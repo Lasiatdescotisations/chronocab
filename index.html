@@ -55,6 +55,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 .nav a.on{color:var(--ink);border-bottom-color:var(--accent)}
 .nav .count{margin-left:6px;font-size:11px;font-family:var(--mono);background:var(--todo-soft);color:var(--ink);border-radius:20px;padding:1px 7px}
 .top-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.ver{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
 .sync{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;white-space:nowrap}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
 .sync.ok i{background:var(--accent)} .sync.busy i{background:var(--s-todo)} .sync.err i{background:var(--stop)}
@@ -63,7 +64,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 .pill .num{font-weight:600}
 .pill button{border:0;background:var(--stop);color:#fff;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none}
 
-main{max-width:1180px;margin:0 auto;padding:22px 20px 80px}
+main{max-width:1380px;margin:0 auto;padding:22px 20px 80px}
 .view{display:none}.view.on{display:block}
 h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:28px 0 10px}
 h2:first-child{margin-top:0}
@@ -149,7 +150,7 @@ h2:first-child{margin-top:0}
 .day-h .d{font-weight:600}
 .day-h .t{margin-left:auto;font-family:var(--mono);font-weight:600}
 .day-h .tb{color:var(--muted);font-size:12px}
-.row{display:grid;grid-template-columns:minmax(170px,1.6fr) minmax(140px,1.5fr) auto auto auto auto 62px auto;align-items:center;gap:10px;padding:6px 10px 6px 14px;border-bottom:1px solid var(--line)}
+.row{display:grid;grid-template-columns:minmax(220px,2.2fr) minmax(140px,1.4fr) auto auto auto auto 62px auto;align-items:center;gap:10px;padding:6px 10px 6px 14px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .row:hover{background:color-mix(in srgb,var(--surface-2) 50%,transparent)}
 .what{border:0;background:transparent;text-align:left;padding:4px 0;display:flex;align-items:center;gap:7px;min-width:0}
@@ -241,6 +242,8 @@ table.t{border-collapse:collapse;width:100%;font-size:13px}
 .ref-row select{padding:4px 6px;font-size:12px}
 .ref-row .use{font-size:12px;color:var(--muted);font-family:var(--mono);width:62px;text-align:right}
 .ref-row.arch{opacity:.55}
+.trash-list{max-height:320px}
+.tag{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--surface-2);border-radius:5px;padding:2px 6px;width:52px;text-align:center;flex:none}
 .ref-list{max-height:520px;overflow:auto}
 .settings{padding:14px;display:grid;gap:14px}
 .setting{display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -307,6 +310,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
     <div id="pill" class="pill" hidden></div>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
     <button id="account" class="btn sm ghost" hidden>Déconnexion</button>
+    <span class="ver" id="ver"></span>
   </div>
 </header>
 
@@ -370,6 +374,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
+const APP_VERSION = '1.1.0';
+const APP_DATE = '11/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -460,7 +466,7 @@ const ICON = {
 /* =========================================================
    État
    ========================================================= */
-const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true };
+const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true, dayEnd: '18:00' };
 const S = {
   meta: { clients: [], tasks: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
   days: {},          // 'YYYY-MM-DD' -> { entries: { id: entry } }
@@ -485,8 +491,8 @@ function normalizeMeta(m) {
 }
 const clientOf = id => S.meta.clients.find(c => c.id === id) || null;
 const taskOf = id => S.meta.tasks.find(t => t.id === id) || null;
-const clientName = id => clientOf(id)?.name || '';
-const taskName = id => taskOf(id)?.name || '';
+const clientName = id => id ? (clientOf(id)?.name || 'Client supprimé') : '';
+const taskName = id => id ? (taskOf(id)?.name || 'Tâche supprimée') : '';
 const dur = e => (e.end ?? Date.now()) - e.start;
 
 let _cache = { rev: -1, list: [] };
@@ -701,13 +707,13 @@ function deleteEntries(ids) {
 }
 function addClient(name) {
   name = name.trim(); if (!name) return null;
-  const ex = S.meta.clients.find(c => norm(c.name) === norm(name)); if (ex) { if (ex.archived) { ex.archived = false; touchMeta(); } return ex.id; }
+  const ex = S.meta.clients.find(c => norm(c.name) === norm(name)); if (ex) { if (ex.archived || ex.deletedAt) { ex.archived = false; delete ex.deletedAt; touchMeta(); } return ex.id; }
   const c = { id: 'c' + newId(), name, code: '', billing: '', archived: false };
   S.meta.clients.push(c); touchMeta(); return c.id;
 }
 function addTask(name) {
   name = name.trim(); if (!name) return null;
-  const ex = S.meta.tasks.find(t => norm(t.name) === norm(name)); if (ex) { if (ex.archived) { ex.archived = false; touchMeta(); } return ex.id; }
+  const ex = S.meta.tasks.find(t => norm(t.name) === norm(name)); if (ex) { if (ex.archived || ex.deletedAt) { ex.archived = false; delete ex.deletedAt; touchMeta(); } return ex.id; }
   const t = { id: 't' + newId(), name, billing: 'auto', archived: false };
   S.meta.tasks.push(t); touchMeta(); return t.id;
 }
@@ -801,7 +807,7 @@ function usageStats() {
 }
 function clientOptions(q) {
   const u = usageStats();
-  let cs = S.meta.clients.filter(c => !c.archived);
+  let cs = S.meta.clients.filter(c => !c.archived && !c.deletedAt);
   if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n)); }
   const recent = q ? [] : cs.filter(c => u.cLast[c.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
   const rest = cs.slice().sort((a, b) => a.name.localeCompare(b.name, 'fr'));
@@ -811,7 +817,7 @@ function clientOptions(q) {
 }
 function taskOptions(q, clientId) {
   const u = usageStats();
-  let ts = S.meta.tasks.filter(t => !t.archived);
+  let ts = S.meta.tasks.filter(t => !t.archived && !t.deletedAt);
   if (q) { const n = norm(q); ts = ts.filter(t => norm(t.name).includes(n)); }
   const score = t => (clientId ? (u.ctCount[clientId + '|' + t.id] || 0) * 1000 : 0) + (u.tCount[t.id] || 0);
   ts.sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name, 'fr'));
@@ -908,6 +914,7 @@ function syncTimerBar() {
   } else sub.innerHTML = '';
   tick();
 }
+let _tickN = 0;
 function tick() {
   const c = $('#tb-clock');
   if (S.running) {
@@ -917,7 +924,8 @@ function tick() {
   } else { c.textContent = '00:00:00'; c.classList.add('idle'); document.title = 'Chronocab — temps passés'; }
   $$('[data-live]').forEach(el => { if (S.running) el.textContent = el.dataset.live === 'clock' ? fmtClock(Date.now() - S.running.start) : fmtDur(Date.now() - S.running.start); });
   const w = $('#long-warn');
-  if (w) w.hidden = !(S.running && Date.now() - S.running.start > 9 * 3600000);
+  if (w) w.hidden = !isForgotten();
+  if (++_tickN % 30 === 0) checkForgotten();
 }
 function renderPill() {
   const p = $('#pill');
@@ -981,7 +989,8 @@ function recents() {
     if (!e.client && !e.task) continue;
     const k = e.client + '|' + e.task;
     if (seen.has(k)) continue;
-    if (clientOf(e.client)?.archived || taskOf(e.task)?.archived) continue;
+    const oc = clientOf(e.client), ot = taskOf(e.task);
+    if ((e.client && !oc) || (e.task && !ot) || oc?.archived || oc?.deletedAt || ot?.archived || ot?.deletedAt) continue;
     seen.add(k); out.push({ c: e.client, t: e.task, fav: false });
   }
   return out;
@@ -995,7 +1004,7 @@ function renderChrono() {
   const unlogged = entries.filter(e => !e.logged && e.start >= addDays(today, -31)).length;
   const rec = recents();
   let html = '';
-  html += `<div class="warn" id="long-warn" hidden>Le chrono tourne depuis plus de 9 heures. Oubli d'arrêt ? Corrigez l'heure de début ci-dessus ou arrêtez-le puis ajustez la fin.</div>`;
+  html += `<div class="warn" id="long-warn" hidden><span>Le chrono tourne depuis très longtemps : un oubli d’arrêt ?</span><button class="btn sm" data-act="forgot">Ajuster l’heure de fin</button></div>`;
   if (!S.meta.clients.length && !entries.length) {
     html += `<div class="card empty" style="margin-top:18px"><b>Bienvenue.</b><br>Tapez un nom de client dans « Client / dossier » pour le créer, puis une tâche (ex. « Production des bulletins »), et appuyez sur ▶.<br><br>
       <button class="btn" data-act="preset">Ajouter les tâches standards</button> &nbsp; <a class="btn ghost" href="#referentiel">Gérer clients et tâches</a></div>`;
@@ -1011,7 +1020,7 @@ function renderChrono() {
     <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer</div></div>
     <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
-    <div class="card stat"><div class="k">Non reportées (31 j)</div><div class="v">${unlogged}</div><div class="s">saisies à reporter dans le logiciel du cabinet</div></div>
+    <div class="card stat"><div class="k" title="Saisies des 31 derniers jours pas encore cochées « Reporté » (pas encore recopiées dans le logiciel du cabinet)">À reporter · 31 derniers jours</div><div class="v">${unlogged}</div><div class="s">saisies à reporter dans le logiciel du cabinet</div></div>
   </div>`;
   // Groupes par jour
   const keys = Object.keys(S.days).sort().reverse();
@@ -1037,7 +1046,7 @@ function renderChrono() {
 function rowHTML(e) {
   const st = statusOf(e);
   return `<div class="row" data-id="${e.id}">
-    <button class="what" data-act="edit" title="Modifier">${whatHTML(e.client, e.task)}</button>
+    <button class="what" data-act="edit" title="${esc((clientName(e.client) || 'Sans client') + (e.task ? ' › ' + taskName(e.task) : ''))} — cliquer pour modifier">${whatHTML(e.client, e.task)}</button>
     <input class="lbl" data-f="label" value="${esc(e.label)}" placeholder="Ajouter un libellé">
     <button class="bill ${e.billable ? '' : 'no'}" data-act="bill" title="Basculer facturable / non facturable">${e.billable ? 'À facturer' : 'Non facturable'}</button>
     <label class="chk ${e.billable ? '' : 'dis'}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : 'Cocher quand ce temps a été facturé'}"><input type="checkbox" data-f="invoiced" ${e.invoicedAt ? 'checked' : ''} ${e.billable ? '' : 'disabled'}>Facturé</label>
@@ -1120,9 +1129,52 @@ function bindChrono() {
     if (act === 'more') { UI.daysShown += 14; renderChrono(); }
     else if (act === 'recap') openRecap(b.closest('[data-day]').dataset.day);
     else if (act === 'stoprun') stopTimer();
+    else if (act === 'forgot') openForgot();
     else if (act === 'preset') { addPresetTasks(); }
   });
 }
+
+/* ---------- Chrono oublié ---------- */
+function isForgotten() {
+  const r = S.running; if (!r) return false;
+  return dayKey(r.start) !== dayKey(Date.now()) || Date.now() - r.start > 10 * 3600000;
+}
+function proposedEnd(r) {
+  const now = Date.now();
+  let p = timeOn(startOfDay(r.start), S.meta.settings.dayEnd || '18:00');
+  if (p == null || p <= r.start) p = r.start + 3600000; // commencé après l'heure de fin habituelle : 1 h proposée
+  return Math.min(p, now);
+}
+function checkForgotten() {
+  if (!S.running || UI.forgotSeen === S.running.id || $('.overlay')) return;
+  if (isForgotten()) openForgot();
+}
+function openForgot() {
+  const r = S.running; if (!r || $('.overlay')) return;
+  UI.forgotSeen = r.id;
+  const p = proposedEnd(r);
+  const what = (clientName(r.client) || 'Sans client') + (r.task ? ' › ' + taskName(r.task) : '');
+  const m = modal(`<div class="modal-h"><h3>Chrono resté allumé ?</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><div>Le chrono <b>${esc(what)}</b> tourne depuis le <b>${esc(fmtDayLong(dayKey(r.start)).replace('Aujourd’hui · ', '').replace('Hier · ', ''))} à ${hhmm(r.start)}</b>, soit <b>${fmtDur(Date.now() - r.start)}</b>. Vous avez peut-être oublié de l’arrêter.</div>
+      <div class="fld"><span>Heure de fin réelle proposée</span><div style="display:flex;gap:8px;align-items:center"><input type="date" id="fg-d" value="${dayKey(p)}"><input id="fg-t" class="mono" style="width:80px;text-align:center" value="${hhmm(p)}" inputmode="numeric"><span class="muted">durée retenue : <b id="fg-dur" class="mono"></b></span></div></div>
+      <div class="muted small">L’heure proposée est votre heure habituelle de fin de journée (${esc(S.meta.settings.dayEnd)}), modifiable dans Clients & tâches › Réglages.</div></div>
+    <div class="modal-f"><button class="btn" data-close>Le laisser tourner</button><button class="btn" id="fg-now">Arrêter maintenant (${fmtDur(Date.now() - r.start)})</button><span class="sp"></span><button class="btn primary" id="fg-ok">Arrêter à cette heure</button></div>`);
+  const q = s => m.el.querySelector(s);
+  const end = () => { const t = timeOn(parseDay(q('#fg-d').value || dayKey(p)), q('#fg-t').value); return t; };
+  const upd = () => { const t = end(); q('#fg-dur').textContent = t && t > r.start ? fmtDur(t - r.start) : '—'; };
+  q('#fg-d').addEventListener('change', upd); q('#fg-t').addEventListener('input', upd); upd();
+  q('#fg-now').addEventListener('click', () => { m.close(); stopTimer(); });
+  q('#fg-ok').addEventListener('click', () => {
+    const t = end();
+    if (!t || t <= r.start || t > Date.now()) { toast('L’heure de fin doit être après le début et pas dans le futur.'); return; }
+    if (!S.running || S.running.id !== r.id) { m.close(); return; }
+    S.running = null; S.rev++; Store.put('running');
+    saveEntry({ ...r, end: t });
+    syncTimerBar(); scheduleRender(); m.close();
+    toast('Chrono arrêté à ' + hhmm(t) + ' : ' + fmtDur(t - r.start) + ' enregistrées');
+  });
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(checkForgotten, 400); });
 
 /* ---------- Modale ---------- */
 function modal(html, cls = '') {
@@ -1137,7 +1189,7 @@ function modal(html, cls = '') {
   return { el: ov, close };
 }
 function selectOpts(arr, cur, empty) {
-  return `<option value="">${empty}</option>` + arr.filter(x => !x.archived || x.id === cur).slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+  return `<option value="">${empty}</option>` + arr.filter(x => (!x.archived && !x.deletedAt) || x.id === cur).slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
 }
 function openEdit(id) {
   const e = findEntry(id); if (!e) return;
@@ -1527,10 +1579,11 @@ function renderRefs() {
   const u = {}; const ut = {};
   for (const e of allEntries()) { if (e.client) u[e.client] = (u[e.client] || 0) + dur(e); if (e.task) ut[e.task] = (ut[e.task] || 0) + dur(e); }
   const showA = UI.refArch;
-  const cs = S.meta.clients.filter(c => showA || !c.archived).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
-  const ts = S.meta.tasks.filter(t => showA || !t.archived).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
+  const cs = S.meta.clients.filter(c => !c.deletedAt && (showA || !c.archived)).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
+  const ts = S.meta.tasks.filter(t => !t.deletedAt && (showA || !t.archived)).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
   const st = S.meta.settings;
-  const nArch = S.meta.clients.filter(c => c.archived).length + S.meta.tasks.filter(t => t.archived).length;
+  const nArch = S.meta.clients.filter(c => c.archived && !c.deletedAt).length + S.meta.tasks.filter(t => t.archived && !t.deletedAt).length;
+  const trash = [...S.meta.clients.filter(c => c.deletedAt).map(o => ({ o, kind: 'client', use: u[o.id] || 0 })), ...S.meta.tasks.filter(t => t.deletedAt).map(o => ({ o, kind: 'task', use: ut[o.id] || 0 }))].sort((a, b) => b.o.deletedAt - a.o.deletedAt);
   let html = `<div class="toolbar" style="margin-top:0"><h2>Clients et tâches</h2><span class="sp"></span>${nArch ? `<label class="chk"><input type="checkbox" data-act="arch" ${showA ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
   <div class="grid2">
     <div class="card"><div class="ref-add"><input id="new-client" placeholder="Nouveau client (ex. Alpha SARL)"><input id="new-client-code" placeholder="Code dossier" style="flex:0 0 110px"><button class="btn primary" data-act="add-client">Ajouter</button></div>
@@ -1539,24 +1592,34 @@ function renderRefs() {
         <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
         <span class="use" title="Temps total enregistré">${u[c.id] ? fmtDur(u[c.id], 'hm') : ''}</span>
         <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
-        ${u[c.id] ? '<span style="width:30px;flex:none"></span>' : `<button class="icon" data-act="del-ref" title="Supprimer">${ICON.trash}</button>`}</div>`).join('') || '<div class="empty">Aucun client pour l’instant.</div>'}</div></div>
+        <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || '<div class="empty">Aucun client pour l’instant.</div>'}</div></div>
     <div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
       <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
         <input class="nm" data-k="name" value="${esc(t.name)}">
         <select data-k="billing" title="Facturation par défaut"><option value="auto" ${!t.billing || t.billing === 'auto' ? 'selected' : ''}>Selon le client</option><option value="bill" ${t.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${t.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
         <span class="use">${ut[t.id] ? fmtDur(ut[t.id], 'hm') : ''}</span>
         <button class="btn sm ghost" data-act="toggle-arch">${t.archived ? 'Restaurer' : 'Archiver'}</button>
-        ${ut[t.id] ? '<span style="width:30px;flex:none"></span>' : `<button class="icon" data-act="del-ref" title="Supprimer">${ICON.trash}</button>`}</div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches standards</button></div>`}</div>
+        <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches standards</button></div>`}</div>
       ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Ajouter toutes les tâches standards</button></div>` : ''}</div>
   </div>
+  ${trash.length ? `<div class="toolbar"><h2>Corbeille (${trash.length})</h2><span class="muted small">Les éléments supprimés restent ici tant que vous ne les supprimez pas définitivement. Les temps déjà saisis sont conservés.</span><span class="sp"></span><button class="btn sm danger" data-act="trash-empty">Vider la corbeille</button></div>
+  <div class="card ref-list trash-list">${trash.map(x => `<div class="ref-row" data-kind="${x.kind}" data-id="${x.o.id}">
+      <span class="tag">${x.kind === 'client' ? 'Client' : 'Tâche'}</span>${x.kind === 'client' ? `<span class="dot" style="--c:${colorFor(x.o.id)}"></span>` : ''}
+      <span style="flex:1;font-weight:500">${esc(x.o.name)}${x.o.code ? ` <span class="mono muted small">${esc(x.o.code)}</span>` : ''}</span>
+      <span class="muted small">supprimé le ${fmtDate(x.o.deletedAt)}</span>
+      <span class="use" title="Temps enregistré">${x.use ? fmtDur(x.use, 'hm') : ''}</span>
+      <button class="btn sm" data-act="trash-restore">Restaurer</button>
+      <button class="btn sm danger" data-act="trash-purge">Supprimer définitivement</button></div>`).join('')}</div>` : ''}
   <div class="grid2" style="margin-top:6px">
     <div><h2>Réglages</h2><div class="card settings">
       <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
+      <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
     </div></div>
     <div><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
+      <div class="setting"><div>Version de l’application<div class="d">Chronocab v${APP_VERSION} du ${APP_DATE}</div></div></div>
       <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div></div>
@@ -1585,7 +1648,10 @@ function bindRefs() {
     else if (act === 'preset') addPresetTasks();
     else if (act === 'arch') { UI.refArch = b.checked; renderRefs(); }
     else if (act === 'toggle-arch' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); o.archived = !o.archived; touchMeta(); }
-    else if (act === 'del-ref' && row) { const arr = row.dataset.kind === 'client' ? S.meta.clients : S.meta.tasks; const i = arr.findIndex(x => x.id === row.dataset.id); if (i >= 0) { const [o] = arr.splice(i, 1); touchMeta(); toast('« ' + o.name + ' » supprimé', 'Annuler', () => { arr.push(o); touchMeta(); }); } }
+    else if (act === 'del-ref' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (o) { o.deletedAt = Date.now(); touchMeta(); toast('« ' + o.name + ' » mis à la corbeille', 'Annuler', () => { delete o.deletedAt; touchMeta(); }); } }
+    else if (act === 'trash-restore' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (o) { delete o.deletedAt; o.archived = false; touchMeta(); toast('« ' + o.name + ' » restauré'); } }
+    else if (act === 'trash-purge' && row) confirmPurge([{ kind: row.dataset.kind, id: row.dataset.id }]);
+    else if (act === 'trash-empty') confirmPurge([...S.meta.clients.filter(c => c.deletedAt).map(c => ({ kind: 'client', id: c.id })), ...S.meta.tasks.filter(t => t.deletedAt).map(t => ({ kind: 'task', id: t.id }))]);
     else if (act === 'export') {
       const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, running: S.running }, null, 1);
       downloadText('chronocab_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
@@ -1594,11 +1660,28 @@ function bindRefs() {
   body.addEventListener('change', ev => {
     const i = ev.target;
     if (i.id === 'import-file') { importFile(i.files[0]); i.value = ''; return; }
+    if (i.dataset.s === 'dayEnd') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayEnd; toast('Heure non comprise (ex. 18:00)'); return; } S.meta.settings.dayEnd = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
     if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : k === 'defaultBillable' ? i.value === '1' : i.value; touchMeta(); return; }
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
     const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (!o) return;
     const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
     o[i.dataset.k] = v; touchMeta(); syncTimerBar();
+  });
+}
+function confirmPurge(items) {
+  if (!items.length) return;
+  const used = items.reduce((n, it) => n + allEntries().filter(e => (it.kind === 'client' ? e.client : e.task) === it.id).length, 0);
+  const names = items.map(it => (it.kind === 'client' ? clientOf : taskOf)(it.id)?.name).filter(Boolean);
+  const m = modal(`<div class="modal-h"><h3>Supprimer définitivement ?</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><div>${items.length > 1 ? '<b>' + items.length + ' éléments</b> vont être supprimés définitivement.' : '« <b>' + esc(names[0] || '') + '</b> » va être supprimé définitivement.'} Cette action ne peut pas être annulée.</div>
+    ${used ? `<div class="warn" style="margin:0">${used} saisie${used > 1 ? 's' : ''} de temps ${used > 1 ? 'restent' : 'reste'} conservée${used > 1 ? 's' : ''}, mais ${used > 1 ? 'apparaîtront' : 'apparaîtra'} avec la mention « Client supprimé » ou « Tâche supprimée ».</div>` : ''}</div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" style="background:var(--stop);border-color:var(--stop)" id="purge-ok">Supprimer définitivement</button></div>`);
+  m.el.querySelector('#purge-ok').addEventListener('click', () => {
+    const ids = new Set(items.map(i => i.id));
+    S.meta.clients = S.meta.clients.filter(c => !ids.has(c.id));
+    S.meta.tasks = S.meta.tasks.filter(t => !ids.has(t.id));
+    S.meta.favorites = S.meta.favorites.filter(f => !ids.has(f.c) && !ids.has(f.t));
+    touchMeta(); m.close(); toast(items.length > 1 ? 'Corbeille vidée' : 'Supprimé définitivement');
   });
 }
 function importFile(file) {
@@ -1678,6 +1761,7 @@ function toast(msg, actLabel, act) {
    ========================================================= */
 async function boot() {
   initTimerBar();
+  $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Chronocab version ' + APP_VERSION + ' du ' + APP_DATE;
   bindChrono(); bindReports(); bindBilling(); bindRefs();
   // Le runtime de l'artifact peut s'installer juste après le chargement
   if (!FIREBASE_CONFIG.apiKey && !(window.claude && window.claude.use)) await new Promise(r => setTimeout(r, 400));
@@ -1687,6 +1771,7 @@ async function boot() {
   syncTimerBar();
   route();
   setInterval(tick, 1000);
+  setTimeout(checkForgotten, 800);
 }
 boot();
 </script>
