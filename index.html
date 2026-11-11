@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chronocab — temps passés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f4f0; --surface:#ffffff; --surface-2:#f0eee9; --surface-3:#e8e6e0;
+  --line:#e2dfd8; --line-2:#d3cfc6;
+  --ink:#17191c; --ink-2:#4f5157; --muted:#878880;
+  --accent:#0d6656; --accent-2:#0a5244; --accent-soft:#e1efeb; --accent-ink:#ffffff;
+  --stop:#c2362b; --stop-2:#a52c22; --stop-soft:#f9e6e3;
+  --s-inv:#2a78d6; --s-todo:#eb6834; --s-nobill:#1baf7a;
+  --todo-soft:#fcebe2; --inv-soft:#e3eefb; --nobill-soft:#eceae5;
+  --shadow:0 1px 2px rgba(20,20,10,.05), 0 4px 16px rgba(20,20,10,.05);
+  --r:10px;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#141513; --surface:#1c1d1b; --surface-2:#232421; --surface-3:#2c2d2a;
+    --line:#30312d; --line-2:#3c3d38;
+    --ink:#efeee9; --ink-2:#c1c0b7; --muted:#8d8c84;
+    --accent:#2fa58c; --accent-2:#3bb99e; --accent-soft:#18332d; --accent-ink:#0b1210;
+    --stop:#e0574b; --stop-2:#ea6c60; --stop-soft:#3a1d1a;
+    --s-inv:#3987e5; --s-todo:#d95926; --s-nobill:#199e70;
+    --todo-soft:#3a2418; --inv-soft:#1a2a3d; --nobill-soft:#2a2b27;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+input,select,textarea{background:var(--surface);border:1px solid var(--line-2);border-radius:7px;padding:7px 9px;outline:none;min-width:0}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0;margin:0;vertical-align:middle;box-shadow:none}
+.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- Header ---------- */
+.top{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 20px;height:56px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.01em;font-size:15px;white-space:nowrap}
+.brand-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+.nav{display:flex;gap:2px;height:100%}
+.nav a{display:flex;align-items:center;padding:0 13px;text-decoration:none;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.nav a:hover{color:var(--ink)}
+.nav a.on{color:var(--ink);border-bottom-color:var(--accent)}
+.nav .count{margin-left:6px;font-size:11px;font-family:var(--mono);background:var(--todo-soft);color:var(--ink);border-radius:20px;padding:1px 7px}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.sync{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;white-space:nowrap}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync.ok i{background:var(--accent)} .sync.busy i{background:var(--s-todo)} .sync.err i{background:var(--stop)}
+.pill{display:flex;align-items:center;gap:8px;background:var(--stop-soft);border-radius:30px;padding:4px 4px 4px 12px;font-size:13px;max-width:360px}
+.pill .what{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill .num{font-weight:600}
+.pill button{border:0;background:var(--stop);color:#fff;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none}
+
+main{max-width:1180px;margin:0 auto;padding:22px 20px 80px}
+.view{display:none}.view.on{display:block}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:28px 0 10px}
+h2:first-child{margin-top:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.muted{color:var(--muted)} .small{font-size:12px}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:7px;padding:7px 12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent-2)}
+.btn.danger{color:var(--stop);border-color:color-mix(in srgb,var(--stop) 40%,var(--line-2))}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:default}
+.icon{border:0;background:transparent;width:30px;height:30px;border-radius:7px;display:inline-grid;place-items:center;color:var(--muted);flex:none}
+.icon:hover{background:var(--surface-2);color:var(--ink)}
+.icon svg,.btn svg{width:16px;height:16px}
+
+/* ---------- Timer bar ---------- */
+.timerbar{display:flex;align-items:stretch;gap:0;padding:8px;position:sticky;top:68px;z-index:20}
+.tb-fields{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.1fr) minmax(180px,1.7fr);gap:6px;flex:1;min-width:0}
+.tb-fields input{border-color:transparent;background:var(--surface-2);height:44px;font-size:15px}
+.tb-fields input:focus{background:var(--surface)}
+.tb-side{display:flex;align-items:center;gap:8px;padding-left:10px}
+.bill{border:1px solid var(--line-2);background:var(--surface);border-radius:20px;padding:4px 10px 4px 8px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.bill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--s-todo)}
+.bill.no::before{background:var(--s-nobill)}
+.bill.inv::before{background:var(--s-inv)}
+.bill:hover{background:var(--surface-2)}
+.tb-side .bill{height:34px;padding:0 12px 0 10px;font-size:13px}
+.clock{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:.01em;border:0;background:transparent;padding:0 6px;min-width:128px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.clock.idle{color:var(--muted)}
+.go{width:48px;height:48px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none;transition:transform .08s}
+.go:hover{background:var(--accent-2)} .go:active{transform:scale(.95)}
+.go.stop{background:var(--stop)} .go.stop:hover{background:var(--stop-2)}
+.go.add{width:auto;border-radius:24px;padding:0 18px;font-weight:600}
+.go svg{width:20px;height:20px}
+.modes{display:flex;flex-direction:column;gap:2px;margin-left:2px}
+.modes button{border:0;background:transparent;color:var(--muted);width:28px;height:23px;border-radius:5px;display:grid;place-items:center}
+.modes button.on{color:var(--accent);background:var(--accent-soft)}
+.modes svg{width:15px;height:15px}
+.manual{display:flex;align-items:center;gap:6px}
+.manual input{height:38px}
+.manual input.hm{width:76px;font-family:var(--mono);text-align:center}
+.tb-sub{display:flex;align-items:center;gap:10px;padding:6px 6px 0;color:var(--muted);font-size:12px;min-height:10px}
+.tb-sub input{padding:2px 6px;font-size:12px;width:64px;font-family:var(--mono);text-align:center}
+.warn{background:var(--todo-soft);color:var(--ink);padding:8px 12px;border-radius:8px;font-size:13px;margin-top:10px;display:flex;gap:10px;align-items:center}
+
+/* combobox */
+.combo{position:relative;min-width:0}
+.combo input{width:100%}
+.combo-list{position:absolute;left:0;top:calc(100% + 4px);min-width:100%;width:max-content;max-width:420px;max-height:320px;overflow:auto;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;box-shadow:0 10px 30px rgba(0,0,0,.14);z-index:50;padding:4px;display:none}
+.combo.open .combo-list{display:block}
+.opt{padding:7px 9px;border-radius:6px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.opt.hi{background:var(--accent-soft)}
+.opt .sub{color:var(--muted);font-size:12px;margin-left:auto;padding-left:14px}
+.opt.create{color:var(--accent);font-weight:500}
+.opt-head{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px 9px 3px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--c,#999);flex:none;display:inline-block}
+
+/* recents */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:2px 3px 2px 4px;gap:2px;max-width:340px}
+.chip .star{width:24px;height:24px;color:var(--line-2)}
+.chip .star.on{color:#d9a400}
+.chip .lab{border:0;background:transparent;padding:4px 4px;display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.chip .lab span{overflow:hidden;text-overflow:ellipsis}
+.chip .play{width:26px;height:26px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.chip .play:hover{background:var(--accent);color:var(--accent-ink)}
+.chip .play svg{width:12px;height:12px}
+.chip .star svg{width:14px;height:14px}
+
+/* summary stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{padding:12px 14px}
+.stat .k{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat .s{font-size:12px;color:var(--muted)}
+
+/* entries */
+.day{margin-top:14px;overflow:hidden}
+.day-h{display:flex;align-items:center;gap:14px;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.day-h .d{font-weight:600}
+.day-h .t{margin-left:auto;font-family:var(--mono);font-weight:600}
+.day-h .tb{color:var(--muted);font-size:12px}
+.row{display:grid;grid-template-columns:minmax(170px,1.6fr) minmax(140px,1.5fr) auto auto auto auto 62px auto;align-items:center;gap:10px;padding:6px 10px 6px 14px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row:hover{background:color-mix(in srgb,var(--surface-2) 50%,transparent)}
+.what{border:0;background:transparent;text-align:left;padding:4px 0;display:flex;align-items:center;gap:7px;min-width:0}
+.what .cl{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.what .tk{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.what .none{color:var(--muted);font-style:italic}
+.what .sep{color:var(--muted)}
+.lbl{border-color:transparent;background:transparent;padding:5px 7px;width:100%}
+.lbl:hover{border-color:var(--line)}
+.lbl::placeholder{color:var(--muted)}
+.chk{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2);white-space:nowrap;cursor:pointer;user-select:none}
+.chk.dis{opacity:.35;cursor:default}
+.times{display:flex;align-items:center;gap:3px;color:var(--muted)}
+.times input{border-color:transparent;background:transparent;padding:3px 4px;width:54px;text-align:center;font-family:var(--mono);font-size:13px}
+.times input:hover{border-color:var(--line)}
+.dur{font-family:var(--mono);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.acts{display:flex}
+.row.running{background:var(--stop-soft)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.empty b{color:var(--ink)}
+.more{display:flex;justify-content:center;margin-top:16px}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px}
+.filters label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.filters select,.filters input{padding:6px 8px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 11px;font-size:13px;border-right:1px solid var(--line-2)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+
+/* chart */
+.chart-wrap{padding:14px 16px 8px;position:relative}
+.chart-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+svg.chart{width:100%;height:auto;display:block}
+svg.chart text{font-family:var(--sans);font-size:11px;fill:var(--muted)}
+svg.chart .grid{stroke:var(--line);stroke-width:1}
+svg.chart .hit{fill:transparent}
+svg.chart .hit:hover{fill:color-mix(in srgb,var(--ink) 5%,transparent)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line-2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:8px 10px;font-size:12px;min-width:170px;z-index:5}
+.tip .h{font-weight:600;margin-bottom:4px}
+.tip .r{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.tip .r span{display:flex;align-items:center;gap:6px}
+.tip i{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+/* tables */
+.tbl-wrap{overflow:auto}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+.t th{position:sticky;top:0;background:var(--surface-2);text-align:left;font-weight:600;font-size:12px;color:var(--ink-2);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.t td.n,.t th.n{text-align:right;white-space:nowrap}
+.t td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.t tr.grp td{font-weight:600;background:color-mix(in srgb,var(--surface-2) 45%,transparent)}
+.t tr.sub td:first-child{padding-left:30px;color:var(--ink-2)}
+.t tr.tot td{font-weight:700;border-top:2px solid var(--line-2);border-bottom:0}
+.t .zero{color:var(--line-2)}
+.t td.lab{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--s-todo)}
+.status.inv::before{background:var(--s-inv)} .status.no::before{background:var(--s-nobill)}
+.bulk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:28px 0 10px}
+.toolbar h2{margin:0}
+.toolbar .sp{flex:1}
+
+/* billing */
+.bclient{margin-top:10px;overflow:hidden}
+.bclient-h{display:flex;align-items:center;gap:12px;padding:12px 14px;flex-wrap:wrap}
+.bclient-h .name{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px;cursor:pointer;border:0;background:transparent;padding:0}
+.bclient-h .meta{color:var(--muted);font-size:12px}
+.bclient-h .amt{margin-left:auto;font-family:var(--mono);font-size:18px;font-weight:600}
+.bclient-body{border-top:1px solid var(--line)}
+
+/* refs */
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.ref-add{display:flex;gap:6px;padding:12px;border-bottom:1px solid var(--line)}
+.ref-add input{flex:1}
+.ref-row{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line)}
+.ref-row:last-child{border-bottom:0}
+.ref-row input.nm{flex:1;min-width:80px;border-color:transparent;background:transparent;font-weight:500}
+.ref-row input.nm:hover{border-color:var(--line)}
+.ref-row input.code{width:90px;border-color:transparent;background:transparent;font-family:var(--mono);font-size:12px}
+.ref-row input.code:hover{border-color:var(--line)}
+.ref-row select{padding:4px 6px;font-size:12px}
+.ref-row .use{font-size:12px;color:var(--muted);font-family:var(--mono);width:62px;text-align:right}
+.ref-row.arch{opacity:.55}
+.ref-list{max-height:520px;overflow:auto}
+.settings{padding:14px;display:grid;gap:14px}
+.setting{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.setting .d{font-size:12px;color:var(--muted)}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(15,15,10,.42);z-index:100;display:grid;place-items:center;padding:20px}
+.modal{background:var(--surface);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:min(560px,100%);max-height:calc(100vh - 40px);overflow:auto}
+.modal.wide{width:min(900px,100%)}
+.modal-h{display:flex;align-items:center;padding:16px 18px 6px;gap:10px}
+.modal-h h3{margin:0;font-size:17px}
+.modal-h .icon{margin-left:auto}
+.modal-b{padding:8px 18px 14px;display:grid;gap:12px}
+.modal-f{display:flex;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line);align-items:center}
+.modal-f .sp{flex:1}
+.fld{display:grid;gap:4px}
+.fld>span{font-size:12px;color:var(--muted);font-weight:500}
+.fld-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.radio{display:flex;gap:6px}
+.radio label{flex:1;border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;display:flex;gap:8px;align-items:center;cursor:pointer}
+.radio label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+
+/* toast */
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:200}
+.toast{background:var(--ink);color:var(--bg);border-radius:9px;padding:10px 14px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px}
+.toast button{border:0;background:transparent;color:var(--accent-2);font-weight:600;padding:0}
+@media (prefers-color-scheme: dark){ .toast button{color:var(--accent)} }
+
+.loading{display:grid;place-items:center;height:60vh;color:var(--muted)}
+.login{max-width:420px;padding:28px;text-align:center;color:var(--ink)}
+.login h3{margin:0 0 6px;font-size:19px}
+.login p{color:var(--ink-2);margin:0 0 18px}
+.login .err{color:var(--stop);font-size:13px;margin-top:12px}
+textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
+
+@media (max-width: 980px){
+  .row{grid-template-columns:1fr auto;grid-auto-rows:auto}
+  .row .lbl{grid-column:1 / -1}
+  .tb-fields{grid-template-columns:1fr 1fr}
+  .tb-fields #tb-label{grid-column:1 / -1}
+  .grid2{grid-template-columns:1fr}
+  .top{gap:8px;padding:0 10px}
+  .brand .txt{display:none}
+  .sync span{display:none}
+}
+@media (max-width: 700px){
+  .timerbar{flex-direction:column}
+  .tb-side{padding:8px 0 0;justify-content:flex-end;flex-wrap:wrap}
+  .nav a{padding:0 8px}
+  .pill .what{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Chronocab</span></div>
+  <nav class="nav">
+    <a href="#chrono" data-view="chrono">Chrono</a>
+    <a href="#rapports" data-view="rapports">Rapports</a>
+    <a href="#facturation" data-view="facturation">À facturer<span class="count" id="todo-count" hidden></span></a>
+    <a href="#referentiel" data-view="referentiel">Clients & tâches</a>
+  </nav>
+  <div class="top-right">
+    <div id="pill" class="pill" hidden></div>
+    <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
+    <button id="account" class="btn sm ghost" hidden>Déconnexion</button>
+  </div>
+</header>
+
+<main>
+  <div id="loading" class="loading">Chargement de vos temps…</div>
+
+  <!-- ===== CHRONO ===== -->
+  <section class="view" id="v-chrono">
+    <div class="card timerbar" id="timerbar">
+      <div class="tb-fields">
+        <div class="combo" id="cb-client"><input placeholder="Client / dossier" autocomplete="off" spellcheck="false"></div>
+        <div class="combo" id="cb-task"><input placeholder="Tâche" autocomplete="off" spellcheck="false"></div>
+        <input id="tb-label" placeholder="Libellé (ex. bulletins d'octobre, STC M. Durand…)" autocomplete="off">
+      </div>
+      <div class="tb-side">
+        <button id="tb-bill" class="bill" title="Cliquer pour basculer">À facturer</button>
+        <div id="tb-timer"><button id="tb-clock" class="clock idle" title="Modifier l'heure de début">00:00:00</button></div>
+        <div id="tb-manual" class="manual" hidden>
+          <input type="date" id="mn-date">
+          <input class="hm" id="mn-start" title="Heure de début" placeholder="début" inputmode="numeric" autocomplete="off">
+          <span class="muted">–</span>
+          <input class="hm" id="mn-end" title="Heure de fin" placeholder="fin" inputmode="numeric" autocomplete="off">
+        </div>
+        <button id="tb-go" class="go" title="Démarrer"></button>
+        <div class="modes">
+          <button data-mode="timer" class="on" title="Mode chronomètre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4M10 2h4"/></svg></button>
+          <button data-mode="manual" title="Saisie manuelle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="tb-sub" id="tb-sub"></div>
+    <div id="chrono-body" data-guard></div>
+  </section>
+
+  <!-- ===== RAPPORTS ===== -->
+  <section class="view" id="v-rapports"><div id="rapports-body" data-guard></div></section>
+
+  <!-- ===== FACTURATION ===== -->
+  <section class="view" id="v-facturation"><div id="facturation-body" data-guard></div></section>
+
+  <!-- ===== REFERENTIEL ===== -->
+  <section class="view" id="v-referentiel"><div id="referentiel-body" data-guard></div></section>
+</main>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   CONFIGURATION FIREBASE (facultatif)
+   Laissez vide pour l'utiliser sur claude.ai ou en local.
+   Pour la version Firebase : collez ici les valeurs de l'objet
+   firebaseConfig donné par la console Firebase.
+   ========================================================= */
+const FIREBASE_CONFIG = {
+ apiKey: "AIzaSyCdCambB0k0iLhGBo7QurY63kZNCl7w6-I",
+ authDomain: "chronocab-f08ae.firebaseapp.com",
+ projectId: "chronocab-f08ae",
+ storageBucket: "chronocab-f08ae.firebasestorage.app",
+ messagingSenderId: "29403974929",
+ appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
+
+};
+const FB_VERSION = '12.16.0';
+/* =========================================================
+   Utilitaires
+   ========================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = n => String(n).padStart(2, '0');
+const DAY = 86400000;
+const dayKey = ms => { const d = new Date(ms); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+const monthKey = ms => { const d = new Date(ms); return d.getFullYear() + '-' + pad(d.getMonth() + 1); };
+const parseDay = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d).getTime(); };
+const hhmm = ms => { const d = new Date(ms); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const startOfDay = ms => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const addDays = (ms, n) => { const d = new Date(ms); d.setDate(d.getDate() + n); return d.getTime(); };
+const startOfWeek = ms => { const d = new Date(startOfDay(ms)); const wd = (d.getDay() + 6) % 7; d.setDate(d.getDate() - wd); return d.getTime(); };
+const startOfMonth = ms => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
+const addMonths = (ms, n) => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth() + n, 1).getTime(); };
+const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const MONTHS_L = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const WD = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+const fmtDate = ms => { const d = new Date(ms); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); };
+const fmtMonth = mk => { const [y, m] = mk.split('-').map(Number); return MONTHS[m - 1] + ' ' + String(y).slice(2); };
+function fmtDayLong(k) {
+  const ms = parseDay(k), today = startOfDay(Date.now());
+  const d = new Date(ms);
+  const base = WD[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_L[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+  if (ms === today) return 'Aujourd’hui · ' + base;
+  if (ms === addDays(today, -1)) return 'Hier · ' + base;
+  return base.charAt(0).toUpperCase() + base.slice(1);
+}
+function fmtClock(ms) { const s = Math.max(0, Math.floor(ms / 1000)); return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s % 3600 / 60)) + ':' + pad(s % 60); }
+function fmtDur(ms, fmt) {
+  fmt = fmt || S.meta.settings.durFormat;
+  if (fmt === 'dec') return (ms / 3600000).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' h';
+  const m = Math.round(ms / 60000);
+  return Math.floor(m / 60) + 'h' + pad(m % 60);
+}
+const hoursDec = ms => (ms / 3600000).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function roundMs(ms) {
+  const st = S.meta.settings.roundStep;
+  if (!st || ms <= 0) return ms;
+  const stepMs = st * 60000;
+  let r = S.meta.settings.roundMode === 'up' ? Math.ceil(ms / stepMs) * stepMs : Math.round(ms / stepMs) * stepMs;
+  return Math.max(r, stepMs);
+}
+function colorFor(id) {
+  if (!id) return '#9a9a92';
+  let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return `hsl(${h % 360} 55% 48%)`;
+}
+function parseHM(str) { // accepte 9, 9h, 9h30, 930, 0930, 9:30, 09.30
+  const v = String(str || '').trim().toLowerCase().replace(/\s/g, '');
+  let m = /^(\d{1,2})(?:[:h.](\d{1,2})?)?$/.exec(v), h, mi;
+  if (m) { h = +m[1]; mi = m[2] ? +m[2] : 0; }
+  else if ((m = /^(\d{1,2})(\d{2})$/.exec(v))) { h = +m[1]; mi = +m[2]; }
+  else return null;
+  if (h > 24 || mi > 59) return null;
+  return [h, mi];
+}
+function timeOn(dayMs, str) { // "HH:MM" -> ms ce jour-là
+  const hm = parseHM(str); if (!hm) return null;
+  const d = new Date(dayMs); d.setHours(hm[0], hm[1], 0, 0); return d.getTime();
+}
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+};
+
+/* =========================================================
+   État
+   ========================================================= */
+const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true };
+const S = {
+  meta: { clients: [], tasks: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
+  days: {},          // 'YYYY-MM-DD' -> { entries: { id: entry } }
+  running: null,     // entrée en cours (end = null)
+  rev: 0,
+};
+const UI = {
+  view: 'chrono', daysShown: 7, mode: 'timer',
+  draft: { client: null, task: null, label: '', billable: true, billTouched: false },
+  rep: { period: 'month', from: '', to: '', client: '', task: '', bill: 'all', logged: 'all', q: '', cols: 'status', group: 'client', sel: new Set(), limit: 200 },
+  fac: { until: '', open: new Set() },
+  refArch: false,
+};
+function normalizeMeta(m) {
+  m = m || {};
+  return {
+    clients: Array.isArray(m.clients) ? m.clients : [],
+    tasks: Array.isArray(m.tasks) ? m.tasks : [],
+    favorites: Array.isArray(m.favorites) ? m.favorites : [],
+    settings: { ...DEFAULT_SETTINGS, ...(m.settings || {}) },
+  };
+}
+const clientOf = id => S.meta.clients.find(c => c.id === id) || null;
+const taskOf = id => S.meta.tasks.find(t => t.id === id) || null;
+const clientName = id => clientOf(id)?.name || '';
+const taskName = id => taskOf(id)?.name || '';
+const dur = e => (e.end ?? Date.now()) - e.start;
+
+let _cache = { rev: -1, list: [] };
+function allEntries() {
+  if (_cache.rev === S.rev) return _cache.list;
+  const list = [];
+  for (const k in S.days) { const en = S.days[k].entries || {}; for (const id in en) list.push(en[id]); }
+  list.sort((a, b) => b.start - a.start);
+  _cache = { rev: S.rev, list };
+  return list;
+}
+function defaultBillable(clientId, taskId) {
+  const t = taskOf(taskId);
+  if (t && t.billing && t.billing !== 'auto') return t.billing === 'bill';
+  const c = clientOf(clientId);
+  if (c && c.billing) return c.billing === 'bill';
+  return !!S.meta.settings.defaultBillable;
+}
+
+/* =========================================================
+   Stockage : cloud (db de l'artifact, privé par utilisateur) ou navigateur
+   ========================================================= */
+const LS_PREFIX = 'chronocab:';
+const Store = {
+  mode: 'local', col: null, queue: new Map(), inflight: null, busy: false, lsOk: true, downloads: null,
+  async init() {
+    if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId) return this.initFirebase();
+    let db = null, user = null, uid = null;
+    if (window.claude && typeof window.claude.use === 'function') {
+      try {
+        [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+        if (user && typeof user.id === 'function') uid = await user.id();
+        window.claude.use('downloads').then(d => { Store.downloads = d; }).catch(() => {});
+      } catch (e) { db = null; }
+    }
+    if (db && uid) {
+      this.mode = 'cloud';
+      this.col = db.collection('data/users/' + uid);
+      await this.subscribeCloud();
+    } else {
+      this.mode = 'local';
+      this.loadLocal();
+      setSync();
+    }
+  },
+  async initFirebase() {
+    const base = `https://www.gstatic.com/firebasejs/${FB_VERSION}/`;
+    let A, AU, F;
+    try { [A, AU, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]); }
+    catch (e) { showFatal('Impossible de charger Firebase. Vérifiez la connexion internet (ou un pare-feu qui bloquerait gstatic.com).'); throw e; }
+    const app = A.initializeApp(FIREBASE_CONFIG);
+    const auth = AU.getAuth(app);
+    let db;
+    try { db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); }
+    catch (e) { db = F.getFirestore(app); }
+    try { await AU.getRedirectResult(auth); } catch (e) { if (e && e.code) console.warn(e.code); }
+    let user = await new Promise(res => { const un = AU.onAuthStateChanged(auth, u => { un(); res(u); }); });
+    if (!user) user = await showLogin(auth, AU);
+    this.mode = 'firebase';
+    this.fb = { auth, AU, user };
+    const colRef = F.collection(db, 'users', user.uid, 'docs');
+    this.col = {
+      doc: key => { const r = F.doc(colRef, key); return { set: b => F.setDoc(r, b), delete: () => F.deleteDoc(r) }; },
+      onSnapshot: (next, err) => F.onSnapshot(colRef, next, err),
+    };
+    const acc = $('#account');
+    acc.hidden = false; acc.title = 'Connecté : ' + (user.email || user.displayName || '') + ' — cliquer pour se déconnecter';
+    acc.onclick = async () => { await AU.signOut(auth); location.reload(); };
+    await this.subscribeCloud();
+  },
+  subscribeCloud() {
+    return new Promise(resolve => {
+      let first = true;
+      const timer = setTimeout(() => { setSync('slow'); if (first) { first = false; resolve(); } }, 10000);
+      this.unsub = this.col.onSnapshot(snap => {
+        for (const ch of snap.docChanges()) {
+          const key = ch.doc.id;
+          if (this.isBusy(key)) continue;
+          applyDoc(key, ch.type === 'removed' ? null : JSON.parse(JSON.stringify(ch.doc.data() || {})));
+        }
+        if (!snap.metadata.fromCache) { clearTimeout(timer); this.slow = false; setSync(); }
+        if (first) { first = false; resolve(); } else { onRemoteChange(); }
+      }, err => {
+        clearTimeout(timer);
+        this.error = err; setSync();
+        if (first) { first = false; resolve(); }
+      });
+    });
+  },
+  loadLocal() {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith(LS_PREFIX)) continue;
+        try { applyDoc(k.slice(LS_PREFIX.length), JSON.parse(localStorage.getItem(k))); } catch (e) {}
+      }
+    } catch (e) { this.lsOk = false; }
+  },
+  bodyFor(key) {
+    if (key === 'meta') return S.meta;
+    if (key === 'running') return { entry: S.running };
+    if (key.startsWith('d-')) {
+      const d = S.days[key.slice(2)];
+      if (!d || !Object.keys(d.entries || {}).length) return null;
+      return d;
+    }
+    return null;
+  },
+  put(key) {
+    const b = this.bodyFor(key);
+    const body = b === null ? null : JSON.parse(JSON.stringify(b));
+    if (key.startsWith('d-') && body === null) delete S.days[key.slice(2)];
+    if (this.mode === 'local') {
+      try { body === null ? localStorage.removeItem(LS_PREFIX + key) : localStorage.setItem(LS_PREFIX + key, JSON.stringify(body)); }
+      catch (e) { this.lsOk = false; setSync(); }
+      return;
+    }
+    this.queue.set(key, body);
+    setSync();
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.kick(), 250);
+  },
+  isBusy(key) { return this.queue.has(key) || this.inflight === key; },
+  async kick() {
+    if (this.busy) return;
+    this.busy = true;
+    while (this.queue.size) {
+      const [key, body] = this.queue.entries().next().value;
+      this.queue.delete(key);
+      this.inflight = key;
+      let ok = false;
+      for (let attempt = 0; attempt < 2 && !ok; attempt++) {
+        try {
+          const ref = this.col.doc(key);
+          if (body === null) await ref.delete(); else await ref.set(body);
+          ok = true; this.error = null;
+        } catch (e) {
+          if (e && e.code === 'permission-denied') { this.error = e; toast('Accès refusé par la base : vérifiez les règles Firestore.'); break; }
+          if (e && (e.code === 'unavailable' || !e.code) && attempt === 0) { await new Promise(r => setTimeout(r, 600 + Math.random() * 900)); continue; }
+          this.error = e;
+          if (e && (e.code === 'quota_exceeded' || e.code === 'resource-exhausted')) toast('Espace de stockage plein : exportez puis supprimez d’anciennes saisies.');
+          else toast('Enregistrement impossible pour le moment (' + (e?.code || 'erreur') + '). Vos données restent affichées ; réessai à la prochaine modification.');
+          break;
+        }
+      }
+      this.inflight = null;
+    }
+    this.busy = false;
+    setSync();
+  },
+};
+function applyDoc(key, body) {
+  if (key === 'meta') S.meta = normalizeMeta(body);
+  else if (key === 'running') S.running = (body && body.entry) || null;
+  else if (key.startsWith('d-')) {
+    const k = key.slice(2);
+    if (body && body.entries) S.days[k] = { entries: body.entries }; else delete S.days[k];
+  }
+  S.rev++;
+}
+function setSync() {
+  const el = $('#sync'); if (!el) return;
+  let cls = 'ok', txt = '';
+  if (Store.mode === 'local') {
+    cls = Store.lsOk ? 'busy' : 'err';
+    txt = Store.lsOk ? 'Enregistré dans ce navigateur' : 'Stockage navigateur indisponible';
+  } else if (Store.error) { cls = 'err'; txt = 'Erreur de synchronisation'; }
+  else if (Store.queue.size || Store.inflight) { cls = 'busy'; txt = 'Enregistrement…'; }
+  else if (Store.slow) { cls = 'busy'; txt = 'Connexion lente…'; }
+  else { cls = 'ok'; txt = 'Synchronisé'; }
+  el.className = 'sync ' + cls;
+  el.querySelector('span').textContent = txt;
+  el.title = Store.mode === 'firebase' ? 'Données dans votre base Firebase, liées à votre compte Google.' : Store.mode === 'cloud' ? 'Données privées liées à votre compte Claude, accessibles depuis n’importe quel poste.' : 'Données stockées uniquement dans ce navigateur. Pensez à exporter une sauvegarde (onglet Clients & tâches).';
+}
+window.addEventListener('beforeunload', e => { if (Store.queue.size || Store.inflight) { e.preventDefault(); e.returnValue = ''; } });
+
+/* =========================================================
+   Mutations
+   ========================================================= */
+function touchMeta() { S.rev++; Store.put('meta'); scheduleRender(); }
+function saveEntry(e) {
+  const k = dayKey(e.start);
+  for (const dk of Object.keys(S.days)) {
+    if (dk !== k && S.days[dk].entries[e.id]) { delete S.days[dk].entries[e.id]; Store.put('d-' + dk); }
+  }
+  (S.days[k] ||= { entries: {} }).entries[e.id] = e;
+  S.rev++;
+  Store.put('d-' + k);
+  scheduleRender();
+}
+function findEntry(id) {
+  for (const k in S.days) if (S.days[k].entries[id]) return S.days[k].entries[id];
+  return null;
+}
+function updateEntries(ids, fn) { // fn(entry) mutates; groups writes by day
+  const touched = new Set();
+  for (const id of ids) {
+    for (const k in S.days) { const e = S.days[k].entries[id]; if (e) { fn(e); touched.add(k); } }
+  }
+  S.rev++;
+  touched.forEach(k => Store.put('d-' + k));
+  scheduleRender();
+  return touched.size;
+}
+function deleteEntries(ids) {
+  const removed = [], touched = new Set();
+  for (const id of ids) for (const k in S.days) { const e = S.days[k].entries[id]; if (e) { removed.push(e); delete S.days[k].entries[id]; touched.add(k); } }
+  S.rev++;
+  touched.forEach(k => Store.put('d-' + k));
+  scheduleRender();
+  if (removed.length) toast(removed.length > 1 ? removed.length + ' saisies supprimées' : 'Saisie supprimée', 'Annuler', () => removed.forEach(saveEntry));
+}
+function addClient(name) {
+  name = name.trim(); if (!name) return null;
+  const ex = S.meta.clients.find(c => norm(c.name) === norm(name)); if (ex) { if (ex.archived) { ex.archived = false; touchMeta(); } return ex.id; }
+  const c = { id: 'c' + newId(), name, code: '', billing: '', archived: false };
+  S.meta.clients.push(c); touchMeta(); return c.id;
+}
+function addTask(name) {
+  name = name.trim(); if (!name) return null;
+  const ex = S.meta.tasks.find(t => norm(t.name) === norm(name)); if (ex) { if (ex.archived) { ex.archived = false; touchMeta(); } return ex.id; }
+  const t = { id: 't' + newId(), name, billing: 'auto', archived: false };
+  S.meta.tasks.push(t); touchMeta(); return t.id;
+}
+
+/* ---------- Chrono ---------- */
+function startTimer(spec) {
+  if (S.running) stopTimer(true);
+  const billable = spec.billable ?? defaultBillable(spec.client, spec.task);
+  S.running = { id: 'e' + newId(), client: spec.client || null, task: spec.task || null, label: spec.label || '', billable, start: Date.now(), end: null, invoicedAt: 0, logged: false };
+  S.rev++; Store.put('running');
+  UI.draft = { client: null, task: null, label: '', billable: S.meta.settings.defaultBillable, billTouched: false };
+  syncTimerBar(); scheduleRender();
+}
+function stopTimer(silent) {
+  const r = S.running; if (!r) return;
+  const end = Date.now();
+  S.running = null; S.rev++; Store.put('running');
+  if (end - r.start < 3000) { if (!silent) toast('Chrono annulé (moins de 3 secondes)'); }
+  else saveEntry({ ...r, end });
+  syncTimerBar(); scheduleRender();
+}
+let _runT = null;
+function updateRunning(patch) {
+  if (!S.running) return;
+  Object.assign(S.running, patch); S.rev++;
+  clearTimeout(_runT); _runT = setTimeout(() => Store.put('running'), 500);
+  renderPill();
+}
+
+/* =========================================================
+   Combobox (recherche client / tâche)
+   ========================================================= */
+function Combo(root, o) {
+  const input = root.querySelector('input');
+  const list = document.createElement('div'); list.className = 'combo-list'; root.appendChild(list);
+  let items = [], hi = 0, value = null, typed = false;
+  function build() {
+    const q = typed ? input.value.trim() : '';
+    items = o.options(q);
+    if (q && o.onCreate && !items.some(i => !i.head && norm(i.label) === norm(q))) items.push({ create: true, text: q, label: o.createLabel(q) });
+    const sel = items.filter(i => !i.head);
+    hi = Math.min(hi, Math.max(0, sel.length - 1));
+    let n = -1;
+    list.innerHTML = items.length ? items.map(i => {
+      if (i.head) return `<div class="opt-head">${esc(i.label)}</div>`;
+      n++;
+      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.dot ? `<span class="dot" style="--c:${i.dot}"></span>` : ''}<span>${esc(i.label)}</span>${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
+    }).join('') : `<div class="opt-head">${typed ? 'Aucun résultat' : o.emptyText}</div>`;
+    const h = list.querySelector('.opt.hi'); if (h) h.scrollIntoView({ block: 'nearest' });
+  }
+  function selectable() { return items.filter(i => !i.head); }
+  function open() { root.classList.add('open'); build(); }
+  function close() { root.classList.remove('open'); typed = false; }
+  function choose(it) {
+    if (!it) return;
+    const id = it.create ? o.onCreate(it.text) : it.id;
+    set(id); close(); o.onSelect(id);
+  }
+  function set(id) { value = id || null; input.value = value ? o.labelOf(value) : ''; }
+  input.addEventListener('focus', () => { typed = false; hi = 0; open(); setTimeout(() => { if (!typed) input.select(); }, 0); });
+  input.addEventListener('input', () => { typed = true; hi = 0; open(); });
+  input.addEventListener('keydown', e => {
+    const sel = selectable();
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (!root.classList.contains('open')) open(); hi = Math.min(hi + 1, sel.length - 1); build(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); hi = Math.max(hi - 1, 0); build(); }
+    else if (e.key === 'Enter') { if (root.classList.contains('open') && sel.length) { e.preventDefault(); choose(sel[hi]); o.onEnter && o.onEnter(); } }
+    else if (e.key === 'Escape') { set(value); close(); input.blur(); }
+    else if (e.key === 'Tab') { if (typed && sel.length && input.value.trim()) choose(sel[hi]); }
+  });
+  input.addEventListener('blur', () => setTimeout(() => {
+    if (!root.classList.contains('open')) return;
+    if (!input.value.trim()) { set(null); close(); o.onSelect(null); }
+    else { set(value); close(); }
+  }, 120));
+  list.addEventListener('mousedown', e => { e.preventDefault(); const el = e.target.closest('.opt[data-n]'); if (el) choose(selectable()[+el.dataset.n]); });
+  return { set, get: () => value, focus: () => input.focus(), input };
+}
+function usageStats() {
+  if (usageStats._rev === S.rev) return usageStats._v;
+  const cLast = {}, ctCount = {}, tCount = {};
+  const since = Date.now() - 120 * DAY;
+  for (const e of allEntries()) {
+    if (e.client) cLast[e.client] = Math.max(cLast[e.client] || 0, e.start);
+    if (e.start < since) continue;
+    if (e.task) { tCount[e.task] = (tCount[e.task] || 0) + 1; const k = e.client + '|' + e.task; ctCount[k] = (ctCount[k] || 0) + 1; }
+  }
+  usageStats._rev = S.rev; usageStats._v = { cLast, ctCount, tCount };
+  return usageStats._v;
+}
+function clientOptions(q) {
+  const u = usageStats();
+  let cs = S.meta.clients.filter(c => !c.archived);
+  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n)); }
+  const recent = q ? [] : cs.filter(c => u.cLast[c.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
+  const rest = cs.slice().sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  const map = c => ({ id: c.id, label: c.name, sub: c.code, dot: colorFor(c.id) });
+  if (!recent.length) return rest.map(map);
+  return [{ head: true, label: 'Récents' }, ...recent.map(map), { head: true, label: 'Tous les clients' }, ...rest.map(map)];
+}
+function taskOptions(q, clientId) {
+  const u = usageStats();
+  let ts = S.meta.tasks.filter(t => !t.archived);
+  if (q) { const n = norm(q); ts = ts.filter(t => norm(t.name).includes(n)); }
+  const score = t => (clientId ? (u.ctCount[clientId + '|' + t.id] || 0) * 1000 : 0) + (u.tCount[t.id] || 0);
+  ts.sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name, 'fr'));
+  const used = clientId && !q ? ts.filter(t => u.ctCount[clientId + '|' + t.id]) : [];
+  const map = t => ({ id: t.id, label: t.name, sub: t.billing === 'nobill' ? 'non facturable' : '' });
+  if (!used.length) return ts.map(map);
+  const rest = ts.filter(t => !used.includes(t)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  return [{ head: true, label: 'Habituelles pour ce client' }, ...used.map(map), { head: true, label: 'Autres tâches' }, ...rest.map(map)];
+}
+
+/* =========================================================
+   Barre de chrono
+   ========================================================= */
+let cbClient, cbTask;
+function curSpec() { return S.running || UI.draft; }
+function setSpec(patch) {
+  if (S.running) updateRunning(patch); else Object.assign(UI.draft, patch);
+}
+function onPick() {
+  const sp = curSpec();
+  if (!S.running && !UI.draft.billTouched) UI.draft.billable = defaultBillable(sp.client, sp.task);
+  if (S.running && !S.running._billTouched) updateRunning({ billable: defaultBillable(S.running.client, S.running.task) });
+  renderBillBtn();
+}
+function initTimerBar() {
+  cbClient = Combo($('#cb-client'), {
+    options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer',
+    onCreate: name => addClient(name), createLabel: q => '+ Créer le client « ' + q + ' »',
+    onSelect: id => { setSpec({ client: id }); onPick(); if (id && !curSpec().task) setTimeout(() => cbTask.focus(), 0); },
+  });
+  cbTask = Combo($('#cb-task'), {
+    options: q => taskOptions(q, curSpec().client), labelOf: id => taskName(id), emptyText: 'Aucune tâche : tapez un nom pour la créer',
+    onCreate: name => addTask(name), createLabel: q => '+ Créer la tâche « ' + q + ' »',
+    onSelect: id => { setSpec({ task: id }); onPick(); if (id) setTimeout(() => $('#tb-label').focus(), 0); },
+  });
+  const lab = $('#tb-label');
+  lab.addEventListener('input', () => setSpec({ label: lab.value }));
+  lab.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (UI.mode === 'manual') addManual(); else if (!S.running) goTimer(); else lab.blur(); } });
+  $('#tb-bill').addEventListener('click', () => {
+    if (S.running) { S.running._billTouched = true; updateRunning({ billable: !S.running.billable }); }
+    else { UI.draft.billable = !UI.draft.billable; UI.draft.billTouched = true; }
+    renderBillBtn();
+  });
+  $('#tb-go').addEventListener('click', () => { if (UI.mode === 'manual') addManual(); else goTimer(); });
+  $$('.modes button').forEach(b => b.addEventListener('click', () => { UI.mode = b.dataset.mode; syncTimerBar(); }));
+  $('#tb-clock').addEventListener('click', () => { if (S.running) { const i = $('#tb-start'); if (i) { i.focus(); i.showPicker?.(); } } });
+  $('#mn-date').value = dayKey(Date.now());
+}
+function goTimer() {
+  if (S.running) { stopTimer(); return; }
+  const d = UI.draft;
+  startTimer({ client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : undefined });
+}
+function addManual() {
+  const d = UI.draft;
+  const dayMs = parseDay($('#mn-date').value || dayKey(Date.now()));
+  const s = timeOn(dayMs, $('#mn-start').value), e0 = timeOn(dayMs, $('#mn-end').value);
+  if (s == null || e0 == null) { toast('Indiquez une heure de début et de fin.'); return; }
+  let e = e0; if (e <= s) e += DAY;
+  saveEntry({ id: 'e' + newId(), client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : defaultBillable(d.client, d.task), start: s, end: e, invoicedAt: 0, logged: false });
+  toast('Saisie ajoutée : ' + fmtDur(e - s));
+  $('#mn-start').value = $('#mn-end').value;
+  $('#mn-end').value = '';
+}
+function renderBillBtn() {
+  const b = $('#tb-bill'); const on = curSpec().billable;
+  b.textContent = on ? 'À facturer' : 'Non facturable';
+  b.classList.toggle('no', !on);
+}
+function syncTimerBar() {
+  const sp = curSpec();
+  if (document.activeElement !== cbClient.input) cbClient.set(sp.client);
+  if (document.activeElement !== cbTask.input) cbTask.set(sp.task);
+  if (document.activeElement !== $('#tb-label')) $('#tb-label').value = sp.label || '';
+  renderBillBtn();
+  const manual = UI.mode === 'manual' && !S.running;
+  if (S.running && UI.mode === 'manual') UI.mode = 'timer';
+  $$('.modes button').forEach(b => b.classList.toggle('on', b.dataset.mode === UI.mode));
+  $('#tb-timer').hidden = manual; $('#tb-manual').hidden = !manual;
+  const go = $('#tb-go');
+  go.className = 'go' + (manual ? ' add' : S.running ? ' stop' : '');
+  go.innerHTML = manual ? 'Ajouter' : S.running ? ICON.stop : ICON.play;
+  go.title = manual ? 'Ajouter la saisie' : S.running ? 'Arrêter' : 'Démarrer';
+  const sub = $('#tb-sub');
+  if (S.running) {
+    sub.innerHTML = `En cours depuis <input id="tb-start" inputmode="numeric" value="${hhmm(S.running.start)}" title="Corriger l'heure de début"> · le chrono continue même si vous fermez l'onglet.`;
+    $('#tb-start').addEventListener('change', ev => {
+      const t = timeOn(startOfDay(S.running.start), ev.target.value);
+      if (t != null && t < Date.now()) { updateRunning({ start: t }); tick(); }
+    });
+  } else sub.innerHTML = '';
+  tick();
+}
+function tick() {
+  const c = $('#tb-clock');
+  if (S.running) {
+    const t = fmtClock(Date.now() - S.running.start);
+    c.textContent = t; c.classList.remove('idle');
+    document.title = '▶ ' + t + ' · ' + (clientName(S.running.client) || 'Chronocab');
+  } else { c.textContent = '00:00:00'; c.classList.add('idle'); document.title = 'Chronocab — temps passés'; }
+  $$('[data-live]').forEach(el => { if (S.running) el.textContent = el.dataset.live === 'clock' ? fmtClock(Date.now() - S.running.start) : fmtDur(Date.now() - S.running.start); });
+  const w = $('#long-warn');
+  if (w) w.hidden = !(S.running && Date.now() - S.running.start > 9 * 3600000);
+}
+function renderPill() {
+  const p = $('#pill');
+  if (!S.running || UI.view === 'chrono') { p.hidden = true; return; }
+  p.hidden = false;
+  const r = S.running;
+  p.innerHTML = `<span class="what">${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span><button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
+  $('#pill-stop').onclick = () => stopTimer();
+}
+
+/* =========================================================
+   Rendu
+   ========================================================= */
+let _rq = false, _pending = false;
+function scheduleRender() { if (_rq) return; _rq = true; requestAnimationFrame(() => { _rq = false; render(); }); }
+function isEditingGuarded() {
+  const a = document.activeElement;
+  return a && a.closest && a.closest('[data-guard]') && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.type !== 'checkbox';
+}
+document.addEventListener('focusout', () => { if (_pending) setTimeout(() => { if (!isEditingGuarded() && _pending) { _pending = false; render(); } }, 30); });
+function onRemoteChange() {
+  if (document.activeElement !== $('#tb-label') && !$('.combo.open')) syncTimerBar();
+  scheduleRender();
+}
+function render() {
+  if (isEditingGuarded()) { _pending = true; renderHeader(); return; }
+  renderHeader();
+  if (UI.view === 'chrono') renderChrono();
+  else if (UI.view === 'rapports') renderReports();
+  else if (UI.view === 'facturation') renderBilling();
+  else if (UI.view === 'referentiel') renderRefs();
+}
+function renderHeader() {
+  $$('.nav a').forEach(a => a.classList.toggle('on', a.dataset.view === UI.view));
+  const todo = allEntries().filter(e => e.billable && !e.invoicedAt);
+  const c = $('#todo-count');
+  const tot = todo.reduce((s, e) => s + dur(e), 0);
+  c.hidden = !todo.length; c.textContent = fmtDur(tot, 'hm');
+  renderPill();
+}
+function route() {
+  const h = (location.hash || '').slice(1);
+  UI.view = ['chrono', 'rapports', 'facturation', 'referentiel'].includes(h) ? h : 'chrono';
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
+  render();
+}
+window.addEventListener('hashchange', route);
+
+/* ---------- Vue Chrono ---------- */
+function statusOf(e) { return !e.billable ? 'no' : e.invoicedAt ? 'inv' : 'todo'; }
+function statusLabel(st) { return st === 'no' ? 'Non facturable' : st === 'inv' ? 'Facturé' : 'À facturer'; }
+function whatHTML(c, t) {
+  return `<span class="dot" style="--c:${colorFor(c)}"></span>${c ? `<span class="cl">${esc(clientName(c))}</span>` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
+}
+function recents() {
+  const seen = new Set(), out = [];
+  const favs = S.meta.favorites.filter(f => clientOf(f.c) || taskOf(f.t));
+  favs.forEach(f => { seen.add(f.c + '|' + f.t); out.push({ c: f.c, t: f.t, fav: true }); });
+  for (const e of allEntries()) {
+    if (out.length >= favs.length + 8) break;
+    if (!e.client && !e.task) continue;
+    const k = e.client + '|' + e.task;
+    if (seen.has(k)) continue;
+    if (clientOf(e.client)?.archived || taskOf(e.task)?.archived) continue;
+    seen.add(k); out.push({ c: e.client, t: e.task, fav: false });
+  }
+  return out;
+}
+function renderChrono() {
+  const body = $('#chrono-body');
+  const entries = allEntries();
+  const now = Date.now(), today = startOfDay(now), wk = startOfWeek(now), mo = startOfMonth(now);
+  const sum = (from, f = () => true) => entries.filter(e => e.start >= from && f(e)).reduce((s, e) => s + dur(e), 0) + (S.running && S.running.start >= from && f(S.running) ? dur(S.running) : 0);
+  const todoN = entries.filter(e => e.billable && !e.invoicedAt).length;
+  const unlogged = entries.filter(e => !e.logged && e.start >= addDays(today, -31)).length;
+  const rec = recents();
+  let html = '';
+  html += `<div class="warn" id="long-warn" hidden>Le chrono tourne depuis plus de 9 heures. Oubli d'arrêt ? Corrigez l'heure de début ci-dessus ou arrêtez-le puis ajustez la fin.</div>`;
+  if (!S.meta.clients.length && !entries.length) {
+    html += `<div class="card empty" style="margin-top:18px"><b>Bienvenue.</b><br>Tapez un nom de client dans « Client / dossier » pour le créer, puis une tâche (ex. « Production des bulletins »), et appuyez sur ▶.<br><br>
+      <button class="btn" data-act="preset">Ajouter les tâches types de la paie</button> &nbsp; <a class="btn ghost" href="#referentiel">Gérer clients et tâches</a></div>`;
+  }
+  if (rec.length) {
+    html += `<h2>Raccourcis</h2><div class="chips">` + rec.map(r => `<div class="chip" data-c="${esc(r.c || '')}" data-t="${esc(r.t || '')}">
+      <button class="icon star ${r.fav ? 'on' : ''}" data-act="fav" title="${r.fav ? 'Retirer des favoris' : 'Épingler en favori'}">${ICON.star}</button>
+      <button class="lab" data-act="fill" title="Pré-remplir">${whatHTML(r.c, r.t)}</button>
+      <button class="play" data-act="quick" title="Démarrer tout de suite">${ICON.play}</button></div>`).join('') + `</div>`;
+  }
+  html += `<h2>Résumé</h2><div class="stats">
+    <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div></div>
+    <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer</div></div>
+    <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
+    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
+    <div class="card stat"><div class="k">Non reportées (31 j)</div><div class="v">${unlogged}</div><div class="s">saisies à reporter dans le logiciel du cabinet</div></div>
+  </div>`;
+  // Groupes par jour
+  const keys = Object.keys(S.days).sort().reverse();
+  if (S.running && !keys.includes(dayKey(S.running.start))) { keys.push(dayKey(S.running.start)); keys.sort().reverse(); }
+  const shown = keys.slice(0, UI.daysShown);
+  if (shown.length) html += `<h2>Saisies</h2>`;
+  for (const k of shown) {
+    const list = Object.values(S.days[k]?.entries || {}).sort((a, b) => b.start - a.start);
+    const run = S.running && dayKey(S.running.start) === k ? S.running : null;
+    const tot = list.reduce((s, e) => s + dur(e), 0);
+    const totB = list.filter(e => e.billable).reduce((s, e) => s + dur(e), 0);
+    html += `<div class="card day" data-day="${k}"><div class="day-h"><span class="d">${esc(fmtDayLong(k))}</span>
+      <button class="btn sm ghost" data-act="recap" title="Totaux par client et tâche, à recopier dans le logiciel du cabinet">${ICON.list} Récap à reporter</button>
+      <span class="tb">à facturer ${fmtDur(totB)}</span><span class="t">${fmtDur(tot)}</span></div>`;
+    if (run) html += `<div class="row running"><div class="what">${whatHTML(run.client, run.task)}</div><div class="muted small">${esc(run.label) || 'En cours…'}</div><span class="bill ${run.billable ? '' : 'no'}" style="pointer-events:none">${run.billable ? 'À facturer' : 'Non facturable'}</span><span></span><span></span><span class="times mono small">${hhmm(run.start)} – …</span><span class="dur" data-live="clock">${fmtClock(dur(run))}</span><div class="acts"><button class="icon" data-act="stoprun" title="Arrêter">${ICON.stop}</button></div></div>`;
+    html += list.map(rowHTML).join('');
+    html += `</div>`;
+  }
+  if (keys.length > UI.daysShown) html += `<div class="more"><button class="btn" data-act="more">Afficher les jours précédents</button></div>`;
+  body.innerHTML = html;
+  tick();
+}
+function rowHTML(e) {
+  const st = statusOf(e);
+  return `<div class="row" data-id="${e.id}">
+    <button class="what" data-act="edit" title="Modifier">${whatHTML(e.client, e.task)}</button>
+    <input class="lbl" data-f="label" value="${esc(e.label)}" placeholder="Ajouter un libellé">
+    <button class="bill ${e.billable ? '' : 'no'}" data-act="bill" title="Basculer facturable / non facturable">${e.billable ? 'À facturer' : 'Non facturable'}</button>
+    <label class="chk ${e.billable ? '' : 'dis'}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : 'Cocher quand ce temps a été facturé'}"><input type="checkbox" data-f="invoiced" ${e.invoicedAt ? 'checked' : ''} ${e.billable ? '' : 'disabled'}>Facturé</label>
+    <label class="chk" title="Reporté dans le logiciel de gestion des temps du cabinet"><input type="checkbox" data-f="logged" ${e.logged ? 'checked' : ''}>Reporté</label>
+    <span class="times"><input data-f="start" inputmode="numeric" maxlength="5" value="${hhmm(e.start)}" title="Début"><span>–</span><input data-f="end" inputmode="numeric" maxlength="5" value="${hhmm(e.end)}" title="Fin"></span>
+    <span class="dur">${fmtDur(dur(e))}</span>
+    <div class="acts"><button class="icon" data-act="resume" title="Relancer cette tâche">${ICON.play}</button><button class="icon" data-act="del" title="Supprimer">${ICON.trash}</button></div>
+  </div>`;
+}
+function bindEntryEvents(container) {
+  container.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-act]'); if (!b) return;
+    const row = b.closest('[data-id]'); const id = row?.dataset.id;
+    const act = b.dataset.act;
+    if (act === 'edit' && id) openEdit(id);
+    else if (act === 'bill' && id) updateEntries([id], e => { e.billable = !e.billable; if (!e.billable) e.invoicedAt = 0; });
+    else if (act === 'resume' && id) { const e = findEntry(id); if (e) startTimer({ client: e.client, task: e.task, label: e.label, billable: e.billable }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else if (act === 'del' && id) deleteEntries([id]);
+  });
+  container.addEventListener('change', ev => {
+    const i = ev.target; const row = i.closest('[data-id]'); if (!row || !i.dataset.f) return;
+    const id = row.dataset.id, f = i.dataset.f;
+    if (f === 'invoiced') updateEntries([id], e => { e.invoicedAt = i.checked ? Date.now() : 0; });
+    else if (f === 'logged') updateEntries([id], e => { e.logged = i.checked; });
+    else if (f === 'label') updateEntries([id], e => { e.label = i.value; });
+  });
+  container.addEventListener('focusout', ev => {
+    const i = ev.target; if (!i.matches('.times input')) return;
+    const row = i.closest('[data-id]'); if (!row) return;
+    const e = findEntry(row.dataset.id); if (!e) return;
+    const day = startOfDay(e.start);
+    if (i.dataset.f === 'start') {
+      const s = timeOn(day, i.value);
+      if (s == null) { i.value = hhmm(e.start); return; }
+      if (Math.floor(s / 60000) === Math.floor(e.start / 60000)) { i.value = hhmm(e.start); return; }
+      const d = e.end - e.start; let end = e.end; if (end <= s) end = s + d;
+      saveEntry({ ...e, start: s, end });
+    } else if (i.dataset.f === 'end') {
+      let t = timeOn(day, i.value); if (t == null) { i.value = hhmm(e.end); return; }
+      if (t <= e.start) t += DAY;
+      if (Math.floor(t / 60000) === Math.floor(e.end / 60000)) { i.value = hhmm(e.end); return; }
+      saveEntry({ ...e, end: t });
+    }
+  });
+  container.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.matches('input.lbl, .times input')) ev.target.blur(); });
+}
+function bindChrono() {
+  const body = $('#chrono-body');
+  bindEntryEvents(body);
+  body.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act;
+    const chip = b.closest('.chip');
+    if (chip) {
+      const c = chip.dataset.c || null, t = chip.dataset.t || null;
+      if (act === 'quick') startTimer({ client: c, task: t, label: '' });
+      else if (act === 'fill') {
+        if (S.running) { toast('Un chrono est en cours : arrêtez-le ou utilisez ▶ pour basculer.'); return; }
+        Object.assign(UI.draft, { client: c, task: t }); if (!UI.draft.billTouched) UI.draft.billable = defaultBillable(c, t);
+        syncTimerBar(); $('#tb-label').focus();
+      } else if (act === 'fav') {
+        const i = S.meta.favorites.findIndex(f => f.c === c && f.t === t);
+        if (i >= 0) S.meta.favorites.splice(i, 1); else S.meta.favorites.push({ c, t });
+        touchMeta();
+      }
+      return;
+    }
+    if (act === 'more') { UI.daysShown += 14; renderChrono(); }
+    else if (act === 'recap') openRecap(b.closest('[data-day]').dataset.day);
+    else if (act === 'stoprun') stopTimer();
+    else if (act === 'preset') { addPresetTasks(); }
+  });
+}
+
+/* ---------- Modale ---------- */
+function modal(html, cls = '') {
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = `<div class="modal ${cls}">${html}</div>`;
+  document.body.appendChild(ov);
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  ov.addEventListener('mousedown', e => { if (e.target === ov) close(); });
+  ov.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
+  return { el: ov, close };
+}
+function selectOpts(arr, cur, empty) {
+  return `<option value="">${empty}</option>` + arr.filter(x => !x.archived || x.id === cur).slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
+}
+function openEdit(id) {
+  const e = findEntry(id); if (!e) return;
+  const m = modal(`<div class="modal-h"><h3>Modifier la saisie</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">
+      <div class="fld-row"><label class="fld"><span>Client</span><select id="ed-c">${selectOpts(S.meta.clients, e.client, '— Sans client —')}</select></label>
+      <label class="fld"><span>Tâche</span><select id="ed-t">${selectOpts(S.meta.tasks, e.task, '— Sans tâche —')}</select></label></div>
+      <label class="fld"><span>Libellé</span><input id="ed-l" value="${esc(e.label)}"></label>
+      <div class="fld-row"><label class="fld"><span>Date</span><input type="date" id="ed-d" value="${dayKey(e.start)}"></label>
+      <label class="fld"><span>Début</span><input id="ed-s" class="mono" inputmode="numeric" value="${hhmm(e.start)}"></label>
+      <label class="fld"><span>Fin</span><input id="ed-e" class="mono" inputmode="numeric" value="${hhmm(e.end)}"></label>
+      <label class="fld"><span>Durée (h:mm)</span><input id="ed-u" class="mono" value="${Math.floor(dur(e) / 3600000)}:${pad(Math.round(dur(e) % 3600000 / 60000))}"></label></div>
+      <div class="fld"><span>Facturation</span><div class="radio">
+        <label><input type="radio" name="ed-b" value="1" ${e.billable ? 'checked' : ''}> À facturer</label>
+        <label><input type="radio" name="ed-b" value="0" ${e.billable ? '' : 'checked'}> Non facturable</label></div></div>
+      <div class="fld-row"><label class="chk" style="font-size:13px"><input type="checkbox" id="ed-i" ${e.invoicedAt ? 'checked' : ''}> Facturé le</label><input type="date" id="ed-id" value="${e.invoicedAt ? dayKey(e.invoicedAt) : ''}">
+      <label class="chk" style="font-size:13px"><input type="checkbox" id="ed-g" ${e.logged ? 'checked' : ''}> Reporté dans le logiciel du cabinet</label></div>
+    </div>
+    <div class="modal-f"><button class="btn danger" id="ed-del">${ICON.trash} Supprimer</button><button class="btn" id="ed-dup">Dupliquer</button><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="ed-ok">Enregistrer</button></div>`);
+  const q = s => m.el.querySelector(s);
+  const recompute = () => { const s = timeOn(parseDay(q('#ed-d').value), q('#ed-s').value); let en = timeOn(parseDay(q('#ed-d').value), q('#ed-e').value); if (s != null && en != null) { if (en <= s) en += DAY; const mins = Math.round((en - s) / 60000); q('#ed-u').value = Math.floor(mins / 60) + ':' + pad(mins % 60); } };
+  q('#ed-s').addEventListener('change', recompute); q('#ed-e').addEventListener('change', recompute);
+  q('#ed-u').addEventListener('change', () => {
+    const v = q('#ed-u').value.trim().replace(',', '.'); let mins = null;
+    const mm = /^(\d+)[:h](\d{1,2})$/.exec(v); if (mm) mins = +mm[1] * 60 + +mm[2]; else if (/^\d+(\.\d+)?$/.test(v)) mins = Math.round(parseFloat(v) * 60);
+    const s = timeOn(parseDay(q('#ed-d').value), q('#ed-s').value);
+    if (mins != null && s != null) q('#ed-e').value = hhmm(s + mins * 60000);
+  });
+  q('#ed-i').addEventListener('change', () => { if (q('#ed-i').checked && !q('#ed-id').value) q('#ed-id').value = dayKey(Date.now()); });
+  q('#ed-ok').addEventListener('click', () => {
+    const dayMs = parseDay(q('#ed-d').value || dayKey(e.start));
+    const s = timeOn(dayMs, q('#ed-s').value); let en = timeOn(dayMs, q('#ed-e').value);
+    if (s == null || en == null) { toast('Heures invalides.'); return; }
+    if (en <= s) en += DAY;
+    const billable = m.el.querySelector('input[name=ed-b]:checked').value === '1';
+    const inv = billable && q('#ed-i').checked ? (q('#ed-id').value ? parseDay(q('#ed-id').value) + 12 * 3600000 : Date.now()) : 0;
+    saveEntry({ ...e, client: q('#ed-c').value || null, task: q('#ed-t').value || null, label: q('#ed-l').value, start: s, end: en, billable, invoicedAt: inv, logged: q('#ed-g').checked });
+    m.close();
+  });
+  q('#ed-del').addEventListener('click', () => { m.close(); deleteEntries([id]); });
+  q('#ed-dup').addEventListener('click', () => { saveEntry({ ...e, id: 'e' + newId(), invoicedAt: 0, logged: false }); m.close(); toast('Saisie dupliquée'); });
+}
+
+/* ---------- Récapitulatif à reporter ---------- */
+function aggregate(entries) {
+  const map = new Map();
+  for (const e of entries) {
+    const k = (e.client || '') + '|' + (e.task || '') + '|' + (e.billable ? 1 : 0);
+    if (!map.has(k)) map.set(k, { client: e.client, task: e.task, billable: e.billable, ms: 0, labels: [], ids: [], logged: true });
+    const g = map.get(k); g.ms += dur(e); g.ids.push(e.id); if (!e.logged) g.logged = false;
+    if (e.label && !g.labels.includes(e.label.trim())) g.labels.push(e.label.trim());
+  }
+  return [...map.values()].sort((a, b) => clientName(a.client).localeCompare(clientName(b.client), 'fr') || taskName(a.task).localeCompare(taskName(b.task), 'fr'));
+}
+function openRecap(k) {
+  const entries = Object.values(S.days[k]?.entries || {});
+  const groups = aggregate(entries);
+  const rounding = S.meta.settings.roundStep > 0;
+  const tot = groups.reduce((s, g) => s + g.ms, 0), totR = groups.reduce((s, g) => s + roundMs(g.ms), 0);
+  const tsv = ['Date\tClient\tCode\tTâche\tLibellés\tDurée (h:mm)\tDurée (h déc.)\tFacturation',
+    ...groups.map(g => [fmtDate(parseDay(k)), clientName(g.client), clientOf(g.client)?.code || '', taskName(g.task), g.labels.join(' ; '), fmtDur(roundMs(g.ms), 'hm'), hoursDec(roundMs(g.ms)), g.billable ? 'À facturer' : 'Non facturable'].join('\t'))].join('\n');
+  const m = modal(`<div class="modal-h"><h3>Récap à reporter · ${esc(fmtDayLong(k))}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><div class="muted small">Totaux regroupés par client et tâche, prêts à recopier dans le logiciel de gestion des temps du cabinet.${rounding ? ' Arrondi appliqué : ' + S.meta.settings.roundStep + ' min (' + (S.meta.settings.roundMode === 'up' ? 'au supérieur' : 'au plus proche') + ').' : ''}</div>
+    <div class="tbl-wrap card"><table class="t"><thead><tr><th>Client</th><th>Tâche</th><th>Libellés</th><th class="n">Durée</th>${rounding ? '<th class="n">Arrondi</th>' : ''}<th class="n">Heures</th><th>Facturation</th><th>Reporté</th></tr></thead><tbody>
+    ${groups.map((g, i) => `<tr><td><span class="dot" style="--c:${colorFor(g.client)}"></span> ${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}<td class="n">${hoursDec(roundMs(g.ms))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td><input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}></td></tr>`).join('')}
+    <tr class="tot"><td colspan="3">Total</td><td class="n">${fmtDur(tot, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(totR, 'hm')}</td>` : ''}<td class="n">${hoursDec(rounding ? totR : tot)}</td><td colspan="2"></td></tr></tbody></table></div>
+    <textarea class="copy" id="rc-txt" hidden readonly></textarea></div>
+    <div class="modal-f"><button class="btn" id="rc-copy">${ICON.copy} Copier pour Excel</button><span class="sp"></span><button class="btn primary" id="rc-all">Tout marquer comme reporté</button></div>`, 'wide');
+  m.el.querySelectorAll('input[data-g]').forEach(cb => cb.addEventListener('change', () => { const g = groups[+cb.dataset.g]; updateEntries(g.ids, e => { e.logged = cb.checked; }); }));
+  m.el.querySelector('#rc-copy').addEventListener('click', () => copyText(tsv, m.el.querySelector('#rc-txt')));
+  m.el.querySelector('#rc-all').addEventListener('click', () => { updateEntries(entries.map(e => e.id), e => { e.logged = true; }); m.close(); toast('Journée marquée comme reportée'); });
+}
+async function copyText(txt, fallbackTa) {
+  try { await navigator.clipboard.writeText(txt); toast('Copié : collez dans Excel ou dans votre logiciel'); }
+  catch (e) {
+    if (fallbackTa) { fallbackTa.hidden = false; fallbackTa.value = txt; fallbackTa.focus(); fallbackTa.select(); try { document.execCommand('copy'); toast('Copié'); } catch (_) { toast('Sélectionnez le texte puis Ctrl+C'); } }
+  }
+}
+async function downloadText(filename, txt, mime) {
+  if (Store.downloads) {
+    try { await Store.downloads.save({ filename, data: (mime === 'text/csv' ? '﻿' : '') + txt }); return; }
+    catch (e) {
+      if (e && (e.code === 'declined')) return;
+      if (e && e.code === 'rate_limited') { toast('Une demande de téléchargement est déjà ouverte.'); return; }
+    }
+  }
+  if (Store.mode === 'cloud') { toast('Téléchargement indisponible ici : utilisez « Copier ».'); return; }
+  try {
+    const url = URL.createObjectURL(new Blob(['﻿' + txt], { type: mime }));
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch (e) { toast('Téléchargement indisponible ici : utilisez « Copier ».'); }
+}
+
+/* ---------- Vue Rapports ---------- */
+function periodRange() {
+  const r = UI.rep, now = Date.now();
+  let from, to;
+  switch (r.period) {
+    case 'week': from = startOfWeek(now); to = addDays(from, 7); break;
+    case 'lastweek': to = startOfWeek(now); from = addDays(to, -7); break;
+    case 'month': from = startOfMonth(now); to = addMonths(now, 1); break;
+    case 'lastmonth': to = startOfMonth(now); from = addMonths(now, -1); break;
+    case 'quarter': { const d = new Date(now); from = new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3, 1).getTime(); to = addMonths(from, 3); break; }
+    case 'year': { const y = new Date(now).getFullYear(); from = new Date(y, 0, 1).getTime(); to = new Date(y + 1, 0, 1).getTime(); break; }
+    case '12m': to = addMonths(now, 1); from = addMonths(now, -11); break;
+    case 'all': { const l = allEntries(); from = l.length ? startOfMonth(l[l.length - 1].start) : startOfMonth(now); to = addMonths(now, 1); break; }
+    default: from = r.from ? parseDay(r.from) : startOfMonth(now); to = r.to ? addDays(parseDay(r.to), 1) : addDays(startOfDay(now), 1);
+  }
+  return [from, to];
+}
+function filtered() {
+  const r = UI.rep, [from, to] = periodRange(), q = norm(r.q);
+  return allEntries().filter(e => {
+    if (e.start < from || e.start >= to) return false;
+    if (r.client && e.client !== r.client) return false;
+    if (r.task && e.task !== r.task) return false;
+    const st = statusOf(e);
+    if (r.bill === 'bill' && !e.billable) return false;
+    if (r.bill === 'todo' && st !== 'todo') return false;
+    if (r.bill === 'inv' && st !== 'inv') return false;
+    if (r.bill === 'no' && st !== 'no') return false;
+    if (r.logged === 'yes' && !e.logged) return false;
+    if (r.logged === 'no' && e.logged) return false;
+    if (q && !(norm(e.label).includes(q) || norm(clientName(e.client)).includes(q) || norm(taskName(e.task)).includes(q))) return false;
+    return true;
+  });
+}
+function totals(list) {
+  const t = { all: 0, bill: 0, inv: 0, todo: 0, no: 0 };
+  for (const e of list) { const d = dur(e), st = statusOf(e); t.all += d; t[st] += d; if (e.billable) t.bill += d; }
+  return t;
+}
+function renderReports() {
+  const r = UI.rep, [from, to] = periodRange();
+  const list = filtered();
+  const t = totals(list);
+  const pct = t.all ? Math.round(t.bill / t.all * 100) : 0;
+  const periodOpts = [['week', 'Cette semaine'], ['lastweek', 'Semaine dernière'], ['month', 'Ce mois-ci'], ['lastmonth', 'Mois dernier'], ['quarter', 'Ce trimestre'], ['year', 'Cette année'], ['12m', '12 derniers mois'], ['all', 'Tout l’historique'], ['custom', 'Personnalisée…']];
+  let html = `<div class="card filters">
+    <label>Période<select data-r="period">${periodOpts.map(([v, l]) => `<option value="${v}" ${r.period === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    ${r.period === 'custom' ? `<label>Du<input type="date" data-r="from" value="${r.from || dayKey(from)}"></label><label>Au<input type="date" data-r="to" value="${r.to || dayKey(to - 1)}"></label>` : `<label>&nbsp;<span class="small" style="padding:7px 0;color:var(--ink-2)">${fmtDate(from)} → ${fmtDate(to - 1)}</span></label>`}
+    <label>Client<select data-r="client">${selectOpts(S.meta.clients, r.client, 'Tous les clients')}</select></label>
+    <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
+    <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label>Report logiciel<select data-r="logged">${[['all', 'Tout'], ['no', 'Non reporté'], ['yes', 'Reporté']].map(([v, l]) => `<option value="${v}" ${r.logged === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label style="flex:1;min-width:160px">Recherche<input data-r="q" value="${esc(r.q)}" placeholder="Libellé, client, tâche…"></label>
+  </div>`;
+  html += `<h2>Synthèse</h2><div class="stats">
+    <div class="card stat"><div class="k">Temps total</div><div class="v">${fmtDur(t.all)}</div><div class="s">${list.length} saisie${list.length > 1 ? 's' : ''}</div></div>
+    <div class="card stat"><div class="k">Facturable</div><div class="v">${fmtDur(t.bill)}</div><div class="s">${pct} % du temps</div></div>
+    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-inv)"></span>Déjà facturé</div><div class="v">${fmtDur(t.inv)}</div></div>
+    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(t.todo)}</div></div>
+    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-nobill)"></span>Non facturable</div><div class="v">${fmtDur(t.no)}</div></div>
+  </div>`;
+  // graphique
+  const months = [];
+  for (let m = startOfMonth(from); m < to; m = addMonths(m, 1)) months.push(monthKey(m));
+  const byDay = (to - from) / DAY <= 45;
+  const buckets = [];
+  if (byDay) { for (let d = from; d < to; d = addDays(d, 1)) buckets.push({ key: dayKey(d), label: String(new Date(d).getDate()), full: fmtDayLong(dayKey(d)), inv: 0, todo: 0, no: 0 }); }
+  else months.forEach(mk => buckets.push({ key: mk, label: fmtMonth(mk), full: MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4), inv: 0, todo: 0, no: 0 }));
+  const bIdx = Object.fromEntries(buckets.map((b, i) => [b.key, i]));
+  for (const e of list) { const k = byDay ? dayKey(e.start) : monthKey(e.start); const b = buckets[bIdx[k]]; if (b) b[statusOf(e)] += dur(e); }
+  html += `<div class="toolbar"><h2>Évolution ${byDay ? 'par jour' : 'par mois'}</h2></div>
+    <div class="card chart-wrap"><div class="chart-head"><div class="legend"><span><i style="background:var(--s-inv)"></i>Facturé</span><span><i style="background:var(--s-todo)"></i>Reste à facturer</span><span><i style="background:var(--s-nobill)"></i>Non facturable</span></div></div>
+    ${chartSVG(buckets)}<div class="tip" id="tip" hidden></div></div>`;
+  // tableau croisé
+  const multiMonth = months.length > 1;
+  const cols = multiMonth && r.cols === 'month' ? 'month' : 'status';
+  html += `<div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : 'tâche puis client'}</h2><span class="sp"></span>
+    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button></div>
+    ${multiMonth ? `<div class="seg" data-seg="cols"><button data-v="status" class="${cols === 'status' ? 'on' : ''}">Colonnes : statuts</button><button data-v="month" class="${cols === 'month' ? 'on' : ''}">Colonnes : mois</button></div>` : ''}
+    <button class="btn sm" data-act="copy-pivot">${ICON.copy} Copier</button></div>`;
+  const pv = pivot(list, r.group, cols, months);
+  html += `<div class="card tbl-wrap">${pv.html}</div>`;
+  // détail
+  const sel = r.sel; for (const id of [...sel]) if (!list.some(e => e.id === id)) sel.delete(id);
+  const shown = list.slice(0, r.limit);
+  html += `<div class="toolbar"><h2>Détail des saisies</h2><span class="sp"></span>
+    <button class="btn sm" data-act="copy-detail">${ICON.copy} Copier pour Excel</button><button class="btn sm" data-act="dl-csv">${ICON.down} Télécharger CSV</button></div>
+    <div class="card"><div class="bulk"><span class="small"><b>${sel.size}</b> sélectionnée${sel.size > 1 ? 's' : ''}</span>
+      <button class="btn sm" data-bulk="inv" ${sel.size ? '' : 'disabled'}>Marquer facturé</button>
+      <button class="btn sm" data-bulk="uninv" ${sel.size ? '' : 'disabled'}>Annuler « facturé »</button>
+      <button class="btn sm" data-bulk="logged" ${sel.size ? '' : 'disabled'}>Marquer reporté</button>
+      <button class="btn sm" data-bulk="bill" ${sel.size ? '' : 'disabled'}>Passer à facturer</button>
+      <button class="btn sm" data-bulk="nobill" ${sel.size ? '' : 'disabled'}>Passer non facturable</button>
+      <span class="sp" style="flex:1"></span><button class="btn sm danger" data-bulk="del" ${sel.size ? '' : 'disabled'}>Supprimer</button></div>
+    <div class="tbl-wrap"><table class="t"><thead><tr><th><input type="checkbox" data-selall ${shown.length && shown.every(e => sel.has(e.id)) ? 'checked' : ''}></th><th>Date</th><th>Client</th><th>Tâche</th><th>Libellé</th><th>Horaires</th><th class="n">Durée</th><th>Statut</th><th>Reporté</th><th></th></tr></thead><tbody>
+    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td><span class="dot" style="--c:${colorFor(e.client)}"></span> ${esc(clientName(e.client) || '—')}</td><td>${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
+    </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
+  const body = $('#rapports-body');
+  body.innerHTML = html;
+  body._pivotTsv = pv.tsv;
+  body._list = list;
+  bindChart(body, buckets);
+}
+function pivot(list, group, cols, months) {
+  const k1 = group === 'client' ? e => e.client || '' : e => e.task || '';
+  const k2 = group === 'client' ? e => e.task || '' : e => e.client || '';
+  const n1 = group === 'client' ? id => clientName(id) || 'Sans client' : id => taskName(id) || 'Sans tâche';
+  const n2 = group === 'client' ? id => taskName(id) || 'Sans tâche' : id => clientName(id) || 'Sans client';
+  const g = new Map();
+  for (const e of list) {
+    const a = k1(e), b = k2(e);
+    if (!g.has(a)) g.set(a, { list: [], subs: new Map() });
+    const G = g.get(a); G.list.push(e);
+    if (!G.subs.has(b)) G.subs.set(b, []); G.subs.get(b).push(e);
+  }
+  const statusCols = [['all', 'Total'], ['bill', 'Facturable'], ['inv', 'Facturé'], ['todo', 'Reste à fact.'], ['no', 'Non fact.']];
+  const colDefs = cols === 'month' ? [...months.map(mk => [mk, fmtMonth(mk)]), ['all', 'Total']] : statusCols;
+  const vals = l => {
+    if (cols === 'month') { const o = { all: 0 }; months.forEach(m => o[m] = 0); l.forEach(e => { const d = dur(e); o.all += d; const mk = monthKey(e.start); if (mk in o) o[mk] += d; }); return o; }
+    return totals(l);
+  };
+  const cell = v => v ? fmtDur(v) : '<span class="zero">–</span>';
+  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
+  const tsvRows = [[group === 'client' ? 'Client' : 'Tâche', group === 'client' ? 'Tâche' : 'Client', ...colDefs.map(c => c[1] + ' (h)')].join('\t')];
+  let rows = '';
+  const sorted = [...g.entries()].sort((a, b) => n1(a[0]).localeCompare(n1(b[0]), 'fr'));
+  for (const [a, G] of sorted) {
+    const v = vals(G.list);
+    rows += `<tr class="grp"><td>${group === 'client' ? `<span class="dot" style="--c:${colorFor(a)}"></span> ` : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
+    const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
+    for (const [b, l] of subs) {
+      const sv = vals(l);
+      rows += `<tr class="sub"><td>${esc(n2(b))}</td>${colDefs.map(c => `<td class="n">${cell(sv[c[0]])}</td>`).join('')}</tr>`;
+      tsvRows.push([n1(a), n2(b), ...colDefs.map(c => hoursDec(sv[c[0]] || 0))].join('\t'));
+    }
+  }
+  const tv = vals(list);
+  rows += `<tr class="tot"><td>Total</td>${colDefs.map(c => `<td class="n">${cell(tv[c[0]])}</td>`).join('')}</tr>`;
+  return { html: list.length ? `<table class="t"><thead>${head}</thead><tbody>${rows}</tbody></table>` : `<div class="empty">Aucune saisie sur cette période.</div>`, tsv: tsvRows.join('\n') };
+}
+function chartSVG(b) {
+  const W = 1000, H = 230, L = 46, R = 8, T = 10, B = 26;
+  const maxMs = Math.max(0, ...b.map(x => x.inv + x.todo + x.no));
+  const maxH = maxMs / 3600000;
+  const step = maxH <= 4 ? 1 : maxH <= 10 ? 2 : maxH <= 25 ? 5 : maxH <= 60 ? 10 : maxH <= 150 ? 25 : maxH <= 300 ? 50 : 100;
+  const top = Math.max(step, Math.ceil(maxH / step) * step);
+  const y = h => T + (H - T - B) * (1 - h / top);
+  const n = b.length, slot = (W - L - R) / Math.max(1, n), bw = Math.min(46, slot * 0.62);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Heures par période, réparties entre facturé, reste à facturer et non facturable">`;
+  for (let v = 0; v <= top + 1e-9; v += step) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v} h</text>`;
+  const every = Math.ceil(n / 16);
+  b.forEach((x, i) => {
+    const cx = L + slot * i + slot / 2, x0 = cx - bw / 2;
+    let base = 0; const segs = [['inv', 'var(--s-inv)'], ['todo', 'var(--s-todo)'], ['no', 'var(--s-nobill)']].filter(([k]) => x[k] > 0);
+    segs.forEach(([k, col], j) => {
+      const h0 = base, h1 = base + x[k] / 3600000; base = h1;
+      let y0 = y(h0), y1 = y(h1);
+      if (j > 0) y0 -= 2; // espace de 2px entre segments
+      const hh = y0 - y1; if (hh <= 0.5) return;
+      const isTop = j === segs.length - 1, r = Math.min(4, hh, bw / 2);
+      s += isTop ? `<path d="M${x0},${y0} V${y1 + r} Q${x0},${y1} ${x0 + r},${y1} H${x0 + bw - r} Q${x0 + bw},${y1} ${x0 + bw},${y1 + r} V${y0} Z" fill="${col}"/>` : `<rect x="${x0}" y="${y1}" width="${bw}" height="${hh}" fill="${col}"/>`;
+    });
+    if (i % every === 0) s += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${esc(x.label)}</text>`;
+    s += `<rect class="hit" data-i="${i}" x="${L + slot * i}" y="${T}" width="${slot}" height="${H - T - B}"/>`;
+  });
+  return s + `</svg>`;
+}
+function bindChart(root, b) {
+  const tip = root.querySelector('#tip'), wrap = root.querySelector('.chart-wrap'); if (!tip) return;
+  root.querySelectorAll('.hit').forEach(h => {
+    h.addEventListener('mouseenter', () => {
+      const x = b[+h.dataset.i]; const tot = x.inv + x.todo + x.no;
+      tip.innerHTML = `<div class="h">${esc(x.full)}</div><div class="r"><b>Total</b><b class="mono">${fmtDur(tot)}</b></div>
+        <div class="r"><span><i style="background:var(--s-inv)"></i>Facturé</span><span class="mono">${fmtDur(x.inv)}</span></div>
+        <div class="r"><span><i style="background:var(--s-todo)"></i>Reste à facturer</span><span class="mono">${fmtDur(x.todo)}</span></div>
+        <div class="r"><span><i style="background:var(--s-nobill)"></i>Non facturable</span><span class="mono">${fmtDur(x.no)}</span></div>`;
+      tip.hidden = false;
+    });
+    h.addEventListener('mousemove', ev => {
+      const rc = wrap.getBoundingClientRect(); let lx = ev.clientX - rc.left + 14;
+      if (lx + 190 > rc.width) lx = ev.clientX - rc.left - 200;
+      tip.style.left = lx + 'px'; tip.style.top = (ev.clientY - rc.top - 10) + 'px';
+    });
+    h.addEventListener('mouseleave', () => { tip.hidden = true; });
+  });
+}
+function detailTSV(list, sep) {
+  const q = v => sep === ';' ? '"' + String(v ?? '').replace(/"/g, '""') + '"' : String(v ?? '').replace(/[\t\n]/g, ' ');
+  const head = ['Date', 'Client', 'Code client', 'Tâche', 'Libellé', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
+  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', taskName(e.task), e.label, hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
+  return [head.map(q).join(sep), ...rows].join('\n');
+}
+function bindReports() {
+  const body = $('#rapports-body');
+  body.addEventListener('change', ev => {
+    const i = ev.target;
+    if (i.dataset.r) {
+      UI.rep[i.dataset.r] = i.value;
+      if (i.dataset.r === 'period' && i.value === 'custom') { const [f, t] = [startOfMonth(Date.now()), Date.now()]; UI.rep.from ||= dayKey(f); UI.rep.to ||= dayKey(t); }
+      UI.rep.limit = 200; renderReports(); return;
+    }
+    if (i.matches('[data-sel]')) { const id = i.closest('tr').dataset.id; i.checked ? UI.rep.sel.add(id) : UI.rep.sel.delete(id); renderReports(); }
+    if (i.matches('[data-selall]')) { const ids = body._list.slice(0, UI.rep.limit).map(e => e.id); ids.forEach(id => i.checked ? UI.rep.sel.add(id) : UI.rep.sel.delete(id)); renderReports(); }
+  });
+  let qT; body.addEventListener('input', ev => { if (ev.target.dataset.r === 'q') { clearTimeout(qT); UI.rep.q = ev.target.value; qT = setTimeout(() => { const pos = ev.target.selectionStart; renderReports(); const inp = body.querySelector('[data-r=q]'); inp.focus(); inp.setSelectionRange(pos, pos); }, 300); } });
+  body.addEventListener('click', ev => {
+    const s = ev.target.closest('.seg button'); if (s) { UI.rep[s.parentElement.dataset.seg] = s.dataset.v; renderReports(); return; }
+    const b = ev.target.closest('[data-act],[data-bulk]'); if (!b) return;
+    if (b.dataset.act === 'edit') openEdit(b.closest('tr').dataset.id);
+    else if (b.dataset.act === 'copy-pivot') copyText(body._pivotTsv);
+    else if (b.dataset.act === 'copy-detail') copyText(detailTSV(body._list, '\t'));
+    else if (b.dataset.act === 'dl-csv') { const [f, t] = periodRange(); downloadText(`temps_${dayKey(f)}_${dayKey(t - 1)}.csv`, detailTSV(body._list, ';'), 'text/csv'); }
+    else if (b.dataset.act === 'more-detail') { UI.rep.limit += 300; renderReports(); }
+    else if (b.dataset.bulk) {
+      const ids = [...UI.rep.sel]; const k = b.dataset.bulk;
+      if (k === 'inv') { const n = updateEntries(ids, e => { if (e.billable && !e.invoicedAt) e.invoicedAt = Date.now(); }); toast('Marqué comme facturé'); }
+      else if (k === 'uninv') updateEntries(ids, e => { e.invoicedAt = 0; });
+      else if (k === 'logged') updateEntries(ids, e => { e.logged = true; });
+      else if (k === 'bill') updateEntries(ids, e => { e.billable = true; });
+      else if (k === 'nobill') updateEntries(ids, e => { e.billable = false; e.invoicedAt = 0; });
+      else if (k === 'del') { deleteEntries(ids); UI.rep.sel.clear(); }
+    }
+  });
+}
+
+/* ---------- Vue À facturer ---------- */
+function renderBilling() {
+  const f = UI.fac;
+  const until = f.until ? addDays(parseDay(f.until), 1) : Infinity;
+  const list = allEntries().filter(e => e.billable && !e.invoicedAt && e.start < until);
+  const byC = new Map();
+  for (const e of list) { const k = e.client || ''; if (!byC.has(k)) byC.set(k, []); byC.get(k).push(e); }
+  const groups = [...byC.entries()].map(([c, l]) => ({ c, l, ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
+  const tot = groups.reduce((s, g) => s + g.ms, 0);
+  const lastMonthEnd = dayKey(startOfMonth(Date.now()) - 1);
+  let html = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Temps facturable pas encore facturé</div><div class="muted small">Quand la facture est émise, marquez le temps comme facturé : il sort de cette liste et reste dans les rapports.</div></div>
+    <label>Temps jusqu’au<input type="date" data-f="until" value="${esc(f.until)}"></label>
+    <label>&nbsp;<span style="display:flex;gap:6px"><button class="btn sm" data-act="until-lm">Fin du mois dernier</button><button class="btn sm" data-act="until-clear">Tout</button></span></label></div>`;
+  html += `<div class="stats" style="margin-top:12px"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${groups.length} client${groups.length > 1 ? 's' : ''} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div></div>`;
+  if (!groups.length) html += `<div class="card empty" style="margin-top:14px">Rien à facturer${f.until ? ' jusqu’à cette date' : ''}. 🎉</div>`;
+  for (const g of groups) {
+    const open = f.open.has(g.c);
+    const first = Math.min(...g.l.map(e => e.start)), last = Math.max(...g.l.map(e => e.start));
+    html += `<div class="card bclient" data-c="${esc(g.c)}"><div class="bclient-h">
+      <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span><span class="dot" style="--c:${colorFor(g.c)}"></span>${esc(clientName(g.c) || 'Sans client')}</button>
+      <span class="meta">${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}</span>
+      <span class="amt">${fmtDur(g.ms)}</span>
+      <button class="btn sm" data-act="copy-client">${ICON.copy} Copier le détail</button>
+      <button class="btn sm primary" data-act="inv-client">Marquer facturé</button></div>`;
+    if (open) {
+      const byT = aggregate(g.l);
+      html += `<div class="bclient-body tbl-wrap"><table class="t"><thead><tr><th>Tâche</th><th>Libellés</th><th class="n">Saisies</th><th class="n">Durée</th><th class="n">Heures</th><th></th></tr></thead><tbody>
+        ${byT.map((x, i) => `<tr><td>${esc(taskName(x.task) || '—')}</td><td class="lab" title="${esc(x.labels.join(' ; '))}">${esc(x.labels.join(' ; '))}</td><td class="n">${x.ids.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td><td><button class="btn sm" data-act="inv-task" data-i="${i}">Facturé</button></td></tr>`).join('')}
+        </tbody></table></div>`;
+    }
+    html += `</div>`;
+  }
+  const body = $('#facturation-body'); body.innerHTML = html; body._groups = groups;
+}
+function bindBilling() {
+  const body = $('#facturation-body');
+  body.addEventListener('change', ev => { if (ev.target.dataset.f === 'until') { UI.fac.until = ev.target.value; renderBilling(); } });
+  body.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'until-lm') { UI.fac.until = dayKey(startOfMonth(Date.now()) - 1); renderBilling(); return; }
+    if (act === 'until-clear') { UI.fac.until = ''; renderBilling(); return; }
+    const card = b.closest('[data-c]'); if (!card) return;
+    const c = card.dataset.c; const g = body._groups.find(x => x.c === c); if (!g) return;
+    if (act === 'toggle') { UI.fac.open.has(c) ? UI.fac.open.delete(c) : UI.fac.open.add(c); renderBilling(); }
+    else if (act === 'inv-client') {
+      const ids = g.l.map(e => e.id), now = Date.now();
+      updateEntries(ids, e => { e.invoicedAt = now; });
+      toast(fmtDur(g.ms) + ' marqué facturé pour ' + (clientName(c) || 'Sans client'), 'Annuler', () => updateEntries(ids, e => { if (e.invoicedAt === now) e.invoicedAt = 0; }));
+    } else if (act === 'inv-task') {
+      const x = aggregate(g.l)[+b.dataset.i]; const now = Date.now();
+      updateEntries(x.ids, e => { e.invoicedAt = now; });
+      toast('Marqué facturé', 'Annuler', () => updateEntries(x.ids, e => { if (e.invoicedAt === now) e.invoicedAt = 0; }));
+    } else if (act === 'copy-client') copyText(detailTSV(g.l, '\t'));
+  });
+}
+
+/* ---------- Vue Référentiel ---------- */
+const PAYROLL_TASKS = ['Production des bulletins de salaire', 'Collecte et saisie des variables', 'Entrées / DPAE / contrats', 'Soldes de tout compte / sorties', 'Arrêts maladie / IJSS / subrogation', 'Accidents du travail', 'DSN et déclarations sociales', 'Saisies sur salaire', 'Congés et absences', 'Conseil et questions client', 'Paramétrage du dossier', 'Régularisations / contrôle'];
+function addPresetTasks() {
+  let n = 0;
+  for (const name of PAYROLL_TASKS) if (!S.meta.tasks.some(t => norm(t.name) === norm(name))) { S.meta.tasks.push({ id: 't' + newId(), name, billing: 'auto', archived: false }); n++; }
+  touchMeta(); toast(n ? n + ' tâches ajoutées (modifiables dans « Clients & tâches »)' : 'Les tâches types sont déjà présentes');
+}
+function renderRefs() {
+  const u = {}; const ut = {};
+  for (const e of allEntries()) { if (e.client) u[e.client] = (u[e.client] || 0) + dur(e); if (e.task) ut[e.task] = (ut[e.task] || 0) + dur(e); }
+  const showA = UI.refArch;
+  const cs = S.meta.clients.filter(c => showA || !c.archived).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
+  const ts = S.meta.tasks.filter(t => showA || !t.archived).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
+  const st = S.meta.settings;
+  const nArch = S.meta.clients.filter(c => c.archived).length + S.meta.tasks.filter(t => t.archived).length;
+  let html = `<div class="toolbar" style="margin-top:0"><h2>Clients et tâches</h2><span class="sp"></span>${nArch ? `<label class="chk"><input type="checkbox" data-act="arch" ${showA ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
+  <div class="grid2">
+    <div class="card"><div class="ref-add"><input id="new-client" placeholder="Nouveau client (ex. Alpha SARL)"><input id="new-client-code" placeholder="Code dossier" style="flex:0 0 110px"><button class="btn primary" data-act="add-client">Ajouter</button></div>
+      <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}"><span class="dot" style="--c:${colorFor(c.id)}"></span>
+        <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
+        <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
+        <span class="use" title="Temps total enregistré">${u[c.id] ? fmtDur(u[c.id], 'hm') : ''}</span>
+        <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
+        ${u[c.id] ? '<span style="width:30px;flex:none"></span>' : `<button class="icon" data-act="del-ref" title="Supprimer">${ICON.trash}</button>`}</div>`).join('') || '<div class="empty">Aucun client pour l’instant.</div>'}</div></div>
+    <div class="card"><div class="ref-add"><input id="new-task" placeholder="Nouvelle tâche (ex. Production des bulletins)"><button class="btn primary" data-act="add-task">Ajouter</button></div>
+      <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
+        <input class="nm" data-k="name" value="${esc(t.name)}">
+        <select data-k="billing" title="Facturation par défaut"><option value="auto" ${!t.billing || t.billing === 'auto' ? 'selected' : ''}>Selon le client</option><option value="bill" ${t.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${t.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
+        <span class="use">${ut[t.id] ? fmtDur(ut[t.id], 'hm') : ''}</span>
+        <button class="btn sm ghost" data-act="toggle-arch">${t.archived ? 'Restaurer' : 'Archiver'}</button>
+        ${ut[t.id] ? '<span style="width:30px;flex:none"></span>' : `<button class="icon" data-act="del-ref" title="Supprimer">${ICON.trash}</button>`}</div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches types de la paie</button></div>`}</div>
+      ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Tâches types de la paie</button></div>` : ''}</div>
+  </div>
+  <div class="grid2" style="margin-top:6px">
+    <div><h2>Réglages</h2><div class="card settings">
+      <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
+      <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
+      <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
+    </div></div>
+    <div><h2>Données</h2><div class="card settings">
+      <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
+      <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
+      <textarea class="copy" id="export-ta" hidden readonly></textarea>
+    </div></div>
+  </div>`;
+  $('#referentiel-body').innerHTML = html;
+}
+function bindRefs() {
+  const body = $('#referentiel-body');
+  const addC = () => { const i = $('#new-client'), code = $('#new-client-code'); const id = addClient(i.value); if (id && code.value.trim()) { clientOf(id).code = code.value.trim(); touchMeta(); } i.value = ''; code.value = ''; i.focus(); };
+  const addT = () => { const i = $('#new-task'); addTask(i.value); i.value = ''; i.focus(); };
+  body.addEventListener('keydown', ev => {
+    if (ev.key !== 'Enter') return;
+    if (ev.target.id === 'new-client' || ev.target.id === 'new-client-code') addC();
+    else if (ev.target.id === 'new-task') addT();
+    else if (ev.target.matches('.ref-row input')) ev.target.blur();
+  });
+  body.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act, row = b.closest('.ref-row');
+    if (act === 'add-client') addC();
+    else if (act === 'add-task') addT();
+    else if (act === 'preset') addPresetTasks();
+    else if (act === 'arch') { UI.refArch = b.checked; renderRefs(); }
+    else if (act === 'toggle-arch' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); o.archived = !o.archived; touchMeta(); }
+    else if (act === 'del-ref' && row) { const arr = row.dataset.kind === 'client' ? S.meta.clients : S.meta.tasks; const i = arr.findIndex(x => x.id === row.dataset.id); if (i >= 0) { const [o] = arr.splice(i, 1); touchMeta(); toast('« ' + o.name + ' » supprimé', 'Annuler', () => { arr.push(o); touchMeta(); }); } }
+    else if (act === 'export') {
+      const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, running: S.running }, null, 1);
+      downloadText('chronocab_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
+    }
+  });
+  body.addEventListener('change', ev => {
+    const i = ev.target;
+    if (i.id === 'import-file') { importFile(i.files[0]); i.value = ''; return; }
+    if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : k === 'defaultBillable' ? i.value === '1' : i.value; touchMeta(); return; }
+    const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
+    const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (!o) return;
+    const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
+    o[i.dataset.k] = v; touchMeta(); syncTimerBar();
+  });
+}
+function importFile(file) {
+  if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    let d; try { d = JSON.parse(rd.result); } catch (e) { toast('Fichier illisible'); return; }
+    if (!d || !d.meta || !d.days) { toast('Ce fichier n’est pas une sauvegarde Chronocab'); return; }
+    const m = normalizeMeta(d.meta);
+    const mergeArr = (a, b) => { for (const x of b) { const i = a.findIndex(y => y.id === x.id); if (i < 0) a.push(x); } };
+    mergeArr(S.meta.clients, m.clients); mergeArr(S.meta.tasks, m.tasks);
+    for (const f of m.favorites) if (!S.meta.favorites.some(x => x.c === f.c && x.t === f.t)) S.meta.favorites.push(f);
+    let n = 0;
+    for (const k in d.days) {
+      const en = d.days[k]?.entries || {}; let ch = false;
+      for (const id in en) { const e = en[id]; if (!e || typeof e.start !== 'number') continue; const dk = dayKey(e.start); (S.days[dk] ||= { entries: {} }); if (!S.days[dk].entries[id]) { S.days[dk].entries[id] = e; n++; ch = true; Store.put('d-' + dk); } }
+    }
+    S.rev++; Store.put('meta'); scheduleRender(); syncTimerBar();
+    toast(n + ' saisie' + (n > 1 ? 's' : '') + ' importée' + (n > 1 ? 's' : '') + ' (les doublons sont ignorés)');
+  };
+  rd.readAsText(file);
+}
+
+/* ---------- Connexion Firebase ---------- */
+function showFatal(msg) { const l = $('#loading'); if (l) l.innerHTML = `<div class="card login"><h3>Chargement impossible</h3><p>${esc(msg)}</p></div>`; }
+function showLogin(auth, AU) {
+  return new Promise(resolve => {
+    const l = $('#loading');
+    l.innerHTML = `<div class="card login"><div class="brand-mark" style="margin:0 auto 14px;width:40px;height:40px;border-radius:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div>
+      <h3>Chronocab</h3><p>Connectez-vous avec votre compte Google pour retrouver vos temps sur n’importe quel poste.</p>
+      <button class="btn primary" id="login-btn" style="padding:10px 18px">Se connecter avec Google</button><div class="err" id="login-err"></div></div>`;
+    const done = AU.onAuthStateChanged(auth, u => { if (u) { done(); resolve(u); } });
+    $('#login-btn').onclick = async () => {
+      $('#login-err').textContent = '';
+      const prov = new AU.GoogleAuthProvider(); prov.setCustomParameters({ prompt: 'select_account' });
+      try { await AU.signInWithPopup(auth, prov); }
+      catch (e) {
+        const c = e && e.code;
+        if (c === 'auth/popup-blocked' || c === 'auth/operation-not-supported-in-this-environment') { try { await AU.signInWithRedirect(auth, prov); } catch (e2) { $('#login-err').textContent = e2.code || String(e2); } }
+        else if (c === 'auth/unauthorized-domain') $('#login-err').textContent = 'Ce site (' + location.hostname + ') n’est pas autorisé : ajoutez-le dans Firebase › Authentication › Paramètres › Domaines autorisés.';
+        else if (c === 'auth/configuration-not-found' || c === 'auth/operation-not-allowed') $('#login-err').textContent = 'La connexion Google n’est pas activée dans Firebase › Authentication › Mode de connexion.';
+        else if (c !== 'auth/popup-closed-by-user' && c !== 'auth/cancelled-popup-request') $('#login-err').textContent = 'Erreur : ' + (c || e);
+      }
+    };
+  });
+}
+
+/* ---------- Toasts ---------- */
+function toast(msg, actLabel, act) {
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = `<span>${esc(msg)}</span>${actLabel ? `<button>${esc(actLabel)}</button>` : ''}`;
+  $('#toasts').appendChild(t);
+  if (actLabel) t.querySelector('button').onclick = () => { act(); t.remove(); };
+  setTimeout(() => t.remove(), actLabel ? 7000 : 3500);
+}
+
+/* =========================================================
+   Démarrage
+   ========================================================= */
+async function boot() {
+  initTimerBar();
+  bindChrono(); bindReports(); bindBilling(); bindRefs();
+  // Le runtime de l'artifact peut s'installer juste après le chargement
+  if (!FIREBASE_CONFIG.apiKey && !(window.claude && window.claude.use)) await new Promise(r => setTimeout(r, 400));
+  await Store.init();
+  $('#loading').remove();
+  UI.draft.billable = !!S.meta.settings.defaultBillable;
+  syncTimerBar();
+  route();
+  setInterval(tick, 1000);
+}
+boot();
+</script>
+</body>
+</html>
