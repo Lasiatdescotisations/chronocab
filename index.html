@@ -1561,7 +1561,11 @@ function renderRefs() {
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div></div>
   </div>`;
-  $('#referentiel-body').innerHTML = html;
+  const body = $('#referentiel-body');
+  const keep = $$('.ref-list', body).map(l => l.scrollTop), wy = window.scrollY;
+  body.innerHTML = html;
+  $$('.ref-list', body).forEach((l, i) => { l.scrollTop = keep[i] || 0; });
+  if (Math.abs(window.scrollY - wy) > 1) window.scrollTo(0, wy);
 }
 function bindRefs() {
   const body = $('#referentiel-body');
