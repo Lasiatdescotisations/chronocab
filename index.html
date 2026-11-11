@@ -166,6 +166,8 @@ h2:first-child{margin-top:0}
 .times input{border-color:transparent;background:transparent;padding:3px 4px;width:54px;text-align:center;font-family:var(--mono);font-size:13px}
 .times input:hover{border-color:var(--line)}
 .dur{font-family:var(--mono);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.dur-in{font-family:var(--mono);font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-color:transparent;background:transparent;padding:3px 4px;width:100%;min-width:0}
+.dur-in:hover{border-color:var(--line)}
 .acts{display:flex}
 .row.running{background:var(--stop-soft)}
 .empty{padding:40px 20px;text-align:center;color:var(--muted)}
@@ -359,20 +361,13 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
    Pour la version Firebase : collez ici les valeurs de l'objet
    firebaseConfig donné par la console Firebase.
    ========================================================= */
-const firebaseConfig = {
-
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCdCambB0k0iLhGBo7QurY63kZNCl7w6-I",
-
   authDomain: "chronocab-f08ae.firebaseapp.com",
-
   projectId: "chronocab-f08ae",
-
   storageBucket: "chronocab-f08ae.firebasestorage.app",
-
   messagingSenderId: "29403974929",
-
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
-
 };
 const FB_VERSION = '12.16.0';
 /* =========================================================
@@ -435,6 +430,15 @@ function parseHM(str) { // accepte 9, 9h, 9h30, 930, 0930, 9:30, 09.30
   else return null;
   if (h > 24 || mi > 59) return null;
   return [h, mi];
+}
+function parseDur(str) { // minutes : « 30 », « 45min », « 1h », « 1h15 », « 1:15 », « 1,5 » (heures)
+  const v = String(str || '').trim().toLowerCase().replace(/\s/g, '').replace(/(min|mn|m)$/, '');
+  let m;
+  if ((m = /^(\d+)h(\d{1,2})?$/.exec(v))) return +m[1] * 60 + (m[2] ? +m[2] : 0);
+  if ((m = /^(\d+):(\d{1,2})$/.exec(v))) return +m[1] * 60 + +m[2];
+  if ((m = /^(\d*)[.,](\d+)h?$/.exec(v))) return Math.round(parseFloat((m[1] || '0') + '.' + m[2]) * 60);
+  if ((m = /^(\d+)$/.exec(v))) return +m[1];
+  return null;
 }
 function timeOn(dayMs, str) { // "HH:MM" -> ms ce jour-là
   const hm = parseHM(str); if (!hm) return null;
@@ -532,7 +536,7 @@ const Store = {
     const base = `https://www.gstatic.com/firebasejs/${FB_VERSION}/`;
     let A, AU, F;
     try { [A, AU, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]); }
-    catch (e) { showFatal('Impossible de charger Firebase. Vérifiez la connexion internet (ou un pare-feu qui bloquerait gstatic.com).'); throw e; }
+    catch (e) { showFatal(location.protocol === 'https:' && /github\.io$|pages\.dev$|web\.app$|firebaseapp\.com$/.test(location.hostname) ? 'Impossible de charger Firebase. Vérifiez la connexion internet (ou un pare-feu qui bloquerait gstatic.com).' : 'Cette version de Chronocab est prévue pour Firebase : elle ne fonctionne qu’ouverte depuis votre adresse GitHub Pages, pas dans un aperçu de fichier. Dans Claude, utilisez le lien de l’application Chronocab.'); throw e; }
     const app = A.initializeApp(FIREBASE_CONFIG);
     const auth = AU.getAuth(app);
     let db;
@@ -1039,7 +1043,7 @@ function rowHTML(e) {
     <label class="chk ${e.billable ? '' : 'dis'}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : 'Cocher quand ce temps a été facturé'}"><input type="checkbox" data-f="invoiced" ${e.invoicedAt ? 'checked' : ''} ${e.billable ? '' : 'disabled'}>Facturé</label>
     <label class="chk" title="Reporté dans le logiciel de gestion des temps du cabinet"><input type="checkbox" data-f="logged" ${e.logged ? 'checked' : ''}>Reporté</label>
     <span class="times"><input data-f="start" inputmode="numeric" maxlength="5" value="${hhmm(e.start)}" title="Début"><span>–</span><input data-f="end" inputmode="numeric" maxlength="5" value="${hhmm(e.end)}" title="Fin"></span>
-    <span class="dur">${fmtDur(dur(e))}</span>
+    <input class="dur-in" data-f="dur" value="${fmtDur(dur(e))}" title="Modifier la durée : 30 = 30 min, 1h15, 1:15 ou 1,5 (heures). L’heure de fin s’ajuste." autocomplete="off">
     <div class="acts"><button class="icon" data-act="resume" title="Relancer cette tâche">${ICON.play}</button><button class="icon" data-act="del" title="Supprimer">${ICON.trash}</button></div>
   </div>`;
 }
@@ -1060,8 +1064,19 @@ function bindEntryEvents(container) {
     else if (f === 'logged') updateEntries([id], e => { e.logged = i.checked; });
     else if (f === 'label') updateEntries([id], e => { e.label = i.value; });
   });
+  container.addEventListener('focusin', ev => { if (ev.target.matches('.dur-in')) ev.target.select(); });
   container.addEventListener('focusout', ev => {
-    const i = ev.target; if (!i.matches('.times input')) return;
+    const i = ev.target;
+    if (i.matches('.dur-in')) {
+      const row = i.closest('[data-id]'); const e = row && findEntry(row.dataset.id); if (!e) return;
+      const mins = parseDur(i.value);
+      if (mins == null || mins > 24 * 60) { if (i.value.trim()) toast('Durée non comprise : tapez par ex. 30, 1h15 ou 1,5'); i.value = fmtDur(dur(e)); return; }
+      const newEnd = e.start + mins * 60000;
+      if (Math.round(dur(e) / 60000) === mins) { i.value = fmtDur(dur(e)); return; }
+      saveEntry({ ...e, end: newEnd });
+      return;
+    }
+    if (!i.matches('.times input')) return;
     const row = i.closest('[data-id]'); if (!row) return;
     const e = findEntry(row.dataset.id); if (!e) return;
     const day = startOfDay(e.start);
@@ -1078,7 +1093,8 @@ function bindEntryEvents(container) {
       saveEntry({ ...e, end: t });
     }
   });
-  container.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.matches('input.lbl, .times input')) ev.target.blur(); });
+  container.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.matches('input.lbl, .times input, .dur-in')) ev.target.blur();
+    if (ev.key === 'Escape' && ev.target.matches('.dur-in')) { const e = findEntry(ev.target.closest('[data-id]').dataset.id); if (e) ev.target.value = fmtDur(dur(e)); ev.target.blur(); } });
 }
 function bindChrono() {
   const body = $('#chrono-body');
@@ -1133,7 +1149,7 @@ function openEdit(id) {
       <div class="fld-row"><label class="fld"><span>Date</span><input type="date" id="ed-d" value="${dayKey(e.start)}"></label>
       <label class="fld"><span>Début</span><input id="ed-s" class="mono" inputmode="numeric" value="${hhmm(e.start)}"></label>
       <label class="fld"><span>Fin</span><input id="ed-e" class="mono" inputmode="numeric" value="${hhmm(e.end)}"></label>
-      <label class="fld"><span>Durée (h:mm)</span><input id="ed-u" class="mono" value="${Math.floor(dur(e) / 3600000)}:${pad(Math.round(dur(e) % 3600000 / 60000))}"></label></div>
+      <label class="fld"><span>Durée (30, 1h15, 1,5…)</span><input id="ed-u" class="mono" value="${Math.floor(dur(e) / 3600000)}:${pad(Math.round(dur(e) % 3600000 / 60000))}"></label></div>
       <div class="fld"><span>Facturation</span><div class="radio">
         <label><input type="radio" name="ed-b" value="1" ${e.billable ? 'checked' : ''}> À facturer</label>
         <label><input type="radio" name="ed-b" value="0" ${e.billable ? '' : 'checked'}> Non facturable</label></div></div>
@@ -1145,8 +1161,7 @@ function openEdit(id) {
   const recompute = () => { const s = timeOn(parseDay(q('#ed-d').value), q('#ed-s').value); let en = timeOn(parseDay(q('#ed-d').value), q('#ed-e').value); if (s != null && en != null) { if (en <= s) en += DAY; const mins = Math.round((en - s) / 60000); q('#ed-u').value = Math.floor(mins / 60) + ':' + pad(mins % 60); } };
   q('#ed-s').addEventListener('change', recompute); q('#ed-e').addEventListener('change', recompute);
   q('#ed-u').addEventListener('change', () => {
-    const v = q('#ed-u').value.trim().replace(',', '.'); let mins = null;
-    const mm = /^(\d+)[:h](\d{1,2})$/.exec(v); if (mm) mins = +mm[1] * 60 + +mm[2]; else if (/^\d+(\.\d+)?$/.test(v)) mins = Math.round(parseFloat(v) * 60);
+    const mins = parseDur(q('#ed-u').value);
     const s = timeOn(parseDay(q('#ed-d').value), q('#ed-s').value);
     if (mins != null && s != null) q('#ed-e').value = hhmm(s + mins * 60000);
   });
