@@ -255,19 +255,11 @@ h2:first-child{margin-top:0}
 .cy-mini .cy-pg-track{display:inline-block;width:110px;height:7px}
 .cy-mini .cy-pg-fill{display:block}
 .cy-mini b{font-family:var(--mono);color:var(--ink)}
-#quote-splash{position:fixed;inset:0;z-index:500;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(3px);pointer-events:none;animation:qsIn .45s ease both;padding:24px}
-#quote-splash.out{animation:qsOut .45s ease both}
-.qs-in{max-width:560px;text-align:center}
-.qs-brand{font-family:var(--brand-font);font-weight:600;font-size:18px;letter-spacing:var(--brand-ls);color:var(--accent);margin-bottom:18px}
-#quote-splash blockquote{margin:0;font-family:var(--quote-font);font-size:26px;line-height:1.35;color:var(--ink)}
-.qs-auth{margin-top:14px;color:var(--muted);font-size:14px}
-.qs-bar{margin:22px auto 0;width:120px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
-.qs-bar i{display:block;height:100%;background:var(--accent);animation:qsBar 4s linear both}
-@keyframes qsIn{from{opacity:0}to{opacity:1}}
-@keyframes qsOut{from{opacity:1}to{opacity:0}}
-@keyframes qsBar{from{width:0}to{width:100%}}
-@media (max-width:700px){#quote-splash blockquote{font-size:21px}}
-@media (prefers-reduced-motion:reduce){#quote-splash,#quote-splash.out,.qs-bar i{animation:none}}
+#quote-tick{flex:1;min-width:0;align-self:center;height:30px;overflow:hidden;position:relative;margin:0 12px;cursor:pointer;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);transition:opacity .4s}
+#quote-tick.out{opacity:0}
+.qt-in{position:absolute;left:0;top:0;height:30px;display:flex;align-items:center;gap:10px;white-space:nowrap;will-change:transform}
+.qt-q{font-family:var(--quote-font);font-style:italic;font-size:15px;color:var(--ink-2)}
+.qt-a{font-size:12px;color:var(--muted)}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
 .cy-banner span{flex:1}
 .cy-legend{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -652,7 +644,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.8.1';
+const APP_VERSION = '1.8.3';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -2659,7 +2651,7 @@ function renderRefs() {
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
       <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
-      <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Affichée quelques secondes au démarrage (sur cet appareil). Un clic ou une touche la ferme.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
+      <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div></div>
     <div><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
@@ -2977,38 +2969,288 @@ function toast(msg, actLabel, act) {
    ========================================================= */
 /* ---------- Citation sur le temps à l'ouverture ---------- */
 const QUOTES = [
+  // Auteurs classiques
   ['Ô temps, suspends ton vol !', 'Alphonse de Lamartine'],
+  ['L’homme n’a point de port, le temps n’a point de rive ; il coule, et nous passons !', 'Alphonse de Lamartine'],
   ['Rien ne sert de courir ; il faut partir à point.', 'Jean de La Fontaine'],
   ['Patience et longueur de temps font plus que force ni que rage.', 'Jean de La Fontaine'],
+  ['Travaillez, prenez de la peine : c’est le fonds qui manque le moins.', 'Jean de La Fontaine'],
+  ['En toute chose il faut considérer la fin.', 'Jean de La Fontaine'],
+  ['Aide-toi, le Ciel t’aidera.', 'Jean de La Fontaine'],
+  ['Il se faut entraider, c’est la loi de nature.', 'Jean de La Fontaine'],
   ['Le temps est un grand maître, il règle bien des choses.', 'Pierre Corneille'],
   ['Le temps fuit, et nous traîne avec soi.', 'Nicolas Boileau'],
+  ['Hâtez-vous lentement, et sans perdre courage, vingt fois sur le métier remettez votre ouvrage.', 'Nicolas Boileau'],
+  ['Ce que l’on conçoit bien s’énonce clairement.', 'Nicolas Boileau'],
+  ['Le moment où je parle est déjà loin de moi.', 'Nicolas Boileau'],
   ['Le Temps mange la vie.', 'Charles Baudelaire'],
+  ['Souviens-toi que le Temps est un joueur avide qui gagne sans tricher, à tout coup !', 'Charles Baudelaire'],
+  ['Cueillez dès aujourd’hui les roses de la vie.', 'Pierre de Ronsard'],
+  ['Le temps s’en va, le temps s’en va, ma Dame ; las ! le temps non, mais nous nous en allons.', 'Pierre de Ronsard'],
+  ['Mais où sont les neiges d’antan ?', 'François Villon'],
+  ['Vienne la nuit sonne l’heure, les jours s’en vont je demeure.', 'Guillaume Apollinaire'],
+  ['Aimez ce que jamais on ne verra deux fois.', 'Alfred de Vigny'],
+  ['Il faut être absolument moderne.', 'Arthur Rimbaud'],
+  ['Je n’ai fait celle-ci plus longue que parce que je n’ai pas eu le loisir de la faire plus courte.', 'Blaise Pascal'],
+  ['Nous ne tenons jamais au temps présent.', 'Blaise Pascal'],
+  ['Le présent n’est jamais notre fin.', 'Blaise Pascal'],
+  ['Le temps est assez long pour quiconque en profite ; qui travaille et qui pense en étend la limite.', 'Voltaire'],
+  ['Le travail éloigne de nous trois grands maux : l’ennui, le vice et le besoin.', 'Voltaire'],
+  ['Il faut cultiver notre jardin.', 'Voltaire'],
+  ['Le mieux est l’ennemi du bien.', 'Voltaire'],
+  ['Le plus lent à promettre est toujours le plus fidèle à tenir.', 'Jean-Jacques Rousseau'],
+  ['Il faut être toujours botté et prêt à partir.', 'Michel de Montaigne'],
+  ['Le temps ne fait rien à l’affaire.', 'Molière'],
+  ['Qui veut voyager loin ménage sa monture.', 'Jean Racine'],
+  ['Je me presse de rire de tout, de peur d’être obligé d’en pleurer.', 'Beaumarchais'],
+  ['Ceux qui emploient mal leur temps sont les premiers à se plaindre de sa brièveté.', 'Jean de La Bruyère'],
+  ['Pour exécuter de grandes choses, il faut vivre comme si on ne devait jamais mourir.', 'Vauvenargues'],
+  ['La plus perdue de toutes les journées est celle où l’on n’a pas ri.', 'Chamfort'],
+  ['Diviser chacune des difficultés en autant de parcelles qu’il se pourrait.', 'René Descartes'],
+  ['Le génie n’est qu’une plus grande aptitude à la patience.', 'Buffon'],
+  ['Le temps est le seul capital des gens qui n’ont que leur intelligence pour fortune.', 'Honoré de Balzac'],
+  ['La paresse n’est que l’habitude de se reposer avant d’être fatigué.', 'Jules Renard'],
+  ['Les vrais paradis sont les paradis qu’on a perdus.', 'Marcel Proust'],
+  ['Le temps est invention ou il n’est rien du tout.', 'Henri Bergson'],
+  ['L’exactitude est la politesse des rois.', 'Louis XVIII'],
+  ['Demandez-moi tout, sauf du temps.', 'Napoléon Bonaparte'],
+  ['Surtout, pas trop de zèle.', 'Talleyrand'],
+  ['Qu’est-ce donc que le temps ? Si personne ne me le demande, je le sais ; si je veux l’expliquer, je ne le sais plus.', 'Saint Augustin'],
+  ['Il y a un temps pour tout, et un moment pour toute chose sous le ciel.', 'L’Ecclésiaste'],
+  ['À chaque jour suffit sa peine.', 'Évangile selon Matthieu'],
   ['Ce n’est pas que nous ayons peu de temps, c’est que nous en perdons beaucoup.', 'Sénèque'],
+  ['Tant qu’on remet la vie à plus tard, elle passe.', 'Sénèque'],
+  ['Saisis chaque heure : tu dépendras moins de demain.', 'Sénèque'],
+  ['Aucun vent n’est favorable pour celui qui ne sait où il va.', 'Sénèque'],
+  ['La vie est longue si elle est bien remplie.', 'Sénèque'],
+  ['Tout nous est étranger ; seul le temps nous appartient.', 'Sénèque'],
   ['Le temps découvre la vérité.', 'Sénèque'],
-  ['Hâte-toi lentement.', 'Auguste'],
-  ['Cueille le jour présent.', 'Horace'],
-  ['Le temps s’enfuit sans retour.', 'Virgile'],
+  ['Fais chaque chose comme si c’était la dernière de ta vie.', 'Marc Aurèle'],
+  ['Le temps est comme un fleuve fait des événements qui passent.', 'Marc Aurèle'],
+  ['On ne se baigne jamais deux fois dans le même fleuve.', 'Héraclite'],
+  ['Il y a ce qui dépend de nous et ce qui ne dépend pas de nous.', 'Épictète'],
+  ['Le plus sage, c’est le temps, car il découvre tout.', 'Thalès'],
+  ['Le temps est le plus sage des conseillers.', 'Périclès'],
+  ['Le temps est la plus coûteuse des dépenses.', 'Théophraste'],
+  ['La vie est courte, l’art est long.', 'Hippocrate'],
+  ['Le temps, qui dévore toutes choses.', 'Ovide'],
+  ['La goutte d’eau creuse la pierre, non par la force, mais en tombant souvent.', 'Ovide'],
+  ['Les temps changent, et nous changeons avec eux.', 'Adage latin'],
+  ['Cueille le jour présent, sans te fier au lendemain.', 'Horace'],
+  ['Pendant que nous parlons, le temps jaloux s’enfuit.', 'Horace'],
+  ['Le temps fuit sans retour.', 'Virgile'],
+  ['Un travail opiniâtre vient à bout de tout.', 'Virgile'],
+  ['Qui donne vite donne deux fois.', 'Publilius Syrus'],
+  ['Il faut délibérer longtemps ce qu’on ne décidera qu’une fois.', 'Publilius Syrus'],
+  ['Pas un jour sans une ligne.', 'Pline l’Ancien'],
+  ['Je suis venu, j’ai vu, j’ai vaincu.', 'Jules César'],
+  ['Possède ton sujet, les mots suivront.', 'Caton l’Ancien'],
+  ['Un voyage de mille lieues commence par un premier pas.', 'Lao-tseu'],
   ['Le temps, c’est de l’argent.', 'Benjamin Franklin'],
+  ['Aimez-vous la vie ? Alors ne gaspillez pas le temps, car c’est l’étoffe dont la vie est faite.', 'Benjamin Franklin'],
+  ['Bien fait vaut mieux que bien dit.', 'Benjamin Franklin'],
+  ['Tu peux tarder, mais le temps ne tardera pas.', 'Benjamin Franklin'],
+  ['Ne remets jamais à demain ce que tu peux faire aujourd’hui.', 'Thomas Jefferson'],
+  ['La procrastination est la voleuse du temps.', 'Edward Young'],
+  ['La ponctualité est la voleuse du temps.', 'Oscar Wilde'],
+  ['Ne remets jamais à demain ce que tu peux faire après-demain.', 'Mark Twain'],
+  ['Si tu connaissais le Temps aussi bien que moi, tu ne parlerais pas de le perdre.', 'Lewis Carroll'],
+  ['Mieux vaut trois heures trop tôt qu’une minute trop tard.', 'William Shakespeare'],
+  ['J’ai gaspillé le temps, et maintenant le temps me gaspille.', 'William Shakespeare'],
+  ['Le temps n’est que le ruisseau où je vais pêcher.', 'Henry David Thoreau'],
+  ['Écrivez dans votre cœur que chaque jour est le meilleur de l’année.', 'Ralph Waldo Emerson'],
+  ['Un homme qui ose perdre une heure n’a pas découvert la valeur de la vie.', 'Charles Darwin'],
+  ['Le génie, c’est un pour cent d’inspiration et quatre-vingt-dix-neuf pour cent de transpiration.', 'Thomas Edison'],
+  ['La distinction entre passé, présent et futur n’est qu’une illusion, aussi tenace soit-elle.', 'Albert Einstein'],
+  ['Le temps est infiniment long, et chaque jour est un vase dans lequel on peut verser beaucoup.', 'Goethe'],
+  ['Tant que je respire, j’espère.', 'Devise latine'],
   ['Gouverner, c’est prévoir.', 'Émile de Girardin'],
-  ['Le temps perdu ne se rattrape jamais.', 'Proverbe'],
-  ['Il n’est jamais trop tard pour bien faire.', 'Proverbe'],
+  // Maximes latines et devises de cadrans solaires
+  ['Tempus fugit : le temps s’enfuit.', 'Maxime latine'],
+  ['Carpe diem : cueille le jour.', 'Horace'],
+  ['Festina lente : hâte-toi lentement.', 'Auguste'],
+  ['Ars longa, vita brevis : l’art est long, la vie est brève.', 'Maxime latine'],
+  ['Verba volant, scripta manent : les paroles s’envolent, les écrits restent.', 'Maxime latine'],
+  ['Age quod agis : fais bien ce que tu fais.', 'Maxime latine'],
+  ['Nunc aut numquam : maintenant ou jamais.', 'Maxime latine'],
+  ['Dies diem docet : le jour instruit le jour.', 'Maxime latine'],
+  ['Tempus omnia revelat : le temps révèle toutes choses.', 'Maxime latine'],
+  ['Praemonitus, praemunitus : prévenu, donc prémuni.', 'Maxime latine'],
+  ['Mora trahit periculum : le retard attire le danger.', 'Maxime latine'],
+  ['Qui scribit bis legit : qui écrit lit deux fois.', 'Maxime latine'],
+  ['Ora et labora : prie et travaille.', 'Règle de saint Benoît'],
+  ['Res, non verba : des actes, pas des paroles.', 'Maxime latine'],
+  ['Omnia tempus habent : chaque chose a son temps.', 'Maxime latine'],
+  ['Horas non numero nisi serenas : je ne compte que les heures sereines.', 'Devise de cadran solaire'],
+  ['Vulnerant omnes, ultima necat : toutes blessent, la dernière tue.', 'Devise de cadran solaire'],
+  ['Dum spectas, fugio : pendant que tu regardes, je m’enfuis.', 'Devise de cadran solaire'],
+  ['Utere, non numera : utilise les heures, ne les compte pas.', 'Devise de cadran solaire'],
+  ['Sine sole sileo : sans soleil, je me tais.', 'Devise de cadran solaire'],
+  ['Ultima latet : la dernière heure est cachée.', 'Devise de cadran solaire'],
+  ['Carpe horam : saisis l’heure.', 'Devise de cadran solaire'],
+  ['Lente hora, celeriter anni : l’heure est lente, les années rapides.', 'Devise de cadran solaire'],
+  ['Hora fugit : l’heure fuit.', 'Devise de cadran solaire'],
+  // Proverbes français
+  ['Le temps perdu ne se rattrape jamais.', 'Proverbe français'],
+  ['Il ne faut pas remettre au lendemain ce que l’on peut faire le jour même.', 'Proverbe français'],
+  ['Petit à petit, l’oiseau fait son nid.', 'Proverbe français'],
+  ['Qui va lentement va sûrement.', 'Proverbe français'],
+  ['Tout vient à point à qui sait attendre.', 'Proverbe français'],
+  ['L’avenir appartient à ceux qui se lèvent tôt.', 'Proverbe français'],
+  ['Chaque chose en son temps.', 'Proverbe français'],
+  ['Mieux vaut tard que jamais.', 'Proverbe français'],
+  ['Après la pluie, le beau temps.', 'Proverbe français'],
+  ['Il faut battre le fer pendant qu’il est chaud.', 'Proverbe français'],
+  ['Un homme averti en vaut deux.', 'Proverbe français'],
+  ['Paris ne s’est pas fait en un jour.', 'Proverbe français'],
+  ['Les jours se suivent et ne se ressemblent pas.', 'Proverbe français'],
+  ['Qui trop embrasse mal étreint.', 'Proverbe français'],
+  ['Le temps guérit toutes les blessures.', 'Proverbe français'],
+  ['Ce qui est fait n’est plus à faire.', 'Proverbe français'],
+  ['Mieux vaut prévenir que guérir.', 'Proverbe français'],
+  ['Prudence est mère de sûreté.', 'Proverbe français'],
+  ['Un tiens vaut mieux que deux tu l’auras.', 'Proverbe français'],
+  ['Goutte à goutte, l’eau creuse la pierre.', 'Proverbe français'],
+  ['Les bons comptes font les bons amis.', 'Proverbe français'],
+  ['Il n’y a pas de petites économies.', 'Proverbe français'],
+  ['Il faut laisser du temps au temps.', 'Proverbe français'],
+  ['L’heure, c’est l’heure.', 'Proverbe français'],
+  ['Avant l’heure, ce n’est pas l’heure ; après l’heure, ce n’est plus l’heure.', 'Proverbe français'],
+  ['Ce qui se fait sans le temps, le temps ne le respecte pas.', 'Proverbe français'],
+  ['Autres temps, autres mœurs.', 'Proverbe français'],
+  ['Les petits ruisseaux font les grandes rivières.', 'Proverbe français'],
+  ['Les paroles s’envolent, les écrits restent.', 'Proverbe français'],
+  ['Pierre qui roule n’amasse pas mousse.', 'Proverbe français'],
+  ['Bien faire et laisser dire.', 'Proverbe français'],
+  ['Chose promise, chose due.', 'Proverbe français'],
+  ['Qui paie ses dettes s’enrichit.', 'Proverbe français'],
+  ['Deux précautions valent mieux qu’une.', 'Proverbe français'],
+  ['Une place pour chaque chose, et chaque chose à sa place.', 'Proverbe français'],
+  ['Le temps passé ne revient pas.', 'Proverbe français'],
+  ['Qui a le temps a la vie.', 'Proverbe français'],
+  ['À l’impossible nul n’est tenu.', 'Proverbe français'],
+  ['Qui ne risque rien n’a rien.', 'Proverbe français'],
+  ['Il n’est jamais trop tard pour bien faire.', 'Proverbe français'],
+  ['C’est en forgeant qu’on devient forgeron.', 'Proverbe français'],
+  ['Vouloir, c’est pouvoir.', 'Proverbe français'],
+  ['L’habit ne fait pas le moine.', 'Proverbe français'],
+  ['Il faut prendre le temps comme il vient.', 'Proverbe français'],
+  ['Le temps découvre toutes choses.', 'Proverbe français'],
+  ['Le temps est le meilleur des conseillers.', 'Proverbe français'],
+  ['Le temps use tout.', 'Proverbe français'],
+  ['On a toujours le temps quand on le prend.', 'Proverbe français'],
+  ['Qui commence bien a déjà fait la moitié du chemin.', 'Proverbe français'],
+  ['Il ne faut pas mettre la charrue avant les bœufs.', 'Proverbe français'],
+  ['Il ne faut pas courir deux lièvres à la fois.', 'Proverbe français'],
+  ['Le jour ne se lève pas plus tôt pour celui qui se lève matin.', 'Proverbe espagnol'],
+  ['À bon entendeur, salut.', 'Proverbe français'],
+  ['Les absents ont toujours tort.', 'Proverbe français'],
+  ['Il faut tourner sept fois sa langue dans sa bouche avant de parler.', 'Proverbe français'],
+  ['La nuit porte conseil.', 'Proverbe français'],
+  ['Demain il fera jour.', 'Proverbe français'],
+  ['Il y a loin de la coupe aux lèvres.', 'Proverbe français'],
+  ['Aux grands maux les grands remèdes.', 'Proverbe français'],
+  ['Avec du temps et de la patience, on vient à bout de tout.', 'Proverbe français'],
+  ['Tout passe, tout lasse, tout casse.', 'Proverbe français'],
+  ['Il faut savoir attendre son heure.', 'Proverbe français'],
+  ['Qui sait attendre a tout ce qu’il veut.', 'Proverbe français'],
+  ['Le travail bien commencé est à moitié fait.', 'Proverbe français'],
+  ['À quelque chose malheur est bon.', 'Proverbe français'],
+  ['Il faut que jeunesse se passe.', 'Proverbe français'],
+  ['Nul ne peut servir deux maîtres.', 'Proverbe français'],
+  ['L’appétit vient en mangeant.', 'Proverbe français'],
+  ['Quand on veut, on peut.', 'Proverbe français'],
+  ['Le temps est un grand ami de la vérité.', 'Proverbe français'],
+  // Proverbes du monde
+  ['Le meilleur moment pour planter un arbre était il y a vingt ans ; le deuxième meilleur moment, c’est maintenant.', 'Proverbe chinois'],
+  ['Avec le temps et la patience, la feuille du mûrier devient satin.', 'Proverbe chinois'],
+  ['Il faut creuser le puits avant d’avoir soif.', 'Proverbe chinois'],
+  ['Un pouce de temps vaut un pouce d’or, mais un pouce d’or n’achète pas un pouce de temps.', 'Proverbe chinois'],
+  ['Ne crains pas d’avancer lentement, crains seulement de t’arrêter.', 'Proverbe chinois'],
+  ['L’arbre qui tombe fait plus de bruit que la forêt qui pousse.', 'Proverbe africain'],
+  ['Seul on va plus vite, ensemble on va plus loin.', 'Proverbe africain'],
+  ['Tombe sept fois, relève-toi huit.', 'Proverbe japonais'],
+  ['Même un singe tombe parfois de l’arbre.', 'Proverbe japonais'],
+  ['Le temps est de l’or ; le temps perdu ne se rachète pas.', 'Proverbe japonais'],
+  ['Fais confiance, mais vérifie.', 'Proverbe russe'],
+  ['Mesure sept fois, coupe une fois.', 'Proverbe russe'],
+  ['L’heure du matin a de l’or dans la bouche.', 'Proverbe allemand'],
+  ['Le temps apporte le conseil.', 'Proverbe allemand'],
+  ['Qui va doucement va sainement, et va loin.', 'Proverbe italien'],
+  ['Le temps est un gentilhomme.', 'Proverbe italien'],
+  ['Demain est souvent le jour le plus chargé de la semaine.', 'Proverbe espagnol'],
+  ['Le temps et la marée n’attendent personne.', 'Proverbe anglais'],
+  ['Un point à temps en épargne neuf.', 'Proverbe anglais'],
+  ['Mieux vaut être en avance d’une heure qu’en retard d’une minute.', 'Proverbe anglais'],
+  ['Le temps est le plus grand des innovateurs.', 'Francis Bacon'],
+  ['Choisir son temps, c’est épargner du temps.', 'Francis Bacon'],
+  ['Le commencement est la moitié du tout.', 'Proverbe grec'],
+  ['Le temps révèle toutes choses.', 'Proverbe grec'],
+  ['La patience est amère, mais son fruit est doux.', 'Jean-Jacques Rousseau'],
+  ['Celui qui déplace une montagne commence par déplacer de petites pierres.', 'Proverbe chinois'],
+  ['Le temps passé à affûter la hache n’est jamais du temps perdu.', 'Proverbe'],
+  ['Qui se lève tôt est en bonne santé, riche et sage.', 'Proverbe anglais'],
+  ['Le jour le plus long a une fin.', 'Proverbe anglais'],
+  ['Le temps est le meilleur des médecins.', 'Proverbe'],
+  ['La hâte est mauvaise conseillère.', 'Proverbe arabe'],
+  ['Qui court après deux lièvres n’en attrape aucun.', 'Proverbe latin'],
+  ['Le temps fait mûrir les fruits et les projets.', 'Proverbe'],
+  ['On ne fait pas pousser l’herbe plus vite en tirant dessus.', 'Proverbe africain'],
+  // Clins d'œil au métier et à l'application
   ['Antevorta regarde vers l’avenir : chaque échéance se prépare à l’avance.', 'Mythologie romaine'],
+  ['Antevorta, déesse de l’avenir, veille sur vos DSN.', 'Clin d’œil'],
+  ['Une relance le 28 vaut mieux que deux le 5.', 'Sagesse de gestionnaire de paie'],
+  ['Variables reçues, paie à moitié faite.', 'Sagesse de gestionnaire de paie'],
+  ['Bulletin vérifié, client rassuré.', 'Sagesse de gestionnaire de paie'],
+  ['DSN déposée, esprit apaisé.', 'Sagesse de gestionnaire de paie'],
+  ['Le 15 n’attend pas.', 'Sagesse de gestionnaire de paie'],
+  ['Un virement en avance ne fait jamais de mécontent.', 'Sagesse de gestionnaire de paie'],
+  ['Les minutes notées sont des heures retrouvées.', 'Sagesse de cabinet'],
+  ['Le temps compté est un temps qui compte.', 'Sagesse de cabinet'],
+  ['Ce qui se mesure s’améliore.', 'Sagesse de cabinet'],
+  ['Un chrono lancé, c’est une facture bien justifiée.', 'Sagesse de cabinet'],
 ];
 const quoteOn = () => lsGet('quote', '1') !== '0';
+// Citation affichée une fois, en défilement dans le bandeau du haut, à l'ouverture
 function showQuote(force = false) {
   if (!force && (!quoteOn() || navigator.webdriver)) return;
-  document.getElementById('quote-splash')?.remove();
+  document.getElementById('quote-tick')?.remove();
   const [q, a] = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-  const el = document.createElement('div'); el.id = 'quote-splash'; el.setAttribute('role', 'status');
-  el.innerHTML = `<div class="qs-in"><div class="qs-brand">${esc('Antevorta')}</div><blockquote>« ${esc(q)} »</blockquote><div class="qs-auth">— ${esc(a)}</div><div class="qs-bar"><i></i></div></div>`;
-  document.body.appendChild(el);
+  const top = document.querySelector('header.top'), right = top && top.querySelector('.top-right'); if (!right) return;
+  const el = document.createElement('div'); el.id = 'quote-tick'; el.title = 'Cliquer pour masquer';
+  el.innerHTML = `<span class="qt-in"><span class="qt-q">« ${esc(q)} »</span><span class="qt-a">— ${esc(a)}</span></span>`;
+  top.insertBefore(el, right);
+  const inner = el.firstElementChild;
   let gone = false;
-  const close = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 450); document.removeEventListener('pointerdown', close, true); document.removeEventListener('keydown', close, true); };
-  setTimeout(() => { document.addEventListener('pointerdown', close, true); document.addEventListener('keydown', close, true); }, 150);
-  setTimeout(close, 4000);
+  const close = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 400); };
+  el.addEventListener('click', close);
+  requestAnimationFrame(() => {
+    const w = el.clientWidth, tw = inner.scrollWidth;
+    if (w < 80) { el.remove(); return; }
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !inner.animate) { inner.style.transform = 'none'; setTimeout(close, 9000); return; }
+    const speed = 70; // pixels par seconde
+    const anim = inner.animate([{ transform: `translateX(${w}px)` }, { transform: `translateX(${-tw}px)` }], { duration: (w + tw) / speed * 1000, easing: 'linear' });
+    anim.onfinish = close;
+    el.addEventListener('mouseenter', () => anim.pause()); el.addEventListener('mouseleave', () => anim.play());
+  });
+}
+// Citation après 15 minutes d'inactivité, si aucun chrono ne tourne
+const IDLE_MS = 15 * 60 * 1000;
+const Idle = { last: Date.now(), shown: 0 };
+function initIdleQuote() {
+  const act = () => { Idle.last = Date.now(); };
+  ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(t => window.addEventListener(t, act, { passive: true, capture: true }));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) act(); });
+  setInterval(() => {
+    const now = Date.now();
+    if (document.hidden || S.running || !quoteOn() || navigator.webdriver) return;
+    if (now - Idle.last >= IDLE_MS && now - Idle.shown >= IDLE_MS) { Idle.shown = now; showQuote(true); }
+  }, 20000);
 }
 async function boot() {
   showQuote();
+  initIdleQuote();
   initTimerBar();
   $('#install-btn').onclick = () => Install.run();
   $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Antevorta version ' + APP_VERSION + ' du ' + APP_DATE;
