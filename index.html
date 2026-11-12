@@ -12,9 +12,10 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d6656'/%3E%3Cg transform='translate(4.5 4) scale(.95)' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='13.5' r='8.3'/%3E%3Cpath d='M12 9.2v4.5l3 2.1M9.6 2.2h4.8'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
+  --brand-font:'Cinzel','Trajan Pro',Georgia,serif; --brand-ls:.05em; --quote-font:Georgia,'Times New Roman',serif;
   color-scheme: light;
   --bg:#f5f4f0; --surface:#ffffff; --surface-2:#f0eee9; --surface-3:#e8e6e0;
   --line:#e2dfd8; --line-2:#d3cfc6;
@@ -54,6 +55,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 /* ---------- Header ---------- */
 .top{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 20px;height:56px}
 .brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.01em;font-size:15px;white-space:nowrap}
+.brand .txt{font-family:var(--brand-font);font-weight:600;letter-spacing:var(--brand-ls);font-size:17px}
 .brand-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
 .nav{display:flex;gap:2px;height:100%}
 .nav a{display:flex;align-items:center;padding:0 13px;text-decoration:none;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
@@ -253,6 +255,19 @@ h2:first-child{margin-top:0}
 .cy-mini .cy-pg-track{display:inline-block;width:110px;height:7px}
 .cy-mini .cy-pg-fill{display:block}
 .cy-mini b{font-family:var(--mono);color:var(--ink)}
+#quote-splash{position:fixed;inset:0;z-index:500;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(3px);pointer-events:none;animation:qsIn .45s ease both;padding:24px}
+#quote-splash.out{animation:qsOut .45s ease both}
+.qs-in{max-width:560px;text-align:center}
+.qs-brand{font-family:var(--brand-font);font-weight:600;font-size:18px;letter-spacing:var(--brand-ls);color:var(--accent);margin-bottom:18px}
+#quote-splash blockquote{margin:0;font-family:var(--quote-font);font-size:26px;line-height:1.35;color:var(--ink)}
+.qs-auth{margin-top:14px;color:var(--muted);font-size:14px}
+.qs-bar{margin:22px auto 0;width:120px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.qs-bar i{display:block;height:100%;background:var(--accent);animation:qsBar 4s linear both}
+@keyframes qsIn{from{opacity:0}to{opacity:1}}
+@keyframes qsOut{from{opacity:1}to{opacity:0}}
+@keyframes qsBar{from{width:0}to{width:100%}}
+@media (max-width:700px){#quote-splash blockquote{font-size:21px}}
+@media (prefers-reduced-motion:reduce){#quote-splash,#quote-splash.out,.qs-bar i{animation:none}}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
 .cy-banner span{flex:1}
 .cy-legend{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -428,6 +443,7 @@ table.t{border-collapse:collapse;width:100%;font-size:13px}
 .loading{display:grid;place-items:center;height:60vh;color:var(--muted)}
 .login{max-width:420px;padding:28px;text-align:center;color:var(--ink)}
 .login h3{margin:0 0 6px;font-size:19px}
+.login h3.brandname{font-family:var(--brand-font);font-weight:600;letter-spacing:var(--brand-ls);font-size:24px;color:var(--accent)}
 .login p{color:var(--ink-2);margin:0 0 18px}
 .login .err{color:var(--stop);font-size:13px;margin-top:12px}
 textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
@@ -636,7 +652,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.8.1';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -2643,6 +2659,7 @@ function renderRefs() {
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
       <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
+      <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Affichée quelques secondes au démarrage (sur cet appareil). Un clic ou une touche la ferme.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div></div>
     <div><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
@@ -2726,6 +2743,7 @@ function bindRefs() {
     if (i.id === 'import-file') { importFile(i.files[0]); i.value = ''; return; }
     if (i.id === 'new-client-owner') { UI.newClientOwner = i.value; return; }
     if (i.id === 'new-person-role') { UI.newPersonRole = i.value; return; }
+    if (i.id === 'set-quote') { lsSet('quote', i.value); if (i.value === '1') showQuote(true); return; }
     if (i.dataset.s === 'dayEnd') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayEnd; toast('Heure non comprise (ex. 18:00)'); return; } S.meta.settings.dayEnd = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
     if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : k === 'defaultBillable' ? i.value === '1' : i.value; touchMeta(); return; }
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
@@ -2902,7 +2920,7 @@ function showLogin(auth, AU) {
   return new Promise(resolve => {
     const l = $('#loading');
     l.innerHTML = `<div class="card login"><div class="brand-mark" style="margin:0 auto 14px;width:40px;height:40px;border-radius:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div>
-      <h3>Antevorta</h3><p>Connectez-vous avec votre compte Google pour retrouver vos temps sur n’importe quel poste.</p>
+      <h3 class="brandname">Antevorta</h3><p>Connectez-vous avec votre compte Google pour retrouver vos temps sur n’importe quel poste.</p>
       <button class="btn primary" id="login-btn" style="padding:10px 18px">Se connecter avec Google</button><div class="err" id="login-err"></div></div>`;
     const done = AU.onAuthStateChanged(auth, u => { if (u) { done(); resolve(u); } });
     $('#login-btn').onclick = async () => {
@@ -2957,7 +2975,40 @@ function toast(msg, actLabel, act) {
 /* =========================================================
    Démarrage
    ========================================================= */
+/* ---------- Citation sur le temps à l'ouverture ---------- */
+const QUOTES = [
+  ['Ô temps, suspends ton vol !', 'Alphonse de Lamartine'],
+  ['Rien ne sert de courir ; il faut partir à point.', 'Jean de La Fontaine'],
+  ['Patience et longueur de temps font plus que force ni que rage.', 'Jean de La Fontaine'],
+  ['Le temps est un grand maître, il règle bien des choses.', 'Pierre Corneille'],
+  ['Le temps fuit, et nous traîne avec soi.', 'Nicolas Boileau'],
+  ['Le Temps mange la vie.', 'Charles Baudelaire'],
+  ['Ce n’est pas que nous ayons peu de temps, c’est que nous en perdons beaucoup.', 'Sénèque'],
+  ['Le temps découvre la vérité.', 'Sénèque'],
+  ['Hâte-toi lentement.', 'Auguste'],
+  ['Cueille le jour présent.', 'Horace'],
+  ['Le temps s’enfuit sans retour.', 'Virgile'],
+  ['Le temps, c’est de l’argent.', 'Benjamin Franklin'],
+  ['Gouverner, c’est prévoir.', 'Émile de Girardin'],
+  ['Le temps perdu ne se rattrape jamais.', 'Proverbe'],
+  ['Il n’est jamais trop tard pour bien faire.', 'Proverbe'],
+  ['Antevorta regarde vers l’avenir : chaque échéance se prépare à l’avance.', 'Mythologie romaine'],
+];
+const quoteOn = () => lsGet('quote', '1') !== '0';
+function showQuote(force = false) {
+  if (!force && (!quoteOn() || navigator.webdriver)) return;
+  document.getElementById('quote-splash')?.remove();
+  const [q, a] = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  const el = document.createElement('div'); el.id = 'quote-splash'; el.setAttribute('role', 'status');
+  el.innerHTML = `<div class="qs-in"><div class="qs-brand">${esc('Antevorta')}</div><blockquote>« ${esc(q)} »</blockquote><div class="qs-auth">— ${esc(a)}</div><div class="qs-bar"><i></i></div></div>`;
+  document.body.appendChild(el);
+  let gone = false;
+  const close = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 450); document.removeEventListener('pointerdown', close, true); document.removeEventListener('keydown', close, true); };
+  setTimeout(() => { document.addEventListener('pointerdown', close, true); document.addEventListener('keydown', close, true); }, 150);
+  setTimeout(close, 4000);
+}
 async function boot() {
+  showQuote();
   initTimerBar();
   $('#install-btn').onclick = () => Install.run();
   $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Antevorta version ' + APP_VERSION + ' du ' + APP_DATE;
