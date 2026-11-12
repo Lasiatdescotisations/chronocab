@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
+  --pf-brown:#8a5a2e;
   --brand-font:'Cinzel','Trajan Pro',Georgia,serif; --brand-ls:.05em; --quote-font:Georgia,'Times New Roman',serif;
   color-scheme: light;
   --bg:#f5f4f0; --surface:#ffffff; --surface-2:#f0eee9; --surface-3:#e8e6e0;
@@ -32,6 +33,7 @@
 @media (prefers-color-scheme: dark){
   :root{
     color-scheme: dark;
+    --pf-brown:#c48a55;
     --bg:#141513; --surface:#1c1d1b; --surface-2:#232421; --surface-3:#2c2d2a;
     --line:#30312d; --line-2:#3c3d38;
     --ink:#efeee9; --ink-2:#c1c0b7; --muted:#8d8c84;
@@ -255,6 +257,19 @@ h2:first-child{margin-top:0}
 .cy-mini .cy-pg-track{display:inline-block;width:110px;height:7px}
 .cy-mini .cy-pg-fill{display:block}
 .cy-mini b{font-family:var(--mono);color:var(--ink)}
+.tipbox{position:fixed;z-index:400;max-width:420px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.45;padding:7px 10px;border-radius:7px;white-space:pre-wrap;word-break:break-word;box-shadow:0 6px 18px rgba(0,0,0,.18);pointer-events:none}
+#cy-note-pop{position:absolute;z-index:160;background:var(--surface);border:1px solid var(--accent);border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:6px}
+#cy-note-pop textarea{width:100%;border:0;outline:0;resize:none;font:inherit;font-size:14px;line-height:1.45;background:transparent;color:var(--ink);padding:4px 6px}
+.cnp-h{font-size:11px;color:var(--muted);padding:2px 6px 0}
+.cy-note{width:220px;min-height:24px;padding:3px 6px;border:1px solid transparent;border-radius:6px;cursor:text;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;line-height:1.4}
+.cy-note:hover,.cy-note:focus{border-color:var(--line);outline:0}
+.cy-note.nonote{color:var(--muted)}
+.dense .cy-note{padding:1px 6px;min-height:22px}
+@media (hover: none), (max-width: 700px){
+  .cy-note{width:180px;white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;border-color:var(--line);background:var(--surface-2)}
+  .cy-note.nonote{background:transparent;border-color:transparent}
+  .cy-perm,.dense .cy-perm{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:170px}
+}
 #quote-card{position:fixed;left:0;right:0;top:50%;bottom:calc(60px + env(safe-area-inset-bottom));z-index:55;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--bg) 55%,transparent);animation:qcIn .4s ease both;cursor:pointer}
 #quote-card.out{animation:qcOut .4s ease both}
 .qc-in{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:18px 20px 14px;text-align:center}
@@ -296,6 +311,9 @@ h2:first-child{margin-top:0}
 .cy-chip{display:inline-flex;align-items:center;gap:3px;background:var(--surface-2);border-radius:10px;padding:1px 6px;margin:2px}
 .cy-chip button{border:0;background:transparent;color:var(--muted);padding:0 2px;cursor:pointer}
 .opt-head{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px 9px 3px}
+.pf-ic{display:inline-grid;place-items:center;width:16px;height:16px;flex:none;color:var(--line-2);vertical-align:-3px}
+.pf-ic svg{width:15px;height:15px}
+.pf-ic.mine{color:var(--pf-brown)}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--c,#999);flex:none;display:inline-block}
 
 /* recents */
@@ -533,7 +551,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .tb-side>.bill{order:1}
   .go{order:2;margin-left:auto}
   .modes{order:3}
-  .ref-row>.dot{order:0}
+  .ref-row>.dot,.ref-row>.pf-ic{order:0}
   .ref-row>input.nm{order:1;flex:1 1 calc(100% - 80px)}
   .ref-row>[data-act=del-ref]{order:2}
   .ref-row>input.code{order:3;flex:0 0 90px;border-color:var(--line)}
@@ -657,7 +675,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.8.5';
+const APP_VERSION = '1.8.7';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -706,6 +724,11 @@ function roundMs(ms) {
   let r = S.meta.settings.roundMode === 'up' ? Math.ceil(ms / stepMs) * stepMs : Math.round(ms / stepMs) * stepMs;
   return Math.max(r, stepMs);
 }
+// Icône de dossier : porte-documents marron pour Mon portefeuille, gris pour les autres
+function cliIc(id) {
+  const c = id && clientOf(id), mine = !!c && isMine(c);
+  return `<span class="pf-ic ${mine ? 'mine' : ''}" title="${mine ? 'Mon portefeuille' : 'Hors de mon portefeuille'}">${ICON.case}</span>`;
+}
 function colorFor(id) {
   if (!id) return '#9a9a92';
   let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
@@ -744,6 +767,7 @@ const ICON = {
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
   building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 9h2a2 2 0 0 1 2 2v10"/><path d="M3 21h18M8 7h4M8 11h4M8 15h4"/></svg>',
+  case: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>',
   person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>',
   chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
 };
@@ -1092,7 +1116,7 @@ function Combo(root, o) {
     list.innerHTML = items.length ? items.map(i => {
       if (i.head) return `<div class="opt-head">${esc(i.label)}</div>`;
       n++;
-      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? `<span class="pers-ic">${ICON.person}</span>` : i.dot ? `<span class="dot" style="--c:${i.dot}"></span>` : ''}<span>${esc(i.label)}</span>${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
+      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? `<span class="pers-ic">${ICON.person}</span>` : i.cli ? cliIc(i.cli) : ''}<span>${esc(i.label)}</span>${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
     }).join('') : `<div class="opt-head">${typed ? 'Aucun résultat' : o.emptyText}</div>`;
     const h = list.querySelector('.opt.hi'); if (h) h.scrollIntoView({ block: 'nearest' });
   }
@@ -1143,7 +1167,7 @@ function clientOptions(q) {
   let ps = S.meta.persons.filter(x => !x.archived && !x.deletedAt);
   if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n)); ps = ps.filter(x => norm(x.name).includes(n) || norm(roleLabel(x.role)).includes(n)); }
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
-  const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), dot: colorFor(c.id) });
+  const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), cli: c.id });
   const mapP = x => ({ id: x.id, label: x.name, sub: roleLabel(x.role), person: true });
   const intOpt = { id: INTERNAL_ID, label: INTERNAL_NAME, sub: 'formation, trajet, organisation… · non facturable', internal: true };
   const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : mapC(o);
@@ -1333,7 +1357,7 @@ function whatHTML(c, t) {
   if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
   if (isPersonId(c)) { const p = personOf(c); return `<span class="pers-ic">${ICON.person}</span><span class="cl">${esc(clientName(c))}</span>${p?.role ? `<span class="role">${esc(roleLabel(p.role))}</span>` : ''}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`; }
   const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
-  return `<span class="dot" style="--c:${colorFor(c)}"></span>${c ? `<span class="cl">${esc(clientName(c))}</span>${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
+  return `${cliIc(c)}${c ? `<span class="cl">${esc(clientName(c))}</span>${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
 }
 function recents() {
   const seen = new Set(), out = [];
@@ -1619,7 +1643,7 @@ function openRecap(k) {
   const m = modal(`<div class="modal-h"><h3>Récap à reporter · ${esc(fmtDayLong(k))}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b"><div class="muted small">Totaux regroupés par client et tâche, prêts à recopier dans le logiciel de gestion des temps du cabinet.${rounding ? ' Arrondi appliqué : ' + S.meta.settings.roundStep + ' min (' + (S.meta.settings.roundMode === 'up' ? 'au supérieur' : 'au plus proche') + ').' : ''}</div>
     <div class="tbl-wrap card"><table class="t"><thead><tr><th>Client</th><th>Tâche</th><th>Libellés</th><th class="n">Durée</th>${rounding ? '<th class="n">Arrondi</th>' : ''}<th class="n">Heures</th><th>Facturation</th><th>Reporté</th></tr></thead><tbody>
-    ${groups.map((g, i) => `<tr><td><span class="dot" style="--c:${colorFor(g.client)}"></span> ${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}<td class="n">${hoursDec(roundMs(g.ms))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td><input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}></td></tr>`).join('')}
+    ${groups.map((g, i) => `<tr><td>${cliIc(g.client)} ${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}<td class="n">${hoursDec(roundMs(g.ms))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td><input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}></td></tr>`).join('')}
     <tr class="tot"><td colspan="3">Total</td><td class="n">${fmtDur(tot, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(totR, 'hm')}</td>` : ''}<td class="n">${hoursDec(rounding ? totR : tot)}</td><td colspan="2"></td></tr></tbody></table></div>
     <textarea class="copy" id="rc-txt" hidden readonly></textarea></div>
     <div class="modal-f"><button class="btn" id="rc-copy">${ICON.copy} Copier pour Excel</button><span class="sp"></span><button class="btn primary" id="rc-all">Tout marquer comme reporté</button></div>`, 'wide');
@@ -1931,11 +1955,11 @@ function renderCycle(P) {
   ${rows.map(({ c, row }) => {
     const p = cyOf(c), fin = cyRowDone(mk, c, row);
     return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''}"><td class="mono small">${esc(c.code || '')}</td>
-      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier${p.notes ? ' — ' + esc(p.notes) : ''}"><span class="dot" style="--c:${colorFor(c.id)}"></span><span class="cl">${esc(c.name)}</span>${p.notes ? '<span class="cy-note-ic" title="' + esc(p.notes) + '">📝</span>' : ''}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${p.notes ? `<div class="cy-perm">${esc(p.notes)}</div>` : ''}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier${p.notes ? ' — ' + esc(p.notes) : ''}">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${p.notes ? '<span class="cy-note-ic" title="' + esc(p.notes) + '">📝</span>' : ''}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${p.notes ? `<div class="cy-perm" data-tip>${esc(p.notes)}</div>` : ''}</td>
       ${cols.map(([f]) => {
         if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
-        if (f === 'tpt') return `<td><input class="cy-in" data-in="tpt" value="${esc(row.tpt || '')}" placeholder="—" title="Salariés en mi-temps thérapeutique (rappel d’attestation le mois suivant)">${row.tpt ? `<label class="chk small" title="Attestation faite"><input type="checkbox" data-in="tptDone" ${row.tptDone ? 'checked' : ''}>att.</label>` : ''}</td>`;
-        if (f === 'note') return `<td><input class="cy-in wide" data-in="note" value="${esc(row.note || '')}" placeholder="—"></td>`;
+        if (f === 'tpt') return `<td><input class="cy-in" data-in="tpt" data-tip value="${esc(row.tpt || '')}" placeholder="—" title="Salariés en mi-temps thérapeutique (rappel d’attestation le mois suivant)">${row.tpt ? `<label class="chk small" title="Attestation faite"><input type="checkbox" data-in="tptDone" ${row.tptDone ? 'checked' : ''}>att.</label>` : ''}</td>`;
+        if (f === 'note') return `<td><div class="cy-note ${row.note ? '' : 'nonote'}" data-tip data-note tabindex="0" role="button" aria-label="Remarque du mois">${row.note ? esc(row.note) : '—'}</div></td>`;
         if (f === 'doeth' || f === 'tal') return `<td class="c"><button class="cy-tri v-${row[f] || 'none'}" data-tri="${f}">${CY_TRI[row[f] || ''] || '…'}</button></td>`;
         return cyCellHTML(mk, c, row, f);
       }).join('')}
@@ -2099,6 +2123,57 @@ function bindCycle() {
     }
   });
 }
+/* ---------- Info-bulles sur les textes tronqués + édition confortable des remarques ---------- */
+const Tip = { el: null, t: null, cur: null };
+const canHover = () => !window.matchMedia || matchMedia('(hover: hover)').matches;
+function tipHide() { clearTimeout(Tip.t); Tip.cur = null; if (Tip.el) { Tip.el.remove(); Tip.el = null; } }
+function tipShow(t) {
+  if (!document.body.contains(t) || document.activeElement === t) return;
+  const txt = (t.tagName === 'INPUT' ? t.value : t.textContent || '').trim();
+  if (!txt || (t.scrollWidth <= t.clientWidth + 1 && t.scrollHeight <= t.clientHeight + 1)) return; // seulement si le texte est coupé
+  const r = t.getBoundingClientRect(), el = document.createElement('div');
+  el.className = 'tipbox'; el.textContent = txt; document.body.appendChild(el);
+  const w = el.offsetWidth, h = el.offsetHeight;
+  let left = Math.min(Math.max(8, r.left), innerWidth - w - 8), top = r.bottom + 6;
+  if (top + h > innerHeight - 8) top = r.top - h - 6;
+  el.style.left = left + 'px'; el.style.top = top + 'px'; Tip.el = el;
+}
+document.addEventListener('mouseover', ev => {
+  if (!canHover()) return;
+  const t = ev.target.closest && ev.target.closest('[data-tip]'); if (!t || t === Tip.cur) return;
+  tipHide(); Tip.cur = t; Tip.t = setTimeout(() => tipShow(t), 250);
+});
+document.addEventListener('mouseout', ev => { const t = ev.target.closest && ev.target.closest('[data-tip]'); if (t && !t.contains(ev.relatedTarget)) tipHide(); });
+document.addEventListener('scroll', tipHide, true);
+document.addEventListener('focusin', tipHide);
+const noteOpen = el => { const tr = el.closest('tr[data-id]'); if (tr && UI.pfv) { tipHide(); openNoteEditor(el, UI.pfv.cmonth, tr.dataset.id); } };
+document.addEventListener('click', ev => { const el = ev.target.closest && ev.target.closest('[data-note]'); if (el) noteOpen(el); });
+document.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-note]')) { ev.preventDefault(); noteOpen(ev.target); } });
+function openNoteEditor(inp, mk, cid) {
+  document.getElementById('cy-note-pop')?.remove();
+  const r = inp.getBoundingClientRect(), w = Math.min(420, innerWidth - 16);
+  const box = document.createElement('div'); box.id = 'cy-note-pop';
+  box.innerHTML = `<textarea rows="3" maxlength="500" placeholder="Remarque du mois pour ce dossier…"></textarea><div class="cnp-h">${canHover() ? 'Entrée pour valider · Maj+Entrée pour aller à la ligne · Échap pour annuler' : 'Touchez ailleurs pour enregistrer'}</div>`;
+  document.body.appendChild(box);
+  const ta = box.querySelector('textarea'); ta.value = cyRow(mk, cid).note || '';
+  box.style.width = w + 'px';
+  box.style.left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8) + window.scrollX + 'px';
+  box.style.top = r.top + window.scrollY - 4 + 'px';
+  const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 2, 260) + 'px'; };
+  fit(); ta.addEventListener('input', fit);
+  inp.blur(); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+  let done = false;
+  const finish = save => {
+    if (done) return; done = true; box.remove();
+    const v = ta.value.trim();
+    if (save && v !== (cyRow(mk, cid).note || '')) { cySet(mk, cid, { note: v || null }); toast(v ? 'Remarque enregistrée' : 'Remarque effacée'); }
+  };
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
+    else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); finish(true); }
+  });
+  ta.addEventListener('blur', () => finish(true));
+}
 function pfSwitch(P) {
   return `<div class="seg" data-seg="pfmode"><button data-v="cycle" class="${P.mode !== 'temps' ? 'on' : ''}">Cycle de paie</button><button data-v="temps" class="${P.mode === 'temps' ? 'on' : ''}">Temps & facturation</button></div>`;
 }
@@ -2200,7 +2275,7 @@ function renderPortfolio() {
     const open = P.open.has(r.c.id);
     let h = `<tr class="pf-row ${r.m ? '' : 'idle'}" data-id="${r.c.id}"><td><button class="icon xs" data-pf="toggle" title="Détail du mois"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg)">${ICON.chev}</span></button></td>${cols.map(([k]) => {
       if (k === 'code') return `<td class="mono small">${esc(r.c.code || '')}</td>`;
-      if (k === 'name') return `<td class="pf-name"><span class="dot" style="--c:${colorFor(r.c.id)}"></span> ${esc(r.c.name)}</td>`;
+      if (k === 'name') return `<td class="pf-name">${cliIc(r.c.id)} ${esc(r.c.name)}</td>`;
       if (k === 'm') return `<td class="n"><b>${r.m ? fmtDur(r.m) : '<span class="zero">–</span>'}</b></td>`;
       if (k === 'prev') return `<td class="n">${r.prev ? fmtDur(r.prev) : '<span class="zero">–</span>'} <span class="small">${r.m || r.prev ? delta(r.m, r.prev) : ''}</span></td>`;
       if (k === 'bill') return `<td class="n">${r.bill ? fmtDur(r.bill) : '<span class="zero">–</span>'}</td>`;
@@ -2365,7 +2440,7 @@ function renderReports() {
       <button class="btn sm" data-bulk="nobill" ${sel.size ? '' : 'disabled'}>Passer non facturable</button>
       <span class="sp" style="flex:1"></span><button class="btn sm danger" data-bulk="del" ${sel.size ? '' : 'disabled'}>Supprimer</button></div>
     <div class="tbl-wrap"><table class="t"><thead><tr><th><input type="checkbox" data-selall ${shown.length && shown.every(e => sel.has(e.id)) ? 'checked' : ''}></th><th>Date</th><th>Client</th><th>Tâche</th><th>Libellé</th><th>Horaires</th><th class="n">Durée</th><th>Statut</th><th>Reporté</th><th></th></tr></thead><tbody>
-    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td><span class="dot" style="--c:${colorFor(e.client)}"></span> ${esc(clientName(e.client) || '—')}</td><td>${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
+    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${esc(clientName(e.client) || '—')}</td><td>${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
     </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
   const body = $('#rapports-body');
   body.innerHTML = html;
@@ -2400,7 +2475,7 @@ function pivot(list, group, cols, months) {
   const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
-    rows += `<tr class="grp"><td>${group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `<span class="dot" style="--c:${colorFor(a)}"></span> `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
+    rows += `<tr class="grp"><td>${group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `${cliIc(a)} `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
     const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
     for (const [b, l] of subs) {
       const sv = vals(l);
@@ -2516,7 +2591,7 @@ function renderBilling() {
     const open = f.open.has(g.c);
     const first = Math.min(...g.l.map(e => e.start)), last = Math.max(...g.l.map(e => e.start));
     html += `<div class="card bclient" data-c="${esc(g.c)}"><div class="bclient-h">
-      <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span><span class="dot" style="--c:${colorFor(g.c)}"></span>${esc(clientName(g.c) || 'Sans client')}</button>
+      <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span>${cliIc(g.c)}${esc(clientName(g.c) || 'Sans client')}</button>
       <span class="meta">${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}</span>
       <span class="amt">${fmtDur(g.ms)}</span>
       <button class="btn sm" data-act="copy-client">${ICON.copy} Copier le détail</button>
@@ -2623,7 +2698,7 @@ function renderRefs() {
       <button class="btn primary" data-act="add-client">Ajouter</button></div>
     <div class="ref-tools"><div class="seg" data-seg="refpf"><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${allC.length})</button><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${nOther})</button></div>
       <input id="ref-q" placeholder="Rechercher un client ou un numéro…" value="${esc(UI.refQ || '')}" autocomplete="off"></div>
-    <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}"><span class="dot" style="--c:${colorFor(c.id)}"></span>
+    <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}">${cliIc(c.id)}
       <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
       <button class="pf ${isMine(c) ? 'on' : ''}" data-act="toggle-mine" title="Cliquer pour changer">${isMine(c) ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
       ${isMine(c) ? '' : `<select data-k="owner" title="À qui appartient ce client ?">${ownerOpts(c.owner || '')}</select>`}
@@ -2652,7 +2727,7 @@ function renderRefs() {
   </div>
   ${trash.length ? `<div class="toolbar"><h2>Corbeille (${trash.length})</h2><span class="muted small">Les éléments supprimés restent ici tant que vous ne les supprimez pas définitivement. Les temps déjà saisis sont conservés.</span><span class="sp"></span><button class="btn sm danger" data-act="trash-empty">Vider la corbeille</button></div>
   <div class="card ref-list trash-list">${trash.map(x => `<div class="ref-row" data-kind="${x.kind}" data-id="${x.o.id}">
-      <span class="tag">${kindLabel[x.kind]}</span>${x.kind === 'client' ? `<span class="dot" style="--c:${colorFor(x.o.id)}"></span>` : x.kind === 'person' ? `<span class="pers-ic">${ICON.person}</span>` : ''}
+      <span class="tag">${kindLabel[x.kind]}</span>${x.kind === 'client' ? `${cliIc(x.o.id)}` : x.kind === 'person' ? `<span class="pers-ic">${ICON.person}</span>` : ''}
       <span style="flex:1;font-weight:500">${esc(x.o.name)}${x.o.code ? ` <span class="mono muted small">${esc(x.o.code)}</span>` : ''}</span>
       <span class="muted small">supprimé le ${fmtDate(x.o.deletedAt)}</span>
       <span class="use" title="Temps enregistré">${x.use ? fmtDur(x.use, 'hm') : ''}</span>
