@@ -129,6 +129,8 @@ h2:first-child{margin-top:0}
 .opt.hi{background:var(--accent-soft)}
 .opt .sub{color:var(--muted);font-size:12px;margin-left:auto;padding-left:14px}
 .opt.create{color:var(--accent);font-weight:500}
+.int-ic{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:var(--accent-soft);color:var(--accent);flex:none}
+.int-ic svg{width:12px;height:12px}
 .pers-ic{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--surface-3);color:var(--ink-2);flex:none}
 .pers-ic svg{width:12px;height:12px}
 .what .role,.chip .role{font-size:11px;color:var(--muted);white-space:nowrap}
@@ -211,6 +213,7 @@ h2:first-child{margin-top:0}
 .cy-pg-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .3s}
 .cy-pg-s{font-size:12px;color:var(--muted);margin-top:4px}
 .cy-pg-w{color:var(--s-todo)}
+.cp-hint{align-self:end;padding-bottom:4px}
 .cy-prog-sub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
 .cy-prog-sub b{font-family:var(--mono);color:var(--ink)}
 .cy-hist{display:flex;gap:4px}
@@ -221,6 +224,35 @@ h2:first-child{margin-top:0}
 .cy-h.st-ready b{color:var(--accent)}
 .cy-h.cur{box-shadow:0 0 0 2px var(--accent)}
 .cy-h:hover{border-color:var(--accent)}
+/* Lignes compactes (Mon portefeuille, écran large) */
+.seg.seg-sm button{padding:4px 9px;font-size:12px}
+.toolbar .seg-sm{margin-right:8px}
+@media (min-width: 981px){
+  .dense .t th{padding:5px 8px}
+  .dense .t td{padding:2px 8px;font-size:13px}
+  .dense .cy-table th,.dense .cy-table td{padding:2px 6px}
+  .dense .cy-cell{min-width:50px}
+  .dense .what{padding:1px 0}
+  .dense .cy-in{padding:1px 5px;height:24px;font-size:13px}
+  .dense .icon.xs{width:22px;height:22px}
+  .dense .icon.xs svg{width:11px;height:11px}
+  .dense .cy-tri{padding:0 8px}
+  .dense .chk.small{font-size:11px}
+  .dense td.cy-name{white-space:nowrap}
+  .dense .cy-name .what,.dense .cy-perm{display:inline-flex;vertical-align:middle}
+  .dense .cy-perm{display:inline-block;max-width:180px;margin:0 0 0 8px}
+  .dense .cy-todo-i{padding:3px 0}
+  .dense .cy-todo-list{max-height:170px;overflow:auto}
+  .dense .stat{padding:8px 12px}
+  .dense .stat .v{font-size:19px}
+}
+.cy-prog.min{padding:8px 14px}
+.cy-prog-line{display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap}
+.cy-prog-line .cy-prog-t{font-size:14px}
+.cy-mini{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2)}
+.cy-mini .cy-pg-track{display:inline-block;width:110px;height:7px}
+.cy-mini .cy-pg-fill{display:block}
+.cy-mini b{font-family:var(--mono);color:var(--ink)}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
 .cy-banner span{flex:1}
 .cy-legend{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -604,7 +636,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.7.0';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -690,6 +722,7 @@ const ICON = {
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 9h2a2 2 0 0 1 2 2v10"/><path d="M3 21h18M8 7h4M8 11h4M8 15h4"/></svg>',
   person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>',
   chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
 };
@@ -726,14 +759,19 @@ const clientOf = id => S.meta.clients.find(c => c.id === id) || null;
 const taskOf = id => S.meta.tasks.find(t => t.id === id) || null;
 // Une saisie porte soit un client (id « c… »), soit une personne (id « p… ») dans le champ client.
 const isPersonId = id => typeof id === 'string' && id[0] === 'p';
+// Temps interne au cabinet (formation, trajet, organisation…) : entité fixe, jamais facturable par défaut
+const INTERNAL_ID = 'int', INTERNAL_NAME = 'Interne (cabinet)';
+const isInternalId = id => id === INTERNAL_ID;
+const INTERNAL_TASKS = ['Formation', 'Trajet', 'Réunion d’équipe', 'Organisation / logistique', 'Administratif interne', 'Veille juridique', 'Informatique / outils', 'Entretien / RH interne'];
 const personOf = id => S.meta.persons.find(x => x.id === id) || null;
-const entityOf = id => isPersonId(id) ? personOf(id) : clientOf(id);
+const entityOf = id => isInternalId(id) ? { id, name: INTERNAL_NAME } : isPersonId(id) ? personOf(id) : clientOf(id);
 const ROLES = { paie: 'Collaborateur paie', compta: 'Collaborateur comptable', ec: 'Expert-comptable', autre: 'Autre' };
 const roleLabel = r => ROLES[r] || '';
 const isMine = c => !!c && c.mine !== false;
-const clientName = id => !id ? '' : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
+const clientName = id => !id ? '' : isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
 function pfKey(id) {
   if (!id) return 'none';
+  if (isInternalId(id)) return 'internal';
   if (isPersonId(id)) return 'p:' + id;
   const c = clientOf(id); if (!c) return 'none';
   if (isMine(c)) return 'mine';
@@ -743,6 +781,7 @@ function pfName(k) {
   if (k === 'mine') return 'Mon portefeuille';
   if (k === 'others') return 'Autres portefeuilles (non attribués)';
   if (k === 'none') return 'Sans client';
+  if (k === 'internal') return 'Temps interne (cabinet)';
   const p = personOf(k.slice(2)); return p ? p.name + (p.role ? ' · ' + roleLabel(p.role) : '') : 'Personne supprimée';
 }
 const taskName = id => id ? (taskOf(id)?.name || 'Tâche supprimée') : '';
@@ -758,6 +797,7 @@ function allEntries() {
   return list;
 }
 function defaultBillable(clientId, taskId) {
+  if (isInternalId(clientId)) return false; // temps interne : jamais facturable par défaut
   const t = taskOf(taskId);
   if (t && t.billing && t.billing !== 'auto') return t.billing === 'bill';
   if (isPersonId(clientId)) return false; // temps passé avec une personne : non facturable par défaut
@@ -1084,10 +1124,13 @@ function clientOptions(q) {
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
   const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), dot: colorFor(c.id) });
   const mapP = x => ({ id: x.id, label: x.name, sub: roleLabel(x.role), person: true });
-  const map = o => isPersonId(o.id) ? mapP(o) : mapC(o);
+  const intOpt = { id: INTERNAL_ID, label: INTERNAL_NAME, sub: 'formation, trajet, organisation… · non facturable', internal: true };
+  const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : mapC(o);
   const out = [];
-  const recent = q ? [] : [...cs, ...ps].filter(o => u.cLast[o.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
+  const showInt = !q || ['interne', 'cabinet', 'formation', 'trajet', 'organisation', 'logistique', 'reunion'].some(w => w.startsWith(norm(q)) || norm(q).startsWith(w.slice(0, Math.max(3, norm(q).length))));
+  const recent = q ? [] : [...cs, ...ps, ...(u.cLast[INTERNAL_ID] ? [{ id: INTERNAL_ID }] : [])].filter(o => u.cLast[o.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
   if (recent.length) out.push({ head: true, label: 'Récents' }, ...recent.map(map));
+  if (showInt && !recent.some(o => o.id === INTERNAL_ID)) out.push({ head: true, label: 'Interne' }, intOpt);
   const mine = cs.filter(isMine).sort(byName), others = cs.filter(c => !isMine(c)).sort(byName);
   if (mine.length) out.push({ head: true, label: 'Mon portefeuille' }, ...mine.map(mapC));
   if (others.length) out.push({ head: true, label: 'Autres portefeuilles' }, ...others.map(mapC));
@@ -1104,6 +1147,13 @@ function taskOptions(q, clientId) {
   const map = t => ({ id: t.id, label: t.name, sub: t.billing === 'nobill' ? 'non facturable' : '' });
   let std = missingStandard().filter(n => !S.meta.tasks.some(t => t.archived && norm(t.name) === norm(n)));
   if (q) { const n = norm(q); std = std.filter(s => norm(s).includes(n)); }
+  if (isInternalId(clientId)) {
+    const isInt = n => INTERNAL_TASKS.some(x => norm(x) === norm(n));
+    const intExisting = ts.filter(t => isInt(t.name) && !used.includes(t)), intStd = std.filter(isInt);
+    const intItems = [...intExisting.map(map), ...intStd.map(n => ({ create: true, text: n, label: n, sub: 'tâche interne' }))];
+    const others = ts.filter(t => !used.includes(t) && !isInt(t.name)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    return [...(used.length ? [{ head: true, label: 'Habituelles en interne' }, ...used.map(map)] : []), ...(intItems.length ? [{ head: true, label: 'Tâches internes' }, ...intItems] : []), ...(others.length ? [{ head: true, label: 'Autres tâches' }, ...others.map(map)] : [])];
+  }
   const stdItems = std.length ? [{ head: true, label: 'Tâches standards (créées au choix)' }, ...std.map(n => ({ create: true, text: n, label: n, sub: 'standard' }))] : [];
   if (!used.length) return [...(ts.length && stdItems.length ? [{ head: true, label: 'Mes tâches' }] : []), ...ts.map(map), ...stdItems];
   const rest = ts.filter(t => !used.includes(t)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
@@ -1259,6 +1309,7 @@ window.addEventListener('hashchange', route);
 function statusOf(e) { return !e.billable ? 'no' : e.invoicedAt ? 'inv' : 'todo'; }
 function statusLabel(st) { return st === 'no' ? 'Non facturable' : st === 'inv' ? 'Facturé' : 'À facturer'; }
 function whatHTML(c, t) {
+  if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
   if (isPersonId(c)) { const p = personOf(c); return `<span class="pers-ic">${ICON.person}</span><span class="cl">${esc(clientName(c))}</span>${p?.role ? `<span class="role">${esc(roleLabel(p.role))}</span>` : ''}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`; }
   const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
   return `<span class="dot" style="--c:${colorFor(c)}"></span>${c ? `<span class="cl">${esc(clientName(c))}</span>${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
@@ -1304,7 +1355,7 @@ function renderChrono() {
     <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div></div>
     <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer</div></div>
     <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
-    <div class="card stat"><div class="k">Hors portefeuille · ce mois</div><div class="v">${fmtDur(sum(mo, e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none'; }))}</div><div class="s">autres clients et temps avec des personnes</div></div>
+    <div class="card stat"><div class="k">Hors portefeuille · ce mois</div><div class="v">${fmtDur(sum(mo, e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none' && k !== 'internal'; }))}</div><div class="s">autres clients et temps avec des personnes${(() => { const ti = sum(mo, e => isInternalId(e.client)); return ti ? ` · <b>${fmtDur(ti)}</b> en interne` : ''; })()}</div></div>
     <div class="card stat" data-k="todo"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
     <div class="card stat"><div class="k" title="Saisies des 31 derniers jours pas encore cochées « Reporté » (pas encore recopiées dans le logiciel du cabinet)">À reporter · 31 derniers jours</div><div class="v">${unlogged}</div><div class="s">saisies à reporter dans le logiciel du cabinet</div></div>
   </div>`;
@@ -1578,10 +1629,10 @@ async function downloadText(filename, txt, mime) {
 }
 
 /* ---------- Cycle de paie (onglet Mon portefeuille) ----------
-   Paramètres par dossier : client.cy = { rec: var|auto|robot, recDay, vir: file|client|odep|nc, dep: next|fixed|nc, depDay, dsn: 5|15, notes }
+   Paramètres par dossier : client.cy = { rec: var|auto|robot, recDay, varDay: 'm27' | 'n3' (réception habituelle des variables, mois du cycle ou mois suivant), vir: file|client|odep|nc, dep: next|fixed|nc, depDay, dsn: 5|15, notes }
    Données du mois : S.cycles['AAAA-MM'] = { rows: { idClient: { rec, rel, prep, env, corr: [dates], bs, vir, dep, dsn, tpt, tptDone, note, doeth, tal } } }
    Les dates sont stockées au format 'AAAA-MM-JJ'. */
-const CY_DEF = { rec: 'var', recDay: null, vir: 'file', dep: 'next', depDay: null, dsn: 15, notes: '' };
+const CY_DEF = { rec: 'var', recDay: null, varDay: null, vir: 'file', dep: 'next', depDay: null, dsn: 15, notes: '' };
 const cyOf = c => ({ ...CY_DEF, ...(c && c.cy || {}) });
 const cyClients = () => S.meta.clients.filter(c => !c.deletedAt && !c.archived && isMine(c)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 const cyRow = (mk, cid) => (S.cycles[mk] && S.cycles[mk].rows && S.cycles[mk].rows[cid]) || {};
@@ -1601,6 +1652,32 @@ const prevMk = mk => monthKey(addMonths(monthStart(mk), -1));
 function nextWorkday(ms) { let d = addDays(ms, 1); while ([0, 6].includes(new Date(d).getDay())) d = addDays(d, 1); return d; }
 function prevWorkday(ms) { let d = ms; while ([0, 6].includes(new Date(d).getDay())) d = addDays(d, -1); return d; }
 function dayIn(mk, day) { const s = monthStart(mk), e = monthEnd(mk); return Math.min(addDays(s, Math.max(1, day) - 1), e); }
+const CY_REL_DEF = 28; // relance par défaut le 28 (ou le jour ouvré suivant)
+function addWorkdays(ms, n) { let d = ms; for (let i = 0; i < n; i++) d = nextWorkday(d); return d; }
+const isWorkday = ms => ![0, 6].includes(new Date(ms).getDay());
+// Date habituelle de réception des variables pour le cycle mk ('m27' = le 27 du mois, 'n3' = le 3 du mois suivant)
+function cyVarDate(mk, code) {
+  const m = /^([mn])(\d{1,2})$/.exec(code || ''); if (!m) return null;
+  return dayIn(m[1] === 'n' ? nextMk(mk) : mk, +m[2]);
+}
+const cyVarLabel = code => { const m = /^([mn])(\d{1,2})$/.exec(code || ''); return m ? 'le ' + (+m[2] === 1 ? '1er' : m[2]) + (m[1] === 'n' ? ' du mois suivant' : '') : ''; };
+// Relance : lendemain (ouvré) de la date habituelle ; par défaut le 28. Retard : 2 jours ouvrés après la relance prévue.
+function cyRelDates(mk, c) {
+  const p = cyOf(c), v = cyVarDate(mk, p.varDay);
+  let rel = v ? nextWorkday(v) : dayIn(mk, CY_REL_DEF);
+  if (!isWorkday(rel)) rel = nextWorkday(rel);
+  return { usual: v, rel, late: addWorkdays(rel, 2) };
+}
+// Suggestion de date habituelle d'après les réceptions saisies (au moins 3 mois)
+function cyVarSuggest(cid) {
+  const offs = []; let mk = monthKey(Date.now());
+  for (let i = 0; i < 13; i++) { mk = prevMk(mk); const r = cyRow(mk, cid).rec; if (r) offs.push({ mk, off: Math.round((dOf(r) - monthStart(mk)) / DAY) }); }
+  if (offs.length < 3) return null;
+  const sorted = offs.map(o => o.off).sort((a, b) => a - b), med = sorted[Math.floor(sorted.length / 2)];
+  const ref = offs[0].mk, len = Math.round((monthEnd(ref) - monthStart(ref)) / DAY) + 1;
+  const code = med < len ? 'm' + (med + 1) : 'n' + Math.min(med - len + 1, 15);
+  return { code, n: offs.length };
+}
 // Échéances indicatives d'un dossier pour le cycle mk
 function cyDue(mk, c, row) {
   const p = cyOf(c), last = monthEnd(mk);
@@ -1620,9 +1697,14 @@ function cyState(mk, c, row, f) {
   if (f === 'dep' && p.dep === 'nc' && !val) return { st: 'na', label: 'NC' };
   if (f === 'rec' && p.rec !== 'var' && !val) return { st: 'auto', label: p.rec === 'robot' ? 'Automate' + (p.recDay ? ' ' + p.recDay : '') : 'Auto' + (p.recDay ? ' ' + p.recDay : '') };
   if (val) return { st: 'done', label: null };
-  if (f === 'rec' && row.rel) return { st: 'rel', label: 'R', tip: 'Relancé le ' + fmtDate(dOf(row.rel)) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') + ' — variables pas encore reçues' };
+  if (f === 'rec' && p.rec === 'var') {
+    const rd = cyRelDates(mk, c), hab = p.varDay ? 'Variables habituellement ' + cyVarLabel(p.varDay) + ' · ' : '';
+    const st = today > rd.late ? 'late' : today >= rd.rel ? 'warn' : row.rel ? 'rel' : 'todo';
+    if (row.rel) return { st, label: 'R', tip: 'Relancé le ' + fmtDate(dOf(row.rel)) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') + ' — variables pas encore reçues' + (st === 'late' ? ' · en retard depuis le ' + fmtDate(rd.late) : '') };
+    return { st, label: '', tip: hab + (st === 'late' ? 'Variables en retard (relance prévue le ' + fmtDate(rd.rel) + ')' : st === 'warn' ? 'Relance à faire (prévue le ' + fmtDate(rd.rel) + ')' : 'Relance prévue le ' + fmtDate(rd.rel)) };
+  }
+  if (f === 'rec' && row.rel) return { st: 'rel', label: 'R', tip: 'Relancé le ' + fmtDate(dOf(row.rel)) };
   const d = due[f];
-  if (f === 'rec' && p.rec === 'var') { if (today > dayIn(mk, 25)) return { st: 'warn', label: '', tip: 'Variables non reçues' }; return { st: 'todo' }; }
   if (f === 'env' && row.rec && !d && today >= addDays(dOf(row.rec), 2)) return { st: 'warn', tip: 'Variables reçues il y a plus de 2 jours' };
   if (!d) return { st: 'todo' };
   if (today > d) return { st: 'late', tip: 'Échéance : ' + fmtDate(d) };
@@ -1639,6 +1721,16 @@ function cyRowDone(mk, c, row) {
   const p = cyOf(c);
   const ok = f => !!row[f] || cyState(mk, c, row, f).st === 'na';
   return !!row.dsn && ok('vir') && ok('dep') && (!!row.env || p.rec === 'robot');
+}
+const lsGet = (k, d) => { try { const v = localStorage.getItem('chronocab:' + k); return v == null ? d : v; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem('chronocab:' + k, v); } catch (e) {} };
+const pfDense = () => lsGet('density', 'compact') === 'compact';
+function densitySeg() {
+  return `<div class="seg seg-sm" data-seg="density" title="Hauteur des lignes du tableau"><button data-v="compact" class="${pfDense() ? 'on' : ''}">Compact</button><button data-v="normal" class="${pfDense() ? '' : 'on'}">Aéré</button></div>`;
+}
+function cyMini(lbl, a, b, ratio = [a, b]) {
+  const v = pct(ratio[0], ratio[1]);
+  return `<span class="cy-mini"><span>${lbl}</span><span class="cy-pg-track"><span class="cy-pg-fill ${v === 100 ? 'full' : ''}" style="width:${v}%"></span></span><b>${a}</b>/${b}</span>`;
 }
 const cyClosed = mk => (S.cycles[mk] && S.cycles[mk].closed) || null;
 function cySetClosed(mk, v) {
@@ -1695,7 +1787,10 @@ function cyTodo() {
       const row = cyRow(mk, c.id), p = cyOf(c), due = cyDue(mk, c, row), when = mk === cur ? '' : ' (cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ')';
       const add = (f, txt, d) => items.push({ mk, cid: c.id, f, txt: txt + when, late: d && today > d, d });
       if (mk === cur && p.rec !== 'var' && !row.env && due.env && today >= addDays(due.env, -1)) add('env', 'Paie automatique à envoyer — ' + c.name, due.env);
-      if (mk === cur && p.rec === 'var' && !row.rec && today >= dayIn(mk, 20) && row.rel !== isoDay(today)) items.push({ mk, cid: c.id, f: 'rel', txt: (row.rel ? 'Relancer à nouveau' : 'Relancer') + ' pour les variables — ' + c.name + (row.rel ? ' (dernière relance le ' + fmtDate(dOf(row.rel)).slice(0, 5) + ')' : ''), late: today > dayIn(mk, 25) });
+      if (p.rec === 'var' && !row.rec && (mk === cur || row.rel || Object.keys((S.cycles[mk] && S.cycles[mk].rows) || {}).length)) {
+        const rd = cyRelDates(mk, c);
+        if (today >= rd.rel && (!row.rel || today >= addWorkdays(dOf(row.rel), 2))) items.push({ mk, cid: c.id, f: 'rel', txt: (row.rel ? 'Relancer à nouveau' : 'Relancer') + ' pour les variables — ' + c.name + (row.rel ? ' (dernière relance le ' + fmtDate(dOf(row.rel)).slice(0, 5) + ')' : p.varDay ? ' (habituellement ' + cyVarLabel(p.varDay) + ')' : '') + when, late: today > rd.late });
+      }
       if (!row.vir && due.vir && row.env && today >= addDays(due.vir, -1)) add('vir', 'Virements à envoyer — ' + c.name, due.vir);
       if (!row.dep && due.dep && today >= due.dep) add('dep', 'Déposer les bulletins — ' + c.name, due.dep);
       if (!row.dsn && today >= addDays(due.dsn, -3) && (row.env || p.rec === 'robot' || today > due.dsn)) add('dsn', 'DSN à déposer — ' + c.name + ' (échéance le ' + fmtDate(due.dsn).slice(0, 5) + ')', due.dsn);
@@ -1746,14 +1841,22 @@ function renderCycle(P) {
     <input id="cy-q" placeholder="Rechercher un dossier…" value="${esc(P.cq || '')}" autocomplete="off" style="min-width:200px">
     <label class="chk"><input type="checkbox" data-cy="prep" ${showPrep ? 'checked' : ''}> Colonne Prépa</label>
     <button class="btn sm" data-cy="copy">${ICON.copy} Copier pour Excel</button></div>`;
-  if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div>${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div>`;
+  if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div><div class="cy-todo-list">${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div></div>`;
   if (isApril) html += `<div class="warn" style="margin-top:12px">Cycle d’avril : la DSN doit déclarer la <b>DOETH</b> et la <b>taxe d’apprentissage libératoire</b>. Cochez les deux colonnes dédiées pour chaque dossier (OK, NC ou Exo).</div>`;
   const g = cyProgress(mk), cl = cyClosed(mk), restDsn = g.dsn[1] - g.dsn[0], pbs = cyProgress(prevMk(mk)).bs;
-  html += `<div class="card cy-prog ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}">
+  const closeBtn = cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" ${g.allDsn ? '' : 'disabled'} title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Disponible quand toutes les DSN du portefeuille sont déposées'}">Clôturer le cycle</button>`;
+  if (lsGet('cyProgMin', '') === '1') html += `<div class="card cy-prog min ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}"><div class="cy-prog-line">
+      <b class="cy-prog-t">Progression</b>
+      ${cyMini('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.noBs ? g.dep : g.bsDep)}
+      ${cyMini('DSN', g.dsn[0], g.dsn[1])}
+      <span class="muted small">${g.fin}/${g.n} dossiers terminés</span>
+      <span class="sp" style="flex:1"></span>${closeBtn}
+      <button class="btn sm ghost" data-cy="progmin" title="Afficher le détail de la progression">Détails ▾</button></div></div>`;
+  else html += `<div class="card cy-prog ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}">
     <div class="cy-prog-h"><div><div class="cy-prog-t">Progression du cycle de ${esc(monthLabel)}</div>
       <div class="muted small">${cl ? 'Cycle de paie déclaré terminé le ' + fmtDate(dOf(cl)) : !g.n ? '&nbsp;' : g.allDsn ? 'Toutes les DSN sont déposées : vous pouvez clôturer le cycle.' : restDsn + ' DSN restante' + (restDsn > 1 ? 's' : '') + ' avant de pouvoir clôturer'}</div></div>
       <span class="sp" style="flex:1"></span>
-      ${cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" ${g.allDsn ? '' : 'disabled'} title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Disponible quand toutes les DSN du portefeuille sont déposées'}">Clôturer le cycle</button>`}
+      ${closeBtn}<button class="btn sm ghost" data-cy="progmin" title="Réduire la progression sur une ligne">Réduire ▴</button>
     </div>
     <div class="cy-pg-grid">
       ${cyBar('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.dep[0] + ' / ' + g.dep[1] + ' dossiers' + (g.n - g.dep[1] ? ' · ' + (g.n - g.dep[1]) + ' non concerné' + (g.n - g.dep[1] > 1 ? 's' : '') : '') + (g.noBs ? ` · <span class="cy-pg-w">${g.noBs} dossier${g.noBs > 1 ? 's' : ''} sans nombre de BS : avancement compté en dossiers</span>` : ''), g.noBs ? g.dep : g.bsDep)}
@@ -1767,7 +1870,7 @@ function renderCycle(P) {
       <span class="sp" style="flex:1"></span>${cyHistory(mk)}
     </div>
   </div>`;
-  html += `<div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>
+  html += `<div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>${densitySeg()}
     <div class="seg" data-seg="cyf">${[['all', 'Tous'], ['todo', 'En cours'], ['late', 'À surveiller'], ['done', 'Terminés']].map(([v, l]) => `<button data-v="${v}" class="${(P.cfilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
   <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'tpt'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}">${l}</th>`).join('')}<th></th></tr></thead><tbody>
   ${rows.map(({ c, row }) => {
@@ -1850,6 +1953,8 @@ function openCyParams(cid) {
     <div class="modal-b">
       <div class="fld-row"><label class="fld"><span>Réception des variables</span><select id="cp-rec">${opt('var', 'Avec variables', p.rec)}${opt('auto', 'Automatique (sans variables)', p.rec)}${opt('robot', 'Automate Silae', p.rec)}</select></label>
       <label class="fld"><span>Jour d’envoi prévu (auto)</span><select id="cp-recday">${opt('', '—', p.recDay || '')}${[16, 19, 20, 25, 30].map(d => opt(d, 'vers le ' + d, p.recDay || '')).join('')}</select></label></div>
+      <div class="fld-row"><label class="fld"><span>Réception habituelle des variables</span><select id="cp-varday">${opt('', '— (relance le ' + CY_REL_DEF + ')', p.varDay || '')}${Array.from({ length: 21 }, (_, i) => i + 10).map(d => opt('m' + d, 'Vers le ' + d, p.varDay || '')).join('')}${opt('m31', 'Fin de mois', p.varDay || '')}${Array.from({ length: 10 }, (_, i) => i + 1).map(d => opt('n' + d, 'Le ' + (d === 1 ? '1er' : d) + ' du mois suivant', p.varDay || '')).join('')}</select></label>
+      <div class="fld cp-hint" id="cp-varhint"></div></div>
       <div class="fld-row"><label class="fld"><span>Virements</span><select id="cp-vir">${opt('file', 'Fichier de virement envoyé', p.vir)}${opt('odep', 'OD + état des paiements', p.vir)}${opt('client', 'Client autonome', p.vir)}${opt('nc', 'Non concerné', p.vir)}</select></label>
       <label class="fld"><span>Échéance DSN</span><select id="cp-dsn">${opt(15, 'Le 15 du mois suivant', p.dsn)}${opt(5, 'Le 5 du mois suivant', p.dsn)}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Dépôt des bulletins</span><select id="cp-dep">${opt('next', 'Le lendemain des virements', p.dep)}${opt('fixed', 'Un jour fixe', p.dep)}${opt('nc', 'Non concerné (MySilae…)', p.dep)}</select></label>
@@ -1858,9 +1963,17 @@ function openCyParams(cid) {
     </div>
     <div class="modal-f"><span class="muted small">N° ${esc(c.code || '—')}</span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
   const q = s => m.el.querySelector(s);
+  const sug = cyVarSuggest(cid);
+  const hint = () => {
+    const v = q('#cp-varday').value, rd = cyRelDates(monthKey(Date.now()), { cy: { ...p, varDay: v || null } });
+    q('#cp-varhint').innerHTML = `<span class="muted small">Relance proposée le ${fmtDate(rd.rel).slice(0, 5)}, en retard à partir du ${fmtDate(addDays(rd.late, 1)).slice(0, 5)} (cycle du mois).</span>` +
+      (sug && sug.code !== v ? `<div class="small" style="margin-top:4px">💡 D’après ${sug.n} mois saisis : habituellement <b>${cyVarLabel(sug.code)}</b> <button class="btn sm" type="button" id="cp-usesug">Utiliser</button></div>` : '');
+    const u = q('#cp-usesug'); if (u) u.onclick = () => { q('#cp-varday').value = sug.code; hint(); };
+  };
+  q('#cp-varday').addEventListener('change', hint); hint();
   q('#cp-ok').addEventListener('click', () => {
     const dd = parseInt(q('#cp-depday').value, 10);
-    c.cy = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
+    c.cy = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, varDay: q('#cp-varday').value || null, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
     if (c.cy.dep === 'fixed' && !c.cy.depDay) c.cy.dep = 'next';
     touchMeta(); m.close();
   });
@@ -1905,6 +2018,7 @@ function bindCycle() {
     const a = b.dataset.cy, cid = b.closest('tr[data-id]')?.dataset.id;
     if (a === 'prev' || a === 'next') { P.cmonth = a === 'prev' ? prevMk(P.cmonth) : nextMk(P.cmonth); renderPortfolio(); }
     else if (a === 'today') { P.cmonth = monthKey(Date.now()); renderPortfolio(); }
+    else if (a === 'progmin') { lsSet('cyProgMin', lsGet('cyProgMin', '') === '1' ? '' : '1'); renderPortfolio(); }
     else if (a === 'goto') { P.cmonth = b.dataset.mk; renderPortfolio(); }
     else if (a === 'close') {
       const mk = P.cmonth; if (!cyProgress(mk).allDsn) return;
@@ -1986,6 +2100,7 @@ function renderPortfolio() {
   const P = UI.pfv ||= {};
   P.month ||= monthKey(Date.now()); P.sort ||= 'name'; P.dir ||= 1; P.filter ||= 'all'; if (P.q == null) P.q = ''; P.open ||= new Set();
   P.mode ||= 'cycle'; P.cmonth ||= defaultCycleMonth();
+  $('#portefeuille-body').classList.toggle('dense', pfDense());
   if (P.mode !== 'temps') { renderCycle(P); return; }
   const data = portfolioData(P.month);
   let rows = data.rows;
@@ -2021,7 +2136,7 @@ function renderPortfolio() {
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Saisies à facturer</div><div class="v">${tot.todo}</div><div class="s">${tot.todo ? `<a href="#portefeuille" data-pf-filter="todo">voir les dossiers</a>` : 'rien en attente'}</div></div>
     ${data.hasBs ? `<div class="card stat"><div class="k">Bulletins (BS) du mois</div><div class="v">${nAll - noBs}<span class="of"> / ${nAll}</span></div><div class="s">${noBs ? `<a href="#portefeuille" data-pf-filter="nobs">${noBs} dossier${noBs > 1 ? 's' : ''} sans BS saisi</a>` : 'tous les dossiers ont du temps BS'}</div></div>` : ''}
   </div>
-  <div class="toolbar"><h2>Mes dossiers (${rows.length})</h2><span class="sp"></span>
+  <div class="toolbar"><h2>Mes dossiers (${rows.length})</h2><span class="sp"></span>${densitySeg()}
     <div class="seg" data-seg="pff">${[['all', 'Tous'], ['active', 'Avec temps'], ['idle', 'Sans temps'], ['todo', 'À facturer'], ...(data.hasBs ? [['nobs', 'Sans BS']] : [])].map(([v, l]) => `<button data-v="${v}" class="${P.filter === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
   <div class="card tbl-wrap"><table class="t pf-table"><thead><tr><th></th>${cols.map(([k, l]) => `<th class="${['m', 'prev', 'bill', 'inv', 'todo'].includes(k) ? 'n' : ''} ${['bs', 'dsn'].includes(k) ? 'c' : ''}"><button class="sort ${P.sort === k ? 'on' : ''}" data-sort="${k}">${l}${P.sort === k ? (P.dir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`).join('')}<th></th></tr></thead><tbody>
   ${rows.map(r => {
@@ -2054,7 +2169,10 @@ function renderPortfolio() {
 }
 function bindPortfolio() {
   const body = $('#portefeuille-body');
-  body.addEventListener('click', ev => { const sm = ev.target.closest('.seg[data-seg=pfmode] button'); if (sm) { UI.pfv.mode = sm.dataset.v; renderPortfolio(); } });
+  body.addEventListener('click', ev => {
+    const sm = ev.target.closest('.seg[data-seg=pfmode] button'); if (sm) { UI.pfv.mode = sm.dataset.v; renderPortfolio(); return; }
+    const sd = ev.target.closest('.seg[data-seg=density] button'); if (sd) { lsSet('density', sd.dataset.v); renderPortfolio(); }
+  });
   let qT;
   body.addEventListener('input', ev => {
     if (ev.target.id !== 'pf-q') return;
@@ -2090,7 +2208,7 @@ function bindPortfolio() {
 function pfOpts(cur) {
   const ps = S.meta.persons.filter(x => !x.deletedAt).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   const o = (v, l) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`;
-  return o('', 'Tous') + o('mine', 'Mon portefeuille') + o('others', 'Hors de mon portefeuille') + o('persons', 'Temps passé avec des personnes') + (ps.length ? `<optgroup label="Lié à une personne (ses clients + temps avec elle)">${ps.map(x => o('p:' + x.id, x.name + ' · ' + roleLabel(x.role))).join('')}</optgroup>` : '');
+  return o('', 'Tous') + o('mine', 'Mon portefeuille') + o('others', 'Hors de mon portefeuille') + o('persons', 'Temps passé avec des personnes') + o('internal', 'Temps interne (cabinet)') + (ps.length ? `<optgroup label="Lié à une personne (ses clients + temps avec elle)">${ps.map(x => o('p:' + x.id, x.name + ' · ' + roleLabel(x.role))).join('')}</optgroup>` : '');
 }
 function periodRange() {
   const r = UI.rep, now = Date.now();
@@ -2113,7 +2231,7 @@ function filtered() {
   return allEntries().filter(e => {
     if (e.start < from || e.start >= to) return false;
     if (r.client && e.client !== r.client) return false;
-    if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
+    if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none' || k === 'internal') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
     if (r.task && e.task !== r.task) return false;
     const st = statusOf(e);
     if (r.bill === 'bill' && !e.billable) return false;
@@ -2153,7 +2271,8 @@ function renderReports() {
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-inv)"></span>Déjà facturé</div><div class="v">${fmtDur(t.inv)}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(t.todo)}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-nobill)"></span>Non facturable</div><div class="v">${fmtDur(t.no)}</div></div>
-    <div class="card stat"><div class="k">Hors de mon portefeuille</div><div class="v">${fmtDur(list.filter(e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none'; }).reduce((a, e) => a + dur(e), 0))}</div><div class="s">autres clients et temps avec des personnes</div></div>
+    <div class="card stat"><div class="k">Hors de mon portefeuille</div><div class="v">${fmtDur(list.filter(e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none' && k !== 'internal'; }).reduce((a, e) => a + dur(e), 0))}</div><div class="s">autres clients et temps avec des personnes</div></div>
+    <div class="card stat"><div class="k"><span class="int-ic">${ICON.building}</span> Temps interne</div><div class="v">${fmtDur(list.filter(e => isInternalId(e.client)).reduce((a, e) => a + dur(e), 0))}</div><div class="s">${t.all ? Math.round(list.filter(e => isInternalId(e.client)).reduce((a, e) => a + dur(e), 0) * 100 / t.all) + ' % du temps · ' : ''}formation, trajet, organisation…</div></div>
   </div>`;
   // graphique
   const months = [];
@@ -2198,7 +2317,7 @@ function renderReports() {
   bindChart(body, buckets);
 }
 function pivot(list, group, cols, months) {
-  const tgt = id => isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) || 'Sans client';
+  const tgt = id => isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) || 'Sans client';
   const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : e => e.task || '';
   const k2 = group === 'client' ? e => e.task || '' : e => e.client || '';
   const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : id => taskName(id) || 'Sans tâche';
@@ -2224,7 +2343,7 @@ function pivot(list, group, cols, months) {
   const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
-    rows += `<tr class="grp"><td>${group === 'client' ? (isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `<span class="dot" style="--c:${colorFor(a)}"></span> `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
+    rows += `<tr class="grp"><td>${group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `<span class="dot" style="--c:${colorFor(a)}"></span> `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
     const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
     for (const [b, l] of subs) {
       const sv = vals(l);
@@ -2380,7 +2499,7 @@ function bindBilling() {
 
 /* ---------- Vue Référentiel ---------- */
 // Tâches standards (vocabulaire repris des projets Clockify), proposées à la création
-const STANDARD_TASKS = ['Bulletins (BS)', 'DSN', 'Conseil social', 'STC', 'Analyses', 'Maladie', 'Entrée', 'Contrat (CDD / CDI)', 'Avenant', 'Maj salarié', 'Support', 'URSSAF', 'Montage', 'Desk RH', 'MySilae / Silae', 'Sauvegardes et GED', 'DUE', 'Question compta', 'Paramétrage', 'Simulation', 'Saisie-arrêt', 'Changement SIRET', 'Calcul IFC', 'Mission facturable', 'Formation', 'Accident du travail', 'Congés et absences', 'Variables de paie', 'Intéressement / PPV', 'Attestations'];
+const STANDARD_TASKS = ['Bulletins (BS)', 'DSN', 'Conseil social', 'STC', 'Analyses', 'Maladie', 'Entrée', 'Contrat (CDD / CDI)', 'Avenant', 'Maj salarié', 'Support', 'URSSAF', 'Montage', 'Desk RH', 'MySilae / Silae', 'Sauvegardes et GED', 'DUE', 'Question compta', 'Paramétrage', 'Simulation', 'Saisie-arrêt', 'Changement SIRET', 'Calcul IFC', 'Mission facturable', 'Formation', 'Accident du travail', 'Congés et absences', 'Variables de paie', 'Intéressement / PPV', 'Attestations', 'Trajet', 'Réunion d’équipe', 'Organisation / logistique', 'Administratif interne', 'Veille juridique', 'Informatique / outils', 'Entretien / RH interne'];
 const PAYROLL_TASKS = STANDARD_TASKS;
 const missingStandard = () => STANDARD_TASKS.filter(n => !S.meta.tasks.some(t => norm(t.name) === norm(n)));
 function addPresetTasks() {
