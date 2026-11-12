@@ -636,7 +636,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.7.1';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -897,7 +897,7 @@ const Store = {
     }
     if (key.startsWith('cy-')) {
       const c = S.cycles[key.slice(3)];
-      if (!c || !Object.keys(c.rows || {}).length) return null;
+      if (!c || (!Object.keys(c.rows || {}).length && !c.closed)) return null;
       return c;
     }
     return null;
@@ -954,7 +954,7 @@ function applyDoc(key, body) {
     if (body && body.entries) S.days[k] = { entries: body.entries }; else delete S.days[k];
   } else if (key.startsWith('cy-')) {
     const k = key.slice(3);
-    if (body && body.rows) S.cycles[k] = body.closed ? { rows: body.rows, closed: body.closed } : { rows: body.rows }; else delete S.cycles[k];
+    if (body && body.rows) S.cycles[k] = { rows: body.rows, ...(body.closed ? { closed: body.closed } : {}), ...(body.closed && body.manual ? { manual: true } : {}) }; else delete S.cycles[k];
   }
   S.rev++;
 }
@@ -1733,9 +1733,10 @@ function cyMini(lbl, a, b, ratio = [a, b]) {
   return `<span class="cy-mini"><span>${lbl}</span><span class="cy-pg-track"><span class="cy-pg-fill ${v === 100 ? 'full' : ''}" style="width:${v}%"></span></span><b>${a}</b>/${b}</span>`;
 }
 const cyClosed = mk => (S.cycles[mk] && S.cycles[mk].closed) || null;
-function cySetClosed(mk, v) {
+function cySetClosed(mk, v, manual = false) {
   const doc = (S.cycles[mk] ||= { rows: {} }); doc.rows ||= {};
   if (v) doc.closed = v; else delete doc.closed;
+  if (v && manual) doc.manual = true; else delete doc.manual;
   S.rev++; Store.put('cy-' + mk); scheduleRender();
 }
 // Progression du portefeuille sur un cycle
@@ -1761,6 +1762,23 @@ function cyBar(lbl, a, b, sub, ratio = [a, b]) {
   return `<div class="cy-pg"><div class="cy-pg-top"><span class="cy-pg-l">${lbl}</span><span class="cy-pg-n"><b>${a}</b> / ${b}</span><span class="cy-pg-p">${ratio[1] ? v + ' %' : '–'}</span></div>
     <div class="cy-pg-track" role="progressbar" aria-valuemin="0" aria-valuemax="${ratio[1]}" aria-valuenow="${ratio[0]}" aria-label="${esc(lbl)}"><div class="cy-pg-fill ${v === 100 ? 'full' : ''}" style="width:${v}%"></div></div>${sub ? `<div class="cy-pg-s">${sub}</div>` : ''}</div>`;
 }
+function openCyManualClose(mk) {
+  const g = cyProgress(mk), lbl = MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4);
+  const y = mk.slice(0, 4), olders = []; for (let m = prevMk(mk); m >= y + '-01'; m = prevMk(m)) if (!cyClosed(m)) olders.push(m);
+  const m = modal(`<div class="modal-h"><h3>Clôturer manuellement le cycle de ${esc(lbl)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">
+      <p>${g.dsn[1] - g.dsn[0]} DSN sur ${g.dsn[1]} ne sont pas renseignées dans Chronocab. La clôture manuelle arrête les rappels et les alertes de ce cycle, sans rien modifier aux dossiers.</p>
+      <p class="muted small">Utile pour les cycles suivis ailleurs (ancien portefeuille, tableau Excel…). Vous pourrez rouvrir le cycle à tout moment.</p>
+      ${olders.length ? `<label class="chk" style="font-size:13px"><input type="checkbox" id="cmc-all" checked> Clôturer aussi les ${olders.length} cycle${olders.length > 1 ? 's' : ''} précédent${olders.length > 1 ? 's' : ''} non clôturé${olders.length > 1 ? 's' : ''} de ${y} (${olders.slice().reverse().map(x => MONTHS[+x.slice(5) - 1]).join(', ')})</label>` : ''}
+    </div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cmc-ok">Clôturer</button></div>`);
+  m.el.querySelector('#cmc-ok').addEventListener('click', () => {
+    const all = m.el.querySelector('#cmc-all')?.checked, list = [mk, ...(all ? olders : [])], today = isoDay(Date.now());
+    list.forEach(x => cySetClosed(x, today, true));
+    m.close();
+    toast(list.length > 1 ? list.length + ' cycles clôturés manuellement' : 'Cycle de ' + lbl + ' clôturé manuellement', 'Annuler', () => list.forEach(x => cySetClosed(x, null)));
+  });
+}
 function cyHistory(mk) {
   let m = mk; const list = [];
   for (let i = 0; i < 6; i++) { list.unshift(m); m = prevMk(m); }
@@ -1768,7 +1786,7 @@ function cyHistory(mk) {
     const g = cyProgress(k), cl = cyClosed(k), cur = k === mk;
     const st = cl ? 'closed' : !g.touched ? 'empty' : g.allDsn ? 'ready' : 'open';
     const txt = cl ? '✓' : !g.touched ? '–' : pct(g.dsn[0], g.dsn[1]) + ' %';
-    const tip = cl ? 'Cycle clôturé le ' + fmtDate(dOf(cl)) : !g.touched ? 'Aucune saisie' : g.dsn[0] + ' DSN déposées sur ' + g.dsn[1];
+    const tip = cl ? 'Cycle clôturé' + (S.cycles[k]?.manual ? ' manuellement' : '') + ' le ' + fmtDate(dOf(cl)) : !g.touched ? 'Aucune saisie' : g.dsn[0] + ' DSN déposées sur ' + g.dsn[1];
     return `<button class="cy-h st-${st} ${cur ? 'cur' : ''}" data-cy="goto" data-mk="${k}" title="${esc(MONTHS_L[+k.slice(5) - 1] + ' ' + k.slice(0, 4) + ' — ' + tip)}"><span>${MONTHS[+k.slice(5) - 1]}</span><b>${txt}</b></button>`;
   }).join('')}</div>`;
 }
@@ -1844,7 +1862,7 @@ function renderCycle(P) {
   if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div><div class="cy-todo-list">${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div></div>`;
   if (isApril) html += `<div class="warn" style="margin-top:12px">Cycle d’avril : la DSN doit déclarer la <b>DOETH</b> et la <b>taxe d’apprentissage libératoire</b>. Cochez les deux colonnes dédiées pour chaque dossier (OK, NC ou Exo).</div>`;
   const g = cyProgress(mk), cl = cyClosed(mk), restDsn = g.dsn[1] - g.dsn[0], pbs = cyProgress(prevMk(mk)).bs;
-  const closeBtn = cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" ${g.allDsn ? '' : 'disabled'} title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Disponible quand toutes les DSN du portefeuille sont déposées'}">Clôturer le cycle</button>`;
+  const closeBtn = cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Toutes les DSN ne sont pas déposées : clôture manuelle possible (ex. cycles non suivis dans Chronocab)'}">${g.allDsn ? 'Clôturer le cycle' : 'Clôturer manuellement…'}</button>`;
   if (lsGet('cyProgMin', '') === '1') html += `<div class="card cy-prog min ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}"><div class="cy-prog-line">
       <b class="cy-prog-t">Progression</b>
       ${cyMini('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.noBs ? g.dep : g.bsDep)}
@@ -1854,7 +1872,7 @@ function renderCycle(P) {
       <button class="btn sm ghost" data-cy="progmin" title="Afficher le détail de la progression">Détails ▾</button></div></div>`;
   else html += `<div class="card cy-prog ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}">
     <div class="cy-prog-h"><div><div class="cy-prog-t">Progression du cycle de ${esc(monthLabel)}</div>
-      <div class="muted small">${cl ? 'Cycle de paie déclaré terminé le ' + fmtDate(dOf(cl)) : !g.n ? '&nbsp;' : g.allDsn ? 'Toutes les DSN sont déposées : vous pouvez clôturer le cycle.' : restDsn + ' DSN restante' + (restDsn > 1 ? 's' : '') + ' avant de pouvoir clôturer'}</div></div>
+      <div class="muted small">${cl ? (S.cycles[mk]?.manual ? 'Cycle clôturé manuellement le ' : 'Cycle de paie déclaré terminé le ') + fmtDate(dOf(cl)) : !g.n ? '&nbsp;' : g.allDsn ? 'Toutes les DSN sont déposées : vous pouvez clôturer le cycle.' : restDsn + ' DSN restante' + (restDsn > 1 ? 's' : '') + ' avant de pouvoir clôturer'}</div></div>
       <span class="sp" style="flex:1"></span>
       ${closeBtn}<button class="btn sm ghost" data-cy="progmin" title="Réduire la progression sur une ligne">Réduire ▴</button>
     </div>
@@ -2021,11 +2039,11 @@ function bindCycle() {
     else if (a === 'progmin') { lsSet('cyProgMin', lsGet('cyProgMin', '') === '1' ? '' : '1'); renderPortfolio(); }
     else if (a === 'goto') { P.cmonth = b.dataset.mk; renderPortfolio(); }
     else if (a === 'close') {
-      const mk = P.cmonth; if (!cyProgress(mk).allDsn) return;
+      const mk = P.cmonth; if (!cyProgress(mk).allDsn) { openCyManualClose(mk); return; }
       cySetClosed(mk, isoDay(Date.now()));
       toast('🎉 Cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ' clôturé', 'Annuler', () => cySetClosed(mk, null));
     }
-    else if (a === 'reopen') { const mk = P.cmonth, old = cyClosed(mk); cySetClosed(mk, null); toast('Cycle rouvert', 'Annuler', () => cySetClosed(mk, old)); }
+    else if (a === 'reopen') { const mk = P.cmonth, old = cyClosed(mk), man = !!S.cycles[mk]?.manual; cySetClosed(mk, null); toast('Cycle rouvert', 'Annuler', () => cySetClosed(mk, old, man)); }
     else if (a === 'goapril') { P.cmonth = new Date().getFullYear() + '-04'; renderPortfolio(); }
     else if (a === 'params' && cid) openCyParams(cid);
     else if (a === 'start' && cid) { startTimer({ client: cid, task: null, label: '' }); location.hash = 'chrono'; setTimeout(() => cbTask.focus(), 50); }
