@@ -255,6 +255,19 @@ h2:first-child{margin-top:0}
 .cy-mini .cy-pg-track{display:inline-block;width:110px;height:7px}
 .cy-mini .cy-pg-fill{display:block}
 .cy-mini b{font-family:var(--mono);color:var(--ink)}
+#quote-card{position:fixed;left:0;right:0;top:50%;bottom:calc(60px + env(safe-area-inset-bottom));z-index:55;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--bg) 55%,transparent);animation:qcIn .4s ease both;cursor:pointer}
+#quote-card.out{animation:qcOut .4s ease both}
+.qc-in{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:18px 20px 14px;text-align:center}
+.qc-brand{font-family:var(--brand-font);font-weight:600;letter-spacing:var(--brand-ls);color:var(--accent);font-size:15px;margin-bottom:10px}
+#quote-card blockquote{margin:0;font-family:var(--quote-font);font-style:italic;font-size:19px;line-height:1.4;color:var(--ink)}
+.qc-auth{margin-top:10px;font-size:13px;color:var(--muted)}
+.qc-bar{margin:14px auto 6px;width:90px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.qc-bar i{display:block;height:100%;background:var(--accent);animation:qcBar 7s linear both}
+.qc-hint{font-size:11px;color:var(--muted)}
+@keyframes qcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes qcOut{from{opacity:1}to{opacity:0}}
+@keyframes qcBar{from{width:0}to{width:100%}}
+@media (prefers-reduced-motion:reduce){#quote-card,#quote-card.out,.qc-bar i{animation:none}}
 #quote-tick{flex:1;min-width:0;align-self:center;height:30px;overflow:hidden;position:relative;margin:0 12px;cursor:pointer;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);transition:opacity .4s}
 #quote-tick.out{opacity:0}
 .qt-in{position:absolute;left:0;top:0;height:30px;display:flex;align-items:center;gap:10px;white-space:nowrap;will-change:transform}
@@ -644,7 +657,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.8.3';
+const APP_VERSION = '1.8.4';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -3214,8 +3227,19 @@ const quoteOn = () => lsGet('quote', '1') !== '0';
 // Citation affichée une fois, en défilement dans le bandeau du haut, à l'ouverture
 function showQuote(force = false) {
   if (!force && (!quoteOn() || navigator.webdriver)) return;
-  document.getElementById('quote-tick')?.remove();
+  document.getElementById('quote-tick')?.remove(); document.getElementById('quote-card')?.remove();
   const [q, a] = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  // Téléphone : carte dans la moitié inférieure de l'écran (le bandeau du haut y est trop étroit)
+  if (window.matchMedia && matchMedia('(max-width: 700px)').matches) {
+    const el = document.createElement('div'); el.id = 'quote-card'; el.setAttribute('role', 'status');
+    el.innerHTML = `<div class="qc-in"><div class="qc-brand">Antevorta</div><blockquote>« ${esc(q)} »</blockquote><div class="qc-auth">— ${esc(a)}</div><div class="qc-bar"><i></i></div><div class="qc-hint">Touchez pour fermer</div></div>`;
+    document.body.appendChild(el);
+    let gone = false;
+    const close = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 400); };
+    el.addEventListener('click', close);
+    setTimeout(close, 7000);
+    return;
+  }
   const top = document.querySelector('header.top'), right = top && top.querySelector('.top-right'); if (!right) return;
   const el = document.createElement('div'); el.id = 'quote-tick'; el.title = 'Cliquer pour masquer';
   el.innerHTML = `<span class="qt-in"><span class="qt-q">« ${esc(q)} »</span><span class="qt-a">— ${esc(a)}</span></span>`;
