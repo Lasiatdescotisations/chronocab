@@ -657,7 +657,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.8.4';
+const APP_VERSION = '1.8.5';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -3223,7 +3223,7 @@ const QUOTES = [
   ['Ce qui se mesure s’améliore.', 'Sagesse de cabinet'],
   ['Un chrono lancé, c’est une facture bien justifiée.', 'Sagesse de cabinet'],
 ];
-const quoteOn = () => lsGet('quote', '1') !== '0';
+const quoteOn = () => lsGet('quote', '0') === '1'; // désactivé par défaut, à activer dans les réglages
 // Citation affichée une fois, en défilement dans le bandeau du haut, à l'ouverture
 function showQuote(force = false) {
   if (!force && (!quoteOn() || navigator.webdriver)) return;
