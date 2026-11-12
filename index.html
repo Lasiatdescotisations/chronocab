@@ -138,6 +138,111 @@ h2:first-child{margin-top:0}
 .ref-tools{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .ref-tools input{flex:1;min-width:160px}
 .clients-card .ref-list{max-height:560px}
+.month-nav{display:flex;align-items:center;gap:6px;font-size:16px}
+.month-nav .icon{font-size:20px;line-height:1}
+.month-nav .icon:disabled{opacity:.3;cursor:default}
+.stat .of{font-size:14px;color:var(--muted)}
+.up{color:var(--accent);font-size:11px;white-space:nowrap}
+.down{color:var(--stop);font-size:11px;white-space:nowrap}
+.ok{color:var(--accent);font-weight:700}
+.ko{color:var(--line-2)}
+.t th.c,.t td.c{text-align:center}
+.t th .sort{border:0;background:transparent;font:inherit;font-weight:600;color:inherit;padding:0;cursor:pointer;white-space:nowrap}
+.t th .sort.on{color:var(--accent)}
+.pf-row.idle td{color:var(--muted)}
+.pf-row.idle .pf-name{color:var(--ink-2)}
+.pf-row:hover td{background:color-mix(in srgb,var(--surface-2) 50%,transparent)}
+.pf-name{font-weight:600;white-space:nowrap}
+.icon.xs{width:26px;height:26px}
+.icon.xs svg{width:13px;height:13px}
+.pf-detail td{background:var(--surface-2)}
+.pf-tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px}
+.pf-task{display:flex;gap:10px;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.pf-task span:first-child{flex:1;font-weight:500}
+.pf-head .seg{margin-right:8px}
+.filters label.chk{flex-direction:row;align-items:center;gap:6px}
+.filters label.chk input{width:auto;padding:0}
+.cy-table th,.cy-table td{padding:6px 8px}
+.cy-table td.cy-name{position:sticky;left:0;background:var(--surface);z-index:1;min-width:190px}
+.cy-name .what{padding:0}
+.cy-name .what .cl{max-width:230px}
+.cy-perm{font-size:11px;color:var(--muted);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.cy-note-ic{font-size:11px}
+.cy-cell{text-align:center;cursor:pointer;font-family:var(--mono);font-weight:600;min-width:58px;border-left:1px solid var(--line);user-select:none;white-space:nowrap}
+.cy-cell:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+.cy-cell.st-done{background:var(--accent-soft);color:var(--accent)}
+.cy-cell.st-warn{background:var(--todo-soft)}
+.cy-cell.st-late{background:var(--stop-soft);color:var(--stop)}
+.cy-cell.st-na,.cy-cell.st-auto{background:var(--surface-2);color:var(--muted);font-family:var(--sans);font-weight:400;font-size:12px}
+.cy-cell.st-rel{background:var(--todo-soft)}
+.cy-cell.st-todo:empty::after,.cy-cell.st-warn:empty::after,.cy-cell.st-late:empty::after{content:"+";color:var(--line-2);font-weight:400}
+.cy-r{color:var(--s-todo);font-weight:700;margin-right:1px}
+.cy-cell sup{font-size:9px;color:var(--muted);margin-left:1px}
+.cy-lbl{font-size:11px}
+.cy-in{border-color:transparent;background:transparent;padding:4px 6px;width:120px}
+.cy-in:hover{border-color:var(--line)}
+.cy-in.num{width:52px;text-align:center;font-family:var(--mono);font-weight:600}
+.cy-in.sugg{color:var(--muted);font-style:italic;font-weight:400}
+.cy-in.wide{width:200px}
+.cy-fin td{background:color-mix(in srgb,var(--accent-soft) 35%,transparent)}
+.cy-fin td.cy-name{background:color-mix(in srgb,var(--accent-soft) 35%,var(--surface))}
+.cy-tri{border:1px solid var(--line-2);border-radius:12px;background:var(--surface);font-size:11px;padding:2px 9px;min-width:44px}
+.cy-tri.v-ok{background:var(--accent-soft);color:var(--accent);border-color:transparent;font-weight:600}
+.cy-tri.v-none{color:var(--stop)}
+.cy-todo{margin-top:12px;padding:10px 14px}
+.cy-todo-h{font-weight:600;margin-bottom:4px}
+.cy-todo-i{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.cy-todo-i span{flex:1}
+.cy-todo-i.late span{color:var(--stop)}
+.cy-todo-i.camp span{font-weight:600}
+.cy-prog{margin-top:12px;padding:14px 16px}
+.cy-prog.is-ready{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.cy-prog.is-closed{background:color-mix(in srgb,var(--accent-soft) 40%,var(--surface))}
+.cy-prog-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.cy-prog-t{font-weight:600;font-size:15px}
+.cy-closed-badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;padding:4px 10px;border-radius:12px}
+.cy-pg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
+.cy-pg-top{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+.cy-pg-l{font-weight:600;flex:1}
+.cy-pg-n{font-family:var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.cy-pg-n b{font-size:18px;color:var(--ink)}
+.cy-pg-p{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:40px;text-align:right}
+.cy-pg-track{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.cy-pg-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .3s}
+.cy-pg-s{font-size:12px;color:var(--muted);margin-top:4px}
+.cy-pg-w{color:var(--s-todo)}
+.cy-prog-sub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.cy-prog-sub b{font-family:var(--mono);color:var(--ink)}
+.cy-hist{display:flex;gap:4px}
+.cy-h{display:flex;flex-direction:column;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:3px 7px;min-width:46px;font-size:11px;color:var(--muted);line-height:1.25}
+.cy-h b{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.cy-h.st-closed{background:var(--accent-soft);border-color:transparent}
+.cy-h.st-closed b{color:var(--accent)}
+.cy-h.st-ready b{color:var(--accent)}
+.cy-h.cur{box-shadow:0 0 0 2px var(--accent)}
+.cy-h:hover{border-color:var(--accent)}
+.cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
+.cy-banner span{flex:1}
+.cy-legend{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.cy-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.lg-done{background:var(--accent-soft);border:1px solid var(--accent)}
+.lg-warn{background:var(--todo-soft);border:1px solid var(--s-todo)}
+.lg-late{background:var(--stop-soft);border:1px solid var(--stop)}
+.lg-na{background:var(--surface-2);border:1px solid var(--line-2)}
+.cy-pop{position:absolute;z-index:150;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.18);width:250px;padding:6px;font-size:13px}
+.cy-pop-h{font-weight:600;padding:6px 8px;font-size:12px;color:var(--ink-2)}
+.cy-pop-list{max-height:270px;overflow:auto}
+.cy-pop-i{display:block;width:100%;text-align:left;border:0;background:transparent;padding:7px 9px;border-radius:6px}
+.cy-pop-i:hover{background:var(--accent-soft)}
+.cy-pop-i.cur{font-weight:700;color:var(--accent)}
+.cy-pop-i.today:not(.cur){font-weight:600}
+.cy-pop-i.danger{color:var(--stop)}
+.cy-pop-i.strong{color:var(--accent);font-weight:600}
+.cy-pop-foot{display:flex;gap:6px;padding:6px 4px;border-top:1px solid var(--line);margin-top:4px}
+.cy-pop-foot input{flex:1;padding:4px 6px}
+.cy-pop-sep,.cy-pop-sec{font-size:11px;color:var(--muted);padding:4px 8px}
+.cy-chip{display:inline-flex;align-items:center;gap:3px;background:var(--surface-2);border-radius:10px;padding:1px 6px;margin:2px}
+.cy-chip button{border:0;background:transparent;color:var(--muted);padding:0 2px;cursor:pointer}
 .opt-head{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px 9px 3px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--c,#999);flex:none;display:inline-block}
 
@@ -313,7 +418,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   #account{padding:4px 8px}
   #install-btn{padding:5px 9px}
   .nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line);z-index:60;justify-content:space-around;gap:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
-  .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:11px;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
+  .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:10.5px;min-width:0;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
   .nav a.on{border-top-color:var(--accent);color:var(--accent)}
   .nav a svg{display:block;width:22px;height:22px}
   .nav a .lg{display:none} .nav a .sm{display:inline}
@@ -343,6 +448,15 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
   .chip{flex:none;max-width:80vw}
   .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .pf-head #pf-q{min-width:0 !important;flex:1 1 100%}
+  .pf-tasks{grid-template-columns:1fr}
+  .cy-table td.cy-name{min-width:140px}
+  .cy-name .what .cl{max-width:140px}
+  .cy-perm{max-width:140px}
+  .cy-banner{flex-wrap:wrap}
+  .cy-pg-grid{grid-template-columns:1fr}
+  .cy-prog-h{flex-wrap:wrap}
+  .cy-hist{width:100%;overflow-x:auto}
   .stat{padding:10px 12px}
   .stat .v{font-size:20px}
   .day-h{flex-wrap:wrap;gap:6px 12px;padding:10px 12px}
@@ -409,6 +523,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Chronocab</span></div>
   <nav class="nav">
     <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span>Chrono</span></a>
+    <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon portefeuille</span><span class="sm">Dossiers</span></a>
     <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
     <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
     <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
@@ -455,6 +570,9 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   </section>
 
   <!-- ===== RAPPORTS ===== -->
+  <!-- ===== MON PORTEFEUILLE ===== -->
+  <section class="view" id="v-portefeuille"><div id="portefeuille-body" data-guard></div></section>
+
   <section class="view" id="v-rapports"><div id="rapports-body" data-guard></div></section>
 
   <!-- ===== FACTURATION ===== -->
@@ -486,7 +604,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.6.0';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -583,6 +701,7 @@ const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', 
 const S = {
   meta: { clients: [], tasks: [], persons: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
   days: {},          // 'YYYY-MM-DD' -> { entries: { id: entry } }
+  cycles: {},        // 'YYYY-MM' -> { rows: { idClient: {...} } } (cycle de paie)
   running: null,     // entrée en cours (end = null)
   rev: 0,
 };
@@ -736,12 +855,18 @@ const Store = {
       if (!d || !Object.keys(d.entries || {}).length) return null;
       return d;
     }
+    if (key.startsWith('cy-')) {
+      const c = S.cycles[key.slice(3)];
+      if (!c || !Object.keys(c.rows || {}).length) return null;
+      return c;
+    }
     return null;
   },
   put(key) {
     const b = this.bodyFor(key);
     const body = b === null ? null : JSON.parse(JSON.stringify(b));
     if (key.startsWith('d-') && body === null) delete S.days[key.slice(2)];
+    if (key.startsWith('cy-') && body === null) delete S.cycles[key.slice(3)];
     if (this.mode === 'local') {
       try { body === null ? localStorage.removeItem(LS_PREFIX + key) : localStorage.setItem(LS_PREFIX + key, JSON.stringify(body)); }
       catch (e) { this.lsOk = false; setSync(); }
@@ -787,6 +912,9 @@ function applyDoc(key, body) {
   else if (key.startsWith('d-')) {
     const k = key.slice(2);
     if (body && body.entries) S.days[k] = { entries: body.entries }; else delete S.days[k];
+  } else if (key.startsWith('cy-')) {
+    const k = key.slice(3);
+    if (body && body.rows) S.cycles[k] = body.closed ? { rows: body.rows, closed: body.closed } : { rows: body.rows }; else delete S.cycles[k];
   }
   S.rev++;
 }
@@ -1105,6 +1233,7 @@ function render() {
   if (isEditingGuarded()) { _pending = true; renderHeader(); return; }
   renderHeader();
   if (UI.view === 'chrono') renderChrono();
+  else if (UI.view === 'portefeuille') renderPortfolio();
   else if (UI.view === 'rapports') renderReports();
   else if (UI.view === 'facturation') renderBilling();
   else if (UI.view === 'referentiel') renderRefs();
@@ -1120,7 +1249,7 @@ function renderHeader() {
 }
 function route() {
   const h = (location.hash || '').slice(1);
-  UI.view = ['chrono', 'rapports', 'facturation', 'referentiel'].includes(h) || (h === 'acces' && Store.access === 'admin') ? h : 'chrono';
+  UI.view = ['chrono', 'portefeuille', 'rapports', 'facturation', 'referentiel'].includes(h) || (h === 'acces' && Store.access === 'admin') ? h : 'chrono';
   $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
   render();
 }
@@ -1158,6 +1287,8 @@ function renderChrono() {
   const unlogged = entries.filter(e => !e.logged && e.start >= addDays(today, -31)).length;
   const rec = recents();
   let html = '';
+  const cyt = cyTodo();
+  if (cyt.length) html += `<div class="cy-banner card"><span>📌 <b>${cyt.length}</b> rappel${cyt.length > 1 ? 's' : ''} de cycle de paie aujourd’hui : ${esc(cyt.slice(0, 2).map(t => t.txt).join(' · '))}${cyt.length > 2 ? '…' : ''}</span><a class="btn sm" href="#portefeuille" data-act="cyview">Voir</a></div>`;
   html += `<div class="warn" id="long-warn" hidden><span>Le chrono tourne depuis très longtemps : un oubli d’arrêt ?</span><button class="btn sm" data-act="forgot">Ajuster l’heure de fin</button></div>`;
   if (!S.meta.clients.length && !entries.length) {
     html += `<div class="card empty" style="margin-top:18px"><b>Bienvenue.</b><br>Tapez un nom de client dans « Client / dossier » pour le créer, puis une tâche (ex. « Production des bulletins »), et appuyez sur ▶.<br><br>
@@ -1285,6 +1416,7 @@ function bindChrono() {
     else if (act === 'recap') openRecap(b.closest('[data-day]').dataset.day);
     else if (act === 'stoprun') stopTimer();
     else if (act === 'forgot') openForgot();
+    else if (act === 'cyview') { (UI.pfv ||= {}).mode = 'cycle'; }
     else if (act === 'preset') { addPresetTasks(); }
   });
 }
@@ -1443,6 +1575,515 @@ async function downloadText(filename, txt, mime) {
     const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   } catch (e) { toast('Téléchargement indisponible ici : utilisez « Copier ».'); }
+}
+
+/* ---------- Cycle de paie (onglet Mon portefeuille) ----------
+   Paramètres par dossier : client.cy = { rec: var|auto|robot, recDay, vir: file|client|odep|nc, dep: next|fixed|nc, depDay, dsn: 5|15, notes }
+   Données du mois : S.cycles['AAAA-MM'] = { rows: { idClient: { rec, rel, prep, env, corr: [dates], bs, vir, dep, dsn, tpt, tptDone, note, doeth, tal } } }
+   Les dates sont stockées au format 'AAAA-MM-JJ'. */
+const CY_DEF = { rec: 'var', recDay: null, vir: 'file', dep: 'next', depDay: null, dsn: 15, notes: '' };
+const cyOf = c => ({ ...CY_DEF, ...(c && c.cy || {}) });
+const cyClients = () => S.meta.clients.filter(c => !c.deletedAt && !c.archived && isMine(c)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+const cyRow = (mk, cid) => (S.cycles[mk] && S.cycles[mk].rows && S.cycles[mk].rows[cid]) || {};
+const isoDay = ms => dayKey(ms);
+const dOf = iso => iso ? parseDay(iso) : null;
+function cySet(mk, cid, patch) {
+  const doc = (S.cycles[mk] ||= { rows: {} }); doc.rows ||= {};
+  const row = (doc.rows[cid] ||= {});
+  for (const k in patch) { if (patch[k] === null || patch[k] === '' || (Array.isArray(patch[k]) && !patch[k].length)) delete row[k]; else row[k] = patch[k]; }
+  if (!Object.keys(row).length) delete doc.rows[cid];
+  S.rev++; Store.put('cy-' + mk); scheduleRender();
+}
+const monthStart = mk => parseDay(mk + '-01');
+const monthEnd = mk => addMonths(monthStart(mk), 1) - DAY; // dernier jour du mois (00:00)
+const nextMk = mk => monthKey(addMonths(monthStart(mk), 1));
+const prevMk = mk => monthKey(addMonths(monthStart(mk), -1));
+function nextWorkday(ms) { let d = addDays(ms, 1); while ([0, 6].includes(new Date(d).getDay())) d = addDays(d, 1); return d; }
+function prevWorkday(ms) { let d = ms; while ([0, 6].includes(new Date(d).getDay())) d = addDays(d, -1); return d; }
+function dayIn(mk, day) { const s = monthStart(mk), e = monthEnd(mk); return Math.min(addDays(s, Math.max(1, day) - 1), e); }
+// Échéances indicatives d'un dossier pour le cycle mk
+function cyDue(mk, c, row) {
+  const p = cyOf(c), last = monthEnd(mk);
+  const due = {};
+  if (p.rec !== 'var' && p.recDay) due.env = prevWorkday(dayIn(mk, p.recDay));
+  if (p.vir !== 'client' && p.vir !== 'nc') due.vir = prevWorkday(addDays(last, -2));          // DJM-2
+  if (p.dep === 'fixed' && p.depDay) due.dep = dayIn(mk, p.depDay);
+  else if (p.dep === 'next') { const v = dOf(row.vir); due.dep = v ? nextWorkday(v) : (p.vir === 'client' || p.vir === 'nc' ? null : null); }
+  due.dsn = dayIn(nextMk(mk), p.dsn || 15);
+  return due;
+}
+// État d'une case : done | warn | late | na | todo | auto
+function cyState(mk, c, row, f) {
+  const p = cyOf(c), today = startOfDay(Date.now()), due = cyDue(mk, c, row);
+  const val = f === 'corr' ? (row.corr || []).slice(-1)[0] : row[f];
+  if (f === 'vir' && (p.vir === 'client' || p.vir === 'nc') && !val) return { st: 'na', label: p.vir === 'client' ? 'client' : 'NC' };
+  if (f === 'dep' && p.dep === 'nc' && !val) return { st: 'na', label: 'NC' };
+  if (f === 'rec' && p.rec !== 'var' && !val) return { st: 'auto', label: p.rec === 'robot' ? 'Automate' + (p.recDay ? ' ' + p.recDay : '') : 'Auto' + (p.recDay ? ' ' + p.recDay : '') };
+  if (val) return { st: 'done', label: null };
+  if (f === 'rec' && row.rel) return { st: 'rel', label: 'R', tip: 'Relancé le ' + fmtDate(dOf(row.rel)) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') + ' — variables pas encore reçues' };
+  const d = due[f];
+  if (f === 'rec' && p.rec === 'var') { if (today > dayIn(mk, 25)) return { st: 'warn', label: '', tip: 'Variables non reçues' }; return { st: 'todo' }; }
+  if (f === 'env' && row.rec && !d && today >= addDays(dOf(row.rec), 2)) return { st: 'warn', tip: 'Variables reçues il y a plus de 2 jours' };
+  if (!d) return { st: 'todo' };
+  if (today > d) return { st: 'late', tip: 'Échéance : ' + fmtDate(d) };
+  if (today >= addDays(d, f === 'dsn' ? -3 : -1)) return { st: 'warn', tip: 'Échéance : ' + fmtDate(d) };
+  return { st: 'todo', tip: 'Échéance : ' + fmtDate(d) };
+}
+// Nombre de BS effectif : saisi, sinon repris du dernier mois renseigné (jusqu'à 12 mois en arrière)
+function effBs(mk, cid) {
+  let m = mk;
+  for (let i = 0; i < 13; i++) { const v = cyRow(m, cid).bs; if (v != null && v !== '') return { n: +v, own: i === 0, from: m }; m = prevMk(m); }
+  return { n: null, own: false };
+}
+function cyRowDone(mk, c, row) {
+  const p = cyOf(c);
+  const ok = f => !!row[f] || cyState(mk, c, row, f).st === 'na';
+  return !!row.dsn && ok('vir') && ok('dep') && (!!row.env || p.rec === 'robot');
+}
+const cyClosed = mk => (S.cycles[mk] && S.cycles[mk].closed) || null;
+function cySetClosed(mk, v) {
+  const doc = (S.cycles[mk] ||= { rows: {} }); doc.rows ||= {};
+  if (v) doc.closed = v; else delete doc.closed;
+  S.rev++; Store.put('cy-' + mk); scheduleRender();
+}
+// Progression du portefeuille sur un cycle
+function cyProgress(mk) {
+  const cs = cyClients(), g = { n: cs.length, env: [0, 0], vir: [0, 0], dep: [0, 0], bsDep: [0, 0], dsn: [0, 0], bsDsn: 0, fin: 0, bs: 0, touched: 0, noBs: 0 };
+  for (const c of cs) {
+    const row = cyRow(mk, c.id), p = cyOf(c), n = effBs(mk, c.id).n || 0;
+    if (Object.keys(row).length) g.touched++;
+    g.bs += n;
+    g.env[1]++; if (row.env || (p.rec === 'robot' && row.dsn)) g.env[0]++;
+    if (!['client', 'nc'].includes(p.vir)) { g.vir[1]++; if (row.vir) g.vir[0]++; }
+    if (p.dep !== 'nc') { g.dep[1]++; g.bsDep[1] += n; if (!n) g.noBs++; if (row.dep) { g.dep[0]++; g.bsDep[0] += n; } }
+    g.dsn[1]++; if (row.dsn) { g.dsn[0]++; g.bsDsn += n; }
+    if (cyRowDone(mk, c, row)) g.fin++;
+  }
+  g.allDsn = g.n > 0 && g.dsn[0] === g.dsn[1];
+  return g;
+}
+const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
+// ratio = [fait, total] qui règle la barre ; a / b = chiffres affichés (peuvent différer : bulletins vs dossiers)
+function cyBar(lbl, a, b, sub, ratio = [a, b]) {
+  const v = pct(ratio[0], ratio[1]);
+  return `<div class="cy-pg"><div class="cy-pg-top"><span class="cy-pg-l">${lbl}</span><span class="cy-pg-n"><b>${a}</b> / ${b}</span><span class="cy-pg-p">${ratio[1] ? v + ' %' : '–'}</span></div>
+    <div class="cy-pg-track" role="progressbar" aria-valuemin="0" aria-valuemax="${ratio[1]}" aria-valuenow="${ratio[0]}" aria-label="${esc(lbl)}"><div class="cy-pg-fill ${v === 100 ? 'full' : ''}" style="width:${v}%"></div></div>${sub ? `<div class="cy-pg-s">${sub}</div>` : ''}</div>`;
+}
+function cyHistory(mk) {
+  let m = mk; const list = [];
+  for (let i = 0; i < 6; i++) { list.unshift(m); m = prevMk(m); }
+  return `<div class="cy-hist" aria-label="Cycles précédents">${list.map(k => {
+    const g = cyProgress(k), cl = cyClosed(k), cur = k === mk;
+    const st = cl ? 'closed' : !g.touched ? 'empty' : g.allDsn ? 'ready' : 'open';
+    const txt = cl ? '✓' : !g.touched ? '–' : pct(g.dsn[0], g.dsn[1]) + ' %';
+    const tip = cl ? 'Cycle clôturé le ' + fmtDate(dOf(cl)) : !g.touched ? 'Aucune saisie' : g.dsn[0] + ' DSN déposées sur ' + g.dsn[1];
+    return `<button class="cy-h st-${st} ${cur ? 'cur' : ''}" data-cy="goto" data-mk="${k}" title="${esc(MONTHS_L[+k.slice(5) - 1] + ' ' + k.slice(0, 4) + ' — ' + tip)}"><span>${MONTHS[+k.slice(5) - 1]}</span><b>${txt}</b></button>`;
+  }).join('')}</div>`;
+}
+function cyLabel(iso, mk) {
+  if (!iso) return '';
+  const d = new Date(dOf(iso)), m = monthKey(d.getTime());
+  return m === mk || m === nextMk(mk) ? String(d.getDate()) : pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
+}
+// Rappels du jour (cycles du mois en cours et du mois précédent)
+function cyTodo() {
+  const today = startOfDay(Date.now()), cur = monthKey(today), items = [];
+  const cs = cyClients();
+  for (const mk of [prevMk(cur), cur]) {
+    if (cyClosed(mk)) continue;
+    for (const c of cs) {
+      const row = cyRow(mk, c.id), p = cyOf(c), due = cyDue(mk, c, row), when = mk === cur ? '' : ' (cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ')';
+      const add = (f, txt, d) => items.push({ mk, cid: c.id, f, txt: txt + when, late: d && today > d, d });
+      if (mk === cur && p.rec !== 'var' && !row.env && due.env && today >= addDays(due.env, -1)) add('env', 'Paie automatique à envoyer — ' + c.name, due.env);
+      if (mk === cur && p.rec === 'var' && !row.rec && today >= dayIn(mk, 20) && row.rel !== isoDay(today)) items.push({ mk, cid: c.id, f: 'rel', txt: (row.rel ? 'Relancer à nouveau' : 'Relancer') + ' pour les variables — ' + c.name + (row.rel ? ' (dernière relance le ' + fmtDate(dOf(row.rel)).slice(0, 5) + ')' : ''), late: today > dayIn(mk, 25) });
+      if (!row.vir && due.vir && row.env && today >= addDays(due.vir, -1)) add('vir', 'Virements à envoyer — ' + c.name, due.vir);
+      if (!row.dep && due.dep && today >= due.dep) add('dep', 'Déposer les bulletins — ' + c.name, due.dep);
+      if (!row.dsn && today >= addDays(due.dsn, -3) && (row.env || p.rec === 'robot' || today > due.dsn)) add('dsn', 'DSN à déposer — ' + c.name + ' (échéance le ' + fmtDate(due.dsn).slice(0, 5) + ')', due.dsn);
+    }
+  }
+  // Attestations de mi-temps thérapeutique : début du mois suivant
+  const pm = prevMk(cur);
+  if (new Date(today).getDate() <= 10) for (const c of cs) { const row = cyRow(pm, c.id); if (row.tpt && !row.tptDone) items.push({ mk: pm, cid: c.id, f: 'tptDone', txt: 'Attestation mi-temps thérapeutique (Net-Entreprises) — ' + c.name + ' : ' + row.tpt }); }
+  // Campagne de la DSN d'avril
+  const y = new Date(today).getFullYear(), amk = y + '-04';
+  if (today >= parseDay(y + '-04-15') && today <= parseDay(y + '-05-15')) {
+    const rest = cs.filter(c => { const r = cyRow(amk, c.id); return !r.doeth || !r.tal; }).length;
+    if (rest) items.unshift({ campaign: true, txt: 'DSN d’avril : DOETH et taxe d’apprentissage libératoire à traiter (' + rest + ' dossier' + (rest > 1 ? 's' : '') + ' non cochés)' });
+  }
+  return items;
+}
+function cyCellHTML(mk, c, row, f) {
+  const s = cyState(mk, c, row, f);
+  let txt = '';
+  if (f === 'corr') { const arr = row.corr || []; txt = arr.length ? cyLabel(arr[arr.length - 1], mk) + (arr.length > 1 ? `<sup>×${arr.length}</sup>` : '') : ''; }
+  else if (f === 'rec' && row.rec) txt = (row.rel ? '<span class="cy-r">R</span>' : '') + cyLabel(row.rec, mk);
+  else if (f === 'rec' && row.rel) txt = '<span class="cy-r">R</span>';
+  else if (row[f]) txt = cyLabel(row[f], mk);
+  else if (s.label) txt = `<span class="cy-lbl">${esc(s.label)}</span>`;
+  const title = [s.tip, row[f] && f !== 'corr' ? 'Fait le ' + fmtDate(dOf(row[f])) : '', f === 'rec' && row.rec && row.rel ? 'après relance le ' + fmtDate(dOf(row.rel)) : '', f === 'corr' && (row.corr || []).length ? 'Corrections : ' + row.corr.map(x => fmtDate(dOf(x)).slice(0, 5)).join(', ') : ''].filter(Boolean).join(' · ');
+  return `<td class="cy-cell st-${s.st}" data-cell="${f}" title="${esc(title || 'Cliquer pour poser la date du jour')}">${txt}</td>`;
+}
+const CY_TRI = { '': '', ok: 'OK', nc: 'NC', exo: 'Exo' };
+function renderCycle(P) {
+  const mk = P.cmonth, cs = cyClients(), [yy, mm] = mk.split('-').map(Number);
+  const monthLabel = MONTHS_L[mm - 1] + ' ' + yy, isApril = mm === 4, cur = monthKey(Date.now());
+  const q = norm(P.cq || '');
+  let rows = cs.map(c => ({ c, row: cyRow(mk, c.id) }));
+  const nAll = rows.length, done = rows.filter(r => cyRowDone(mk, r.c, r.row));
+  const bs = rows.reduce((a, r) => a + (effBs(mk, r.c.id).n || 0), 0);
+  const prevBs = cs.reduce((a, c) => a + (effBs(prevMk(mk), c.id).n || 0), 0);
+  if (P.cfilter === 'todo') rows = rows.filter(r => !cyRowDone(mk, r.c, r.row));
+  else if (P.cfilter === 'late') rows = rows.filter(r => ['rec', 'env', 'vir', 'dep', 'dsn'].some(f => ['late', 'warn'].includes(cyState(mk, r.c, r.row, f).st)));
+  else if (P.cfilter === 'done') rows = rows.filter(r => cyRowDone(mk, r.c, r.row));
+  if (q) rows = rows.filter(r => norm(r.c.name).includes(q) || norm(r.c.code).includes(q));
+  const closed = nAll && done.length === nAll ? Math.max(...rows.concat([]).map(r => Math.max(dOf(r.row.dsn) || 0, dOf(r.row.dep) || 0, dOf(r.row.vir) || 0))) : 0;
+  const todo = mk === cur || mk === prevMk(cur) ? cyTodo() : [];
+  const showPrep = !!P.showPrep;
+  const cols = [['rec', 'Réception'], ...(showPrep ? [['prep', 'Prépa']] : []), ['env', '1er envoi'], ['corr', 'Corrigé'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['tpt', 'TPT'], ['note', 'Remarques']];
+  let html = `<div class="card filters pf-head">${pfSwitch(P)}
+    <div class="month-nav"><button class="icon" data-cy="prev" title="Cycle précédent">‹</button><b>Cycle de ${esc(monthLabel)}</b><button class="icon" data-cy="next" title="Cycle suivant">›</button>${mk === cur ? '' : '<button class="btn sm ghost" data-cy="today">Cycle du mois</button>'}</div>
+    <span class="sp" style="flex:1"></span>
+    <input id="cy-q" placeholder="Rechercher un dossier…" value="${esc(P.cq || '')}" autocomplete="off" style="min-width:200px">
+    <label class="chk"><input type="checkbox" data-cy="prep" ${showPrep ? 'checked' : ''}> Colonne Prépa</label>
+    <button class="btn sm" data-cy="copy">${ICON.copy} Copier pour Excel</button></div>`;
+  if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div>${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div>`;
+  if (isApril) html += `<div class="warn" style="margin-top:12px">Cycle d’avril : la DSN doit déclarer la <b>DOETH</b> et la <b>taxe d’apprentissage libératoire</b>. Cochez les deux colonnes dédiées pour chaque dossier (OK, NC ou Exo).</div>`;
+  const g = cyProgress(mk), cl = cyClosed(mk), restDsn = g.dsn[1] - g.dsn[0], pbs = cyProgress(prevMk(mk)).bs;
+  html += `<div class="card cy-prog ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}">
+    <div class="cy-prog-h"><div><div class="cy-prog-t">Progression du cycle de ${esc(monthLabel)}</div>
+      <div class="muted small">${cl ? 'Cycle de paie déclaré terminé le ' + fmtDate(dOf(cl)) : !g.n ? '&nbsp;' : g.allDsn ? 'Toutes les DSN sont déposées : vous pouvez clôturer le cycle.' : restDsn + ' DSN restante' + (restDsn > 1 ? 's' : '') + ' avant de pouvoir clôturer'}</div></div>
+      <span class="sp" style="flex:1"></span>
+      ${cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" ${g.allDsn ? '' : 'disabled'} title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Disponible quand toutes les DSN du portefeuille sont déposées'}">Clôturer le cycle</button>`}
+    </div>
+    <div class="cy-pg-grid">
+      ${cyBar('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.dep[0] + ' / ' + g.dep[1] + ' dossiers' + (g.n - g.dep[1] ? ' · ' + (g.n - g.dep[1]) + ' non concerné' + (g.n - g.dep[1] > 1 ? 's' : '') : '') + (g.noBs ? ` · <span class="cy-pg-w">${g.noBs} dossier${g.noBs > 1 ? 's' : ''} sans nombre de BS : avancement compté en dossiers</span>` : ''), g.noBs ? g.dep : g.bsDep)}
+      ${cyBar('DSN déposées', g.dsn[0], g.dsn[1], g.bsDsn + ' bulletin' + (g.bsDsn > 1 ? 's' : '') + ' déclaré' + (g.bsDsn > 1 ? 's' : '') + ' · échéance le 5 ou le 15 selon le dossier')}
+    </div>
+    <div class="cy-prog-sub">
+      <span>1<sup>er</sup> envoi <b>${g.env[0]}/${g.env[1]}</b></span>
+      <span>Virements <b>${g.vir[0]}/${g.vir[1]}</b></span>
+      <span>Dossiers terminés <b>${g.fin}/${g.n}</b></span>
+      <span>Bulletins du mois <b>${g.bs || '–'}</b>${pbs ? ` <span class="muted">(préc. ${pbs})</span>` : ''}</span>
+      <span class="sp" style="flex:1"></span>${cyHistory(mk)}
+    </div>
+  </div>`;
+  html += `<div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>
+    <div class="seg" data-seg="cyf">${[['all', 'Tous'], ['todo', 'En cours'], ['late', 'À surveiller'], ['done', 'Terminés']].map(([v, l]) => `<button data-v="${v}" class="${(P.cfilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+  <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'tpt'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}">${l}</th>`).join('')}<th></th></tr></thead><tbody>
+  ${rows.map(({ c, row }) => {
+    const p = cyOf(c), fin = cyRowDone(mk, c, row);
+    return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''}"><td class="mono small">${esc(c.code || '')}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier${p.notes ? ' — ' + esc(p.notes) : ''}"><span class="dot" style="--c:${colorFor(c.id)}"></span><span class="cl">${esc(c.name)}</span>${p.notes ? '<span class="cy-note-ic" title="' + esc(p.notes) + '">📝</span>' : ''}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${p.notes ? `<div class="cy-perm">${esc(p.notes)}</div>` : ''}</td>
+      ${cols.map(([f]) => {
+        if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
+        if (f === 'tpt') return `<td><input class="cy-in" data-in="tpt" value="${esc(row.tpt || '')}" placeholder="—" title="Salariés en mi-temps thérapeutique (rappel d’attestation le mois suivant)">${row.tpt ? `<label class="chk small" title="Attestation faite"><input type="checkbox" data-in="tptDone" ${row.tptDone ? 'checked' : ''}>att.</label>` : ''}</td>`;
+        if (f === 'note') return `<td><input class="cy-in wide" data-in="note" value="${esc(row.note || '')}" placeholder="—"></td>`;
+        if (f === 'doeth' || f === 'tal') return `<td class="c"><button class="cy-tri v-${row[f] || 'none'}" data-tri="${f}">${CY_TRI[row[f] || ''] || '…'}</button></td>`;
+        return cyCellHTML(mk, c, row, f);
+      }).join('')}
+      <td><button class="icon xs" data-cy="start" title="Démarrer le chrono sur ce dossier">${ICON.play}</button></td></tr>`;
+  }).join('') || `<tr><td colspan="${cols.length + 3}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.'}</td></tr>`}
+  ${rows.length ? `<tr class="tot"><td></td><td>Total (${rows.length})</td>${cols.map(([f]) => f === 'bs' ? `<td class="c num">${rows.reduce((a, r) => a + (effBs(mk, r.c.id).n || 0), 0) || ''}</td>` : '<td></td>').join('')}<td></td></tr>` : ''}
+  </tbody></table></div>
+  <div class="cy-legend muted small"><span><i class="lg-done"></i>fait</span><span><i class="lg-warn"></i>échéance proche</span><span><i class="lg-late"></i>en retard</span><span><i class="lg-na"></i>non concerné / automatique</span> · Clic sur une case vide : date du jour. Clic sur une case remplie : modifier, corriger ou effacer. Clic sur le nom : paramètres et remarques du dossier.</div>`;
+  const body = $('#portefeuille-body');
+  const sx = body.querySelector('.tbl-wrap')?.scrollLeft || 0;
+  body.innerHTML = html;
+  const tw = body.querySelector('.tbl-wrap'); if (tw) tw.scrollLeft = sx;
+  body._cyRows = rows; body._cyCols = cols; body._cyTodo = todo; body._cyMonth = monthLabel;
+}
+const WD_S = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+function closeCyPop() { const p = document.getElementById('cy-pop'); if (p) { p.remove(); document.removeEventListener('mousedown', cyPopOutside, true); document.removeEventListener('keydown', cyPopKey, true); } }
+function cyPopOutside(e) { const p = document.getElementById('cy-pop'); if (p && !p.contains(e.target)) closeCyPop(); }
+function cyPopKey(e) { if (e.key === 'Escape') closeCyPop(); }
+// Menu déroulant de dates sous la case : jours précédents / suivants, autre date, effacer
+function openCyCell(mk, cid, f, anchor) {
+  closeCyPop();
+  const c = clientOf(cid); if (!c) return;
+  const row = cyRow(mk, cid), today = startOfDay(Date.now());
+  const isCorr = f === 'corr', corr = row.corr || [];
+  const curIso = isCorr ? corr[corr.length - 1] : row[f];
+  const center = curIso ? dOf(curIso) : today;
+  const days = []; for (let i = -4; i <= 4; i++) days.push(addDays(center, i));
+  const lbl = d => (d === today ? 'Aujourd’hui · ' : d === addDays(today, -1) ? 'Hier · ' : d === addDays(today, 1) ? 'Demain · ' : '') + WD_S[new Date(d).getDay()] + ' ' + new Date(d).getDate() + ' ' + MONTHS[new Date(d).getMonth()];
+  const titles = { rec: row.rel && !row.rec ? 'Variables reçues le…' : 'Réception', prep: 'Préparation', env: '1er envoi', corr: 'Corrigé', vir: 'Virements', dep: 'Dépôts', dsn: 'DSN' };
+  const pop = document.createElement('div'); pop.id = 'cy-pop'; pop.className = 'cy-pop';
+  if (f === 'rec' && !row.rec && row.rel) days.forEach((d, i) => days[i] = d); // la liste propose « reçues le … »
+  pop.innerHTML = `<div class="cy-pop-h">${titles[f]} · ${esc(c.name)}</div>
+    ${isCorr ? `<div class="cy-pop-sec">${corr.length ? 'Corrections : ' + corr.map((x, i) => `<span class="cy-chip">${fmtDate(dOf(x)).slice(0, 5)}<button data-rm="${i}" title="Retirer">×</button></span>`).join(' ') : ''}</div>
+      <button class="cy-pop-i strong" data-add="${isoDay(today)}">+ Nouvelle correction aujourd’hui</button><div class="cy-pop-sep">Remplacer la dernière par :</div>` : ''}
+    <div class="cy-pop-list">${days.map(d => `<button class="cy-pop-i ${isoDay(d) === curIso ? 'cur' : ''} ${d === today ? 'today' : ''}" data-set="${isoDay(d)}">${lbl(d)}${isoDay(d) === curIso ? ' ✓' : ''}</button>`).join('')}</div>
+    <div class="cy-pop-foot"><input type="date" class="cy-pop-date" value="${curIso || isoDay(today)}" title="Autre date"><button class="btn sm" data-other="1">OK</button></div>
+    ${f === 'rec' ? `<div class="cy-pop-sec">${row.rel ? 'Relancé le ' + fmtDate(dOf(row.rel)).slice(0, 5) + (row.relN > 1 ? ' (' + row.relN + ' fois)' : '') : 'Pas de relance notée'}</div>
+      ${row.rel !== isoDay(today) ? `<button class="cy-pop-i" data-relnow="1">↻ Relance envoyée aujourd’hui (R)</button>` : ''}
+      ${row.rel ? `<button class="cy-pop-i" data-relclear="1">Retirer la relance</button>` : ''}` : ''}
+    ${curIso ? `<button class="cy-pop-i danger" data-clear="1">${isCorr ? 'Effacer toutes les corrections' : 'Effacer la date'}</button>` : ''}`;
+  document.body.appendChild(pop);
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = r.left + window.scrollX, top = r.bottom + window.scrollY + 4;
+  if (left + pw > window.scrollX + document.documentElement.clientWidth - 8) left = window.scrollX + document.documentElement.clientWidth - pw - 8;
+  if (r.bottom + ph + 8 > window.innerHeight && r.top - ph - 4 > 0) top = r.top + window.scrollY - ph - 4;
+  pop.style.left = Math.max(8, left) + 'px'; pop.style.top = top + 'px';
+  pop.querySelector('.cy-pop-i.cur, .cy-pop-i.today')?.scrollIntoView({ block: 'nearest' });
+  setTimeout(() => { document.addEventListener('mousedown', cyPopOutside, true); document.addEventListener('keydown', cyPopKey, true); }, 0);
+  const setVal = v => {
+    if (isCorr) { const arr = corr.slice(); if (arr.length) arr[arr.length - 1] = v; else arr.push(v); cySet(mk, cid, { corr: [...new Set(arr)].sort() }); }
+    else cySet(mk, cid, { [f]: v });
+    closeCyPop();
+  };
+  pop.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.relnow) { cySet(mk, cid, { rel: isoDay(today), relN: (row.relN || (row.rel ? 1 : 0)) + 1 }); closeCyPop(); return; }
+    if (b.dataset.relclear) { cySet(mk, cid, { rel: null, relN: null }); closeCyPop(); return; }
+    if (b.dataset.set) setVal(b.dataset.set);
+    else if (b.dataset.add) { cySet(mk, cid, { corr: [...new Set([...corr, b.dataset.add])].sort() }); closeCyPop(); }
+    else if (b.dataset.rm) { const arr = corr.slice(); arr.splice(+b.dataset.rm, 1); cySet(mk, cid, { corr: arr }); closeCyPop(); }
+    else if (b.dataset.other) { const v = pop.querySelector('.cy-pop-date').value; if (v) setVal(v); }
+    else if (b.dataset.clear) { cySet(mk, cid, isCorr ? { corr: null } : { [f]: null, ...(f === 'rec' ? { rel: null } : {}) }); closeCyPop(); }
+  });
+}
+function openCyParams(cid) {
+  const c = clientOf(cid); if (!c) return;
+  const p = cyOf(c);
+  const opt = (v, l, cur) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${l}</option>`;
+  const m = modal(`<div class="modal-h"><h3>Cycle de paie — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">
+      <div class="fld-row"><label class="fld"><span>Réception des variables</span><select id="cp-rec">${opt('var', 'Avec variables', p.rec)}${opt('auto', 'Automatique (sans variables)', p.rec)}${opt('robot', 'Automate Silae', p.rec)}</select></label>
+      <label class="fld"><span>Jour d’envoi prévu (auto)</span><select id="cp-recday">${opt('', '—', p.recDay || '')}${[16, 19, 20, 25, 30].map(d => opt(d, 'vers le ' + d, p.recDay || '')).join('')}</select></label></div>
+      <div class="fld-row"><label class="fld"><span>Virements</span><select id="cp-vir">${opt('file', 'Fichier de virement envoyé', p.vir)}${opt('odep', 'OD + état des paiements', p.vir)}${opt('client', 'Client autonome', p.vir)}${opt('nc', 'Non concerné', p.vir)}</select></label>
+      <label class="fld"><span>Échéance DSN</span><select id="cp-dsn">${opt(15, 'Le 15 du mois suivant', p.dsn)}${opt(5, 'Le 5 du mois suivant', p.dsn)}</select></label></div>
+      <div class="fld-row"><label class="fld"><span>Dépôt des bulletins</span><select id="cp-dep">${opt('next', 'Le lendemain des virements', p.dep)}${opt('fixed', 'Un jour fixe', p.dep)}${opt('nc', 'Non concerné (MySilae…)', p.dep)}</select></label>
+      <label class="fld"><span>Jour fixe de dépôt</span><input id="cp-depday" inputmode="numeric" value="${esc(p.depDay || '')}" placeholder="ex. 30"></label></div>
+      <label class="fld"><span>Remarques permanentes (affichées sous le nom du dossier)</span><textarea id="cp-notes" rows="3" placeholder="ex. Paies sur quel RIB ? · Virement au DJM-2 · MySilae uniquement">${esc(p.notes || '')}</textarea></label>
+    </div>
+    <div class="modal-f"><span class="muted small">N° ${esc(c.code || '—')}</span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
+  const q = s => m.el.querySelector(s);
+  q('#cp-ok').addEventListener('click', () => {
+    const dd = parseInt(q('#cp-depday').value, 10);
+    c.cy = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
+    if (c.cy.dep === 'fixed' && !c.cy.depDay) c.cy.dep = 'next';
+    touchMeta(); m.close();
+  });
+}
+function bindCycle() {
+  const body = $('#portefeuille-body');
+  let qT;
+  body.addEventListener('input', ev => {
+    if (ev.target.id !== 'cy-q') return;
+    UI.pfv.cq = ev.target.value; clearTimeout(qT);
+    qT = setTimeout(() => { const pos = ev.target.selectionStart; renderPortfolio(); const i = $('#cy-q'); if (i) { i.focus(); i.setSelectionRange(pos, pos); } }, 200);
+  });
+  body.addEventListener('change', ev => {
+    const i = ev.target, P = UI.pfv; if (!P || P.mode === 'temps') return;
+    if (i.dataset.cy === 'prep') { P.showPrep = i.checked; renderPortfolio(); return; }
+    const tr = i.closest('tr[data-id]'); if (!tr || !i.dataset.in) return;
+    const k = i.dataset.in;
+    if (k === 'tptDone') cySet(P.cmonth, tr.dataset.id, { tptDone: i.checked || null });
+    else if (k === 'bs') { const n = parseInt(i.value, 10); cySet(P.cmonth, tr.dataset.id, { bs: n >= 0 ? n : null }); i.classList.toggle('sugg', !(n >= 0)); }
+    else cySet(P.cmonth, tr.dataset.id, { [k]: i.value.trim() || null });
+  });
+  body.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.matches('.cy-in')) ev.target.blur(); });
+  body.addEventListener('click', ev => {
+    const P = UI.pfv; if (!P || P.mode === 'temps') return;
+    const sg = ev.target.closest('.seg[data-seg=cyf] button'); if (sg) { P.cfilter = sg.dataset.v; renderPortfolio(); return; }
+    const tri = ev.target.closest('[data-tri]');
+    if (tri) { const tr = tri.closest('tr[data-id]'), f = tri.dataset.tri, order = ['', 'ok', 'nc', 'exo'], curv = cyRow(P.cmonth, tr.dataset.id)[f] || ''; cySet(P.cmonth, tr.dataset.id, { [f]: order[(order.indexOf(curv) + 1) % order.length] || null }); return; }
+    const cell = ev.target.closest('[data-cell]');
+    if (cell) {
+      const tr = cell.closest('tr[data-id]'), cid = tr.dataset.id, f = cell.dataset.cell, row = cyRow(P.cmonth, cid);
+      const empty = f === 'corr' ? !(row.corr || []).length : !row[f];
+      if (f === 'rec' && !row.rec && row.rel) { openCyCell(P.cmonth, cid, f, cell); return; }
+      if (empty) {
+        const v = isoDay(Date.now()), c = clientOf(cid);
+        if (f === 'rec') { cySet(P.cmonth, cid, { rec: v }); toast((c ? c.name + ' : ' : '') + 'variables reçues aujourd’hui', 'C’est une relance', () => cySet(P.cmonth, cid, { rec: null, rel: v, relN: (row.relN || 0) + 1 })); return; }
+        cySet(P.cmonth, cid, f === 'corr' ? { corr: [v] } : { [f]: v });
+        toast((c ? c.name + ' : ' : '') + ({ rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', vir: 'virements', dep: 'dépôt', dsn: 'DSN' })[f] + ' notée aujourd’hui', 'Annuler', () => cySet(P.cmonth, cid, f === 'corr' ? { corr: null } : { [f]: null }));
+      } else openCyCell(P.cmonth, cid, f, cell);
+      return;
+    }
+    const b = ev.target.closest('[data-cy]'); if (!b) return;
+    const a = b.dataset.cy, cid = b.closest('tr[data-id]')?.dataset.id;
+    if (a === 'prev' || a === 'next') { P.cmonth = a === 'prev' ? prevMk(P.cmonth) : nextMk(P.cmonth); renderPortfolio(); }
+    else if (a === 'today') { P.cmonth = monthKey(Date.now()); renderPortfolio(); }
+    else if (a === 'goto') { P.cmonth = b.dataset.mk; renderPortfolio(); }
+    else if (a === 'close') {
+      const mk = P.cmonth; if (!cyProgress(mk).allDsn) return;
+      cySetClosed(mk, isoDay(Date.now()));
+      toast('🎉 Cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ' clôturé', 'Annuler', () => cySetClosed(mk, null));
+    }
+    else if (a === 'reopen') { const mk = P.cmonth, old = cyClosed(mk); cySetClosed(mk, null); toast('Cycle rouvert', 'Annuler', () => cySetClosed(mk, old)); }
+    else if (a === 'goapril') { P.cmonth = new Date().getFullYear() + '-04'; renderPortfolio(); }
+    else if (a === 'params' && cid) openCyParams(cid);
+    else if (a === 'start' && cid) { startTimer({ client: cid, task: null, label: '' }); location.hash = 'chrono'; setTimeout(() => cbTask.focus(), 50); }
+    else if (a === 'tododone') {
+      const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return;
+      if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
+      cySet(t.mk, t.cid, t.f === 'tptDone' ? { tptDone: true } : { [t.f]: isoDay(Date.now()) });
+      toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
+    }
+    else if (a === 'copy') {
+      const rows = body._cyRows || [], cols = body._cyCols || [];
+      const val = (row, f, cid) => f === 'bs' ? (effBs(P.cmonth, cid).n ?? '') : f === 'corr' ? (row.corr || []).map(x => fmtDate(dOf(x)).slice(0, 5)).join(' ; ') : ['rec', 'prep', 'env', 'vir', 'dep', 'dsn'].includes(f) ? (row[f] ? fmtDate(dOf(row[f])).slice(0, 5) : '') : f === 'doeth' || f === 'tal' ? (CY_TRI[row[f] || ''] || '') : (row[f] || '');
+      copyText(['Cycle de paie — ' + body._cyMonth, ['N°', 'Dossier', ...cols.map(c => c[1])].join('\t'), ...rows.map(({ c, row }) => [c.code || '', c.name, ...cols.map(([f]) => val(row, f, c.id))].join('\t'))].join('\n'));
+    }
+  });
+}
+function pfSwitch(P) {
+  return `<div class="seg" data-seg="pfmode"><button data-v="cycle" class="${P.mode !== 'temps' ? 'on' : ''}">Cycle de paie</button><button data-v="temps" class="${P.mode === 'temps' ? 'on' : ''}">Temps & facturation</button></div>`;
+}
+function defaultCycleMonth() {
+  const now = Date.now(), cur = monthKey(now), pm = prevMk(cur);
+  if (new Date(now).getDate() < 15) {
+    const cs = cyClients(); if (!cyClosed(pm) && cs.some(c => { const r = cyRow(pm, c.id); return Object.keys(r).length && !cyRowDone(pm, c, r); })) return pm;
+  }
+  return cur;
+}
+// Rappel discret une fois par jour à l'ouverture
+function cyDailyReminder() {
+  const items = cyTodo(); if (!items.length) return;
+  let k = null; try { k = localStorage.getItem('chronocab:lastReminder'); } catch (e) {}
+  const today = dayKey(Date.now()); if (k === today) return;
+  try { localStorage.setItem('chronocab:lastReminder', today); } catch (e) {}
+  toast('📌 ' + items.length + ' rappel' + (items.length > 1 ? 's' : '') + ' de cycle de paie aujourd’hui', 'Voir', () => { (UI.pfv ||= {}).mode = 'cycle'; location.hash = 'portefeuille'; });
+}
+
+/* ---------- Vue Mon portefeuille ---------- */
+const PF_COLS = [
+  ['code', 'N°'], ['name', 'Dossier'], ['m', 'Temps du mois'], ['prev', 'Mois préc.'], ['bill', 'Facturable'],
+  ['inv', 'Facturées'], ['todo', 'À facturer'], ['bs', 'BS'], ['dsn', 'DSN'], ['last', 'Dernière intervention'],
+];
+function keyTaskIds(kind) {
+  const ids = new Set();
+  for (const t of S.meta.tasks) {
+    const n = norm(t.name);
+    if (kind === 'bs' ? (n.includes('bulletin') || /\bbs\b/.test(n)) : /\bdsn\b/.test(n)) ids.add(t.id);
+  }
+  return ids;
+}
+function portfolioData(mk) {
+  const from = parseDay(mk + '-01'), to = addMonths(from, 1), pFrom = addMonths(from, -1);
+  const bsIds = keyTaskIds('bs'), dsnIds = keyTaskIds('dsn');
+  const clients = S.meta.clients.filter(c => !c.deletedAt && !c.archived && isMine(c));
+  const rows = new Map(clients.map(c => [c.id, { c, m: 0, prev: 0, bill: 0, inv: 0, todo: 0, bs: false, dsn: false, last: 0, tasks: new Map() }]));
+  for (const e of allEntries()) {
+    const r = rows.get(e.client); if (!r) continue;
+    if (e.start > r.last) r.last = e.start;
+    const d = dur(e);
+    if (e.start >= from && e.start < to) {
+      r.m += d; if (e.billable) r.bill += d;
+      if (e.billable && e.invoicedAt) r.inv++;
+      if (e.billable && !e.invoicedAt) r.todo++;
+      if (bsIds.has(e.task)) r.bs = true;
+      if (dsnIds.has(e.task)) r.dsn = true;
+      const k = e.task || '';
+      const t = r.tasks.get(k) || { ms: 0, n: 0, inv: 0, todo: 0 }; t.ms += d; t.n++; if (e.billable && e.invoicedAt) t.inv++; if (e.billable && !e.invoicedAt) t.todo++;
+      r.tasks.set(k, t);
+    } else if (e.start >= pFrom && e.start < from) r.prev += d;
+  }
+  return { rows: [...rows.values()], hasBs: bsIds.size > 0, hasDsn: dsnIds.size > 0, from, to };
+}
+function renderPortfolio() {
+  const P = UI.pfv ||= {};
+  P.month ||= monthKey(Date.now()); P.sort ||= 'name'; P.dir ||= 1; P.filter ||= 'all'; if (P.q == null) P.q = ''; P.open ||= new Set();
+  P.mode ||= 'cycle'; P.cmonth ||= defaultCycleMonth();
+  if (P.mode !== 'temps') { renderCycle(P); return; }
+  const data = portfolioData(P.month);
+  let rows = data.rows;
+  const nAll = rows.length, active = rows.filter(r => r.m > 0), idle = rows.filter(r => r.m === 0);
+  const tot = rows.reduce((a, r) => ({ m: a.m + r.m, bill: a.bill + r.bill, inv: a.inv + r.inv, todo: a.todo + r.todo, prev: a.prev + r.prev }), { m: 0, bill: 0, inv: 0, todo: 0, prev: 0 });
+  const isCur = P.month === monthKey(Date.now());
+  const noBs = data.hasBs ? rows.filter(r => !r.bs).length : 0;
+  // filtres
+  if (P.filter === 'active') rows = active;
+  else if (P.filter === 'idle') rows = idle;
+  else if (P.filter === 'todo') rows = rows.filter(r => r.todo > 0);
+  else if (P.filter === 'nobs') rows = rows.filter(r => !r.bs);
+  const q = norm(P.q); if (q) rows = rows.filter(r => norm(r.c.name).includes(q) || norm(r.c.code).includes(q));
+  const val = (r, k) => k === 'name' ? r.c.name : k === 'code' ? (r.c.code || '') : k === 'bs' || k === 'dsn' ? (r[k] ? 1 : 0) : r[k];
+  rows = rows.slice().sort((a, b) => { const x = val(a, P.sort), y = val(b, P.sort); const c = typeof x === 'string' ? x.localeCompare(y, 'fr', { numeric: true }) : x - y; return (c || a.c.name.localeCompare(b.c.name, 'fr')) * P.dir; });
+  const [yy, mm] = P.month.split('-').map(Number);
+  const monthLabel = MONTHS_L[mm - 1] + ' ' + yy;
+  const cols = PF_COLS.filter(([k]) => (k !== 'bs' || data.hasBs) && (k !== 'dsn' || data.hasDsn));
+  const pct = tot.m ? Math.round(tot.bill / tot.m * 100) : 0;
+  const delta = (a, b) => { if (!b && !a) return ''; if (!b) return '<span class="up">nouveau</span>'; const d = Math.round((a - b) / b * 100); return d === 0 ? '<span class="muted">=</span>' : `<span class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '+' : ''}${d} %</span>`; };
+  const chk = v => v ? '<span class="ok" title="Fait ce mois">✓</span>' : '<span class="ko" title="Rien de saisi ce mois">–</span>';
+  const ago = ms => { if (!ms) return '<span class="muted">jamais</span>'; const d = Math.floor((startOfDay(Date.now()) - startOfDay(ms)) / DAY); return d <= 0 ? "aujourd’hui" : d === 1 ? 'hier' : d < 31 ? 'il y a ' + d + ' j' : fmtDate(ms); };
+  let html = `<div class="card filters pf-head">${pfSwitch(P)}
+    <div class="month-nav"><button class="icon" data-pf="prev" title="Mois précédent">‹</button><b>${esc(monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1))}</b><button class="icon" data-pf="next" title="Mois suivant" ${isCur ? 'disabled' : ''}>›</button>${isCur ? '' : '<button class="btn sm ghost" data-pf="today">Ce mois-ci</button>'}</div>
+    <span class="sp" style="flex:1"></span>
+    <input id="pf-q" placeholder="Rechercher un dossier ou un numéro…" value="${esc(P.q)}" autocomplete="off" style="min-width:220px">
+    <button class="btn sm" data-pf="copy">${ICON.copy} Copier pour Excel</button></div>
+  <div class="stats" style="margin-top:12px">
+    <div class="card stat"><div class="k">Dossiers actifs ce mois</div><div class="v">${active.length}<span class="of"> / ${nAll}</span></div><div class="s">${idle.length ? `<a href="#portefeuille" data-pf-filter="idle">${idle.length} sans temps saisi</a>` : 'tous ont du temps saisi'}</div></div>
+    <div class="card stat"><div class="k">Temps sur mon portefeuille</div><div class="v">${fmtDur(tot.m)}</div><div class="s">${tot.prev ? 'mois précédent : ' + fmtDur(tot.prev) + ' ' + delta(tot.m, tot.prev) : '&nbsp;'}</div></div>
+    <div class="card stat"><div class="k">Temps facturable</div><div class="v">${fmtDur(tot.bill)}</div><div class="s">${pct} % du temps du mois</div></div>
+    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-inv)"></span>Saisies facturées</div><div class="v">${tot.inv}</div><div class="s">sur le mois</div></div>
+    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Saisies à facturer</div><div class="v">${tot.todo}</div><div class="s">${tot.todo ? `<a href="#portefeuille" data-pf-filter="todo">voir les dossiers</a>` : 'rien en attente'}</div></div>
+    ${data.hasBs ? `<div class="card stat"><div class="k">Bulletins (BS) du mois</div><div class="v">${nAll - noBs}<span class="of"> / ${nAll}</span></div><div class="s">${noBs ? `<a href="#portefeuille" data-pf-filter="nobs">${noBs} dossier${noBs > 1 ? 's' : ''} sans BS saisi</a>` : 'tous les dossiers ont du temps BS'}</div></div>` : ''}
+  </div>
+  <div class="toolbar"><h2>Mes dossiers (${rows.length})</h2><span class="sp"></span>
+    <div class="seg" data-seg="pff">${[['all', 'Tous'], ['active', 'Avec temps'], ['idle', 'Sans temps'], ['todo', 'À facturer'], ...(data.hasBs ? [['nobs', 'Sans BS']] : [])].map(([v, l]) => `<button data-v="${v}" class="${P.filter === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+  <div class="card tbl-wrap"><table class="t pf-table"><thead><tr><th></th>${cols.map(([k, l]) => `<th class="${['m', 'prev', 'bill', 'inv', 'todo'].includes(k) ? 'n' : ''} ${['bs', 'dsn'].includes(k) ? 'c' : ''}"><button class="sort ${P.sort === k ? 'on' : ''}" data-sort="${k}">${l}${P.sort === k ? (P.dir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`).join('')}<th></th></tr></thead><tbody>
+  ${rows.map(r => {
+    const open = P.open.has(r.c.id);
+    let h = `<tr class="pf-row ${r.m ? '' : 'idle'}" data-id="${r.c.id}"><td><button class="icon xs" data-pf="toggle" title="Détail du mois"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg)">${ICON.chev}</span></button></td>${cols.map(([k]) => {
+      if (k === 'code') return `<td class="mono small">${esc(r.c.code || '')}</td>`;
+      if (k === 'name') return `<td class="pf-name"><span class="dot" style="--c:${colorFor(r.c.id)}"></span> ${esc(r.c.name)}</td>`;
+      if (k === 'm') return `<td class="n"><b>${r.m ? fmtDur(r.m) : '<span class="zero">–</span>'}</b></td>`;
+      if (k === 'prev') return `<td class="n">${r.prev ? fmtDur(r.prev) : '<span class="zero">–</span>'} <span class="small">${r.m || r.prev ? delta(r.m, r.prev) : ''}</span></td>`;
+      if (k === 'bill') return `<td class="n">${r.bill ? fmtDur(r.bill) : '<span class="zero">–</span>'}</td>`;
+      if (k === 'inv') return `<td class="n">${r.inv || '<span class="zero">–</span>'}</td>`;
+      if (k === 'todo') return `<td class="n">${r.todo ? `<span class="status">${r.todo}</span>` : '<span class="zero">–</span>'}</td>`;
+      if (k === 'bs' || k === 'dsn') return `<td class="c">${chk(r[k])}</td>`;
+      if (k === 'last') return `<td class="small">${ago(r.last)}</td>`;
+      return '<td></td>';
+    }).join('')}<td><button class="icon xs" data-pf="start" title="Démarrer le chrono sur ce dossier">${ICON.play}</button></td></tr>`;
+    if (open) {
+      const ts = [...r.tasks.entries()].sort((a, b) => b[1].ms - a[1].ms);
+      h += `<tr class="pf-detail"><td></td><td colspan="${cols.length + 1}">${ts.length ? `<div class="pf-tasks">${ts.map(([tid, t]) => `<div class="pf-task"><span>${esc(taskName(tid) || 'Sans tâche')}</span><span class="mono">${fmtDur(t.ms)}</span><span class="muted small">${t.n} saisie${t.n > 1 ? 's' : ''}${t.inv ? ' · ' + t.inv + ' facturée' + (t.inv > 1 ? 's' : '') : ''}${t.todo ? ' · ' + t.todo + ' à facturer' : ''}</span></div>`).join('')}</div>` : '<span class="muted">Aucun temps saisi sur ce dossier en ' + esc(monthLabel) + '.</span>'}
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-pf="report">Voir dans Rapports</button>${r.c.code ? `<span class="muted small" style="align-self:center">Dossier n° ${esc(r.c.code)}</span>` : ''}</div></td></tr>`;
+    }
+    return h;
+  }).join('') || `<tr><td colspan="${cols.length + 2}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun client dans votre portefeuille. Marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.'}</td></tr>`}
+  ${rows.length ? `<tr class="tot"><td></td>${cols.map(([k]) => k === 'name' ? `<td>Total (${rows.length} dossiers)</td>` : k === 'm' ? `<td class="n">${fmtDur(rows.reduce((a, r) => a + r.m, 0))}</td>` : k === 'prev' ? `<td class="n">${fmtDur(rows.reduce((a, r) => a + r.prev, 0))}</td>` : k === 'bill' ? `<td class="n">${fmtDur(rows.reduce((a, r) => a + r.bill, 0))}</td>` : k === 'inv' ? `<td class="n">${rows.reduce((a, r) => a + r.inv, 0)}</td>` : k === 'todo' ? `<td class="n">${rows.reduce((a, r) => a + r.todo, 0)}</td>` : '<td></td>').join('')}<td></td></tr>` : ''}
+  </tbody></table></div>
+  <div class="muted small" style="margin-top:8px">Seuls les clients marqués « ★ Mon portefeuille » et non archivés apparaissent ici. Les colonnes BS et DSN indiquent si du temps a été saisi ce mois sur une tâche Bulletins / DSN.</div>`;
+  const body = $('#portefeuille-body');
+  body.innerHTML = html;
+  body._rows = rows; body._cols = cols; body._month = monthLabel;
+}
+function bindPortfolio() {
+  const body = $('#portefeuille-body');
+  body.addEventListener('click', ev => { const sm = ev.target.closest('.seg[data-seg=pfmode] button'); if (sm) { UI.pfv.mode = sm.dataset.v; renderPortfolio(); } });
+  let qT;
+  body.addEventListener('input', ev => {
+    if (ev.target.id !== 'pf-q') return;
+    UI.pfv.q = ev.target.value; clearTimeout(qT);
+    qT = setTimeout(() => { const pos = ev.target.selectionStart; renderPortfolio(); const i = $('#pf-q'); if (i) { i.focus(); i.setSelectionRange(pos, pos); } }, 200);
+  });
+  body.addEventListener('click', ev => {
+    const P = UI.pfv;
+    const sg = ev.target.closest('.seg[data-seg=pff] button'); if (sg) { P.filter = sg.dataset.v; renderPortfolio(); return; }
+    const lf = ev.target.closest('[data-pf-filter]'); if (lf) { ev.preventDefault(); P.filter = lf.dataset.pfFilter; renderPortfolio(); return; }
+    const so = ev.target.closest('[data-sort]'); if (so) { const k = so.dataset.sort; if (P.sort === k) P.dir = -P.dir; else { P.sort = k; P.dir = ['name', 'code'].includes(k) ? 1 : -1; } renderPortfolio(); return; }
+    const b = ev.target.closest('[data-pf]'); if (!b) return;
+    const a = b.dataset.pf, id = b.closest('[data-id]')?.dataset.id || b.closest('tr.pf-detail')?.previousElementSibling?.dataset.id;
+    if (a === 'prev' || a === 'next') { P.month = monthKey(addMonths(parseDay(P.month + '-01'), a === 'prev' ? -1 : 1)); renderPortfolio(); }
+    else if (a === 'today') { P.month = monthKey(Date.now()); renderPortfolio(); }
+    else if (a === 'toggle' && id) { P.open.has(id) ? P.open.delete(id) : P.open.add(id); renderPortfolio(); }
+    else if (a === 'start' && id) { startTimer({ client: id, task: null, label: '' }); location.hash = 'chrono'; setTimeout(() => cbTask.focus(), 50); }
+    else if (a === 'report' && id) {
+      const from = parseDay(P.month + '-01');
+      Object.assign(UI.rep, { period: 'custom', from: dayKey(from), to: dayKey(addMonths(from, 1) - 1), client: id, pf: '', task: '', bill: 'all', logged: 'all', q: '' });
+      location.hash = 'rapports';
+    }
+    else if (a === 'copy') {
+      const rows = body._rows || [], cols = body._cols || [];
+      const head = cols.map(([, l]) => l).join('\t');
+      const lines = rows.map(r => cols.map(([k]) => k === 'name' ? r.c.name : k === 'code' ? (r.c.code || '') : ['m', 'prev', 'bill'].includes(k) ? hoursDec(r[k]) : k === 'bs' || k === 'dsn' ? (r[k] ? 'oui' : 'non') : k === 'last' ? (r.last ? fmtDate(r.last) : '') : r[k]).join('\t'));
+      copyText(['Mon portefeuille — ' + body._month, head, ...lines].join('\n'));
+    }
+  });
 }
 
 /* ---------- Vue Rapports ---------- */
@@ -1892,7 +2533,7 @@ function bindRefs() {
     else if (act === 'trash-purge' && row) confirmPurge([{ kind: row.dataset.kind, id: row.dataset.id }]);
     else if (act === 'trash-empty') confirmPurge([...S.meta.clients.filter(c => c.deletedAt).map(c => ({ kind: 'client', id: c.id })), ...S.meta.persons.filter(x => x.deletedAt).map(x => ({ kind: 'person', id: x.id })), ...S.meta.tasks.filter(t => t.deletedAt).map(t => ({ kind: 'task', id: t.id }))]);
     else if (act === 'export') {
-      const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, running: S.running }, null, 1);
+      const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running }, null, 1);
       downloadText('chronocab_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
     }
   });
@@ -1941,7 +2582,7 @@ function importFile(file) {
         if (!x || !x.id || !x.name) continue;
         if (arr.some(y => y.id === x.id)) continue;
         const same = arr.find(y => norm(y.name) === norm(x.name));
-        if (same) { remap[x.id] = same.id; if (isClient && !same.code && x.code) { same.code = x.code; ncode++; } continue; }
+        if (same) { remap[x.id] = same.id; if (isClient && !same.code && x.code) { same.code = x.code; ncode++; } if (isClient && x.cy && !same.cy) same.cy = x.cy; continue; }
         arr.push({ ...x }); isClient ? nc++ : nt++;
       }
     };
@@ -1957,6 +2598,12 @@ function importFile(file) {
         const dk = dayKey(e.start); (S.days[dk] ||= { entries: {} });
         if (!S.days[dk].entries[id]) { S.days[dk].entries[id] = { ...e, client: e.client ? R(e.client) : null, task: e.task ? R(e.task) : null }; n++; Store.put('d-' + dk); }
       }
+    }
+    for (const mk in (d.cycles || {})) {
+      const rows = d.cycles[mk]?.rows || {}; let ch = false;
+      for (const cid in rows) { const id = R(cid); const doc = (S.cycles[mk] ||= { rows: {} }); if (!doc.rows[id]) { doc.rows[id] = rows[cid]; ch = true; } }
+      if (d.cycles[mk]?.closed && S.cycles[mk] && !S.cycles[mk].closed) { S.cycles[mk].closed = d.cycles[mk].closed; ch = true; }
+      if (ch) Store.put('cy-' + mk);
     }
     S.rev++; Store.put('meta'); scheduleRender(); syncTimerBar();
     const parts = [];
@@ -2130,7 +2777,7 @@ async function boot() {
   initTimerBar();
   $('#install-btn').onclick = () => Install.run();
   $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Chronocab version ' + APP_VERSION + ' du ' + APP_DATE;
-  bindChrono(); bindReports(); bindBilling(); bindRefs();
+  bindChrono(); bindPortfolio(); bindCycle(); bindReports(); bindBilling(); bindRefs();
   // Le runtime de l'artifact peut s'installer juste après le chargement
   if (!FIREBASE_CONFIG.apiKey && !(window.claude && window.claude.use)) await new Promise(r => setTimeout(r, 400));
   await Store.init();
@@ -2143,6 +2790,7 @@ async function boot() {
   }
   setInterval(tick, 1000);
   setTimeout(checkForgotten, 800);
+  setTimeout(cyDailyReminder, 1500);
 }
 boot();
 </script>
