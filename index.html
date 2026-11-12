@@ -288,6 +288,9 @@ h2:first-child{margin-top:0}
 .qt-in{position:absolute;left:0;top:0;height:30px;display:flex;align-items:center;gap:10px;white-space:nowrap;will-change:transform}
 .qt-q{font-family:var(--quote-font);font-style:italic;font-size:15px;color:var(--ink-2)}
 .qt-a{font-size:12px;color:var(--muted)}
+#acces-body{margin-top:22px}
+.setting select,.setting input{flex:none}
+#acces-body[hidden]{display:none}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
 .cy-banner span{flex:1}
 .cy-legend{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -314,6 +317,7 @@ h2:first-child{margin-top:0}
 .pf-ic{display:inline-grid;place-items:center;width:16px;height:16px;flex:none;color:var(--line-2);vertical-align:-3px}
 .pf-ic svg{width:15px;height:15px}
 .pf-ic.mine{color:var(--pf-brown)}
+#portefeuille-body .pf-ic{display:none} /* inutile dans Mon portefeuille : tous les dossiers en font partie */
 .dot{width:9px;height:9px;border-radius:50%;background:var(--c,#999);flex:none;display:inline-block}
 
 /* recents */
@@ -598,7 +602,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
     <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
     <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
     <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
-    <a href="#acces" data-view="acces" id="nav-acces" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Accès</span><span class="count" id="acc-count" hidden></span></a>
+    <a href="#reglages" data-view="reglages" id="nav-reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="lg">Réglages</span><span class="sm">Réglages</span><span class="count" id="acc-count" hidden></span></a>
   </nav>
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
@@ -652,8 +656,8 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <!-- ===== REFERENTIEL ===== -->
   <section class="view" id="v-referentiel"><div id="referentiel-body" data-guard></div></section>
 
-  <!-- ===== ACCÈS (administrateur Firebase) ===== -->
-  <section class="view" id="v-acces"><div id="acces-body"></div></section>
+  <!-- ===== RÉGLAGES (réglages, données, accès administrateur) ===== -->
+  <section class="view" id="v-reglages"><div id="reglages-body" data-guard></div><div id="acces-body"></div></section>
 </main>
 
 <div class="toasts" id="toasts"></div>
@@ -675,7 +679,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.8.7';
+const APP_VERSION = '1.9.1';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -1332,7 +1336,7 @@ function render() {
   else if (UI.view === 'rapports') renderReports();
   else if (UI.view === 'facturation') renderBilling();
   else if (UI.view === 'referentiel') renderRefs();
-  else if (UI.view === 'acces') Access.render();
+  else if (UI.view === 'reglages') renderSettings();
 }
 function renderHeader() {
   $$('.nav a').forEach(a => a.classList.toggle('on', a.dataset.view === UI.view));
@@ -1344,7 +1348,8 @@ function renderHeader() {
 }
 function route() {
   const h = (location.hash || '').slice(1);
-  UI.view = ['chrono', 'portefeuille', 'rapports', 'facturation', 'referentiel'].includes(h) || (h === 'acces' && Store.access === 'admin') ? h : 'chrono';
+  if (h === 'acces') { location.replace('#reglages'); return; }
+  UI.view = ['chrono', 'portefeuille', 'rapports', 'facturation', 'referentiel', 'reglages'].includes(h) ? h : 'chrono';
   $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
   render();
 }
@@ -2733,7 +2738,16 @@ function renderRefs() {
       <span class="use" title="Temps enregistré">${x.use ? fmtDur(x.use, 'hm') : ''}</span>
       <button class="btn sm" data-act="trash-restore">Restaurer</button>
       <button class="btn sm danger" data-act="trash-purge">Supprimer définitivement</button></div>`).join('')}</div>` : ''}
-  <div class="grid2" style="margin-top:6px">
+`;
+  const body = $('#referentiel-body');
+  const keep = $$('.ref-list', body).map(l => l.scrollTop), wy = window.scrollY;
+  body.innerHTML = html;
+  $$('.ref-list', body).forEach((l, i) => { l.scrollTop = keep[i] || 0; });
+  if (Math.abs(window.scrollY - wy) > 1) window.scrollTo(0, wy);
+}
+function renderSettings() {
+  const st = S.meta.settings;
+  const html = `<div class="settings-page">  <div class="grid2" style="margin-top:0">
     <div><h2>Réglages</h2><div class="card settings">
       <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
@@ -2748,13 +2762,13 @@ function renderRefs() {
       <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.persons.length} personnes · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div></div>
-  </div>`;
-  const body = $('#referentiel-body');
-  const keep = $$('.ref-list', body).map(l => l.scrollTop), wy = window.scrollY;
-  body.innerHTML = html;
-  $$('.ref-list', body).forEach((l, i) => { l.scrollTop = keep[i] || 0; });
-  if (Math.abs(window.scrollY - wy) > 1) window.scrollTo(0, wy);
+  </div>
+    <div id="acces-anchor"></div></div>`;
+  $('#reglages-body').innerHTML = html;
+  const ab = $('#acces-body');
+  if (Store.access === 'admin') { ab.hidden = false; Access.render(); } else { ab.hidden = true; ab.innerHTML = ''; }
 }
+function goAccess() { location.hash = 'reglages'; setTimeout(() => $('#acces-body')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120); }
 function openToPerson(cid) {
   const c = clientOf(cid); if (!c) return;
   const n = allEntries().filter(e => e.client === cid).length;
@@ -2772,8 +2786,8 @@ function openToPerson(cid) {
     toast('« ' + c.name + ' » est maintenant une personne' + (ids.length ? ' (' + ids.length + ' saisie' + (ids.length > 1 ? 's' : '') + ' transférée' + (ids.length > 1 ? 's' : '') + ')' : ''));
   });
 }
-function bindRefs() {
-  const body = $('#referentiel-body');
+function bindRefs() { bindRefsOn($('#referentiel-body')); bindRefsOn($('#reglages-body')); }
+function bindRefsOn(body) {
   const addC = () => {
     const i = $('#new-client'), code = $('#new-client-code'); const id = addClient(i.value);
     if (id) { const c = clientOf(id); if (code.value.trim()) c.code = code.value.trim(); c.mine = UI.newClientMine !== false; if (!c.mine) { const o = $('#new-client-owner'); if (o && o.value) c.owner = o.value; } touchMeta(); }
@@ -2933,22 +2947,21 @@ const Access = {
   },
   startAdmin() {
     const { F, db } = Store.fb;
-    $('#nav-acces').hidden = false;
     F.onSnapshot(F.collection(db, 'access'), snap => {
       const fresh = [];
       if (!this.first) for (const ch of snap.docChanges()) if (ch.type === 'added' && ch.doc.data().status === 'pending') fresh.push(ch.doc.data());
       this.list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const pending = this.list.filter(x => x.status === 'pending');
-      if (this.first && pending.length) toast(pending.length + ' demande' + (pending.length > 1 ? 's' : '') + ' d’accès en attente', 'Voir', () => { location.hash = 'acces'; });
+      if (this.first && pending.length) toast(pending.length + ' demande' + (pending.length > 1 ? 's' : '') + ' d’accès en attente', 'Voir', () => goAccess());
       for (const x of fresh) this.alert(x);
       this.first = false;
       const c = $('#acc-count'); c.hidden = !pending.length; c.textContent = pending.length;
-      if (UI.view === 'acces') this.render();
+      if (UI.view === 'reglages') this.render();
     }, e => console.warn(e));
   },
   alert(x) {
-    toast('Nouvelle demande d’accès : ' + (x.email || x.name), 'Voir', () => { location.hash = 'acces'; });
-    try { if (window.Notification && Notification.permission === 'granted') { const n = new Notification('Antevorta : nouvelle demande d’accès', { body: (x.name ? x.name + ' — ' : '') + (x.email || '') }); n.onclick = () => { window.focus(); location.hash = 'acces'; }; } } catch (e) {}
+    toast('Nouvelle demande d’accès : ' + (x.email || x.name), 'Voir', () => goAccess());
+    try { if (window.Notification && Notification.permission === 'granted') { const n = new Notification('Antevorta : nouvelle demande d’accès', { body: (x.name ? x.name + ' — ' : '') + (x.email || '') }); n.onclick = () => { window.focus(); goAccess(); }; } } catch (e) {}
     const t0 = document.title; let k = 0; const iv = setInterval(() => { document.title = (k++ % 2) ? t0 : '🔔 Demande d’accès'; if (k > 12) { clearInterval(iv); document.title = t0; } }, 1000);
   },
   async set(id, status) {
@@ -2967,7 +2980,7 @@ const Access = {
     const row = (x, acts) => `<div class="ref-row" data-id="${esc(x.id)}"><span style="flex:1"><b>${esc(x.name || '—')}</b> <span class="muted">${esc(x.email || '')}</span></span>
       <span class="muted small">${x.status === 'pending' ? 'demandé le ' + fmtDate(x.requestedAt || 0) + ' à ' + hhmm(x.requestedAt || 0) : x.decidedAt ? 'le ' + fmtDate(x.decidedAt) : ''}</span>${acts}</div>`;
     const sect = (title, arr, acts, empty) => `<h2>${title} (${arr.length})</h2><div class="card">${arr.map(x => row(x, acts)).join('') || `<div class="empty" style="padding:18px">${empty}</div>`}</div>`;
-    body.innerHTML = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Accès à Antevorta</div><div class="muted small">Toute personne qui se connecte avec Google apparaît ici « en attente ». Elle ne voit rien et n’enregistre rien tant que vous ne l’avez pas validée. Chaque compte n’accède qu’à ses propres temps.</div></div>
+    body.innerHTML = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Accès à Antevorta (administrateur)</div><div class="muted small">Toute personne qui se connecte avec Google apparaît ici « en attente ». Elle ne voit rien et n’enregistre rien tant que vous ne l’avez pas validée. Chaque compte n’accède qu’à ses propres temps.</div></div>
       ${notif === 'granted' ? '<span class="muted small">🔔 Alertes du navigateur activées</span>' : notif === 'unsupported' ? '' : '<button class="btn sm" data-a="notif">🔔 Activer les alertes du navigateur</button>'}</div>
       ${sect('En attente de validation', by('pending'), '<button class="btn sm primary" data-a="approve">Valider</button><button class="btn sm danger" data-a="refuse">Refuser</button>', 'Aucune demande en attente.')}
       ${sect('Comptes autorisés', by('approved'), '<button class="btn sm danger" data-a="refuse">Retirer l’accès</button>', 'Aucun autre compte autorisé pour l’instant (vous êtes administrateur).')}
@@ -3022,7 +3035,7 @@ function showLogin(auth, AU) {
 const Install = {
   evt: null,
   standalone: () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true,
-  refresh() { const b = $('#install-btn'); if (b) b.hidden = !this.evt || this.standalone(); if (UI.view === 'referentiel') renderRefs(); },
+  refresh() { const b = $('#install-btn'); if (b) b.hidden = !this.evt || this.standalone(); if (UI.view === 'reglages') renderSettings(); },
   async run() {
     if (!this.evt) { openInstallHelp(); return; }
     this.evt.prompt();
@@ -3297,6 +3310,7 @@ const QUOTES = [
   ['Le temps compté est un temps qui compte.', 'Sagesse de cabinet'],
   ['Ce qui se mesure s’améliore.', 'Sagesse de cabinet'],
   ['Un chrono lancé, c’est une facture bien justifiée.', 'Sagesse de cabinet'],
+  ['En théorie, il n’y a pas de différence entre la théorie et la pratique ; en pratique, il y en a une.', 'Benjamin Brewster'],
 ];
 const quoteOn = () => lsGet('quote', '0') === '1'; // désactivé par défaut, à activer dans les réglages
 // Citation affichée une fois, en défilement dans le bandeau du haut, à l'ouverture
