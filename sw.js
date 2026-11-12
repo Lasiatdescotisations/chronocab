@@ -1,9 +1,9 @@
-/* Chronocab — service worker
+/* Antevorta (ex-Chronocab) — service worker
    - la page (index.html) : réseau d'abord, copie locale si pas de réseau → les mises à jour arrivent toutes seules ;
    - icônes et manifeste : copie locale, rafraîchie en arrière-plan ;
    - SDK Firebase et polices (fichiers versionnés) : copie locale d'abord ;
    - tout le reste (Firestore, connexion Google) passe directement par le réseau. */
-const CACHE = 'chronocab-1.7.3';
+const CACHE = 'antevorta-1.8.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', event => {

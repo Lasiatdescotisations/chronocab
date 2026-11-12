@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chronocab — temps passés</title>
+<title>Antevorta — temps & cycle de paie</title>
 <meta name="theme-color" content="#0d6656">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Chronocab">
+<meta name="apple-mobile-web-app-title" content="Antevorta">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d6656'/%3E%3Cg transform='translate(4.5 4) scale(.95)' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='13.5' r='8.3'/%3E%3Cpath d='M12 9.2v4.5l3 2.1M9.6 2.2h4.8'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -552,7 +552,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
 </head>
 <body>
 <header class="top">
-  <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Chronocab</span></div>
+  <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Antevorta</span></div>
   <nav class="nav">
     <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span>Chrono</span></a>
     <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon portefeuille</span><span class="sm">Dossiers</span></a>
@@ -564,7 +564,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
-    <button id="install-btn" class="btn sm primary" hidden title="Installer Chronocab sur cet appareil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
+    <button id="install-btn" class="btn sm primary" hidden title="Installer Antevorta sur cet appareil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
     <button id="account" class="btn sm ghost" hidden>Déconnexion</button>
     <span class="ver" id="ver"></span>
   </div>
@@ -636,7 +636,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.7.3';
+const APP_VERSION = '1.8.0';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -765,8 +765,8 @@ const isInternalId = id => id === INTERNAL_ID;
 const INTERNAL_TASKS = ['Formation', 'Trajet', 'Réunion d’équipe', 'Organisation / logistique', 'Administratif interne', 'Veille juridique', 'Informatique / outils', 'Entretien / RH interne'];
 const personOf = id => S.meta.persons.find(x => x.id === id) || null;
 const entityOf = id => isInternalId(id) ? { id, name: INTERNAL_NAME } : isPersonId(id) ? personOf(id) : clientOf(id);
-const ROLES = { paie: 'Collaborateur paie', compta: 'Collaborateur comptable', ec: 'Expert-comptable', autre: 'Autre' };
-const roleLabel = r => ROLES[r] || '';
+const ROLES = { paie: 'Collaborateur paie', compta: 'Collaborateur comptable', resp_paie: 'Responsable paie', resp_compta: 'Responsable comptable', app_paie: 'Apprenti paie', app_compta: 'Apprenti comptable', ec: 'Expert-comptable', autre: 'Autre' };
+const roleLabel = r => ROLES[r] || (r || ''); // fonction standard ou saisie libre
 const isMine = c => !!c && c.mine !== false;
 const clientName = id => !id ? '' : isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
 function pfKey(id) {
@@ -836,7 +836,7 @@ const Store = {
     const base = `https://www.gstatic.com/firebasejs/${FB_VERSION}/`;
     let A, AU, F;
     try { [A, AU, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]); }
-    catch (e) { showFatal(location.protocol === 'https:' && /github\.io$|pages\.dev$|web\.app$|firebaseapp\.com$/.test(location.hostname) ? 'Impossible de charger Firebase. Vérifiez la connexion internet (ou un pare-feu qui bloquerait gstatic.com).' : 'Cette version de Chronocab est prévue pour Firebase : elle ne fonctionne qu’ouverte depuis votre adresse GitHub Pages, pas dans un aperçu de fichier. Dans Claude, utilisez le lien de l’application Chronocab.'); throw e; }
+    catch (e) { showFatal(location.protocol === 'https:' && /github\.io$|pages\.dev$|web\.app$|firebaseapp\.com$/.test(location.hostname) ? 'Impossible de charger Firebase. Vérifiez la connexion internet (ou un pare-feu qui bloquerait gstatic.com).' : 'Cette version de Antevorta est prévue pour Firebase : elle ne fonctionne qu’ouverte depuis votre adresse GitHub Pages, pas dans un aperçu de fichier. Dans Claude, utilisez le lien de l’application Antevorta.'); throw e; }
     const app = A.initializeApp(FIREBASE_CONFIG);
     const auth = AU.getAuth(app);
     let db;
@@ -1249,8 +1249,8 @@ function tick() {
   if (S.running) {
     const t = fmtClock(Date.now() - S.running.start);
     c.textContent = t; c.classList.remove('idle');
-    document.title = '▶ ' + t + ' · ' + (clientName(S.running.client) || 'Chronocab');
-  } else { c.textContent = '00:00:00'; c.classList.add('idle'); document.title = 'Chronocab — temps passés'; }
+    document.title = '▶ ' + t + ' · ' + (clientName(S.running.client) || 'Antevorta');
+  } else { c.textContent = '00:00:00'; c.classList.add('idle'); document.title = 'Antevorta — temps & cycle de paie'; }
   $$('[data-live]').forEach(el => { if (S.running) el.textContent = el.dataset.live === 'clock' ? fmtClock(Date.now() - S.running.start) : fmtDur(Date.now() - S.running.start); });
   const w = $('#long-warn');
   if (w) w.hidden = !isForgotten();
@@ -1782,7 +1782,7 @@ function openCyManualClose(mk) {
   const y = mk.slice(0, 4), olders = []; for (let m = prevMk(mk); m >= y + '-01'; m = prevMk(m)) if (!cyClosed(m)) olders.push(m);
   const m = modal(`<div class="modal-h"><h3>Clôturer manuellement le cycle de ${esc(lbl)}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
-      <p>${g.dsn[1] - g.dsn[0]} DSN sur ${g.dsn[1]} ne sont pas renseignées dans Chronocab. La clôture manuelle arrête les rappels et les alertes de ce cycle, sans rien modifier aux dossiers.</p>
+      <p>${g.dsn[1] - g.dsn[0]} DSN sur ${g.dsn[1]} ne sont pas renseignées dans Antevorta. La clôture manuelle arrête les rappels et les alertes de ce cycle, sans rien modifier aux dossiers.</p>
       <p class="muted small">Utile pour les cycles suivis ailleurs (ancien portefeuille, tableau Excel…). Vous pourrez rouvrir le cycle à tout moment.</p>
       ${olders.length ? `<label class="chk" style="font-size:13px"><input type="checkbox" id="cmc-all" checked> Clôturer aussi les ${olders.length} cycle${olders.length > 1 ? 's' : ''} précédent${olders.length > 1 ? 's' : ''} non clôturé${olders.length > 1 ? 's' : ''} de ${y} (${olders.slice().reverse().map(x => MONTHS[+x.slice(5) - 1]).join(', ')})</label>` : ''}
     </div>
@@ -1878,7 +1878,7 @@ function renderCycle(P) {
   if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div><div class="cy-todo-list">${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div></div>`;
   if (isApril) html += `<div class="warn" style="margin-top:12px">Cycle d’avril : la DSN doit déclarer la <b>DOETH</b> et la <b>taxe d’apprentissage libératoire</b>. Cochez les deux colonnes dédiées pour chaque dossier (OK, NC ou Exo).</div>`;
   const g = cyProgress(mk), cl = cyClosed(mk), restDsn = g.dsn[1] - g.dsn[0], pbs = cyProgress(prevMk(mk)).bs;
-  const closeBtn = cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Toutes les DSN ne sont pas déposées : clôture manuelle possible (ex. cycles non suivis dans Chronocab)'}">${g.allDsn ? 'Clôturer le cycle' : 'Clôturer manuellement…'}</button>`;
+  const closeBtn = cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Toutes les DSN ne sont pas déposées : clôture manuelle possible (ex. cycles non suivis dans Antevorta)'}">${g.allDsn ? 'Clôturer le cycle' : 'Clôturer manuellement…'}</button>`;
   if (lsGet('cyProgMin', '') === '1') html += `<div class="card cy-prog min ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}"><div class="cy-prog-line">
       <b class="cy-prog-t">Progression</b>
       ${cyMini('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.noBs ? g.dep : g.bsDep)}
@@ -2544,7 +2544,36 @@ function addPresetTasks() {
   touchMeta(); toast(n ? n + ' tâches ajoutées (modifiables dans « Clients & tâches »)' : 'Les tâches standards sont déjà présentes');
 }
 const objOf = (kind, id) => kind === 'client' ? clientOf(id) : kind === 'person' ? personOf(id) : taskOf(id);
-function roleOpts(cur) { return Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${v}</option>`).join(''); }
+function roleOpts(cur) {
+  const std = Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${v}</option>`).join('');
+  const custom = cur && !ROLES[cur] ? `<option value="${esc(cur)}" selected>${esc(cur)}</option>` : '';
+  return custom + std + `<option value="__custom">✎ Saisir une autre fonction…</option>`;
+}
+// Choix « Saisir une autre fonction… » dans n'importe quelle liste de fonctions
+document.addEventListener('focusin', ev => { const s = ev.target; if (s.tagName === 'SELECT') s.dataset.prev = s.value; }, true);
+document.addEventListener('change', ev => {
+  const s = ev.target; if (s.tagName !== 'SELECT' || s.value !== '__custom') return;
+  ev.stopImmediatePropagation();
+  const prev = s.dataset.prev && s.dataset.prev !== '__custom' ? s.dataset.prev : '';
+  const prevTxt = prev && !ROLES[prev] ? prev : '';
+  const m = modal(`<div class="modal-h"><h3>Fonction de la personne</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><label class="fld"><span>Fonction</span><input id="cr-txt" maxlength="60" value="${esc(prevTxt)}" placeholder="ex. Juriste social, Assistante RH, Gestionnaire paie senior…"></label></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cr-ok">Valider</button></div>`);
+  const inp = m.el.querySelector('#cr-txt'); setTimeout(() => inp.focus(), 30);
+  let done = false;
+  const ok = () => {
+    const v = inp.value.trim().replace(/\s+/g, ' '); if (!v) { inp.focus(); return; }
+    const std = Object.entries(ROLES).find(([, l]) => norm(l) === norm(v));
+    const val = std ? std[0] : v;
+    if (!std && ![...s.options].some(o => o.value === val)) s.insertAdjacentHTML('afterbegin', `<option value="${esc(val)}">${esc(val)}</option>`);
+    s.value = val; s.dataset.prev = val; done = true; m.close();
+    s.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  m.el.querySelector('#cr-ok').addEventListener('click', ok);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
+  const obs = new MutationObserver(() => { if (!document.body.contains(m.el)) { obs.disconnect(); if (!done) s.value = prev || Object.keys(ROLES)[0]; } });
+  obs.observe(document.body, { childList: true, subtree: true });
+}, true);
 function ownerOpts(cur) {
   const ps = S.meta.persons.filter(x => !x.deletedAt && (!x.archived || x.id === cur)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   return `<option value="">Portefeuille de… (non attribué)</option>` + ps.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} · ${esc(roleLabel(x.role))}</option>`).join('');
@@ -2617,8 +2646,8 @@ function renderRefs() {
     </div></div>
     <div><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
-      ${Store.mode === 'firebase' ? `<div class="setting"><div>Application sur cet appareil<div class="d">${Install.standalone() ? 'Chronocab est ouvert en tant qu’application installée.' : 'Installez Chronocab pour l’ouvrir depuis une icône, en plein écran (téléphone ou ordinateur).'}</div></div>${Install.standalone() ? '' : '<button class="btn sm primary" data-act="install">Installer</button>'}</div>` : ''}
-      <div class="setting"><div>Version de l’application<div class="d">Chronocab v${APP_VERSION} du ${APP_DATE}</div></div></div>
+      ${Store.mode === 'firebase' ? `<div class="setting"><div>Application sur cet appareil<div class="d">${Install.standalone() ? 'Antevorta est ouvert en tant qu’application installée.' : 'Installez Antevorta pour l’ouvrir depuis une icône, en plein écran (téléphone ou ordinateur).'}</div></div>${Install.standalone() ? '' : '<button class="btn sm primary" data-act="install">Installer</button>'}</div>` : ''}
+      <div class="setting"><div>Version de l’application<div class="d">Antevorta v${APP_VERSION} du ${APP_DATE}</div></div></div>
       <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.persons.length} personnes · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div></div>
@@ -2689,7 +2718,7 @@ function bindRefs() {
     else if (act === 'trash-empty') confirmPurge([...S.meta.clients.filter(c => c.deletedAt).map(c => ({ kind: 'client', id: c.id })), ...S.meta.persons.filter(x => x.deletedAt).map(x => ({ kind: 'person', id: x.id })), ...S.meta.tasks.filter(t => t.deletedAt).map(t => ({ kind: 'task', id: t.id }))]);
     else if (act === 'export') {
       const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running }, null, 1);
-      downloadText('chronocab_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
+      downloadText('antevorta_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
     }
   });
   body.addEventListener('change', ev => {
@@ -2729,7 +2758,7 @@ function importFile(file) {
   const rd = new FileReader();
   rd.onload = () => {
     let d; try { d = JSON.parse(rd.result); } catch (e) { toast('Fichier illisible'); return; }
-    if (!d || !d.meta || !d.days) { toast('Ce fichier n’est pas une sauvegarde Chronocab'); return; }
+    if (!d || !d.meta || !d.days) { toast('Ce fichier n’est pas une sauvegarde Antevorta'); return; }
     const m = normalizeMeta(d.meta);
     const remap = {}; let nc = 0, nt = 0, ncode = 0;
     const mergeArr = (arr, items, isClient) => {
@@ -2800,7 +2829,7 @@ const Access = {
   watchSelf(F, ref) {
     F.onSnapshot(ref, d => {
       if (!d.exists() || d.data().status !== 'approved') {
-        document.body.insertAdjacentHTML('beforeend', `<div class="overlay"><div class="modal"><div class="modal-h"><h3>Accès retiré</h3></div><div class="modal-b">Votre accès à Chronocab a été retiré par l’administrateur.</div><div class="modal-f"><span class="sp"></span><button class="btn primary" onclick="location.reload()">OK</button></div></div></div>`);
+        document.body.insertAdjacentHTML('beforeend', `<div class="overlay"><div class="modal"><div class="modal-h"><h3>Accès retiré</h3></div><div class="modal-b">Votre accès à Antevorta a été retiré par l’administrateur.</div><div class="modal-f"><span class="sp"></span><button class="btn primary" onclick="location.reload()">OK</button></div></div></div>`);
       }
     }, () => {});
   },
@@ -2821,7 +2850,7 @@ const Access = {
   },
   alert(x) {
     toast('Nouvelle demande d’accès : ' + (x.email || x.name), 'Voir', () => { location.hash = 'acces'; });
-    try { if (window.Notification && Notification.permission === 'granted') { const n = new Notification('Chronocab : nouvelle demande d’accès', { body: (x.name ? x.name + ' — ' : '') + (x.email || '') }); n.onclick = () => { window.focus(); location.hash = 'acces'; }; } } catch (e) {}
+    try { if (window.Notification && Notification.permission === 'granted') { const n = new Notification('Antevorta : nouvelle demande d’accès', { body: (x.name ? x.name + ' — ' : '') + (x.email || '') }); n.onclick = () => { window.focus(); location.hash = 'acces'; }; } } catch (e) {}
     const t0 = document.title; let k = 0; const iv = setInterval(() => { document.title = (k++ % 2) ? t0 : '🔔 Demande d’accès'; if (k > 12) { clearInterval(iv); document.title = t0; } }, 1000);
   },
   async set(id, status) {
@@ -2840,7 +2869,7 @@ const Access = {
     const row = (x, acts) => `<div class="ref-row" data-id="${esc(x.id)}"><span style="flex:1"><b>${esc(x.name || '—')}</b> <span class="muted">${esc(x.email || '')}</span></span>
       <span class="muted small">${x.status === 'pending' ? 'demandé le ' + fmtDate(x.requestedAt || 0) + ' à ' + hhmm(x.requestedAt || 0) : x.decidedAt ? 'le ' + fmtDate(x.decidedAt) : ''}</span>${acts}</div>`;
     const sect = (title, arr, acts, empty) => `<h2>${title} (${arr.length})</h2><div class="card">${arr.map(x => row(x, acts)).join('') || `<div class="empty" style="padding:18px">${empty}</div>`}</div>`;
-    body.innerHTML = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Accès à Chronocab</div><div class="muted small">Toute personne qui se connecte avec Google apparaît ici « en attente ». Elle ne voit rien et n’enregistre rien tant que vous ne l’avez pas validée. Chaque compte n’accède qu’à ses propres temps.</div></div>
+    body.innerHTML = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Accès à Antevorta</div><div class="muted small">Toute personne qui se connecte avec Google apparaît ici « en attente ». Elle ne voit rien et n’enregistre rien tant que vous ne l’avez pas validée. Chaque compte n’accède qu’à ses propres temps.</div></div>
       ${notif === 'granted' ? '<span class="muted small">🔔 Alertes du navigateur activées</span>' : notif === 'unsupported' ? '' : '<button class="btn sm" data-a="notif">🔔 Activer les alertes du navigateur</button>'}</div>
       ${sect('En attente de validation', by('pending'), '<button class="btn sm primary" data-a="approve">Valider</button><button class="btn sm danger" data-a="refuse">Refuser</button>', 'Aucune demande en attente.')}
       ${sect('Comptes autorisés', by('approved'), '<button class="btn sm danger" data-a="refuse">Retirer l’accès</button>', 'Aucun autre compte autorisé pour l’instant (vous êtes administrateur).')}
@@ -2862,7 +2891,7 @@ function showAccessScreen(kind, user) {
   const l = $('#loading'); if (!l) return;
   const pending = kind === 'pending';
   l.innerHTML = `<div class="card login"><h3>${pending ? 'Demande d’accès envoyée' : 'Accès refusé'}</h3>
-    <p>${pending ? 'Votre compte <b>' + esc(user.email || '') + '</b> doit être validé par l’administrateur de Chronocab. Cette page s’ouvrira automatiquement dès la validation.' : 'L’administrateur n’a pas autorisé le compte <b>' + esc(user.email || '') + '</b>.'}</p>
+    <p>${pending ? 'Votre compte <b>' + esc(user.email || '') + '</b> doit être validé par l’administrateur de Antevorta. Cette page s’ouvrira automatiquement dès la validation.' : 'L’administrateur n’a pas autorisé le compte <b>' + esc(user.email || '') + '</b>.'}</p>
     <button class="btn" id="acc-out">Se déconnecter</button></div>`;
   $('#acc-out').onclick = async () => { await Store.fb.AU.signOut(Store.fb.auth); location.reload(); };
 }
@@ -2873,7 +2902,7 @@ function showLogin(auth, AU) {
   return new Promise(resolve => {
     const l = $('#loading');
     l.innerHTML = `<div class="card login"><div class="brand-mark" style="margin:0 auto 14px;width:40px;height:40px;border-radius:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div>
-      <h3>Chronocab</h3><p>Connectez-vous avec votre compte Google pour retrouver vos temps sur n’importe quel poste.</p>
+      <h3>Antevorta</h3><p>Connectez-vous avec votre compte Google pour retrouver vos temps sur n’importe quel poste.</p>
       <button class="btn primary" id="login-btn" style="padding:10px 18px">Se connecter avec Google</button><div class="err" id="login-err"></div></div>`;
     const done = AU.onAuthStateChanged(auth, u => { if (u) { done(); resolve(u); } });
     $('#login-btn').onclick = async () => {
@@ -2899,20 +2928,20 @@ const Install = {
   async run() {
     if (!this.evt) { openInstallHelp(); return; }
     this.evt.prompt();
-    try { const r = await this.evt.userChoice; if (r && r.outcome === 'accepted') toast('Chronocab est en cours d’installation'); } catch (e) {}
+    try { const r = await this.evt.userChoice; if (r && r.outcome === 'accepted') toast('Antevorta est en cours d’installation'); } catch (e) {}
     this.evt = null; this.refresh();
   },
 };
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); Install.evt = e; Install.refresh(); });
-window.addEventListener('appinstalled', () => { Install.evt = null; Install.refresh(); toast('Chronocab est installé : retrouvez son icône sur l’écran d’accueil'); });
+window.addEventListener('appinstalled', () => { Install.evt = null; Install.refresh(); toast('Antevorta est installé : retrouvez son icône sur l’écran d’accueil'); });
 function openInstallHelp() {
-  modal(`<div class="modal-h"><h3>Installer Chronocab</h3><button class="icon" data-close>${ICON.close}</button></div>
+  modal(`<div class="modal-h"><h3>Installer Antevorta</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
       <div><b>Android (Chrome)</b> : menu <b>⋮</b> en haut à droite › <b>Ajouter à l’écran d’accueil</b> › <b>Installer</b>.</div>
       <div><b>Android (Samsung Internet)</b> : menu <b>≡</b> en bas › <b>Ajouter la page à</b> › <b>Écran d’accueil</b>.</div>
       <div><b>iPhone (Safari)</b> : bouton <b>Partager</b> › <b>Sur l’écran d’accueil</b>.</div>
       <div><b>Ordinateur (Chrome ou Edge)</b> : icône d’installation à droite de la barre d’adresse.</div>
-      <div class="muted small">Si vous avez ouvert Chronocab depuis un lien dans Gmail ou une autre application, ouvrez-le d’abord dans le navigateur (menu › « Ouvrir dans Chrome »).</div>
+      <div class="muted small">Si vous avez ouvert Antevorta depuis un lien dans Gmail ou une autre application, ouvrez-le d’abord dans le navigateur (menu › « Ouvrir dans Chrome »).</div>
     </div><div class="modal-f"><span class="sp"></span><button class="btn primary" data-close>OK</button></div>`);
 }
 
@@ -2931,7 +2960,7 @@ function toast(msg, actLabel, act) {
 async function boot() {
   initTimerBar();
   $('#install-btn').onclick = () => Install.run();
-  $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Chronocab version ' + APP_VERSION + ' du ' + APP_DATE;
+  $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Antevorta version ' + APP_VERSION + ' du ' + APP_DATE;
   bindChrono(); bindPortfolio(); bindCycle(); bindReports(); bindBilling(); bindRefs();
   // Le runtime de l'artifact peut s'installer juste après le chargement
   if (!FIREBASE_CONFIG.apiKey && !(window.claude && window.claude.use)) await new Promise(r => setTimeout(r, 400));
