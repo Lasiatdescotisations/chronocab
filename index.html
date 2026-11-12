@@ -129,6 +129,15 @@ h2:first-child{margin-top:0}
 .opt.hi{background:var(--accent-soft)}
 .opt .sub{color:var(--muted);font-size:12px;margin-left:auto;padding-left:14px}
 .opt.create{color:var(--accent);font-weight:500}
+.pers-ic{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--surface-3);color:var(--ink-2);flex:none}
+.pers-ic svg{width:12px;height:12px}
+.what .role,.chip .role{font-size:11px;color:var(--muted);white-space:nowrap}
+.ext{font-size:11px;color:var(--ink-2);background:var(--surface-3);border-radius:10px;padding:1px 7px;white-space:nowrap}
+.pf{border:1px solid var(--line-2);background:var(--surface);border-radius:20px;padding:3px 10px;font-size:12px;white-space:nowrap;color:var(--muted)}
+.pf.on{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line-2));color:var(--accent);font-weight:600}
+.ref-tools{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ref-tools input{flex:1;min-width:160px}
+.clients-card .ref-list{max-height:560px}
 .opt-head{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px 9px 3px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--c,#999);flex:none;display:inline-block}
 
@@ -302,6 +311,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .top{height:52px;padding:0 12px;gap:8px}
   .top-right{gap:8px}
   #account{padding:4px 8px}
+  #install-btn{padding:5px 9px}
   .nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line);z-index:60;justify-content:space-around;gap:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
   .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:11px;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
   .nav a.on{border-top-color:var(--accent);color:var(--accent)}
@@ -362,7 +372,11 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .ref-row>input.code{order:3;flex:0 0 90px;border-color:var(--line)}
   .ref-row>select{order:4}
   .ref-row>.use{order:5;width:auto}
-  .ref-row>[data-act=toggle-arch]{order:6;margin-left:auto}
+  .ref-row>[data-act=toggle-arch]{order:7;margin-left:auto}
+  .ref-row>.pf{order:3}
+  .ref-row>select[data-k=owner]{order:4;flex:1 1 100%}
+  .ref-row>[data-act=to-person]{order:6}
+  .ref-add>#new-client,.ref-add>#new-person,.ref-add>#new-task{flex:1 1 100%}
   .trash-list .ref-row>span{flex:1 1 auto}
   .row input[type=checkbox]{width:20px;height:20px}
   .times input{width:58px;font-size:14px;border-color:var(--line)}
@@ -403,6 +417,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
+    <button id="install-btn" class="btn sm primary" hidden title="Installer Chronocab sur cet appareil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
     <button id="account" class="btn sm ghost" hidden>Déconnexion</button>
     <span class="ver" id="ver"></span>
   </div>
@@ -415,7 +430,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <section class="view" id="v-chrono">
     <div class="card timerbar" id="timerbar">
       <div class="tb-fields">
-        <div class="combo" id="cb-client"><input placeholder="Client / dossier" autocomplete="off" spellcheck="false"></div>
+        <div class="combo" id="cb-client"><input placeholder="Client, dossier ou personne" autocomplete="off" spellcheck="false"></div>
         <div class="combo" id="cb-task"><input placeholder="Tâche" autocomplete="off" spellcheck="false"></div>
         <input id="tb-label" placeholder="Libellé (ex. bulletins d'octobre, STC M. Durand…)" autocomplete="off">
       </div>
@@ -471,7 +486,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -557,6 +572,7 @@ const ICON = {
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>',
   chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
 };
 
@@ -565,7 +581,7 @@ const ICON = {
    ========================================================= */
 const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true, dayEnd: '18:00' };
 const S = {
-  meta: { clients: [], tasks: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
+  meta: { clients: [], tasks: [], persons: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
   days: {},          // 'YYYY-MM-DD' -> { entries: { id: entry } }
   running: null,     // entrée en cours (end = null)
   rev: 0,
@@ -573,7 +589,7 @@ const S = {
 const UI = {
   view: 'chrono', daysShown: 7, mode: 'timer',
   draft: { client: null, task: null, label: '', billable: true, billTouched: false },
-  rep: { period: 'month', from: '', to: '', client: '', task: '', bill: 'all', logged: 'all', q: '', cols: 'status', group: 'client', sel: new Set(), limit: 200 },
+  rep: { period: 'month', from: '', to: '', client: '', task: '', pf: '', bill: 'all', logged: 'all', q: '', cols: 'status', group: 'client', sel: new Set(), limit: 200 },
   fac: { until: '', open: new Set() },
   refArch: false,
 };
@@ -581,6 +597,7 @@ function normalizeMeta(m) {
   m = m || {};
   return {
     clients: Array.isArray(m.clients) ? m.clients : [],
+    persons: Array.isArray(m.persons) ? m.persons : [],
     tasks: Array.isArray(m.tasks) ? m.tasks : [],
     favorites: Array.isArray(m.favorites) ? m.favorites : [],
     settings: { ...DEFAULT_SETTINGS, ...(m.settings || {}) },
@@ -588,7 +605,27 @@ function normalizeMeta(m) {
 }
 const clientOf = id => S.meta.clients.find(c => c.id === id) || null;
 const taskOf = id => S.meta.tasks.find(t => t.id === id) || null;
-const clientName = id => id ? (clientOf(id)?.name || 'Client supprimé') : '';
+// Une saisie porte soit un client (id « c… »), soit une personne (id « p… ») dans le champ client.
+const isPersonId = id => typeof id === 'string' && id[0] === 'p';
+const personOf = id => S.meta.persons.find(x => x.id === id) || null;
+const entityOf = id => isPersonId(id) ? personOf(id) : clientOf(id);
+const ROLES = { paie: 'Collaborateur paie', compta: 'Collaborateur comptable', ec: 'Expert-comptable', autre: 'Autre' };
+const roleLabel = r => ROLES[r] || '';
+const isMine = c => !!c && c.mine !== false;
+const clientName = id => !id ? '' : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
+function pfKey(id) {
+  if (!id) return 'none';
+  if (isPersonId(id)) return 'p:' + id;
+  const c = clientOf(id); if (!c) return 'none';
+  if (isMine(c)) return 'mine';
+  return c.owner && personOf(c.owner) ? 'p:' + c.owner : 'others';
+}
+function pfName(k) {
+  if (k === 'mine') return 'Mon portefeuille';
+  if (k === 'others') return 'Autres portefeuilles (non attribués)';
+  if (k === 'none') return 'Sans client';
+  const p = personOf(k.slice(2)); return p ? p.name + (p.role ? ' · ' + roleLabel(p.role) : '') : 'Personne supprimée';
+}
 const taskName = id => id ? (taskOf(id)?.name || 'Tâche supprimée') : '';
 const dur = e => (e.end ?? Date.now()) - e.start;
 
@@ -604,6 +641,7 @@ function allEntries() {
 function defaultBillable(clientId, taskId) {
   const t = taskOf(taskId);
   if (t && t.billing && t.billing !== 'auto') return t.billing === 'bill';
+  if (isPersonId(clientId)) return false; // temps passé avec une personne : non facturable par défaut
   const c = clientOf(clientId);
   if (c && c.billing) return c.billing === 'bill';
   return !!S.meta.settings.defaultBillable;
@@ -807,8 +845,14 @@ function deleteEntries(ids) {
 function addClient(name) {
   name = name.trim(); if (!name) return null;
   const ex = S.meta.clients.find(c => norm(c.name) === norm(name)); if (ex) { if (ex.archived || ex.deletedAt) { ex.archived = false; delete ex.deletedAt; touchMeta(); } return ex.id; }
-  const c = { id: 'c' + newId(), name, code: '', billing: '', archived: false };
+  const c = { id: 'c' + newId(), name, code: '', billing: '', archived: false, mine: true };
   S.meta.clients.push(c); touchMeta(); return c.id;
+}
+function addPerson(name, role) {
+  name = name.trim(); if (!name) return null;
+  const ex = S.meta.persons.find(x => norm(x.name) === norm(name)); if (ex) { if (ex.archived || ex.deletedAt) { ex.archived = false; delete ex.deletedAt; } if (role) ex.role = role; touchMeta(); return ex.id; }
+  const x = { id: 'p' + newId(), name, role: role || 'paie', archived: false };
+  S.meta.persons.push(x); touchMeta(); return x.id;
 }
 function addTask(name) {
   name = name.trim(); if (!name) return null;
@@ -859,7 +903,7 @@ function Combo(root, o) {
     list.innerHTML = items.length ? items.map(i => {
       if (i.head) return `<div class="opt-head">${esc(i.label)}</div>`;
       n++;
-      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.dot ? `<span class="dot" style="--c:${i.dot}"></span>` : ''}<span>${esc(i.label)}</span>${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
+      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? `<span class="pers-ic">${ICON.person}</span>` : i.dot ? `<span class="dot" style="--c:${i.dot}"></span>` : ''}<span>${esc(i.label)}</span>${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
     }).join('') : `<div class="opt-head">${typed ? 'Aucun résultat' : o.emptyText}</div>`;
     const h = list.querySelector('.opt.hi'); if (h) h.scrollIntoView({ block: 'nearest' });
   }
@@ -907,12 +951,20 @@ function usageStats() {
 function clientOptions(q) {
   const u = usageStats();
   let cs = S.meta.clients.filter(c => !c.archived && !c.deletedAt);
-  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n)); }
-  const recent = q ? [] : cs.filter(c => u.cLast[c.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
-  const rest = cs.slice().sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-  const map = c => ({ id: c.id, label: c.name, sub: c.code, dot: colorFor(c.id) });
-  if (!recent.length) return rest.map(map);
-  return [{ head: true, label: 'Récents' }, ...recent.map(map), { head: true, label: 'Tous les clients' }, ...rest.map(map)];
+  let ps = S.meta.persons.filter(x => !x.archived && !x.deletedAt);
+  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n)); ps = ps.filter(x => norm(x.name).includes(n) || norm(roleLabel(x.role)).includes(n)); }
+  const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
+  const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), dot: colorFor(c.id) });
+  const mapP = x => ({ id: x.id, label: x.name, sub: roleLabel(x.role), person: true });
+  const map = o => isPersonId(o.id) ? mapP(o) : mapC(o);
+  const out = [];
+  const recent = q ? [] : [...cs, ...ps].filter(o => u.cLast[o.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
+  if (recent.length) out.push({ head: true, label: 'Récents' }, ...recent.map(map));
+  const mine = cs.filter(isMine).sort(byName), others = cs.filter(c => !isMine(c)).sort(byName);
+  if (mine.length) out.push({ head: true, label: 'Mon portefeuille' }, ...mine.map(mapC));
+  if (others.length) out.push({ head: true, label: 'Autres portefeuilles' }, ...others.map(mapC));
+  if (ps.length) out.push({ head: true, label: 'Personnes (temps passé avec)' }, ...ps.sort(byName).map(mapP));
+  return out;
 }
 function taskOptions(q, clientId) {
   const u = usageStats();
@@ -946,9 +998,9 @@ function onPick() {
 }
 function initTimerBar() {
   cbClient = Combo($('#cb-client'), {
-    options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer',
+    options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer (les personnes se créent dans Clients & tâches)',
     onCreate: name => addClient(name), createLabel: q => '+ Créer le client « ' + q + ' »',
-    onSelect: id => { setSpec({ client: id }); onPick(); if (id && !curSpec().task) cbTask.focus(); },
+    onSelect: id => { setSpec({ client: id }); onPick(); if (id) cbTask.focus(); },
   });
   cbTask = Combo($('#cb-task'), {
     options: q => taskOptions(q, curSpec().client), labelOf: id => taskName(id), emptyText: 'Aucune tâche : tapez un nom pour la créer',
@@ -1078,18 +1130,20 @@ window.addEventListener('hashchange', route);
 function statusOf(e) { return !e.billable ? 'no' : e.invoicedAt ? 'inv' : 'todo'; }
 function statusLabel(st) { return st === 'no' ? 'Non facturable' : st === 'inv' ? 'Facturé' : 'À facturer'; }
 function whatHTML(c, t) {
-  return `<span class="dot" style="--c:${colorFor(c)}"></span>${c ? `<span class="cl">${esc(clientName(c))}</span>` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
+  if (isPersonId(c)) { const p = personOf(c); return `<span class="pers-ic">${ICON.person}</span><span class="cl">${esc(clientName(c))}</span>${p?.role ? `<span class="role">${esc(roleLabel(p.role))}</span>` : ''}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`; }
+  const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
+  return `<span class="dot" style="--c:${colorFor(c)}"></span>${c ? `<span class="cl">${esc(clientName(c))}</span>${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
 }
 function recents() {
   const seen = new Set(), out = [];
-  const favs = S.meta.favorites.filter(f => clientOf(f.c) || taskOf(f.t));
+  const favs = S.meta.favorites.filter(f => entityOf(f.c) || taskOf(f.t));
   favs.forEach(f => { seen.add(f.c + '|' + f.t); out.push({ c: f.c, t: f.t, fav: true }); });
   for (const e of allEntries()) {
     if (out.length >= favs.length + 8) break;
     if (!e.client && !e.task) continue;
     const k = e.client + '|' + e.task;
     if (seen.has(k)) continue;
-    const oc = clientOf(e.client), ot = taskOf(e.task);
+    const oc = entityOf(e.client), ot = taskOf(e.task);
     if ((e.client && !oc) || (e.task && !ot) || oc?.archived || oc?.deletedAt || ot?.archived || ot?.deletedAt) continue;
     seen.add(k); out.push({ c: e.client, t: e.task, fav: false });
   }
@@ -1119,7 +1173,8 @@ function renderChrono() {
     <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div></div>
     <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer</div></div>
     <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
-    <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
+    <div class="card stat"><div class="k">Hors portefeuille · ce mois</div><div class="v">${fmtDur(sum(mo, e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none'; }))}</div><div class="s">autres clients et temps avec des personnes</div></div>
+    <div class="card stat" data-k="todo"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
     <div class="card stat"><div class="k" title="Saisies des 31 derniers jours pas encore cochées « Reporté » (pas encore recopiées dans le logiciel du cabinet)">À reporter · 31 derniers jours</div><div class="v">${unlogged}</div><div class="s">saisies à reporter dans le logiciel du cabinet</div></div>
   </div>`;
   // Groupes par jour
@@ -1288,6 +1343,13 @@ function modal(html, cls = '') {
   ov.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
   return { el: ov, close };
 }
+function targetOpts(cur, empty) {
+  const ok = x => (!x.archived && !x.deletedAt) || x.id === cur;
+  const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
+  const opt = x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}</option>`;
+  const mine = S.meta.clients.filter(c => ok(c) && isMine(c)).sort(byName), others = S.meta.clients.filter(c => ok(c) && !isMine(c)).sort(byName), ps = S.meta.persons.filter(ok).sort(byName);
+  return `<option value="">${empty}</option>` + (mine.length ? `<optgroup label="Mon portefeuille">${mine.map(opt).join('')}</optgroup>` : '') + (others.length ? `<optgroup label="Autres portefeuilles">${others.map(opt).join('')}</optgroup>` : '') + (ps.length ? `<optgroup label="Personnes">${ps.map(p => `<option value="${p.id}" ${p.id === cur ? 'selected' : ''}>${esc(p.name)} (${esc(roleLabel(p.role))})</option>`).join('')}</optgroup>` : '');
+}
 function selectOpts(arr, cur, empty) {
   return `<option value="">${empty}</option>` + arr.filter(x => (!x.archived && !x.deletedAt) || x.id === cur).slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
 }
@@ -1295,7 +1357,7 @@ function openEdit(id) {
   const e = findEntry(id); if (!e) return;
   const m = modal(`<div class="modal-h"><h3>Modifier la saisie</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
-      <div class="fld-row"><label class="fld"><span>Client</span><select id="ed-c">${selectOpts(S.meta.clients, e.client, '— Sans client —')}</select></label>
+      <div class="fld-row"><label class="fld"><span>Client ou personne</span><select id="ed-c">${targetOpts(e.client, '— Sans client —')}</select></label>
       <label class="fld"><span>Tâche</span><select id="ed-t">${selectOpts(S.meta.tasks, e.task, '— Sans tâche —')}</select></label></div>
       <label class="fld"><span>Libellé</span><input id="ed-l" value="${esc(e.label)}"></label>
       <div class="fld-row"><label class="fld"><span>Date</span><input type="date" id="ed-d" value="${dayKey(e.start)}"></label>
@@ -1384,6 +1446,11 @@ async function downloadText(filename, txt, mime) {
 }
 
 /* ---------- Vue Rapports ---------- */
+function pfOpts(cur) {
+  const ps = S.meta.persons.filter(x => !x.deletedAt).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  const o = (v, l) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`;
+  return o('', 'Tous') + o('mine', 'Mon portefeuille') + o('others', 'Hors de mon portefeuille') + o('persons', 'Temps passé avec des personnes') + (ps.length ? `<optgroup label="Lié à une personne (ses clients + temps avec elle)">${ps.map(x => o('p:' + x.id, x.name + ' · ' + roleLabel(x.role))).join('')}</optgroup>` : '');
+}
 function periodRange() {
   const r = UI.rep, now = Date.now();
   let from, to;
@@ -1405,6 +1472,7 @@ function filtered() {
   return allEntries().filter(e => {
     if (e.start < from || e.start >= to) return false;
     if (r.client && e.client !== r.client) return false;
+    if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
     if (r.task && e.task !== r.task) return false;
     const st = statusOf(e);
     if (r.bill === 'bill' && !e.billable) return false;
@@ -1431,7 +1499,8 @@ function renderReports() {
   let html = `<div class="card filters">
     <label>Période<select data-r="period">${periodOpts.map(([v, l]) => `<option value="${v}" ${r.period === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     ${r.period === 'custom' ? `<label>Du<input type="date" data-r="from" value="${r.from || dayKey(from)}"></label><label>Au<input type="date" data-r="to" value="${r.to || dayKey(to - 1)}"></label>` : `<label>&nbsp;<span class="small" style="padding:7px 0;color:var(--ink-2)">${fmtDate(from)} → ${fmtDate(to - 1)}</span></label>`}
-    <label>Client<select data-r="client">${selectOpts(S.meta.clients, r.client, 'Tous les clients')}</select></label>
+    <label>Portefeuille<select data-r="pf">${pfOpts(r.pf)}</select></label>
+    <label>Client / personne<select data-r="client">${targetOpts(r.client, 'Tous')}</select></label>
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Report logiciel<select data-r="logged">${[['all', 'Tout'], ['no', 'Non reporté'], ['yes', 'Reporté']].map(([v, l]) => `<option value="${v}" ${r.logged === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
@@ -1443,6 +1512,7 @@ function renderReports() {
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-inv)"></span>Déjà facturé</div><div class="v">${fmtDur(t.inv)}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(t.todo)}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-nobill)"></span>Non facturable</div><div class="v">${fmtDur(t.no)}</div></div>
+    <div class="card stat"><div class="k">Hors de mon portefeuille</div><div class="v">${fmtDur(list.filter(e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none'; }).reduce((a, e) => a + dur(e), 0))}</div><div class="s">autres clients et temps avec des personnes</div></div>
   </div>`;
   // graphique
   const months = [];
@@ -1459,8 +1529,8 @@ function renderReports() {
   // tableau croisé
   const multiMonth = months.length > 1;
   const cols = multiMonth && r.cols === 'month' ? 'month' : 'status';
-  html += `<div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : 'tâche puis client'}</h2><span class="sp"></span>
-    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button></div>
+  html += `<div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : 'tâche puis client'}</h2><span class="sp"></span>
+    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button><button data-v="pf" class="${r.group === 'pf' ? 'on' : ''}">Portefeuille › Client</button></div>
     ${multiMonth ? `<div class="seg" data-seg="cols"><button data-v="status" class="${cols === 'status' ? 'on' : ''}">Colonnes : statuts</button><button data-v="month" class="${cols === 'month' ? 'on' : ''}">Colonnes : mois</button></div>` : ''}
     <button class="btn sm" data-act="copy-pivot">${ICON.copy} Copier</button></div>`;
   const pv = pivot(list, r.group, cols, months);
@@ -1487,10 +1557,11 @@ function renderReports() {
   bindChart(body, buckets);
 }
 function pivot(list, group, cols, months) {
-  const k1 = group === 'client' ? e => e.client || '' : e => e.task || '';
+  const tgt = id => isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) || 'Sans client';
+  const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : e => e.task || '';
   const k2 = group === 'client' ? e => e.task || '' : e => e.client || '';
-  const n1 = group === 'client' ? id => clientName(id) || 'Sans client' : id => taskName(id) || 'Sans tâche';
-  const n2 = group === 'client' ? id => taskName(id) || 'Sans tâche' : id => clientName(id) || 'Sans client';
+  const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : id => taskName(id) || 'Sans tâche';
+  const n2 = group === 'client' ? id => taskName(id) || 'Sans tâche' : tgt;
   const g = new Map();
   for (const e of list) {
     const a = k1(e), b = k2(e);
@@ -1505,13 +1576,14 @@ function pivot(list, group, cols, months) {
     return totals(l);
   };
   const cell = v => v ? fmtDur(v) : '<span class="zero">–</span>';
-  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
-  const tsvRows = [[group === 'client' ? 'Client' : 'Tâche', group === 'client' ? 'Tâche' : 'Client', ...colDefs.map(c => c[1] + ' (h)')].join('\t')];
+  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : group === 'pf' ? 'Portefeuille / Client' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
+  const tsvRows = [[group === 'client' ? 'Client' : group === 'pf' ? 'Portefeuille' : 'Tâche', group === 'client' ? 'Tâche' : 'Client', ...colDefs.map(c => c[1] + ' (h)')].join('\t')];
   let rows = '';
-  const sorted = [...g.entries()].sort((a, b) => n1(a[0]).localeCompare(n1(b[0]), 'fr'));
+  const pfRank = k => k === 'mine' ? 0 : k === 'none' ? 3 : k === 'others' ? 2 : 1;
+  const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
-    rows += `<tr class="grp"><td>${group === 'client' ? `<span class="dot" style="--c:${colorFor(a)}"></span> ` : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
+    rows += `<tr class="grp"><td>${group === 'client' ? (isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `<span class="dot" style="--c:${colorFor(a)}"></span> `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
     const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
     for (const [b, l] of subs) {
       const sv = vals(l);
@@ -1571,8 +1643,8 @@ function bindChart(root, b) {
 }
 function detailTSV(list, sep) {
   const q = v => sep === ';' ? '"' + String(v ?? '').replace(/"/g, '""') + '"' : String(v ?? '').replace(/[\t\n]/g, ' ');
-  const head = ['Date', 'Client', 'Code client', 'Tâche', 'Libellé', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
-  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', taskName(e.task), e.label, hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
+  const head = ['Date', 'Client / personne', 'Code client', 'Portefeuille', 'Tâche', 'Libellé', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
+  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', pfName(pfKey(e.client)), taskName(e.task), e.label, hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
   return [head.map(q).join(sep), ...rows].join('\n');
 }
 function bindReports() {
@@ -1675,36 +1747,66 @@ function addPresetTasks() {
   for (const name of PAYROLL_TASKS) if (!S.meta.tasks.some(t => norm(t.name) === norm(name))) { S.meta.tasks.push({ id: 't' + newId(), name, billing: 'auto', archived: false }); n++; }
   touchMeta(); toast(n ? n + ' tâches ajoutées (modifiables dans « Clients & tâches »)' : 'Les tâches standards sont déjà présentes');
 }
+const objOf = (kind, id) => kind === 'client' ? clientOf(id) : kind === 'person' ? personOf(id) : taskOf(id);
+function roleOpts(cur) { return Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${v}</option>`).join(''); }
+function ownerOpts(cur) {
+  const ps = S.meta.persons.filter(x => !x.deletedAt && (!x.archived || x.id === cur)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  return `<option value="">Portefeuille de… (non attribué)</option>` + ps.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} · ${esc(roleLabel(x.role))}</option>`).join('');
+}
 function renderRefs() {
   const u = {}; const ut = {};
   for (const e of allEntries()) { if (e.client) u[e.client] = (u[e.client] || 0) + dur(e); if (e.task) ut[e.task] = (ut[e.task] || 0) + dur(e); }
-  const showA = UI.refArch;
-  const cs = S.meta.clients.filter(c => !c.deletedAt && (showA || !c.archived)).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
-  const ts = S.meta.tasks.filter(t => !t.deletedAt && (showA || !t.archived)).sort((a, b) => a.archived - b.archived || a.name.localeCompare(b.name, 'fr'));
+  const showA = UI.refArch, f = UI.refPf || 'all', q = norm(UI.refQ || '');
+  const byArch = (a, b) => (a.archived ? 1 : 0) - (b.archived ? 1 : 0) || a.name.localeCompare(b.name, 'fr');
+  const allC = S.meta.clients.filter(c => !c.deletedAt && (showA || !c.archived));
+  const nMine = allC.filter(isMine).length, nOther = allC.length - nMine;
+  const cs = allC.filter(c => (f === 'all' || (f === 'mine') === isMine(c)) && (!q || norm(c.name).includes(q) || norm(c.code).includes(q))).sort(byArch);
+  const ts = S.meta.tasks.filter(t => !t.deletedAt && (showA || !t.archived)).sort(byArch);
+  const ps = S.meta.persons.filter(x => !x.deletedAt && (showA || !x.archived)).sort(byArch);
+  const owned = {}; S.meta.clients.forEach(c => { if (!c.deletedAt && !isMine(c) && c.owner) owned[c.owner] = (owned[c.owner] || 0) + 1; });
   const st = S.meta.settings;
-  const nArch = S.meta.clients.filter(c => c.archived && !c.deletedAt).length + S.meta.tasks.filter(t => t.archived && !t.deletedAt).length;
-  const trash = [...S.meta.clients.filter(c => c.deletedAt).map(o => ({ o, kind: 'client', use: u[o.id] || 0 })), ...S.meta.tasks.filter(t => t.deletedAt).map(o => ({ o, kind: 'task', use: ut[o.id] || 0 }))].sort((a, b) => b.o.deletedAt - a.o.deletedAt);
-  let html = `<div class="toolbar" style="margin-top:0"><h2>Clients et tâches</h2><span class="sp"></span>${nArch ? `<label class="chk"><input type="checkbox" data-act="arch" ${showA ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
-  <div class="grid2">
-    <div class="card"><div class="ref-add"><input id="new-client" placeholder="Nouveau client (ex. Alpha SARL)"><input id="new-client-code" placeholder="Code dossier" style="flex:0 0 110px"><button class="btn primary" data-act="add-client">Ajouter</button></div>
-      <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}"><span class="dot" style="--c:${colorFor(c.id)}"></span>
-        <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
-        <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
-        <span class="use" title="Temps total enregistré">${u[c.id] ? fmtDur(u[c.id], 'hm') : ''}</span>
-        <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
-        <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || '<div class="empty">Aucun client pour l’instant.</div>'}</div></div>
-    <div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
+  const nArch = [...S.meta.clients, ...S.meta.tasks, ...S.meta.persons].filter(x => x.archived && !x.deletedAt).length;
+  const trash = [...S.meta.clients.filter(c => c.deletedAt).map(o => ({ o, kind: 'client', use: u[o.id] || 0 })), ...S.meta.persons.filter(x => x.deletedAt).map(o => ({ o, kind: 'person', use: u[o.id] || 0 })), ...S.meta.tasks.filter(t => t.deletedAt).map(o => ({ o, kind: 'task', use: ut[o.id] || 0 }))].sort((a, b) => b.o.deletedAt - a.o.deletedAt);
+  const kindLabel = { client: 'Client', person: 'Personne', task: 'Tâche' };
+  const newMine = UI.newClientMine !== false;
+  let html = `<div class="toolbar" style="margin-top:0"><h2>Clients</h2><span class="sp"></span>${nArch ? `<label class="chk"><input type="checkbox" data-act="arch" ${showA ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
+  <div class="card clients-card">
+    <div class="ref-add"><input id="new-client" placeholder="Nouveau client (ex. Alpha SARL)"><input id="new-client-code" placeholder="Code dossier" style="flex:0 0 110px">
+      <button class="pf ${newMine ? 'on' : ''}" data-act="new-mine" title="Cliquer pour changer">${newMine ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
+      ${newMine ? '' : `<select id="new-client-owner">${ownerOpts(UI.newClientOwner || '')}</select>`}
+      <button class="btn primary" data-act="add-client">Ajouter</button></div>
+    <div class="ref-tools"><div class="seg" data-seg="refpf"><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${allC.length})</button><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${nOther})</button></div>
+      <input id="ref-q" placeholder="Rechercher un client ou un numéro…" value="${esc(UI.refQ || '')}" autocomplete="off"></div>
+    <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}"><span class="dot" style="--c:${colorFor(c.id)}"></span>
+      <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
+      <button class="pf ${isMine(c) ? 'on' : ''}" data-act="toggle-mine" title="Cliquer pour changer">${isMine(c) ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
+      ${isMine(c) ? '' : `<select data-k="owner" title="À qui appartient ce client ?">${ownerOpts(c.owner || '')}</select>`}
+      <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Facturation par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
+      <span class="use" title="Temps total enregistré">${u[c.id] ? fmtDur(u[c.id], 'hm') : ''}</span>
+      <button class="icon" data-act="to-person" title="Convertir en personne (si ce « client » est en fait un collaborateur)">${ICON.person}</button>
+      <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
+      <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">${q || f !== 'all' ? 'Aucun client ne correspond.' : 'Aucun client pour l’instant.'}</div>`}</div></div>
+  <div class="grid2" style="margin-top:4px">
+    <div><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
       <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
         <input class="nm" data-k="name" value="${esc(t.name)}">
         <select data-k="billing" title="Facturation par défaut"><option value="auto" ${!t.billing || t.billing === 'auto' ? 'selected' : ''}>Selon le client</option><option value="bill" ${t.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${t.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
         <span class="use">${ut[t.id] ? fmtDur(ut[t.id], 'hm') : ''}</span>
         <button class="btn sm ghost" data-act="toggle-arch">${t.archived ? 'Restaurer' : 'Archiver'}</button>
         <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches standards</button></div>`}</div>
-      ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Ajouter toutes les tâches standards</button></div>` : ''}</div>
+      ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Ajouter toutes les tâches standards</button></div>` : ''}</div></div>
+    <div><h2>Personnes</h2><div class="card"><div class="ref-add"><input id="new-person" placeholder="Prénom (ex. Sandra)"><select id="new-person-role">${roleOpts(UI.newPersonRole || 'paie')}</select><button class="btn primary" data-act="add-person">Ajouter</button></div>
+      <div class="ref-list">${ps.map(x => `<div class="ref-row ${x.archived ? 'arch' : ''}" data-kind="person" data-id="${x.id}"><span class="pers-ic">${ICON.person}</span>
+        <input class="nm" data-k="name" value="${esc(x.name)}">
+        <select data-k="role">${roleOpts(x.role)}</select>
+        <span class="use" title="Clients de son portefeuille">${owned[x.id] ? owned[x.id] + ' client' + (owned[x.id] > 1 ? 's' : '') : ''}</span>
+        <span class="use" title="Temps passé avec cette personne">${u[x.id] ? fmtDur(u[x.id], 'hm') : ''}</span>
+        <button class="btn sm ghost" data-act="toggle-arch">${x.archived ? 'Restaurer' : 'Archiver'}</button>
+        <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Ajoutez vos collègues (prénom et fonction) pour saisir le temps passé avec eux et rattacher à leur portefeuille les clients qui ne sont pas à vous.</div>`}</div></div></div>
   </div>
   ${trash.length ? `<div class="toolbar"><h2>Corbeille (${trash.length})</h2><span class="muted small">Les éléments supprimés restent ici tant que vous ne les supprimez pas définitivement. Les temps déjà saisis sont conservés.</span><span class="sp"></span><button class="btn sm danger" data-act="trash-empty">Vider la corbeille</button></div>
   <div class="card ref-list trash-list">${trash.map(x => `<div class="ref-row" data-kind="${x.kind}" data-id="${x.o.id}">
-      <span class="tag">${x.kind === 'client' ? 'Client' : 'Tâche'}</span>${x.kind === 'client' ? `<span class="dot" style="--c:${colorFor(x.o.id)}"></span>` : ''}
+      <span class="tag">${kindLabel[x.kind]}</span>${x.kind === 'client' ? `<span class="dot" style="--c:${colorFor(x.o.id)}"></span>` : x.kind === 'person' ? `<span class="pers-ic">${ICON.person}</span>` : ''}
       <span style="flex:1;font-weight:500">${esc(x.o.name)}${x.o.code ? ` <span class="mono muted small">${esc(x.o.code)}</span>` : ''}</span>
       <span class="muted small">supprimé le ${fmtDate(x.o.deletedAt)}</span>
       <span class="use" title="Temps enregistré">${x.use ? fmtDur(x.use, 'hm') : ''}</span>
@@ -1715,12 +1817,13 @@ function renderRefs() {
       <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
       <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
-      <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
+      <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
     </div></div>
     <div><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
+      ${Store.mode === 'firebase' ? `<div class="setting"><div>Application sur cet appareil<div class="d">${Install.standalone() ? 'Chronocab est ouvert en tant qu’application installée.' : 'Installez Chronocab pour l’ouvrir depuis une icône, en plein écran (téléphone ou ordinateur).'}</div></div>${Install.standalone() ? '' : '<button class="btn sm primary" data-act="install">Installer</button>'}</div>` : ''}
       <div class="setting"><div>Version de l’application<div class="d">Chronocab v${APP_VERSION} du ${APP_DATE}</div></div></div>
-      <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
+      <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.persons.length} personnes · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div></div>
   </div>`;
@@ -1730,28 +1833,64 @@ function renderRefs() {
   $$('.ref-list', body).forEach((l, i) => { l.scrollTop = keep[i] || 0; });
   if (Math.abs(window.scrollY - wy) > 1) window.scrollTo(0, wy);
 }
+function openToPerson(cid) {
+  const c = clientOf(cid); if (!c) return;
+  const n = allEntries().filter(e => e.client === cid).length;
+  const m = modal(`<div class="modal-h"><h3>Convertir en personne</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><div>« <b>${esc(c.name)}</b> » deviendra une <b>personne</b>.${n ? ` Ses ${n} saisie${n > 1 ? 's' : ''} de temps ${n > 1 ? 'seront conservées et compteront' : 'sera conservée et comptera'} comme du temps passé avec elle.` : ''} Le client sera mis à la corbeille.</div>
+    <div class="fld-row"><label class="fld"><span>Prénom</span><input id="tp-name" value="${esc(c.name)}"></label><label class="fld"><span>Fonction</span><select id="tp-role">${roleOpts('paie')}</select></label></div></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tp-ok">Convertir</button></div>`);
+  m.el.querySelector('#tp-ok').addEventListener('click', () => {
+    const pid = addPerson(m.el.querySelector('#tp-name').value || c.name, m.el.querySelector('#tp-role').value); if (!pid) return;
+    const ids = allEntries().filter(e => e.client === cid).map(e => e.id);
+    if (ids.length) updateEntries(ids, e => { e.client = pid; });
+    if (S.running && S.running.client === cid) updateRunning({ client: pid });
+    S.meta.favorites.forEach(fv => { if (fv.c === cid) fv.c = pid; });
+    c.deletedAt = Date.now(); touchMeta(); syncTimerBar(); m.close();
+    toast('« ' + c.name + ' » est maintenant une personne' + (ids.length ? ' (' + ids.length + ' saisie' + (ids.length > 1 ? 's' : '') + ' transférée' + (ids.length > 1 ? 's' : '') + ')' : ''));
+  });
+}
 function bindRefs() {
   const body = $('#referentiel-body');
-  const addC = () => { const i = $('#new-client'), code = $('#new-client-code'); const id = addClient(i.value); if (id && code.value.trim()) { clientOf(id).code = code.value.trim(); touchMeta(); } i.value = ''; code.value = ''; i.focus(); };
+  const addC = () => {
+    const i = $('#new-client'), code = $('#new-client-code'); const id = addClient(i.value);
+    if (id) { const c = clientOf(id); if (code.value.trim()) c.code = code.value.trim(); c.mine = UI.newClientMine !== false; if (!c.mine) { const o = $('#new-client-owner'); if (o && o.value) c.owner = o.value; } touchMeta(); }
+    i.value = ''; code.value = ''; i.focus();
+  };
   const addT = () => { const i = $('#new-task'); addTask(i.value); i.value = ''; i.focus(); };
+  const addP = () => { const i = $('#new-person'), r = $('#new-person-role'); UI.newPersonRole = r.value; if (addPerson(i.value, r.value)) setTimeout(() => $('#new-person')?.focus(), 30); i.value = ''; };
   body.addEventListener('keydown', ev => {
     if (ev.key !== 'Enter') return;
     if (ev.target.id === 'new-client' || ev.target.id === 'new-client-code') addC();
     else if (ev.target.id === 'new-task') addT();
+    else if (ev.target.id === 'new-person') addP();
     else if (ev.target.matches('.ref-row input')) ev.target.blur();
   });
+  let qT;
+  body.addEventListener('input', ev => {
+    if (ev.target.id !== 'ref-q') return;
+    UI.refQ = ev.target.value; clearTimeout(qT);
+    qT = setTimeout(() => { const pos = ev.target.selectionStart; renderRefs(); const inp = $('#ref-q'); if (inp) { inp.focus(); inp.setSelectionRange(pos, pos); } }, 200);
+  });
   body.addEventListener('click', ev => {
+    const sg = ev.target.closest('.seg[data-seg=refpf] button'); if (sg) { UI.refPf = sg.dataset.v; renderRefs(); return; }
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act, row = b.closest('.ref-row');
+    const obj = row ? objOf(row.dataset.kind, row.dataset.id) : null;
     if (act === 'add-client') addC();
     else if (act === 'add-task') addT();
+    else if (act === 'add-person') addP();
+    else if (act === 'new-mine') { UI.newClientMine = UI.newClientMine === false; const kn = $('#new-client').value, kc = $('#new-client-code').value; renderRefs(); $('#new-client').value = kn; $('#new-client-code').value = kc; }
     else if (act === 'preset') addPresetTasks();
+    else if (act === 'install') Install.run();
     else if (act === 'arch') { UI.refArch = b.checked; renderRefs(); }
-    else if (act === 'toggle-arch' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); o.archived = !o.archived; touchMeta(); }
-    else if (act === 'del-ref' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (o) { o.deletedAt = Date.now(); touchMeta(); toast('« ' + o.name + ' » mis à la corbeille', 'Annuler', () => { delete o.deletedAt; touchMeta(); }); } }
-    else if (act === 'trash-restore' && row) { const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (o) { delete o.deletedAt; o.archived = false; touchMeta(); toast('« ' + o.name + ' » restauré'); } }
+    else if (act === 'toggle-mine' && obj) { obj.mine = !isMine(obj); touchMeta(); }
+    else if (act === 'to-person' && obj) openToPerson(obj.id);
+    else if (act === 'toggle-arch' && obj) { obj.archived = !obj.archived; touchMeta(); }
+    else if (act === 'del-ref' && obj) { obj.deletedAt = Date.now(); touchMeta(); toast('« ' + obj.name + ' » mis à la corbeille', 'Annuler', () => { delete obj.deletedAt; touchMeta(); }); }
+    else if (act === 'trash-restore' && obj) { delete obj.deletedAt; obj.archived = false; touchMeta(); toast('« ' + obj.name + ' » restauré'); }
     else if (act === 'trash-purge' && row) confirmPurge([{ kind: row.dataset.kind, id: row.dataset.id }]);
-    else if (act === 'trash-empty') confirmPurge([...S.meta.clients.filter(c => c.deletedAt).map(c => ({ kind: 'client', id: c.id })), ...S.meta.tasks.filter(t => t.deletedAt).map(t => ({ kind: 'task', id: t.id }))]);
+    else if (act === 'trash-empty') confirmPurge([...S.meta.clients.filter(c => c.deletedAt).map(c => ({ kind: 'client', id: c.id })), ...S.meta.persons.filter(x => x.deletedAt).map(x => ({ kind: 'person', id: x.id })), ...S.meta.tasks.filter(t => t.deletedAt).map(t => ({ kind: 'task', id: t.id }))]);
     else if (act === 'export') {
       const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, running: S.running }, null, 1);
       downloadText('chronocab_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
@@ -1760,26 +1899,31 @@ function bindRefs() {
   body.addEventListener('change', ev => {
     const i = ev.target;
     if (i.id === 'import-file') { importFile(i.files[0]); i.value = ''; return; }
+    if (i.id === 'new-client-owner') { UI.newClientOwner = i.value; return; }
+    if (i.id === 'new-person-role') { UI.newPersonRole = i.value; return; }
     if (i.dataset.s === 'dayEnd') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayEnd; toast('Heure non comprise (ex. 18:00)'); return; } S.meta.settings.dayEnd = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
     if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : k === 'defaultBillable' ? i.value === '1' : i.value; touchMeta(); return; }
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
-    const o = (row.dataset.kind === 'client' ? clientOf : taskOf)(row.dataset.id); if (!o) return;
+    const o = objOf(row.dataset.kind, row.dataset.id); if (!o) return;
     const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
-    o[i.dataset.k] = v; touchMeta(); syncTimerBar();
+    if (i.dataset.k === 'owner' && !v) delete o.owner; else o[i.dataset.k] = v;
+    touchMeta(); syncTimerBar();
   });
 }
 function confirmPurge(items) {
   if (!items.length) return;
-  const used = items.reduce((n, it) => n + allEntries().filter(e => (it.kind === 'client' ? e.client : e.task) === it.id).length, 0);
-  const names = items.map(it => (it.kind === 'client' ? clientOf : taskOf)(it.id)?.name).filter(Boolean);
+  const used = items.reduce((n, it) => n + allEntries().filter(e => (it.kind === 'task' ? e.task : e.client) === it.id).length, 0);
+  const names = items.map(it => objOf(it.kind, it.id)?.name).filter(Boolean);
   const m = modal(`<div class="modal-h"><h3>Supprimer définitivement ?</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b"><div>${items.length > 1 ? '<b>' + items.length + ' éléments</b> vont être supprimés définitivement.' : '« <b>' + esc(names[0] || '') + '</b> » va être supprimé définitivement.'} Cette action ne peut pas être annulée.</div>
-    ${used ? `<div class="warn" style="margin:0">${used} saisie${used > 1 ? 's' : ''} de temps ${used > 1 ? 'restent' : 'reste'} conservée${used > 1 ? 's' : ''}, mais ${used > 1 ? 'apparaîtront' : 'apparaîtra'} avec la mention « Client supprimé » ou « Tâche supprimée ».</div>` : ''}</div>
+    ${used ? `<div class="warn" style="margin:0">${used} saisie${used > 1 ? 's' : ''} de temps ${used > 1 ? 'restent' : 'reste'} conservée${used > 1 ? 's' : ''}, mais ${used > 1 ? 'apparaîtront' : 'apparaîtra'} avec la mention « Client supprimé », « Personne supprimée » ou « Tâche supprimée ».</div>` : ''}</div>
     <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" style="background:var(--stop);border-color:var(--stop)" id="purge-ok">Supprimer définitivement</button></div>`);
   m.el.querySelector('#purge-ok').addEventListener('click', () => {
     const ids = new Set(items.map(i => i.id));
     S.meta.clients = S.meta.clients.filter(c => !ids.has(c.id));
     S.meta.tasks = S.meta.tasks.filter(t => !ids.has(t.id));
+    S.meta.persons = S.meta.persons.filter(x => !ids.has(x.id));
+    S.meta.clients.forEach(c => { if (c.owner && ids.has(c.owner)) delete c.owner; });
     S.meta.favorites = S.meta.favorites.filter(f => !ids.has(f.c) && !ids.has(f.t));
     touchMeta(); m.close(); toast(items.length > 1 ? 'Corbeille vidée' : 'Supprimé définitivement');
   });
@@ -1801,7 +1945,8 @@ function importFile(file) {
         arr.push({ ...x }); isClient ? nc++ : nt++;
       }
     };
-    mergeArr(S.meta.clients, m.clients, true); mergeArr(S.meta.tasks, m.tasks, false);
+    mergeArr(S.meta.clients, m.clients, true); mergeArr(S.meta.tasks, m.tasks, false); mergeArr(S.meta.persons, m.persons, false);
+    S.meta.clients.forEach(c => { if (c.owner && remap[c.owner]) c.owner = remap[c.owner]; });
     const R = id => remap[id] || id;
     for (const f of m.favorites) { const g = { c: R(f.c), t: R(f.t) }; if (!S.meta.favorites.some(x => x.c === g.c && x.t === g.t)) S.meta.favorites.push(g); }
     let n = 0;
@@ -1944,6 +2089,31 @@ function showLogin(auth, AU) {
   });
 }
 
+/* ---------- Installation (PWA) ---------- */
+const Install = {
+  evt: null,
+  standalone: () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true,
+  refresh() { const b = $('#install-btn'); if (b) b.hidden = !this.evt || this.standalone(); if (UI.view === 'referentiel') renderRefs(); },
+  async run() {
+    if (!this.evt) { openInstallHelp(); return; }
+    this.evt.prompt();
+    try { const r = await this.evt.userChoice; if (r && r.outcome === 'accepted') toast('Chronocab est en cours d’installation'); } catch (e) {}
+    this.evt = null; this.refresh();
+  },
+};
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); Install.evt = e; Install.refresh(); });
+window.addEventListener('appinstalled', () => { Install.evt = null; Install.refresh(); toast('Chronocab est installé : retrouvez son icône sur l’écran d’accueil'); });
+function openInstallHelp() {
+  modal(`<div class="modal-h"><h3>Installer Chronocab</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">
+      <div><b>Android (Chrome)</b> : menu <b>⋮</b> en haut à droite › <b>Ajouter à l’écran d’accueil</b> › <b>Installer</b>.</div>
+      <div><b>Android (Samsung Internet)</b> : menu <b>≡</b> en bas › <b>Ajouter la page à</b> › <b>Écran d’accueil</b>.</div>
+      <div><b>iPhone (Safari)</b> : bouton <b>Partager</b> › <b>Sur l’écran d’accueil</b>.</div>
+      <div><b>Ordinateur (Chrome ou Edge)</b> : icône d’installation à droite de la barre d’adresse.</div>
+      <div class="muted small">Si vous avez ouvert Chronocab depuis un lien dans Gmail ou une autre application, ouvrez-le d’abord dans le navigateur (menu › « Ouvrir dans Chrome »).</div>
+    </div><div class="modal-f"><span class="sp"></span><button class="btn primary" data-close>OK</button></div>`);
+}
+
 /* ---------- Toasts ---------- */
 function toast(msg, actLabel, act) {
   const t = document.createElement('div'); t.className = 'toast';
@@ -1958,6 +2128,7 @@ function toast(msg, actLabel, act) {
    ========================================================= */
 async function boot() {
   initTimerBar();
+  $('#install-btn').onclick = () => Install.run();
   $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Chronocab version ' + APP_VERSION + ' du ' + APP_DATE;
   bindChrono(); bindReports(); bindBilling(); bindRefs();
   // Le runtime de l'artifact peut s'installer juste après le chargement
