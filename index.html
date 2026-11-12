@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chronocab — temps passés</title>
+<meta name="theme-color" content="#0d6656">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chronocab">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d6656'/%3E%3Cg transform='translate(4.5 4) scale(.95)' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='12' cy='13.5' r='8.3'/%3E%3Cpath d='M12 9.2v4.5l3 2.1M9.6 2.2h4.8'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -53,6 +59,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 .nav a{display:flex;align-items:center;padding:0 13px;text-decoration:none;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
 .nav a:hover{color:var(--ink)}
 .nav a.on{color:var(--ink);border-bottom-color:var(--accent)}
+.nav a svg,.nav a .sm{display:none}
 .nav .count{margin-left:6px;font-size:11px;font-family:var(--mono);background:var(--todo-soft);color:var(--ink);border-radius:20px;padding:1px 7px}
 .top-right{margin-left:auto;display:flex;align-items:center;gap:12px}
 .ver{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
@@ -290,10 +297,96 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .sync span{display:none}
 }
 @media (max-width: 700px){
-  .timerbar{flex-direction:column}
-  .tb-side{padding:8px 0 0;justify-content:flex-end;flex-wrap:wrap}
-  .nav a{padding:0 8px}
+  html,body{font-size:15px}
+  input,select,textarea{font-size:16px}
+  .top{height:52px;padding:0 12px;gap:8px}
+  .top-right{gap:8px}
+  #account{padding:4px 8px}
+  .nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line);z-index:60;justify-content:space-around;gap:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+  .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:11px;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
+  .nav a.on{border-top-color:var(--accent);color:var(--accent)}
+  .nav a svg{display:block;width:22px;height:22px}
+  .nav a .lg{display:none} .nav a .sm{display:inline}
+  .nav .count{position:absolute;top:5px;left:calc(50% + 8px);margin:0;font-size:10px;padding:0 5px}
+  main{padding:12px 12px calc(84px + env(safe-area-inset-bottom))}
+  h2{margin:20px 0 8px}
+  .pill{padding:3px 3px 3px 10px;max-width:none}
   .pill .what{display:none}
+  /* chrono */
+  .timerbar{position:static;flex-direction:column;padding:10px}
+  .tb-fields{grid-template-columns:1fr}
+  .tb-fields #tb-label{grid-column:auto}
+  .tb-fields input{height:48px;font-size:16px}
+  .tb-side{padding:10px 0 0;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .tb-side .bill{height:40px;font-size:14px}
+  #tb-timer{flex:1;display:flex;justify-content:center}
+  .clock{font-size:30px;min-width:0;text-align:center}
+  .go{width:66px;height:66px}
+  .go svg{width:26px;height:26px}
+  .go.add{height:52px}
+  .modes{flex-direction:row}
+  .modes button{width:34px;height:34px}
+  .manual{flex:1 1 100%;order:5;flex-wrap:wrap}
+  .manual input[type=date]{flex:1 1 100%}
+  .manual input.hm{flex:1}
+  .tb-sub{flex-wrap:wrap}
+  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .chip{flex:none;max-width:80vw}
+  .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .stat{padding:10px 12px}
+  .stat .v{font-size:20px}
+  .day-h{flex-wrap:wrap;gap:6px 12px;padding:10px 12px}
+  .day-h .tb{order:3}
+  /* saisies en cartes */
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:12px}
+  .row>.what{flex:1 1 0;min-width:0;order:1;font-size:15px}
+  .row>.dur-in,.row>.dur{order:2;width:78px;flex:none;font-size:17px}
+  .row>.lbl{order:3;flex:1 1 100%;border-color:var(--line);font-size:15px}
+  .row>.bill{order:4}
+  .row>label.chk{order:5;font-size:13px}
+  .row>.times{order:6}
+  .row>.acts{order:7;margin-left:auto}
+  .row>.lbl-ro{order:3;flex:1 1 100%}
+  .row>span:empty{display:none}
+  .row.running>.dur{width:auto}
+  .row .what{flex-wrap:wrap;row-gap:1px}
+  .row .what .cl,.row .what .tk{white-space:normal;overflow:visible}
+  .brand .txt{display:inline}
+  #tb-timer{order:0;flex:1 1 100%}
+  .tb-side>.bill{order:1}
+  .go{order:2;margin-left:auto}
+  .modes{order:3}
+  .ref-row>.dot{order:0}
+  .ref-row>input.nm{order:1;flex:1 1 calc(100% - 80px)}
+  .ref-row>[data-act=del-ref]{order:2}
+  .ref-row>input.code{order:3;flex:0 0 90px;border-color:var(--line)}
+  .ref-row>select{order:4}
+  .ref-row>.use{order:5;width:auto}
+  .ref-row>[data-act=toggle-arch]{order:6;margin-left:auto}
+  .trash-list .ref-row>span{flex:1 1 auto}
+  .row input[type=checkbox]{width:20px;height:20px}
+  .times input{width:58px;font-size:14px;border-color:var(--line)}
+  .icon{width:38px;height:38px}
+  /* autres vues */
+  .filters{padding:10px}
+  .filters label{flex:1 1 calc(50% - 8px)}
+  .filters select,.filters input{width:100%}
+  .toolbar{margin-top:20px}
+  .bulk .btn{flex:1 1 auto}
+  .bclient-h .amt{margin-left:0}
+  .ref-add{flex-wrap:wrap}
+  .ref-row{flex-wrap:wrap;padding:10px 12px}
+  .ref-list{max-height:none}
+  .setting{flex-wrap:wrap}
+  /* modales en panneau du bas */
+  .overlay{padding:0;place-items:end stretch}
+  .modal,.modal.wide{width:100%;border-radius:16px 16px 0 0;max-height:92vh}
+  .modal-f{flex-wrap:wrap;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .modal-f .btn{flex:1 1 auto;justify-content:center}
+  .combo-list{max-width:calc(100vw - 44px)}
+  .toasts{bottom:calc(74px + env(safe-area-inset-bottom));width:calc(100% - 24px)}
+  .toast{justify-content:space-between}
+  .login{margin:0 8px}
 }
 </style>
 </head>
@@ -301,10 +394,11 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
 <header class="top">
   <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Chronocab</span></div>
   <nav class="nav">
-    <a href="#chrono" data-view="chrono">Chrono</a>
-    <a href="#rapports" data-view="rapports">Rapports</a>
-    <a href="#facturation" data-view="facturation">À facturer<span class="count" id="todo-count" hidden></span></a>
-    <a href="#referentiel" data-view="referentiel">Clients & tâches</a>
+    <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span>Chrono</span></a>
+    <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
+    <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
+    <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
+    <a href="#acces" data-view="acces" id="nav-acces" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Accès</span><span class="count" id="acc-count" hidden></span></a>
   </nav>
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
@@ -353,6 +447,9 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
 
   <!-- ===== REFERENTIEL ===== -->
   <section class="view" id="v-referentiel"><div id="referentiel-body" data-guard></div></section>
+
+  <!-- ===== ACCÈS (administrateur Firebase) ===== -->
+  <section class="view" id="v-acces"><div id="acces-body"></div></section>
 </main>
 
 <div class="toasts" id="toasts"></div>
@@ -374,8 +471,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.1.0';
-const APP_DATE = '11/11/2026';
+const APP_VERSION = '1.3.0';
+const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -552,16 +649,18 @@ const Store = {
     let user = await new Promise(res => { const un = AU.onAuthStateChanged(auth, u => { un(); res(u); }); });
     if (!user) user = await showLogin(auth, AU);
     this.mode = 'firebase';
-    this.fb = { auth, AU, user };
+    this.fb = { auth, AU, user, F, db };
+    const acc = $('#account');
+    acc.hidden = false; acc.title = 'Connecté : ' + (user.email || user.displayName || '') + ' — cliquer pour se déconnecter';
+    acc.onclick = async () => { await AU.signOut(auth); location.reload(); };
+    this.access = await Access.check(F, db, user);
     const colRef = F.collection(db, 'users', user.uid, 'docs');
     this.col = {
       doc: key => { const r = F.doc(colRef, key); return { set: b => F.setDoc(r, b), delete: () => F.deleteDoc(r) }; },
       onSnapshot: (next, err) => F.onSnapshot(colRef, next, err),
     };
-    const acc = $('#account');
-    acc.hidden = false; acc.title = 'Connecté : ' + (user.email || user.displayName || '') + ' — cliquer pour se déconnecter';
-    acc.onclick = async () => { await AU.signOut(auth); location.reload(); };
     await this.subscribeCloud();
+    if (this.access === 'admin') Access.startAdmin();
   },
   subscribeCloud() {
     return new Promise(resolve => {
@@ -849,12 +948,12 @@ function initTimerBar() {
   cbClient = Combo($('#cb-client'), {
     options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer',
     onCreate: name => addClient(name), createLabel: q => '+ Créer le client « ' + q + ' »',
-    onSelect: id => { setSpec({ client: id }); onPick(); if (id && !curSpec().task) setTimeout(() => cbTask.focus(), 0); },
+    onSelect: id => { setSpec({ client: id }); onPick(); if (id && !curSpec().task) cbTask.focus(); },
   });
   cbTask = Combo($('#cb-task'), {
     options: q => taskOptions(q, curSpec().client), labelOf: id => taskName(id), emptyText: 'Aucune tâche : tapez un nom pour la créer',
     onCreate: name => addTask(name), createLabel: q => '+ Créer la tâche « ' + q + ' »',
-    onSelect: id => { setSpec({ task: id }); onPick(); if (id) setTimeout(() => $('#tb-label').focus(), 0); },
+    onSelect: id => { setSpec({ task: id }); onPick(); if (id) $('#tb-label').focus(); },
   });
   const lab = $('#tb-label');
   lab.addEventListener('input', () => setSpec({ label: lab.value }));
@@ -957,6 +1056,7 @@ function render() {
   else if (UI.view === 'rapports') renderReports();
   else if (UI.view === 'facturation') renderBilling();
   else if (UI.view === 'referentiel') renderRefs();
+  else if (UI.view === 'acces') Access.render();
 }
 function renderHeader() {
   $$('.nav a').forEach(a => a.classList.toggle('on', a.dataset.view === UI.view));
@@ -968,7 +1068,7 @@ function renderHeader() {
 }
 function route() {
   const h = (location.hash || '').slice(1);
-  UI.view = ['chrono', 'rapports', 'facturation', 'referentiel'].includes(h) ? h : 'chrono';
+  UI.view = ['chrono', 'rapports', 'facturation', 'referentiel'].includes(h) || (h === 'acces' && Store.access === 'admin') ? h : 'chrono';
   $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
   render();
 }
@@ -1035,7 +1135,7 @@ function renderChrono() {
     html += `<div class="card day" data-day="${k}"><div class="day-h"><span class="d">${esc(fmtDayLong(k))}</span>
       <button class="btn sm ghost" data-act="recap" title="Totaux par client et tâche, à recopier dans le logiciel du cabinet">${ICON.list} Récap à reporter</button>
       <span class="tb">à facturer ${fmtDur(totB)}</span><span class="t">${fmtDur(tot)}</span></div>`;
-    if (run) html += `<div class="row running"><div class="what">${whatHTML(run.client, run.task)}</div><div class="muted small">${esc(run.label) || 'En cours…'}</div><span class="bill ${run.billable ? '' : 'no'}" style="pointer-events:none">${run.billable ? 'À facturer' : 'Non facturable'}</span><span></span><span></span><span class="times mono small">${hhmm(run.start)} – …</span><span class="dur" data-live="clock">${fmtClock(dur(run))}</span><div class="acts"><button class="icon" data-act="stoprun" title="Arrêter">${ICON.stop}</button></div></div>`;
+    if (run) html += `<div class="row running"><div class="what">${whatHTML(run.client, run.task)}</div><div class="muted small lbl-ro">${esc(run.label) || 'En cours…'}</div><span class="bill ${run.billable ? '' : 'no'}" style="pointer-events:none">${run.billable ? 'À facturer' : 'Non facturable'}</span><span></span><span></span><span class="times mono small">${hhmm(run.start)} – …</span><span class="dur" data-live="clock">${fmtClock(dur(run))}</span><div class="acts"><button class="icon" data-act="stoprun" title="Arrêter">${ICON.stop}</button></div></div>`;
     html += list.map(rowHTML).join('');
     html += `</div>`;
   }
@@ -1424,7 +1524,7 @@ function pivot(list, group, cols, months) {
   return { html: list.length ? `<table class="t"><thead>${head}</thead><tbody>${rows}</tbody></table>` : `<div class="empty">Aucune saisie sur cette période.</div>`, tsv: tsvRows.join('\n') };
 }
 function chartSVG(b) {
-  const W = 1000, H = 230, L = 46, R = 8, T = 10, B = 26;
+  const W = window.innerWidth < 700 ? 420 : 1000, H = window.innerWidth < 700 ? 200 : 230, L = 40, R = 8, T = 10, B = 26;
   const maxMs = Math.max(0, ...b.map(x => x.inv + x.todo + x.no));
   const maxH = maxMs / 3600000;
   const step = maxH <= 4 ? 1 : maxH <= 10 ? 2 : maxH <= 25 ? 5 : maxH <= 60 ? 10 : maxH <= 150 ? 25 : maxH <= 300 ? 50 : 100;
@@ -1433,7 +1533,7 @@ function chartSVG(b) {
   const n = b.length, slot = (W - L - R) / Math.max(1, n), bw = Math.min(46, slot * 0.62);
   let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Heures par période, réparties entre facturé, reste à facturer et non facturable">`;
   for (let v = 0; v <= top + 1e-9; v += step) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v} h</text>`;
-  const every = Math.ceil(n / 16);
+  const every = Math.ceil(n / (W < 700 ? 7 : 16));
   b.forEach((x, i) => {
     const cx = L + slot * i + slot / 2, x0 = cx - bw / 2;
     let base = 0; const segs = [['inv', 'var(--s-inv)'], ['todo', 'var(--s-todo)'], ['no', 'var(--s-nobill)']].filter(([k]) => x[k] > 0);
@@ -1723,6 +1823,103 @@ function importFile(file) {
   rd.readAsText(file);
 }
 
+/* ---------- Contrôle d'accès (Firebase) ----------
+   Collection access/{uid} : { email, name, status: pending|approved|refused, requestedAt, decidedAt }
+   L'administrateur est défini dans les règles Firestore (son adresse e-mail) : l'application
+   le reconnaît simplement au fait qu'il a le droit de lister la collection access. */
+const Access = {
+  list: [], first: true,
+  async check(F, db, user) {
+    try { await F.getDocs(F.query(F.collection(db, 'access'), F.limit(1))); return 'admin'; }
+    catch (e) { if (e && e.code !== 'permission-denied') console.warn(e); }
+    const ref = F.doc(db, 'access', user.uid);
+    let snap;
+    try { snap = await F.getDoc(ref); }
+    catch (e) { if (e && e.code === 'permission-denied') return 'legacy'; throw e; } // anciennes règles : pas de validation
+    const st = snap.exists() ? snap.data().status : null;
+    if (st === 'approved') { this.watchSelf(F, ref); return 'approved'; }
+    if (!snap.exists()) {
+      try { await F.setDoc(ref, { email: user.email || '', name: user.displayName || '', status: 'pending', requestedAt: Date.now() }); }
+      catch (e) { console.warn(e); }
+    }
+    return new Promise(resolve => {
+      const un = F.onSnapshot(ref, d => {
+        const s2 = d.exists() ? d.data().status : null;
+        if (s2 === 'approved') { un(); $('#loading').innerHTML = '<div class="loading">Accès validé, chargement…</div>'; this.watchSelf(F, ref); resolve('approved'); }
+        else showAccessScreen(s2 === 'refused' ? 'refused' : 'pending', user);
+      }, () => showAccessScreen('pending', user));
+    });
+  },
+  watchSelf(F, ref) {
+    F.onSnapshot(ref, d => {
+      if (!d.exists() || d.data().status !== 'approved') {
+        document.body.insertAdjacentHTML('beforeend', `<div class="overlay"><div class="modal"><div class="modal-h"><h3>Accès retiré</h3></div><div class="modal-b">Votre accès à Chronocab a été retiré par l’administrateur.</div><div class="modal-f"><span class="sp"></span><button class="btn primary" onclick="location.reload()">OK</button></div></div></div>`);
+      }
+    }, () => {});
+  },
+  startAdmin() {
+    const { F, db } = Store.fb;
+    $('#nav-acces').hidden = false;
+    F.onSnapshot(F.collection(db, 'access'), snap => {
+      const fresh = [];
+      if (!this.first) for (const ch of snap.docChanges()) if (ch.type === 'added' && ch.doc.data().status === 'pending') fresh.push(ch.doc.data());
+      this.list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const pending = this.list.filter(x => x.status === 'pending');
+      if (this.first && pending.length) toast(pending.length + ' demande' + (pending.length > 1 ? 's' : '') + ' d’accès en attente', 'Voir', () => { location.hash = 'acces'; });
+      for (const x of fresh) this.alert(x);
+      this.first = false;
+      const c = $('#acc-count'); c.hidden = !pending.length; c.textContent = pending.length;
+      if (UI.view === 'acces') this.render();
+    }, e => console.warn(e));
+  },
+  alert(x) {
+    toast('Nouvelle demande d’accès : ' + (x.email || x.name), 'Voir', () => { location.hash = 'acces'; });
+    try { if (window.Notification && Notification.permission === 'granted') { const n = new Notification('Chronocab : nouvelle demande d’accès', { body: (x.name ? x.name + ' — ' : '') + (x.email || '') }); n.onclick = () => { window.focus(); location.hash = 'acces'; }; } } catch (e) {}
+    const t0 = document.title; let k = 0; const iv = setInterval(() => { document.title = (k++ % 2) ? t0 : '🔔 Demande d’accès'; if (k > 12) { clearInterval(iv); document.title = t0; } }, 1000);
+  },
+  async set(id, status) {
+    const { F, db } = Store.fb;
+    try { await F.updateDoc(F.doc(db, 'access', id), { status, decidedAt: Date.now() }); }
+    catch (e) { toast('Action impossible (' + (e.code || e) + ')'); }
+  },
+  async remove(id) {
+    const { F, db } = Store.fb;
+    try { await F.deleteDoc(F.doc(db, 'access', id)); } catch (e) { toast('Action impossible (' + (e.code || e) + ')'); }
+  },
+  render() {
+    const body = $('#acces-body'); if (!body) return;
+    const by = st => this.list.filter(x => x.status === st).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
+    const notif = window.Notification ? Notification.permission : 'unsupported';
+    const row = (x, acts) => `<div class="ref-row" data-id="${esc(x.id)}"><span style="flex:1"><b>${esc(x.name || '—')}</b> <span class="muted">${esc(x.email || '')}</span></span>
+      <span class="muted small">${x.status === 'pending' ? 'demandé le ' + fmtDate(x.requestedAt || 0) + ' à ' + hhmm(x.requestedAt || 0) : x.decidedAt ? 'le ' + fmtDate(x.decidedAt) : ''}</span>${acts}</div>`;
+    const sect = (title, arr, acts, empty) => `<h2>${title} (${arr.length})</h2><div class="card">${arr.map(x => row(x, acts)).join('') || `<div class="empty" style="padding:18px">${empty}</div>`}</div>`;
+    body.innerHTML = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Accès à Chronocab</div><div class="muted small">Toute personne qui se connecte avec Google apparaît ici « en attente ». Elle ne voit rien et n’enregistre rien tant que vous ne l’avez pas validée. Chaque compte n’accède qu’à ses propres temps.</div></div>
+      ${notif === 'granted' ? '<span class="muted small">🔔 Alertes du navigateur activées</span>' : notif === 'unsupported' ? '' : '<button class="btn sm" data-a="notif">🔔 Activer les alertes du navigateur</button>'}</div>
+      ${sect('En attente de validation', by('pending'), '<button class="btn sm primary" data-a="approve">Valider</button><button class="btn sm danger" data-a="refuse">Refuser</button>', 'Aucune demande en attente.')}
+      ${sect('Comptes autorisés', by('approved'), '<button class="btn sm danger" data-a="refuse">Retirer l’accès</button>', 'Aucun autre compte autorisé pour l’instant (vous êtes administrateur).')}
+      ${sect('Comptes refusés', by('refused'), '<button class="btn sm" data-a="approve">Autoriser</button><button class="btn sm ghost" data-a="remove" title="La personne pourra refaire une demande">Effacer la demande</button>', 'Aucun compte refusé.')}`;
+    if (!body._bound) {
+      body._bound = true;
+      body.addEventListener('click', async ev => {
+        const b = ev.target.closest('[data-a]'); if (!b) return;
+        if (b.dataset.a === 'notif') { try { await Notification.requestPermission(); } catch (e) {} this.render(); return; }
+        const id = b.closest('[data-id]')?.dataset.id; if (!id) return;
+        if (b.dataset.a === 'approve') this.set(id, 'approved');
+        else if (b.dataset.a === 'refuse') this.set(id, 'refused');
+        else if (b.dataset.a === 'remove') this.remove(id);
+      });
+    }
+  },
+};
+function showAccessScreen(kind, user) {
+  const l = $('#loading'); if (!l) return;
+  const pending = kind === 'pending';
+  l.innerHTML = `<div class="card login"><h3>${pending ? 'Demande d’accès envoyée' : 'Accès refusé'}</h3>
+    <p>${pending ? 'Votre compte <b>' + esc(user.email || '') + '</b> doit être validé par l’administrateur de Chronocab. Cette page s’ouvrira automatiquement dès la validation.' : 'L’administrateur n’a pas autorisé le compte <b>' + esc(user.email || '') + '</b>.'}</p>
+    <button class="btn" id="acc-out">Se déconnecter</button></div>`;
+  $('#acc-out').onclick = async () => { await Store.fb.AU.signOut(Store.fb.auth); location.reload(); };
+}
+
 /* ---------- Connexion Firebase ---------- */
 function showFatal(msg) { const l = $('#loading'); if (l) l.innerHTML = `<div class="card login"><h3>Chargement impossible</h3><p>${esc(msg)}</p></div>`; }
 function showLogin(auth, AU) {
@@ -1770,6 +1967,9 @@ async function boot() {
   UI.draft.billable = !!S.meta.settings.defaultBillable;
   syncTimerBar();
   route();
+  if (FIREBASE_CONFIG.apiKey && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW', e));
+  }
   setInterval(tick, 1000);
   setTimeout(checkForgotten, 800);
 }

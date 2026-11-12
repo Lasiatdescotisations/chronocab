@@ -1,0 +1,23 @@
+{
+  "name": "Chronocab — temps passés",
+  "short_name": "Chronocab",
+  "description": "Saisie des temps passés par client et par tâche.",
+  "lang": "fr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f4f0",
+  "theme_color": "#0d6656",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Chrono", "url": "./#chrono" },
+    { "name": "Rapports", "url": "./#rapports" },
+    { "name": "À facturer", "url": "./#facturation" }
+  ]
+}
