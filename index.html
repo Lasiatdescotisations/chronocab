@@ -266,9 +266,9 @@ h2:first-child{margin-top:0}
 .al-chip.ok{background:var(--accent-soft);color:var(--ink-2)}
 .al-chip.ok b{color:var(--accent)}
 .al-more{font-size:11px;color:var(--muted)}
-.cyc-badge{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:7px;border-radius:50%;background:conic-gradient(var(--accent) var(--p,0%),var(--line-2) 0);vertical-align:middle}
-.cyc-m{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface);font-size:8.5px;font-weight:600;letter-spacing:.01em;color:var(--ink-2);line-height:1}
-.cyc-badge.done .cyc-m{color:var(--accent)}
+.cyc-badge{--cyf:color-mix(in srgb,var(--accent) 32%,var(--surface));display:inline-grid;place-items:center;width:28px;height:28px;margin-left:7px;border-radius:50%;background:conic-gradient(var(--cyf) var(--p,0%),var(--surface) 0);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 55%,var(--surface));vertical-align:middle}
+.cyc-m{font-size:9px;font-weight:700;letter-spacing:.01em;color:var(--ink);line-height:1}
+.cyc-badge.done{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .al-chip.st-neutral,.al-chip.st-wait{background:var(--surface-3);color:var(--ink-2)}
 .al-chip.st-neutral b,.al-chip.st-wait b{color:var(--ink-2)}
 .al-chip.st-due{background:var(--todo-soft)}
@@ -501,6 +501,7 @@ table.t{border-collapse:collapse;width:100%;font-size:13px}
 .toast{background:var(--ink);color:var(--bg);border-radius:9px;padding:10px 14px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px}
 .toast button{border:0;background:transparent;color:var(--accent-2);font-weight:600;padding:0}
 @media (prefers-color-scheme: dark){ .toast button{color:var(--accent)} }
+@media (prefers-color-scheme: dark){ .cyc-badge{--cyf:color-mix(in srgb,var(--accent) 45%,var(--surface))} }
 
 .loading{display:grid;place-items:center;height:60vh;color:var(--muted)}
 .login{max-width:420px;padding:28px;text-align:center;color:var(--ink)}
@@ -528,7 +529,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   #account{padding:4px 8px}
   #install-btn{padding:5px 9px}
   .cyc-badge{position:absolute;top:2px;left:50%;margin-left:6px;width:22px;height:22px}
-  .cyc-badge .cyc-m{width:17px;height:17px;font-size:7px}
+  .cyc-badge .cyc-m{font-size:7.5px}
   .nav a{position:relative}
   .nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line);z-index:60;justify-content:space-around;gap:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
   .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:10.5px;min-width:0;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
@@ -717,7 +718,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.12.0';
+const APP_VERSION = '1.12.1';
 const APP_DATE = '13/11/2026';
 /* =========================================================
    Utilitaires
