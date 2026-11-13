@@ -266,9 +266,9 @@ h2:first-child{margin-top:0}
 .al-chip.ok{background:var(--accent-soft);color:var(--ink-2)}
 .al-chip.ok b{color:var(--accent)}
 .al-more{font-size:11px;color:var(--muted)}
-.cyc-badge{display:inline-flex;align-items:center;gap:4px;margin-left:7px;padding:1px 7px 1px 3px;border:1px solid var(--line-2);border-radius:10px;font-size:11px;font-weight:500;color:var(--ink-2);line-height:16px;vertical-align:1px}
-.cyc-pie{width:12px;height:12px;border-radius:50%;display:inline-block;background:conic-gradient(var(--accent) var(--p,0%),var(--surface-3) 0);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent)}
-.cyc-badge.done .cyc-pie{background:var(--accent)}
+.cyc-badge{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:7px;border-radius:50%;background:conic-gradient(var(--accent) var(--p,0%),var(--line-2) 0);vertical-align:middle}
+.cyc-m{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface);font-size:8.5px;font-weight:600;letter-spacing:.01em;color:var(--ink-2);line-height:1}
+.cyc-badge.done .cyc-m{color:var(--accent)}
 .al-chip.st-neutral,.al-chip.st-wait{background:var(--surface-3);color:var(--ink-2)}
 .al-chip.st-neutral b,.al-chip.st-wait b{color:var(--ink-2)}
 .al-chip.st-due{background:var(--todo-soft)}
@@ -527,8 +527,8 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .top-right{gap:8px}
   #account{padding:4px 8px}
   #install-btn{padding:5px 9px}
-  .cyc-badge{position:absolute;top:3px;margin-left:22px;padding:0 4px 0 2px;font-size:9px;line-height:13px;gap:2px;background:var(--surface)}
-  .cyc-badge .cyc-pie{width:9px;height:9px}
+  .cyc-badge{position:absolute;top:2px;left:50%;margin-left:6px;width:22px;height:22px}
+  .cyc-badge .cyc-m{width:17px;height:17px;font-size:7px}
   .nav a{position:relative}
   .nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line);z-index:60;justify-content:space-around;gap:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
   .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:10.5px;min-width:0;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
@@ -636,7 +636,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Antevorta</span></div>
   <nav class="nav">
     <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span>Chrono</span></a>
-    <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon cycle</span><span class="sm">Cycle</span><span class="cyc-badge" id="cyc-badge" hidden><i class="cyc-pie"></i><span class="cyc-m"></span></span></a>
+    <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon cycle</span><span class="sm">Cycle</span><span class="cyc-badge" id="cyc-badge" hidden><span class="cyc-m"></span></span></a>
     <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
     <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
     <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
@@ -717,8 +717,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.11.0';
-const APP_DATE = '12/11/2026';
+const APP_VERSION = '1.12.0';
+const APP_DATE = '13/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -817,7 +817,7 @@ const ICON = {
 /* =========================================================
    État
    ========================================================= */
-const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true, dayEnd: '18:00' };
+const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true, dayEnd: '18:00', dayEndAction: 'none' };
 const S = {
   meta: { clients: [], tasks: [], persons: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
   days: {},          // 'YYYY-MM-DD' -> { entries: { id: entry } }
@@ -1572,7 +1572,42 @@ function proposedEnd(r) {
   if (p == null || p <= r.start) p = r.start + 3600000; // commencé après l'heure de fin habituelle : 1 h proposée
   return Math.min(p, now);
 }
+// Arrêt (ou demande d'arrêt) du chrono à l'heure de fin de journée
+const DayEnd = { asked: {} };
+function stopRunningAt(t, msg) {
+  const r = S.running; if (!r || t <= r.start) return;
+  S.running = null; S.rev++; Store.put('running');
+  saveEntry({ ...r, end: t });
+  syncTimerBar(); scheduleRender();
+  toast(msg || ('Chrono arrêté à ' + hhmm(t)), 'Annuler', () => {
+    if (S.running) return;
+    for (const k in S.days) if (S.days[k].entries[r.id]) { delete S.days[k].entries[r.id]; Store.put('d-' + k); }
+    S.running = r; S.rev++; Store.put('running'); syncTimerBar(); scheduleRender();
+  });
+}
+function checkDayEnd() {
+  const r = S.running, mode = S.meta.settings.dayEndAction || 'none';
+  if (!r || mode === 'none' || $('.overlay')) return false;
+  const end = timeOn(startOfDay(r.start), S.meta.settings.dayEnd || '18:00');
+  if (end == null || r.start >= end || Date.now() < end) return false; // commencé après l'heure de fin, ou pas encore l'heure
+  const key = r.id + '@' + dayKey(end);
+  if (mode === 'stop') { stopRunningAt(end, 'Chrono arrêté automatiquement à ' + hhmm(end) + (dayKey(end) !== dayKey(Date.now()) ? ' le ' + fmtDate(end) : '') + ' (heure de fin de journée)'); return true; }
+  if (DayEnd.asked[key] && Date.now() < DayEnd.asked[key]) return true;
+  DayEnd.asked[key] = Infinity; UI.forgotSeen = r.id;
+  const what = (clientName(r.client) || 'Sans client') + (r.task ? ' › ' + taskName(r.task) : '');
+  const m = modal(`<div class="modal-h"><h3>Fin de journée</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><div>Il est ${hhmm(Date.now())}${dayKey(end) !== dayKey(Date.now()) ? ' (le chrono tourne depuis le ' + fmtDate(r.start) + ')' : ''}. Le chrono <b>${esc(what)}</b> tourne encore alors que votre heure de fin de journée est <b>${esc(S.meta.settings.dayEnd)}</b>.</div></div>
+    <div class="modal-f"><button class="btn" id="de-cont">Continuer sans redemander</button>${dayKey(end) === dayKey(Date.now()) ? '<button class="btn" id="de-snooze">Continuer 1 h</button>' : ''}<span class="sp"></span><button class="btn" id="de-now">Arrêter maintenant</button><button class="btn primary" id="de-end">Arrêter à ${hhmm(end)}</button></div>`);
+  const q = x => m.el.querySelector(x);
+  q('#de-end').addEventListener('click', () => { m.close(); stopRunningAt(end); });
+  q('#de-now').addEventListener('click', () => { m.close(); stopTimer(); });
+  q('#de-snooze')?.addEventListener('click', () => { DayEnd.asked[key] = Date.now() + 3600000; m.close(); });
+  q('#de-cont').addEventListener('click', () => m.close());
+  return true;
+}
+setInterval(() => { if (!document.hidden) checkDayEnd(); }, 30000);
 function checkForgotten() {
+  if (checkDayEnd()) return;
   if (!S.running || UI.forgotSeen === S.running.id || $('.overlay')) return;
   if (isForgotten()) openForgot();
 }
@@ -1584,7 +1619,7 @@ function openForgot() {
   const m = modal(`<div class="modal-h"><h3>Chrono resté allumé ?</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b"><div>Le chrono <b>${esc(what)}</b> tourne depuis le <b>${esc(fmtDayLong(dayKey(r.start)).replace('Aujourd’hui · ', '').replace('Hier · ', ''))} à ${hhmm(r.start)}</b>, soit <b>${fmtDur(Date.now() - r.start)}</b>. Vous avez peut-être oublié de l’arrêter.</div>
       <div class="fld"><span>Heure de fin réelle proposée</span><div style="display:flex;gap:8px;align-items:center"><input type="date" id="fg-d" value="${dayKey(p)}"><input id="fg-t" class="mono" style="width:80px;text-align:center" value="${hhmm(p)}" inputmode="numeric"><span class="muted">durée retenue : <b id="fg-dur" class="mono"></b></span></div></div>
-      <div class="muted small">L’heure proposée est votre heure habituelle de fin de journée (${esc(S.meta.settings.dayEnd)}), modifiable dans Clients & tâches › Réglages.</div></div>
+      <div class="muted small">L’heure proposée est votre heure habituelle de fin de journée (${esc(S.meta.settings.dayEnd)}), modifiable dans Réglages.</div></div>
     <div class="modal-f"><button class="btn" data-close>Le laisser tourner</button><button class="btn" id="fg-now">Arrêter maintenant (${fmtDur(Date.now() - r.start)})</button><span class="sp"></span><button class="btn primary" id="fg-ok">Arrêter à cette heure</button></div>`);
   const q = s => m.el.querySelector(s);
   const end = () => { const t = timeOn(parseDay(q('#fg-d').value || dayKey(p)), q('#fg-t').value); return t; };
@@ -2301,8 +2336,8 @@ function updateCycleBadge() {
   if (!g.n) { el.hidden = true; return; }
   el.hidden = false;
   const v = pct(g.dsn[0], g.dsn[1]);
-  el.querySelector('.cyc-pie').style.setProperty('--p', v + '%');
-  el.querySelector('.cyc-m').textContent = MONTHS[+mk.slice(5) - 1];
+  el.style.setProperty('--p', (cyClosed(mk) || g.allDsn ? 100 : v) + '%');
+  el.querySelector('.cyc-m').textContent = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jul', 'aoû', 'sep', 'oct', 'nov', 'déc'][+mk.slice(5) - 1];
   el.title = 'Cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' : clôturé' : ' : ' + g.dsn[0] + ' DSN déposée' + (g.dsn[0] > 1 ? 's' : '') + ' sur ' + g.dsn[1]);
   el.classList.toggle('done', !!cyClosed(mk) || g.allDsn);
 }
@@ -2948,6 +2983,7 @@ function renderSettings() {
       <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
       <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
+      <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à ${esc(st.dayEnd)} (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div></div>
