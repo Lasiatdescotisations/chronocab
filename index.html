@@ -266,6 +266,18 @@ h2:first-child{margin-top:0}
 .al-chip.ok{background:var(--accent-soft);color:var(--ink-2)}
 .al-chip.ok b{color:var(--accent)}
 .al-more{font-size:11px;color:var(--muted)}
+.cyc-badge{display:inline-flex;align-items:center;gap:4px;margin-left:7px;padding:1px 7px 1px 3px;border:1px solid var(--line-2);border-radius:10px;font-size:11px;font-weight:500;color:var(--ink-2);line-height:16px;vertical-align:1px}
+.cyc-pie{width:12px;height:12px;border-radius:50%;display:inline-block;background:conic-gradient(var(--accent) var(--p,0%),var(--surface-3) 0);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent)}
+.cyc-badge.done .cyc-pie{background:var(--accent)}
+.al-chip.st-neutral,.al-chip.st-wait{background:var(--surface-3);color:var(--ink-2)}
+.al-chip.st-neutral b,.al-chip.st-wait b{color:var(--ink-2)}
+.al-chip.st-due{background:var(--todo-soft)}
+.al-chip.st-ok{background:var(--accent-soft);color:var(--ink-2)}
+.al-chip.st-ok b{color:var(--accent)}
+.alp-i.st-ok .alp-t b{text-decoration:line-through;color:var(--muted)}
+.alp-i.st-due .alp-t b{color:var(--s-todo)}
+.alp-dot{width:20px;text-align:center;color:var(--muted);font-size:18px;line-height:1}
+.alp-l{flex:0 0 58px}
 #cy-al-pop{position:absolute;z-index:160;background:var(--surface);border:1px solid var(--accent);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:8px;font-size:13px}
 .alp-h{display:flex;align-items:center;gap:6px;padding:2px 2px 8px;border-bottom:1px solid var(--line)}
 .alp-h button{margin-left:auto}
@@ -515,6 +527,9 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .top-right{gap:8px}
   #account{padding:4px 8px}
   #install-btn{padding:5px 9px}
+  .cyc-badge{position:absolute;top:3px;margin-left:22px;padding:0 4px 0 2px;font-size:9px;line-height:13px;gap:2px;background:var(--surface)}
+  .cyc-badge .cyc-pie{width:9px;height:9px}
+  .nav a{position:relative}
   .nav{position:fixed;left:0;right:0;bottom:0;height:calc(60px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--line);z-index:60;justify-content:space-around;gap:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
   .nav a{flex:1;flex-direction:column;justify-content:center;gap:3px;font-size:10.5px;min-width:0;padding:0 2px;border-bottom:0;border-top:2px solid transparent;margin:0;position:relative;text-align:center;line-height:1.1}
   .nav a.on{border-top-color:var(--accent);color:var(--accent)}
@@ -621,7 +636,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Antevorta</span></div>
   <nav class="nav">
     <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span>Chrono</span></a>
-    <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon portefeuille</span><span class="sm">Dossiers</span></a>
+    <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon cycle</span><span class="sm">Cycle</span><span class="cyc-badge" id="cyc-badge" hidden><i class="cyc-pie"></i><span class="cyc-m"></span></span></a>
     <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
     <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
     <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
@@ -702,7 +717,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.10.0';
+const APP_VERSION = '1.11.0';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -1354,6 +1369,7 @@ function onRemoteChange() {
 function render() {
   if (isEditingGuarded()) { _pending = true; renderHeader(); return; }
   renderHeader();
+  updateCycleBadge();
   if (UI.view === 'chrono') renderChrono();
   else if (UI.view === 'portefeuille') renderPortfolio();
   else if (UI.view === 'rapports') renderReports();
@@ -1903,10 +1919,9 @@ function cyTodo() {
       if (!row.dsn && today >= addDays(due.dsn, -3) && (row.env || p.rec === 'robot' || today > due.dsn)) add('dsn', 'DSN à déposer — ' + c.name + ' (échéance le ' + fmtDate(due.dsn).slice(0, 5) + ')', due.dsn);
     }
   }
-  // Alertes salariés actives et pas encore traitées sur le cycle (cycle en cours, et cycle précédent s'il est suivi et non clôturé)
+  // Alertes salariés « à valider » dont le déclencheur est atteint et non encore validées (cycle en cours et cycle précédent)
   for (const mk of [prevMk(cur), cur]) {
-    if (cyClosed(mk) || (mk !== cur && !Object.keys((S.cycles[mk] && S.cycles[mk].rows) || {}).length)) continue;
-    for (const c of cs) { const ok = cyRow(mk, c.id).alOk || []; for (const a of alActive(c, mk)) if (!ok.includes(a.id)) items.push({ mk, cid: c.id, f: 'al', aid: a.id, txt: 'Alerte salarié — ' + c.name + ' : ' + a.name + (a.tag ? ' (' + a.tag + ')' : '') + (mk === cur ? '' : ' (cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ')') }); }
+    for (const c of cs) { const row = cyRow(mk, c.id); for (const a of alActive(c, mk)) if (alState(mk, c, row, a).st === 'due') items.push({ mk, cid: c.id, f: 'al', aid: a.id, txt: 'Alerte salarié — ' + c.name + ' : ' + a.name + (a.tag ? ' (' + a.tag + ')' : '') + (mk === cur ? '' : ' (cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ')') }); }
   }
   // Campagne de la DSN d'avril
   const y = new Date(today).getFullYear(), amk = y + '-04';
@@ -2158,59 +2173,101 @@ function bindCycle() {
    client.alerts = [{ id, name, tag, from: 'AAAA-MM', until: 'AAAA-MM' | null }]
    Traitement mois par mois : S.cycles[mk].rows[idClient].alOk = [id d'alerte] */
 const ALERT_TAGS = ['TPT', 'Saisie sur salaire', 'Arrêt maladie', 'Accident du travail', 'Maternité / paternité', 'Entrée', 'Sortie', 'Rupture conventionnelle', 'Mutuelle / prévoyance', 'Prime / variable', 'Temps partiel', 'Apprenti'];
+// Mode : neutre (par défaut, visible sans validation) ou « à valider » chaque cycle, avec un déclencheur :
+//   { type: 'day', day: 1..31, next: false|true }  → le N du mois du cycle ou du mois suivant
+//   { type: 'step', step: 'rec'|'env'|'corr'|'vir'|'dep'|'dsn', delay: 0..5 } → N jours ouvrés après la saisie de l'étape
+const AL_STEPS = { rec: 'la réception', env: 'le 1er envoi', corr: 'la correction', vir: 'les virements', dep: 'les dépôts', dsn: 'la DSN' };
 const alActive = (c, mk) => ((c && c.alerts) || []).filter(a => (!a.from || a.from <= mk) && (!a.until || mk <= a.until));
 const mkLabel = mk => MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4);
+function alTrigText(a) {
+  if (a.mode !== 'validate' || !a.trig) return 'neutre';
+  const t = a.trig;
+  if (t.type === 'day') return 'à valider le ' + (t.day === 1 ? '1er' : t.day) + (t.next ? ' du mois suivant' : ' du mois du cycle');
+  return 'à valider ' + (t.delay ? t.delay + ' j. ouvré' + (t.delay > 1 ? 's' : '') + ' après ' : 'à ') + (AL_STEPS[t.step] || 'l’étape');
+}
+// Date de déclenchement d'une alerte pour un cycle (null si l'étape n'est pas encore saisie)
+function alTrigDate(mk, row, a) {
+  if (a.mode !== 'validate' || !a.trig) return null;
+  const t = a.trig;
+  if (t.type === 'day') return dayIn(t.next ? nextMk(mk) : mk, t.day || 1);
+  const v = t.step === 'corr' ? (row.corr || []).slice(-1)[0] : row[t.step];
+  return v ? addWorkdays(dOf(v), t.delay || 0) : null;
+}
+// État : neutral | wait (pas encore déclenchée) | due (à traiter) | ok (validée pour ce cycle)
+function alState(mk, c, row, a) {
+  if (a.mode !== 'validate') return { st: 'neutral' };
+  if ((row.alOk || []).includes(a.id)) return { st: 'ok' };
+  const d = alTrigDate(mk, row, a);
+  if (d && startOfDay(Date.now()) >= d) return { st: 'due', d };
+  return { st: 'wait', d };
+}
 function alSetOk(mk, cid, aid, on) {
   const cur = (cyRow(mk, cid).alOk || []).filter(x => x !== aid);
   if (on) cur.push(aid);
   cySet(mk, cid, { alOk: cur.length ? cur : null });
 }
 function alCellHTML(mk, c, row) {
-  const list = alActive(c, mk), ok = row.alOk || [];
+  const list = alActive(c, mk);
   if (!list.length) return `<div class="cy-al none" data-alert tabindex="0" role="button" title="Ajouter une alerte sur un salarié">—</div>`;
-  const chip = a => `<span class="al-chip ${ok.includes(a.id) ? 'ok' : ''}" title="${esc(a.name + (a.tag ? ' — ' + a.tag : '') + (a.until ? ' · jusqu’au cycle de ' + mkLabel(a.until) : ' · sans limite') + (ok.includes(a.id) ? ' · traité ce mois' : ''))}">${ok.includes(a.id) ? '✓ ' : ''}${esc(a.name)}${a.tag ? `<b>${esc(a.tag)}</b>` : ''}</span>`;
+  const chip = a => {
+    const s = alState(mk, c, row, a);
+    const when = s.st === 'wait' ? (s.d ? ' · à valider à partir du ' + fmtDate(s.d) : ' · ' + alTrigText(a) + ' (étape pas encore saisie)') : s.st === 'due' ? ' · à valider depuis le ' + fmtDate(s.d) : s.st === 'ok' ? ' · validée pour ce cycle' : ' · neutre';
+    return `<span class="al-chip st-${s.st}" title="${esc(a.name + (a.tag ? ' — ' + a.tag : '') + when + (a.until ? ' · jusqu’au cycle de ' + mkLabel(a.until) : ''))}">${s.st === 'ok' ? '✓ ' : s.st === 'wait' ? '⏱ ' : ''}${esc(a.name)}${a.tag ? `<b>${esc(a.tag)}</b>` : ''}</span>`;
+  };
   return `<div class="cy-al" data-alert tabindex="0" role="button">${list.slice(0, 2).map(chip).join('')}${list.length > 2 ? `<span class="al-more">+${list.length - 2}</span>` : ''}</div>`;
 }
 function openAlertEditor(anchor, mk, cid) {
   document.getElementById('cy-al-pop')?.remove();
   const c = clientOf(cid); if (!c) return;
-  const r = anchor.getBoundingClientRect(), w = Math.min(440, innerWidth - 16);
+  const r = anchor.getBoundingClientRect(), w = Math.min(460, innerWidth - 16);
   const box = document.createElement('div'); box.id = 'cy-al-pop';
   box.style.width = w + 'px';
   box.style.left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8) + window.scrollX + 'px';
   box.style.top = r.top + window.scrollY - 4 + 'px';
   document.body.appendChild(box);
-  let editId = null;
+  let editId = null, fMode = 'neutral', fType = 'day';
   const months = []; for (let m = mk, i = 0; i < 24; i++, m = nextMk(m)) months.push(m);
+  const opt = (v, l, cur) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${l}</option>`;
   const draw = () => {
-    const list = alActive(c, mk), ok = cyRow(mk, cid).alOk || [], ed = editId && (c.alerts || []).find(a => a.id === editId);
+    const row = cyRow(mk, cid), list = alActive(c, mk), ed = editId && (c.alerts || []).find(a => a.id === editId);
     const later = (c.alerts || []).filter(a => a.from && a.from > mk);
+    const t = (ed && ed.trig) || {};
     box.innerHTML = `<div class="alp-h"><b>Alertes salariés</b> — ${esc(c.name)}<span class="muted small"> · cycle de ${esc(mkLabel(mk))}</span><button class="icon xs" data-x="close" title="Fermer">${ICON.close}</button></div>
-      <div class="alp-list">${list.map(a => `<div class="alp-i ${ok.includes(a.id) ? 'ok' : ''}" data-id="${a.id}">
-        <label class="chk" title="Traité pour le cycle de ${esc(mkLabel(mk))}"><input type="checkbox" data-x="ok" ${ok.includes(a.id) ? 'checked' : ''}></label>
-        <span class="alp-t"><b>${esc(a.name)}</b>${a.tag ? `<span class="al-tag">${esc(a.tag)}</span>` : ''}<span class="muted small">${a.until ? 'jusqu’au cycle de ' + esc(mkLabel(a.until)) : 'sans limite'}${a.from && a.from < mk ? ' · depuis ' + esc(mkLabel(a.from)) : ''}</span></span>
-        <button class="icon xs" data-x="edit" title="Modifier">✎</button><button class="icon xs" data-x="del" title="Supprimer l’alerte">${ICON.trash}</button></div>`).join('') || '<div class="muted small" style="padding:6px 4px">Aucune alerte active sur ce cycle.</div>'}
+      <div class="alp-list">${list.map(a => { const st = alState(mk, c, row, a).st; return `<div class="alp-i st-${st}" data-id="${a.id}">
+        ${a.mode === 'validate' ? `<label class="chk" title="Validée pour le cycle de ${esc(mkLabel(mk))}"><input type="checkbox" data-x="ok" ${st === 'ok' ? 'checked' : ''}></label>` : '<span class="alp-dot" title="Alerte neutre : visible, sans validation">•</span>'}
+        <span class="alp-t"><b>${esc(a.name)}</b>${a.tag ? `<span class="al-tag">${esc(a.tag)}</span>` : ''}<span class="muted small">${esc(alTrigText(a))} · ${a.until ? 'jusqu’au cycle de ' + esc(mkLabel(a.until)) : 'sans limite'}</span></span>
+        <button class="icon xs" data-x="edit" title="Modifier">✎</button><button class="icon xs" data-x="del" title="Supprimer l’alerte">${ICON.trash}</button></div>`; }).join('') || '<div class="muted small" style="padding:6px 4px">Aucune alerte active sur ce cycle.</div>'}
         ${later.length ? `<div class="muted small" style="padding:4px">${later.length} alerte${later.length > 1 ? 's' : ''} commençant plus tard.</div>` : ''}</div>
       <div class="alp-form">
         <div class="alp-fh">${ed ? 'Modifier l’alerte' : 'Nouvelle alerte'}</div>
         <div class="alp-row"><input id="al-name" placeholder="Salarié (ex. Durand)" maxlength="60" value="${esc(ed ? ed.name : '')}">
-          <input id="al-tag" list="al-tags" placeholder="Étiquette (ex. TPT)" maxlength="40" value="${esc(ed ? ed.tag || '' : '')}"><datalist id="al-tags">${ALERT_TAGS.map(t => `<option value="${esc(t)}">`).join('')}</datalist></div>
-        <div class="alp-row"><label class="small muted" for="al-until">Afficher</label><select id="al-until"><option value="">sans limite, jusqu’à suppression</option>${months.map(m => `<option value="${m}" ${ed && ed.until === m ? 'selected' : ''}>jusqu’au cycle de ${esc(mkLabel(m))}</option>`).join('')}</select></div>
+          <input id="al-tag" list="al-tags" placeholder="Étiquette (ex. TPT)" maxlength="40" value="${esc(ed ? ed.tag || '' : '')}"><datalist id="al-tags">${ALERT_TAGS.map(x => `<option value="${esc(x)}">`).join('')}</datalist></div>
+        <div class="alp-row"><label class="small muted alp-l" for="al-mode">Rappel</label><select id="al-mode">${opt('neutral', 'Neutre : visible, sans validation', fMode)}${opt('validate', 'À valider à chaque cycle', fMode)}</select></div>
+        ${fMode === 'validate' ? `<div class="alp-row"><label class="small muted alp-l" for="al-ttype">À partir</label><select id="al-ttype">${opt('day', 'd’une date du mois', fType)}${opt('step', 'd’une étape du cycle', fType)}</select></div>
+        ${fType === 'day' ? `<div class="alp-row"><span class="alp-l"></span><select id="al-day" style="flex:0 0 92px">${Array.from({ length: 31 }, (_, i) => opt(i + 1, 'le ' + (i ? i + 1 : '1er'), t.type === 'day' ? t.day : 26)).join('')}</select><select id="al-next">${opt('0', 'du mois du cycle', t.type === 'day' && t.next ? 1 : 0)}${opt('1', 'du mois suivant', t.type === 'day' && t.next ? 1 : 0)}</select></div>`
+          : `<div class="alp-row"><span class="alp-l"></span><select id="al-delay" style="flex:0 0 150px">${[0, 1, 2, 3, 4, 5].map(n => opt(n, n ? n + ' j. ouvré' + (n > 1 ? 's' : '') + ' après' : 'le jour même de', t.type === 'step' ? t.delay || 0 : 0)).join('')}</select><select id="al-step">${Object.entries(AL_STEPS).map(([k, l]) => opt(k, l, t.type === 'step' ? t.step : 'rec')).join('')}</select></div>`}` : ''}
+        <div class="alp-row"><label class="small muted alp-l" for="al-until">Afficher</label><select id="al-until"><option value="">sans limite, jusqu’à suppression</option>${months.map(m => `<option value="${m}" ${ed && ed.until === m ? 'selected' : ''}>jusqu’au cycle de ${esc(mkLabel(m))}</option>`).join('')}</select></div>
         <div class="alp-row alp-act">${ed ? '<button class="btn sm ghost" data-x="cancel">Annuler</button>' : ''}<span class="sp" style="flex:1"></span><button class="btn sm primary" data-x="save">${ed ? 'Enregistrer' : 'Ajouter l’alerte'}</button></div>
         <div class="err small" id="al-err"></div>
       </div>`;
-    const n = box.querySelector('#al-name');
-    n.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
+    box.querySelector('#al-name').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
     box.querySelector('#al-tag').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
   };
+  // Garde la saisie en cours quand on change de mode ou de type de déclencheur
+  const keep = () => { const g = id => box.querySelector(id)?.value; return { n: g('#al-name'), t: g('#al-tag'), u: g('#al-until'), d: g('#al-day'), x: g('#al-next'), dl: g('#al-delay'), s: g('#al-step') }; };
+  const restore = k => { const set = (id, v) => { const el = box.querySelector(id); if (el && v != null) el.value = v; }; set('#al-name', k.n); set('#al-tag', k.t); set('#al-until', k.u); set('#al-day', k.d); set('#al-next', k.x); set('#al-delay', k.dl); set('#al-step', k.s); };
   const save = () => {
-    const name = box.querySelector('#al-name').value.trim().replace(/\s+/g, ' ');
-    const tag = box.querySelector('#al-tag').value.trim().replace(/\s+/g, ' ');
-    const until = box.querySelector('#al-until').value || null;
-    if (!name) { box.querySelector('#al-err').textContent = 'Indiquez le salarié concerné.'; box.querySelector('#al-name').focus(); return; }
+    const g = id => box.querySelector(id);
+    const name = g('#al-name').value.trim().replace(/\s+/g, ' ');
+    const tag = g('#al-tag').value.trim().replace(/\s+/g, ' ');
+    const until = g('#al-until').value || null;
+    if (!name) { g('#al-err').textContent = 'Indiquez le salarié concerné.'; g('#al-name').focus(); return; }
+    const mode = fMode === 'validate' ? 'validate' : 'neutral';
+    const trig = mode === 'validate' ? (fType === 'day' ? { type: 'day', day: +g('#al-day').value, next: g('#al-next').value === '1' } : { type: 'step', step: g('#al-step').value, delay: +g('#al-delay').value }) : null;
     c.alerts ||= [];
-    if (editId) { const a = c.alerts.find(x => x.id === editId); if (a) { a.name = name; a.tag = tag; a.until = until; } editId = null; toast('Alerte modifiée'); }
-    else { c.alerts.push({ id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, tag, from: mk, until }); toast('Alerte ajoutée'); }
+    if (editId) { const a = c.alerts.find(x => x.id === editId); if (a) { Object.assign(a, { name, tag, until, mode, trig }); } editId = null; toast('Alerte modifiée'); }
+    else { c.alerts.push({ id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, tag, from: mk, until, mode, trig }); toast('Alerte ajoutée'); }
+    fMode = 'neutral'; fType = 'day';
     touchMeta(); draw(); box.querySelector('#al-name').focus();
   };
   box.addEventListener('click', e => {
@@ -2218,20 +2275,36 @@ function openAlertEditor(anchor, mk, cid) {
     const x = b.dataset.x, id = b.closest('.alp-i')?.dataset.id;
     if (x === 'close') close();
     else if (x === 'save') save();
-    else if (x === 'cancel') { editId = null; draw(); }
-    else if (x === 'edit') { editId = id; draw(); box.querySelector('#al-name').focus(); }
+    else if (x === 'cancel') { editId = null; fMode = 'neutral'; fType = 'day'; draw(); }
+    else if (x === 'edit') { editId = id; const a = (c.alerts || []).find(y => y.id === id); fMode = a && a.mode === 'validate' ? 'validate' : 'neutral'; fType = a && a.trig && a.trig.type === 'step' ? 'step' : 'day'; draw(); box.querySelector('#al-name').focus(); }
     else if (x === 'del') {
       const i = (c.alerts || []).findIndex(a => a.id === id); if (i < 0) return;
       const [old] = c.alerts.splice(i, 1); touchMeta(); draw();
       toast('Alerte « ' + old.name + ' » supprimée', 'Annuler', () => { c.alerts.splice(i, 0, old); touchMeta(); if (document.body.contains(box)) draw(); });
     }
   });
-  box.addEventListener('change', e => { if (e.target.dataset.x === 'ok') { alSetOk(mk, cid, e.target.closest('.alp-i').dataset.id, e.target.checked); draw(); } });
+  box.addEventListener('change', e => {
+    const el = e.target;
+    if (el.dataset.x === 'ok') { alSetOk(mk, cid, el.closest('.alp-i').dataset.id, el.checked); draw(); }
+    else if (el.id === 'al-mode' || el.id === 'al-ttype') { const k = keep(); if (el.id === 'al-mode') fMode = el.value; else fType = el.value; draw(); restore(k); }
+  });
   const outside = e => { if (!box.contains(e.target) && !e.target.closest('.toast')) close(); };
   const key = e => { if (e.key === 'Escape') close(); };
   function close() { box.remove(); document.removeEventListener('pointerdown', outside, true); document.removeEventListener('keydown', key, true); }
   setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', key, true); }, 0);
   draw(); box.querySelector('#al-name').focus();
+}
+// Jauge de l'onglet « Mon cycle » : mois du cycle en cours, rempli comme une horloge selon les DSN déposées
+function updateCycleBadge() {
+  const el = document.getElementById('cyc-badge'); if (!el) return;
+  const mk = defaultCycleMonth(), g = cyProgress(mk);
+  if (!g.n) { el.hidden = true; return; }
+  el.hidden = false;
+  const v = pct(g.dsn[0], g.dsn[1]);
+  el.querySelector('.cyc-pie').style.setProperty('--p', v + '%');
+  el.querySelector('.cyc-m').textContent = MONTHS[+mk.slice(5) - 1];
+  el.title = 'Cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' : clôturé' : ' : ' + g.dsn[0] + ' DSN déposée' + (g.dsn[0] > 1 ? 's' : '') + ' sur ' + g.dsn[1]);
+  el.classList.toggle('done', !!cyClosed(mk) || g.allDsn);
 }
 document.addEventListener('click', ev => { const el = ev.target.closest && ev.target.closest('[data-alert]'); if (!el) return; const tr = el.closest('tr[data-id]'); if (tr && UI.pfv) { tipHide(); openAlertEditor(el, UI.pfv.cmonth, tr.dataset.id); } });
 document.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-alert]')) { ev.preventDefault(); ev.target.click(); } });
