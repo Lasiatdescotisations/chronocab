@@ -67,6 +67,22 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 .nav .count{margin-left:6px;font-size:11px;font-family:var(--mono);background:var(--todo-soft);color:var(--ink);border-radius:20px;padding:1px 7px}
 .top-right{margin-left:auto;display:flex;align-items:center;gap:12px}
 .ver{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+.hist-btn{width:32px;height:32px;display:inline-grid;place-items:center;border-radius:8px;color:var(--ink-2)}
+.hist-btn svg{width:18px;height:18px}
+.hist-btn.on{background:var(--accent-soft);color:var(--accent)}
+.hist-pan{position:fixed;top:58px;right:16px;width:420px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);overflow:auto;z-index:60;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.hist-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+.hist-h b{font-size:14px}
+.hist-i{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 14px;border-bottom:1px solid var(--line);align-items:center}
+.hist-i:last-child{border-bottom:0}
+.hist-l{font-size:13px;font-weight:500;line-height:1.35}
+.hist-m{font-size:11.5px;color:var(--muted);grid-column:1}
+.hist-i .btn{grid-row:1 / span 2;grid-column:2}
+.hist-i.done .hist-l{color:var(--muted);text-decoration:line-through}
+.hist-i.jwarn .hist-m{color:var(--stop);grid-column:1 / -1}
+.hist-i.jwarn .hist-l{grid-column:1 / -1}
+.hist-empty{padding:22px 14px;color:var(--muted);font-size:13px;text-align:center}
+@media (max-width:700px){ .hist-pan{top:auto;bottom:70px;left:8px;right:8px;width:auto;max-height:70vh} }
 .sync{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;white-space:nowrap}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
 .sync.ok i{background:var(--accent)} .sync.busy i{background:var(--s-todo)} .sync.err i{background:var(--stop)}
@@ -500,6 +516,49 @@ table.t{border-collapse:collapse;width:100%;font-size:13px}
 .toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:200}
 .toast{background:var(--ink);color:var(--bg);border-radius:9px;padding:10px 14px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px}
 .toast button{border:0;background:transparent;color:var(--accent-2);font-weight:600;padding:0}
+/* Groupes de dossiers */
+.grp-tag{--g:#888;display:inline-flex;align-items:center;gap:5px;max-width:15em;padding:1px 8px 1px 6px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.55;white-space:nowrap;vertical-align:middle;flex:none;background:color-mix(in srgb,var(--g) 13%,var(--surface));color:color-mix(in srgb,var(--g) 72%,var(--ink));border:1px solid color-mix(in srgb,var(--g) 32%,var(--surface))}
+.grp-tag i{width:7px;height:7px;border-radius:50%;background:var(--g);flex:none}
+.grp-tag span{overflow:hidden;text-overflow:ellipsis}
+.grp-tag.sm{margin-left:6px;font-size:10.5px;max-width:11em}
+.grp-tag.lg{font-size:12.5px;padding:2px 10px 2px 8px;max-width:24em}
+.opt .grp-tag{max-width:12em}
+.grp-dot{--g:#888;display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--g);flex:none;vertical-align:middle;margin-left:2px}
+.grp-none{font-weight:600;color:var(--ink-2);font-size:12.5px}
+.grp-sws{display:inline-flex;gap:4px;flex-wrap:wrap}
+.grp-sw{--g:#888;width:18px;height:18px;border-radius:50%;border:2px solid var(--surface);background:var(--g);box-shadow:0 0 0 1px var(--line-2);padding:0;cursor:pointer}
+.grp-sw.on{box-shadow:0 0 0 2px var(--g)}
+.grp-pick{--g:transparent;display:inline-flex;border-left:4px solid var(--g);border-radius:4px}
+.grp-pick select{max-width:150px}
+.cy-table tr.has-grp > td:first-child{box-shadow:inset 3px 0 0 var(--g)}
+.cy-table tr.cy-grp td{padding:0;background:var(--surface-2);border-top:1px solid var(--line-2);position:sticky;left:0}
+.cy-grp-b{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:7px 10px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.cy-grp-b:hover{background:color-mix(in srgb,var(--g,var(--muted)) 7%,transparent)}
+.cy-grp-b .car{display:inline-flex;width:14px;color:var(--muted);transform:rotate(90deg);transition:transform .15s}
+.cy-grp.folded .cy-grp-b .car{transform:rotate(0)}
+.cy-grp-s{font-size:12px;color:var(--ink-2)}
+.cy-grp-s .g-late{color:var(--stop);font-weight:600}
+.cy-grp-s .g-al{color:var(--s-todo);font-weight:600}
+.dense .cy-grp-b{padding:4px 8px}
+/* Absences et journées entières */
+.abs-ic{display:inline-flex;width:16px;height:16px;color:#6b5fa8;flex:none}
+.abs-ic svg{width:16px;height:16px}
+.abs-ic.is-form{color:var(--ink-2)}
+.row.allday .abs-half{color:var(--ink-2)}
+.row.is-abs{background:color-mix(in srgb,#6b5fa8 5%,var(--surface))}
+.abs-chip{font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,#6b5fa8 13%,var(--surface));color:color-mix(in srgb,#6b5fa8 70%,var(--ink))}
+.abs-chip.is-form,.abs-chip.hol{background:var(--surface-3);color:var(--ink-2)}
+.abs-types{display:flex;flex-wrap:wrap;gap:6px}
+.abs-t{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+.abs-t.on{background:color-mix(in srgb,#6b5fa8 16%,var(--surface));border-color:#6b5fa8;font-weight:600}
+.abs-t.is-form.on{background:var(--accent-soft);border-color:var(--accent)}
+.ab-sum{padding:10px 12px;border-radius:8px;background:var(--surface-2);display:grid;gap:4px}
+.abs-upc{padding:4px 0}
+.hol-sugg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin:12px 0;border-left:3px solid #6b5fa8}
+.abs-up{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.abs-up:last-child{border-bottom:0}
+#tb-abs{color:#6b5fa8}
+@media (prefers-color-scheme: dark){ .abs-ic,#tb-abs{color:#a99ce0} .abs-t.on{border-color:#a99ce0} }
 @media (prefers-color-scheme: dark){ .toast button{color:var(--accent)} }
 @media (prefers-color-scheme: dark){ .cyc-badge{--cyf:color-mix(in srgb,var(--accent) 45%,var(--surface))} }
 
@@ -645,6 +704,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   </nav>
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
+    <button id="hist-btn" class="icon hist-btn" title="Historique : vos 10 dernières actions, restaurables en un clic" aria-label="Historique des actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
     <button id="install-btn" class="btn sm primary" hidden title="Installer Antevorta sur cet appareil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
     <button id="account" class="btn sm ghost" hidden>Déconnexion</button>
@@ -676,6 +736,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
         <div class="modes">
           <button data-mode="timer" class="on" title="Mode chronomètre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4M10 2h4"/></svg></button>
           <button data-mode="manual" title="Saisie manuelle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg></button>
+          <button id="tb-abs" title="Journée entière : congé, maladie, férié, formation…"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
         </div>
       </div>
     </div>
@@ -718,7 +779,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.12.1';
+const APP_VERSION = '1.14.0';
 const APP_DATE = '13/11/2026';
 /* =========================================================
    Utilitaires
@@ -818,9 +879,9 @@ const ICON = {
 /* =========================================================
    État
    ========================================================= */
-const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true, dayEnd: '18:00', dayEndAction: 'none' };
+const DEFAULT_SETTINGS = { durFormat: 'hm', roundStep: 0, roundMode: 'nearest', defaultBillable: true, dayEnd: '18:00', dayEndAction: 'none', absDay: 420 };
 const S = {
-  meta: { clients: [], tasks: [], persons: [], favorites: [], settings: { ...DEFAULT_SETTINGS } },
+  meta: { clients: [], tasks: [], persons: [], favorites: [], groups: [], settings: { ...DEFAULT_SETTINGS } },
   days: {},          // 'YYYY-MM-DD' -> { entries: { id: entry } }
   cycles: {},        // 'YYYY-MM' -> { rows: { idClient: {...} } } (cycle de paie)
   running: null,     // entrée en cours (end = null)
@@ -829,8 +890,8 @@ const S = {
 const UI = {
   view: 'chrono', daysShown: 7, mode: 'timer',
   draft: { client: null, task: null, label: '', billable: true, billTouched: false },
-  rep: { period: 'month', from: '', to: '', client: '', task: '', pf: '', bill: 'all', logged: 'all', q: '', cols: 'status', group: 'client', sel: new Set(), limit: 200 },
-  fac: { until: '', open: new Set() },
+  rep: { period: 'month', from: '', to: '', client: '', task: '', pf: '', grp: '', bill: 'all', logged: 'all', q: '', cols: 'status', group: 'client', sel: new Set(), limit: 200 },
+  fac: { until: '', open: new Set(), by: '' },
   refArch: false,
 };
 function normalizeMeta(m) {
@@ -840,6 +901,7 @@ function normalizeMeta(m) {
     persons: Array.isArray(m.persons) ? m.persons : [],
     tasks: Array.isArray(m.tasks) ? m.tasks : [],
     favorites: Array.isArray(m.favorites) ? m.favorites : [],
+    groups: Array.isArray(m.groups) ? m.groups : [],
     settings: { ...DEFAULT_SETTINGS, ...(m.settings || {}) },
   };
 }
@@ -852,14 +914,212 @@ const INTERNAL_ID = 'int', INTERNAL_NAME = 'Interne (cabinet)';
 const isInternalId = id => id === INTERNAL_ID;
 const INTERNAL_TASKS = ['Formation', 'Trajet', 'Réunion d’équipe', 'Organisation / logistique', 'Administratif interne', 'Veille juridique', 'Informatique / outils', 'Entretien / RH interne'];
 const personOf = id => S.meta.persons.find(x => x.id === id) || null;
-const entityOf = id => isInternalId(id) ? { id, name: INTERNAL_NAME } : isPersonId(id) ? personOf(id) : clientOf(id);
+const entityOf = id => id === ABS_ID ? { id, name: ABS_NAME } : isInternalId(id) ? { id, name: INTERNAL_NAME } : isPersonId(id) ? personOf(id) : clientOf(id);
 const ROLES = { paie: 'Collaborateur paie', compta: 'Collaborateur comptable', resp_paie: 'Responsable paie', resp_compta: 'Responsable comptable', app_paie: 'Apprenti paie', app_compta: 'Apprenti comptable', ec: 'Expert-comptable', autre: 'Autre' };
 const roleLabel = r => ROLES[r] || (r || ''); // fonction standard ou saisie libre
 const isMine = c => !!c && c.mine !== false;
-const clientName = id => !id ? '' : isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
+
+/* ---------- Groupes de dossiers ----------
+   meta.groups = [{ id, name, color: index dans GROUP_COLORS }] ; client.group = id du groupe (un seul groupe par dossier) */
+const GROUP_COLORS = ['#2f6db0', '#a8571a', '#7a4fb8', '#5f7a22', '#c0437e', '#00849c', '#8a6d12', '#4b4fa8'];
+const GROUP_COLOR_NAMES = ['Bleu', 'Cuivre', 'Violet', 'Olive', 'Framboise', 'Cyan', 'Ocre', 'Indigo'];
+const groupsAll = () => S.meta.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+const hasGroups = () => S.meta.groups.length > 0;
+const groupOf = gid => gid ? S.meta.groups.find(g => g.id === gid) || null : null;
+const groupOfClient = id => { if (!id || isPersonId(id) || isInternalId(id) || id === ABS_ID) return null; const c = clientOf(id); return c ? groupOf(c.group) : null; };
+const grpKeyOf = c => (c && groupOf(c.group)?.id) || 'none';
+const grpColor = g => GROUP_COLORS[((g && g.color) || 0) % GROUP_COLORS.length];
+const grpTag = (g, cls = '') => g ? `<span class="grp-tag ${cls}" style="--g:${grpColor(g)}" title="Groupe ${esc(g.name)}"><i></i><span>${esc(g.name)}</span></span>` : '';
+const grpDot = g => g ? `<span class="grp-dot" style="--g:${grpColor(g)}" title="Groupe ${esc(g.name)}"></span>` : '';
+function addGroup(name) {
+  name = String(name || '').trim().replace(/\s+/g, ' '); if (!name) return null;
+  const ex = S.meta.groups.find(g => norm(g.name) === norm(name)); if (ex) return ex.id;
+  const used = S.meta.groups.map(g => g.color);
+  let color = GROUP_COLORS.findIndex((_, i) => !used.includes(i)); if (color < 0) color = S.meta.groups.length % GROUP_COLORS.length;
+  const g = { id: 'g' + newId(), name, color }; S.meta.groups.push(g); touchMeta(); return g.id;
+}
+function groupSelOpts(cur) {
+  return `<option value="">Sans groupe</option>` + groupsAll().map(g => `<option value="${g.id}" ${g.id === cur ? 'selected' : ''}>${esc(g.name)}</option>`).join('') + `<option value="__newgrp">+ Nouveau groupe…</option>`;
+}
+function askGroupName(cb) {
+  const m = modal(`<div class="modal-h"><h3>Nouveau groupe de dossiers</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><label class="fld"><span>Nom du groupe</span><input id="ng-txt" maxlength="60" placeholder="ex. Groupe Martin, Holding Durand…"></label></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="ng-ok">Créer</button></div>`);
+  const inp = m.el.querySelector('#ng-txt'); setTimeout(() => inp.focus(), 30);
+  let done = false;
+  const ok = () => { const id = addGroup(inp.value); if (!id) { inp.focus(); return; } done = true; m.close(); cb(id); };
+  m.el.querySelector('#ng-ok').addEventListener('click', ok);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
+  const obs = new MutationObserver(() => { if (!document.body.contains(m.el)) { obs.disconnect(); if (!done) cb(null); } });
+  obs.observe(document.body, { childList: true, subtree: true });
+}
+
+/* ---------- Absences et journées entières ----------
+   Saisie « journée » : { client: 'abs', abs: type, allday: 'j' | 'am' | 'pm' } (absence, hors temps travaillé)
+   ou { client: 'int', task: Formation, allday } (formation : temps interne travaillé) */
+const ABS_ID = 'abs', ABS_NAME = 'Absence';
+const ABS_TYPES = [['cp', 'Congés payés'], ['rtt', 'RTT / repos'], ['mal', 'Maladie'], ['fer', 'Jour férié'], ['fam', 'Événement familial'], ['ss', 'Congé sans solde'], ['aut', 'Autre absence'], ['form', 'Formation']];
+const absLabel = k => (ABS_TYPES.find(x => x[0] === k) || [0, 'Absence'])[1];
+const isAbs = e => !!e && e.client === ABS_ID;
+const HALF = { j: 'Journée', am: 'Matin', pm: 'Après-midi' };
+const absDayMs = () => (+S.meta.settings.absDay || 420) * 60000;
+const fmtDays = n => String(Math.round(n * 2) / 2).replace('.', ',') + ' j';
+const dayAllday = k => Object.values(S.days[k]?.entries || {}).filter(e => e.allday);
+ICON.cal = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+function easterMs(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, mo - 1, da).getTime();
+}
+const _hol = {};
+function frHolidays(y) { // jours fériés légaux (France métropolitaine)
+  if (_hol[y]) return _hol[y];
+  const E = easterMs(y), o = {};
+  const put = (ms, n) => { o[dayKey(ms)] = n; };
+  put(new Date(y, 0, 1).getTime(), 'Jour de l’an'); put(addDays(E, 1), 'Lundi de Pâques'); put(new Date(y, 4, 1).getTime(), 'Fête du Travail');
+  put(new Date(y, 4, 8).getTime(), 'Victoire 1945'); put(addDays(E, 39), 'Ascension'); put(addDays(E, 50), 'Lundi de Pentecôte');
+  put(new Date(y, 6, 14).getTime(), 'Fête nationale'); put(new Date(y, 7, 15).getTime(), 'Assomption'); put(new Date(y, 10, 1).getTime(), 'Toussaint');
+  put(new Date(y, 10, 11).getTime(), 'Armistice 1918'); put(new Date(y, 11, 25).getTime(), 'Noël');
+  return (_hol[y] = o);
+}
+const holidayOn = k => frHolidays(+k.slice(0, 4))[k] || null;
+function formationTaskId() {
+  const t = S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === 'formation');
+  return t ? (t.archived && (t.archived = false, touchMeta()), t.id) : addTask('Formation');
+}
+function absWarn(k) {
+  const ab = dayAllday(k).find(e => isAbs(e) && e.allday === 'j');
+  if (ab) toast('Attention : vous êtes noté(e) en « ' + absLabel(ab.abs) + ' » ' + (k === dayKey(Date.now()) ? 'aujourd’hui' : 'ce jour-là') + ' (journée entière).');
+}
+function removeSilent(ids) {
+  const removed = [], touched = new Set();
+  for (const id of ids) for (const k in S.days) { const e = S.days[k].entries[id]; if (e) { removed.push(e); delete S.days[k].entries[id]; touched.add(k); } }
+  S.rev++; touched.forEach(k => Store.put('d-' + k)); scheduleRender();
+  return removed;
+}
+function openAbsence(editId, dayK) {
+  const ed = editId ? findEntry(editId) : null;
+  const k0 = ed ? dayKey(ed.start) : (dayK || dayKey(Date.now()));
+  let type = ed ? (isAbs(ed) ? ed.abs : 'form') : (holidayOn(k0) ? 'fer' : 'cp'), half = ed ? ed.allday : 'j';
+  const lbl0 = ed ? ed.label || '' : '';
+  const m = modal(`<div class="modal-h"><h3>${ed ? 'Modifier la journée' : 'Absence ou journée entière'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">
+      <div class="abs-types">${ABS_TYPES.map(([k, l]) => `<button type="button" class="abs-t ${k === 'form' ? 'is-form' : ''} ${k === type ? 'on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
+      <div class="muted small" id="ab-kind"></div>
+      <div class="fld-row"><label class="fld"><span>${ed ? 'Jour' : 'Du'}</span><input type="date" id="ab-from" value="${k0}"></label>${ed ? '' : `<label class="fld"><span>Au (inclus)</span><input type="date" id="ab-to" value="${k0}"></label>`}</div>
+      <div class="fld" id="ab-half-w"><span>Durée</span><div class="seg" id="ab-half">${Object.entries(HALF).map(([v, l]) => `<button type="button" data-v="${v}" class="${half === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+      <label class="chk" id="ab-fer-w" hidden><input type="checkbox" id="ab-fer" checked> <span id="ab-fer-l"></span></label>
+      <label class="fld"><span>Libellé (facultatif)</span><input id="ab-lbl" maxlength="80" value="${esc(lbl0)}" placeholder="ex. Congés d’été, formation DSN…"></label>
+      <div class="ab-sum" id="ab-sum"></div>
+    </div>
+    <div class="modal-f">${ed ? '<button class="btn danger" id="ab-del">Supprimer</button>' : ''}<span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="ab-ok">Enregistrer</button></div>`);
+  const q = x => m.el.querySelector(x);
+  const plan = () => {
+    const f = q('#ab-from').value, t = (q('#ab-to') && q('#ab-to').value) || f; if (!f) return null;
+    let a = parseDay(f), b = parseDay(t); if (b < a) [a, b] = [b, a];
+    if ((b - a) / DAY > 370) return null;
+    const single = a === b, days = [], fer = [];
+    for (let d = a; d <= b; d = addDays(d, 1)) {
+      const k = dayKey(d), hol = holidayOn(k);
+      if (single) { days.push(k); continue; }
+      if (!isWorkday(d)) continue;
+      if (hol && type !== 'fer') { fer.push([k, hol]); continue; }
+      days.push(k);
+    }
+    const h = single ? half : 'j';
+    const busy = days.filter(k => Object.values(S.days[k]?.entries || {}).some(e => !e.allday));
+    const repl = days.filter(k => dayAllday(k).some(e => e.id !== (ed && ed.id) && (h === 'j' || e.allday === 'j' || e.allday === h)));
+    return { days, fer, half: h, single, a };
+  };
+  const upd = () => {
+    $$('.abs-t', m.el).forEach(b => b.classList.toggle('on', b.dataset.t === type));
+    $$('#ab-half button', m.el).forEach(b => b.classList.toggle('on', b.dataset.v === half));
+    q('#ab-kind').innerHTML = type === 'form' ? 'Compté comme <b>temps interne travaillé</b> (non facturable), avec la tâche « Formation ».' : 'Compté à part dans les <b>absences</b>, hors temps travaillé.';
+    const p = plan(); const sum = q('#ab-sum');
+    q('#ab-half-w').hidden = !p || !p.single;
+    if (!p) { sum.innerHTML = '<span class="cy-pg-w">Période non valable.</span>'; return; }
+    const fw = q('#ab-fer-w'); fw.hidden = !p.fer.length;
+    if (p.fer.length) q('#ab-fer-l').textContent = 'Noter aussi ' + (p.fer.length > 1 ? 'les jours fériés de la période' : 'le jour férié') + ' en « Jour férié » (' + p.fer.map(([k, h]) => h + ' ' + fmtDate(parseDay(k)).slice(0, 5)).join(', ') + ')';
+    const n = p.days.length * (p.half === 'j' ? 1 : 0.5);
+    const busy = p.days.filter(k => Object.values(S.days[k]?.entries || {}).some(e => !e.allday));
+    const repl = p.days.filter(k => dayAllday(k).some(e => e.id !== (ed && ed.id) && (p.half === 'j' || e.allday === 'j' || e.allday === p.half)));
+    const hol = p.single && holidayOn(p.days[0]);
+    sum.innerHTML = !p.days.length ? '<span class="cy-pg-w">Aucun jour ouvré dans cette période.</span>' :
+      `<b>${fmtDays(n)}</b>${p.single ? '' : ' ouvré' + (n > 1 ? 's' : '') + ' (sans les week-ends' + (type === 'fer' ? '' : ' ni les jours fériés') + ')'} · ${fmtDur(n * absDayMs())}
+      ${hol && type !== 'fer' ? `<div class="small">ℹ️ Ce jour est férié (${esc(hol)}).</div>` : ''}
+      ${p.single && !isWorkday(p.a) ? '<div class="small">ℹ️ Ce jour tombe un week-end.</div>' : ''}
+      ${busy.length ? `<div class="small">Du temps est déjà saisi le ${busy.map(k => fmtDate(parseDay(k)).slice(0, 5)).join(', ')} : il est conservé.</div>` : ''}
+      ${repl.length ? `<div class="small">Remplace la journée déjà notée le ${repl.map(k => fmtDate(parseDay(k)).slice(0, 5)).join(', ')}.</div>` : ''}`;
+  };
+  m.el.addEventListener('click', ev => {
+    const t = ev.target.closest('.abs-t'); if (t) { type = t.dataset.t; upd(); return; }
+    const h = ev.target.closest('#ab-half button'); if (h) { half = h.dataset.v; upd(); }
+  });
+  m.el.addEventListener('input', ev => { if (ev.target.type === 'date') { if (ev.target.id === 'ab-from' && q('#ab-to') && q('#ab-to').value < ev.target.value) q('#ab-to').value = ev.target.value; upd(); } });
+  upd();
+  if (ed) q('#ab-del').addEventListener('click', () => { m.close(); deleteEntries([ed.id]); });
+  q('#ab-ok').addEventListener('click', () => {
+    const p = plan(); if (!p || !p.days.length) { toast('Aucun jour à enregistrer pour cette période.'); return; }
+    const lbl = q('#ab-lbl').value.trim(), L = absDayMs();
+    const mk = (k, typ, h, label) => {
+      const st = timeOn(parseDay(k), h === 'pm' ? '14:00' : '09:00'), len = h === 'j' ? L : L / 2;
+      const base = { id: 'e' + newId(), start: st, end: st + len, label, billable: false, invoicedAt: 0, logged: false, allday: h };
+      return typ === 'form' ? { ...base, client: INTERNAL_ID, task: formationTaskId() } : { ...base, client: ABS_ID, task: null, abs: typ };
+    };
+    const del = ed ? [ed.id] : [];
+    const news = [];
+    for (const k of p.days) {
+      dayAllday(k).filter(e => e.id !== (ed && ed.id) && (p.half === 'j' || e.allday === 'j' || e.allday === p.half)).forEach(e => del.push(e.id));
+      news.push(mk(k, type, p.half, lbl || (type === 'fer' && holidayOn(k)) || ''));
+    }
+    if (p.fer.length && q('#ab-fer').checked) for (const [k, h] of p.fer) if (!dayAllday(k).some(e => isAbs(e) && e.abs === 'fer')) news.push(mk(k, 'fer', 'j', h));
+    const removed = removeSilent(del);
+    news.forEach(saveEntry);
+    m.close();
+    const n = news.filter(e => (isAbs(e) ? e.abs : 'form') === type).reduce((a, e) => a + (e.allday === 'j' ? 1 : 0.5), 0);
+    toast(absLabel(type) + ' : ' + fmtDays(n) + (ed ? ' modifié' : ' noté') + (n > 1 ? 's' : ''), 'Annuler', () => { removeSilent(news.map(e => e.id)); removed.forEach(saveEntry); });
+  });
+}
+// Jour férié proposé à l'avance : aujourd'hui ou le prochain férié tombant un jour ouvré dans les 14 jours, s'il n'est pas déjà noté
+const holHidden = () => { try { return JSON.parse(lsGet('holHide', '[]')) || []; } catch (e) { return []; } };
+function holSuggest(todayK) {
+  const hid = holHidden();
+  for (let i = 0, d = parseDay(todayK); i <= 14; i++, d = addDays(d, 1)) {
+    const k = dayKey(d), name = holidayOn(k);
+    if (!name || !isWorkday(d) || hid.includes(k)) continue;
+    if (dayAllday(k).some(e => e.allday === 'j')) continue;
+    return { k, name };
+  }
+  return null;
+}
+function absRowHTML(e) {
+  const isA = isAbs(e), g = !isA && e.label;
+  const what = isA ? `<span class="abs-ic">${ICON.cal}</span><span class="cl">${esc(absLabel(e.abs))}</span>` : whatHTML(e.client, e.task);
+  return `<div class="row allday ${isA ? 'is-abs' : ''}" data-id="${e.id}">
+    <button class="what" data-act="absedit" title="Modifier (type, jour, demi-journée)">${what}</button>
+    <input class="lbl" data-f="label" value="${esc(e.label)}" placeholder="Ajouter un libellé">
+    <span class="bill no abs-k" style="pointer-events:none">${isA ? 'Absence' : 'Temps interne'}</span><span></span>
+    <label class="chk" title="Reporté dans le logiciel de gestion des temps du cabinet"><input type="checkbox" data-f="logged" ${e.logged ? 'checked' : ''}>Reporté</label>
+    <span class="times small abs-half">${HALF[e.allday] || 'Journée'}</span>
+    <span class="dur mono">${fmtDur(dur(e))}</span>
+    <div class="acts"><button class="icon" data-act="del" title="Supprimer">${ICON.trash}</button></div></div>`;
+}
+function absUpcoming(todayK) { // absences / formations futures, regroupées en périodes
+  const list = Object.keys(S.days).filter(k => k > todayK).sort().flatMap(k => dayAllday(k)).sort((a, b) => a.start - b.start);
+  const out = [];
+  for (const e of list) {
+    const t = isAbs(e) ? e.abs : 'form', last = out[out.length - 1];
+    if (last && last.t === t && (startOfDay(e.start) - startOfDay(last.to)) / DAY <= 4) { last.to = e.start; last.ids.push(e.id); last.n += e.allday === 'j' ? 1 : 0.5; }
+    else out.push({ t, from: e.start, to: e.start, ids: [e.id], n: e.allday === 'j' ? 1 : 0.5, half: e.allday });
+  }
+  return out;
+}
+const clientName = id => !id ? '' : id === ABS_ID ? ABS_NAME : isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
 function pfKey(id) {
   if (!id) return 'none';
   if (isInternalId(id)) return 'internal';
+  if (id === ABS_ID) return 'abs';
   if (isPersonId(id)) return 'p:' + id;
   const c = clientOf(id); if (!c) return 'none';
   if (isMine(c)) return 'mine';
@@ -870,6 +1130,7 @@ function pfName(k) {
   if (k === 'others') return 'Autres portefeuilles (non attribués)';
   if (k === 'none') return 'Sans client';
   if (k === 'internal') return 'Temps interne (cabinet)';
+  if (k === 'abs') return 'Absences';
   const p = personOf(k.slice(2)); return p ? p.name + (p.role ? ' · ' + roleLabel(p.role) : '') : 'Personne supprimée';
 }
 const taskName = id => id ? (taskOf(id)?.name || 'Tâche supprimée') : '';
@@ -879,7 +1140,7 @@ let _cache = { rev: -1, list: [] };
 function allEntries() {
   if (_cache.rev === S.rev) return _cache.list;
   const list = [];
-  for (const k in S.days) { const en = S.days[k].entries || {}; for (const id in en) list.push(en[id]); }
+  for (const k in S.days) { const en = S.days[k].entries || {}; for (const id in en) if (en[id].client !== ABS_ID) list.push(en[id]); }
   list.sort((a, b) => b.start - a.start);
   _cache = { rev: S.rev, list };
   return list;
@@ -993,6 +1254,7 @@ const Store = {
   put(key) {
     const b = this.bodyFor(key);
     const body = b === null ? null : JSON.parse(JSON.stringify(b));
+    Journal.note(key, body);
     if (key.startsWith('d-') && body === null) delete S.days[key.slice(2)];
     if (key.startsWith('cy-') && body === null) delete S.cycles[key.slice(3)];
     if (this.mode === 'local') {
@@ -1035,6 +1297,7 @@ const Store = {
   },
 };
 function applyDoc(key, body) {
+  Journal.snap[key] = JSON.stringify(body ?? null);
   if (key === 'meta') S.meta = normalizeMeta(body);
   else if (key === 'running') S.running = (body && body.entry) || null;
   else if (key.startsWith('d-')) {
@@ -1045,6 +1308,196 @@ function applyDoc(key, body) {
     if (body && body.rows) S.cycles[k] = { rows: body.rows, ...(body.closed ? { closed: body.closed } : {}), ...(body.closed && body.manual ? { manual: true } : {}) }; else delete S.cycles[k];
   }
   S.rev++;
+}
+/* ---------- Journal des actions (historique restaurable, 10 dernières actions, conservé sur cet appareil) ----------
+   Chaque écriture locale (Store.put) est comparée à l'état connu du document ; les écritures rapprochées (< 0,7 s)
+   forment une seule action. Une action = liste de changements { k: document, p: chemin, b: avant, a: après }.
+   Restaurer = remettre chaque élément dans son état « avant » (les autres actions sont conservées). */
+const J_MAX = 10;
+const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
+const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence' };
+const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
+const Journal = {
+  snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
+  list: [],
+  load() { try { this.list = JSON.parse(lsGet('journal', '[]')) || []; } catch (e) { this.list = []; } },
+  save() { try { lsSet('journal', JSON.stringify(this.list)); } catch (e) {} },
+  note(key, body) {
+    const aft = JSON.stringify(body ?? null);
+    if (!this.ready || this.mute) { this.snap[key] = aft; return; }
+    if (!this.pend) this.pend = { keys: {}, label: null };
+    if (!(key in this.pend.keys)) this.pend.keys[key] = this.snap[key] ?? 'null';
+    this.snap[key] = aft;
+    clearTimeout(this.t); this.t = setTimeout(() => this.flush(), 700);
+  },
+  flush(extra) {
+    clearTimeout(this.t); const P = this.pend; this.pend = null; if (!P) return;
+    const ch = [];
+    for (const k in P.keys) ch.push(...jDiff(k, JSON.parse(P.keys[k]), JSON.parse(this.snap[k] ?? 'null')));
+    if (!ch.length) return;
+    if (ch.every(c => c.k === 'running') && ch.some(c => c.b && c.a)) return; // simple mise à jour du chrono en cours
+    const act = { id: newId(), t: Date.now(), label: P.label || jLabel(ch), ch, ...(P.of ? { of: P.of } : {}) };
+    this.list.unshift(act); this.list = this.list.slice(0, J_MAX); this.save();
+    if (this.open) this.render();
+  },
+  cur(c) {
+    const [a, b] = c.p;
+    if (c.k === 'running') return S.running || null;
+    if (c.k.startsWith('d-')) return S.days[c.k.slice(2)]?.entries?.[b] || null;
+    if (c.k.startsWith('cy-')) { const cy = S.cycles[c.k.slice(3)]; return a === 'closed' ? (cy && cy.closed ? { closed: cy.closed, manual: !!cy.manual } : null) : cy?.rows?.[b] || null; }
+    if (a === 'settings') return S.meta.settings[b] ?? null;
+    if (a === 'favorites') return S.meta.favorites;
+    return (S.meta[a] || []).find(x => x.id === b) || null;
+  },
+  set(c, v) {
+    const [a, b] = c.p; v = v == null ? null : JSON.parse(JSON.stringify(v));
+    if (c.k === 'running') { S.running = v; return; }
+    if (c.k.startsWith('d-')) { const k = c.k.slice(2); if (v) { (S.days[k] ||= { entries: {} }).entries[b] = v; } else if (S.days[k]) delete S.days[k].entries[b]; return; }
+    if (c.k.startsWith('cy-')) {
+      const k = c.k.slice(3), cy = (S.cycles[k] ||= { rows: {} });
+      if (a === 'closed') { if (v) { cy.closed = v.closed; if (v.manual) cy.manual = true; else delete cy.manual; } else { delete cy.closed; delete cy.manual; } }
+      else if (v) cy.rows[b] = v; else delete cy.rows[b];
+      return;
+    }
+    if (a === 'settings') { S.meta.settings[b] = v; return; }
+    if (a === 'favorites') { S.meta.favorites = v || []; return; }
+    const arr = S.meta[a] || (S.meta[a] = []), i = arr.findIndex(x => x.id === b);
+    if (v) { if (i >= 0) arr[i] = v; else arr.push(v); } else if (i >= 0) arr.splice(i, 1);
+  },
+  restore(id, force) {
+    const act = this.list.find(x => x.id === id); if (!act) return;
+    const changed = act.ch.filter(c => !jEq(jPick(this.cur(c), c), jPick(c.a, c)));
+    if (changed.length && !force) { this.warnId = id; this.render(); return; }
+    this.flush();
+    this.pend = { keys: {}, label: 'Restauration : ' + act.label.replace(/^Restauration : /, ''), of: act.id };
+    const keys = new Set();
+    for (const c of act.ch.slice().reverse()) { this.set(c, jMerge(this.cur(c), c)); keys.add(c.k); }
+    for (const k of keys) Store.put(k);
+    act.done = Date.now(); this.warnId = null;
+    S.rev++; scheduleRender(); syncTimerBar();
+    this.flush(); this.save(); this.render();
+    toast('Action restaurée : ' + act.label);
+  },
+  toggle() { this.open ? this.close() : this.show(); },
+  show() { this.open = true; this.render(); $('#hist-btn').classList.add('on'); document.addEventListener('mousedown', this._out = ev => { const pn = $('#hist-pan'); if (pn && !pn.contains(ev.target) && !ev.target.closest('#hist-btn') && !ev.target.closest('.overlay')) this.close(); }); document.addEventListener('keydown', this._key = ev => { if (ev.key === 'Escape') this.close(); }); },
+  close() { this.open = false; this.warnId = null; $('#hist-pan')?.remove(); $('#hist-btn')?.classList.remove('on'); document.removeEventListener('mousedown', this._out); document.removeEventListener('keydown', this._key); },
+  render() {
+    if (!this.open) return;
+    let pn = $('#hist-pan');
+    if (!pn) {
+      pn = document.createElement('div'); pn.id = 'hist-pan'; pn.className = 'hist-pan'; pn.setAttribute('role', 'dialog'); pn.setAttribute('aria-label', 'Historique des actions'); document.body.appendChild(pn);
+      pn.addEventListener('click', ev => {
+        const b = ev.target.closest('[data-j]'); if (!b) return;
+        if (b.dataset.j === 'close') this.close();
+        else if (b.dataset.j === 'clear') { this.list = []; this.save(); this.render(); }
+        else if (b.dataset.j === 'cancel') { this.warnId = null; this.render(); }
+        else this.restore(b.closest('[data-id]').dataset.id, b.dataset.j === 'force');
+      });
+    }
+    const today = dayKey(Date.now());
+    const when = t => (dayKey(t) === today ? 'aujourd’hui' : fmtDate(t).slice(0, 5)) + ' à ' + hhmm(t);
+    pn.innerHTML = `<div class="hist-h"><b>Historique</b><span class="muted small">10 dernières actions</span><span class="sp" style="flex:1"></span>${this.list.length ? '<button class="btn sm ghost" data-j="clear" title="Vider l’historique (ne modifie aucune donnée)">Vider</button>' : ''}<button class="icon" data-j="close" title="Fermer">${ICON.close}</button></div>
+      ${this.list.map(x => {
+        const warn = this.warnId === x.id;
+        return `<div class="hist-i ${x.done ? 'done' : ''} ${warn ? 'jwarn' : ''}" data-id="${x.id}"><div class="hist-l">${esc(x.label)}</div>
+          <div class="hist-m">${warn ? 'Modifié depuis : la restauration écrasera les changements ultérieurs.' : when(x.t) + (x.done ? ' · restauré ' + when(x.done) : '')}</div>
+          ${warn ? `<span style="grid-column:1 / -1;display:flex;gap:6px;justify-content:flex-end;margin-top:6px"><button class="btn sm" data-j="cancel">Annuler</button><button class="btn sm danger" data-j="force">Restaurer quand même</button></span>` : x.done ? `<button class="btn sm ghost" data-j="restore" title="Rejouer l’action (annuler la restauration)">Rétablir</button>` : `<button class="btn sm" data-j="restore" title="Remettre l’état d’avant cette action">Restaurer</button>`}</div>`;
+      }).join('') || '<div class="hist-empty">Aucune action enregistrée pour l’instant.<br>Vos prochaines saisies, modifications et suppressions apparaîtront ici.</div>'}`;
+  },
+};
+// Objets modifiés (saisie, ligne de cycle, client…) : seuls les champs touchés par l'action sont comparés et restaurés
+const jObj = v => v && typeof v === 'object' && !Array.isArray(v);
+const jFields = c => [...new Set([...Object.keys(c.b || {}), ...Object.keys(c.a || {})])].filter(f => !jEq(c.b[f], c.a[f]));
+const jPick = (v, c) => { if (!(jObj(c.b) && jObj(c.a)) || !jObj(v)) return v ?? null; const o = {}; for (const f of jFields(c)) o[f] = v[f] ?? null; return o; };
+function jMerge(cur, c) {
+  if (!(jObj(c.b) && jObj(c.a)) || !jObj(cur)) return c.b;
+  const o = JSON.parse(JSON.stringify(cur));
+  for (const f of jFields(c)) { if (c.b[f] === undefined) delete o[f]; else o[f] = c.b[f]; }
+  return o;
+}
+function jDiff(k, B, A) {
+  const out = [];
+  const byKeys = (bo, ao, p0) => { const ks = new Set([...Object.keys(bo || {}), ...Object.keys(ao || {})]); for (const id of ks) if (!jEq(bo?.[id], ao?.[id])) out.push({ k, p: [p0, id], b: bo?.[id] ?? null, a: ao?.[id] ?? null }); };
+  if (k === 'running') { const b = B?.entry || null, a = A?.entry || null; if (!jEq(b, a)) out.push({ k, p: [], b, a }); }
+  else if (k.startsWith('d-')) byKeys(B?.entries, A?.entries, 'entries');
+  else if (k.startsWith('cy-')) {
+    byKeys(B?.rows, A?.rows, 'rows');
+    const cb = B?.closed ? { closed: B.closed, manual: !!B.manual } : null, ca = A?.closed ? { closed: A.closed, manual: !!A.manual } : null;
+    if (!jEq(cb, ca)) out.push({ k, p: ['closed'], b: cb, a: ca });
+  } else if (k === 'meta') {
+    B = { ...(B || {}), settings: { ...DEFAULT_SETTINGS, ...(B?.settings || {}) } }; A = { ...(A || {}), settings: { ...DEFAULT_SETTINGS, ...(A?.settings || {}) } };
+    for (const arr of Object.keys(J_ARR)) { const m = l => Object.fromEntries((l || []).map(x => [x.id, x])); byKeys(m(B?.[arr]), m(A?.[arr]), arr); }
+    for (const s of new Set([...Object.keys(B?.settings || {}), ...Object.keys(A?.settings || {})])) if (!jEq(B?.settings?.[s], A?.settings?.[s])) out.push({ k, p: ['settings', s], b: B?.settings?.[s] ?? null, a: A?.settings?.[s] ?? null });
+    if (!jEq(B?.favorites || [], A?.favorites || [])) out.push({ k, p: ['favorites'], b: B?.favorites || [], a: A?.favorites || [] });
+  }
+  return out;
+}
+function jEntryName(e) {
+  if (!e) return '';
+  if (e.allday && e.client === ABS_ID) return absLabel(e.abs) + ' ' + fmtDate(e.start).slice(0, 5);
+  return (clientName(e.client) || 'Sans client') + (e.task ? ' › ' + taskName(e.task) : '') + ' (' + fmtDate(e.start).slice(0, 5) + ')';
+}
+function jLabel(ch) {
+  const parts = [];
+  // chrono
+  const run = ch.find(c => c.k === 'running');
+  const ent = ch.filter(c => c.k.startsWith('d-'));
+  if (run && run.b && !run.a) { const e = ent.find(c => !c.b && c.a); parts.push('Chrono arrêté : ' + (e ? jEntryName(e.a) + ' · ' + fmtDur(dur(e.a)) : (clientName(run.b.client) || 'Sans client'))); }
+  else if (run && !run.b && run.a) parts.push('Chrono démarré : ' + (clientName(run.a.client) || 'Sans client') + (run.a.task ? ' › ' + taskName(run.a.task) : ''));
+  // saisies (une saisie déplacée d'un jour à l'autre apparaît comme suppression + création du même id)
+  const byId = new Map(); for (const c of ent) { const x = byId.get(c.p[1]) || { b: null, a: null }; if (c.b) x.b = c.b; if (c.a) x.a = c.a; byId.set(c.p[1], x); }
+  const L = [...byId.values()].filter(x => !(run && run.b && !run.a && !x.b));
+  if (L.length) {
+    const cre = L.filter(x => !x.b), del = L.filter(x => !x.a), mod = L.filter(x => x.b && x.a);
+    const absN = l => l.filter(x => (x.a || x.b).allday).length;
+    if (cre.length) parts.push(cre.length === 1 ? ((cre[0].a.allday ? 'Absence notée : ' : 'Saisie ajoutée : ') + jEntryName(cre[0].a) + (cre[0].a.allday ? '' : ' · ' + fmtDur(dur(cre[0].a)))) : (absN(cre) === cre.length ? cre.length + ' jours d’absence notés' : cre.length + ' saisies ajoutées'));
+    if (del.length) parts.push(del.length === 1 ? ((del[0].b.allday ? 'Absence supprimée : ' : 'Saisie supprimée : ') + jEntryName(del[0].b)) : del.length + ' saisies supprimées');
+    if (mod.length) {
+      const fl = new Set(); for (const x of mod) for (const f of ['start', 'end', 'client', 'task', 'label', 'billable', 'invoicedAt', 'logged', 'abs', 'allday']) if (!jEq(x.b[f], x.a[f])) fl.add(f);
+      const only = f => fl.size === 1 && fl.has(f);
+      const pl = mod.length > 1 ? 's' : '';
+      const what = only('invoicedAt') ? (mod.every(x => x.a.invoicedAt) ? 'marquée' + pl + ' facturée' + pl : 'facturation annulée') : only('logged') ? (mod.every(x => x.a.logged) ? 'marquée' + pl + ' reportée' + pl : 'report annulé') : only('billable') ? (mod.every(x => x.a.billable) ? 'passée' + pl + ' à facturer' : 'passée' + pl + ' non facturable' + pl) : only('label') ? 'libellé modifié' : [...fl].every(f => ['start', 'end'].includes(f)) ? (mod.length === 1 ? 'durée ' + fmtDur(dur(mod[0].b)) + ' → ' + fmtDur(dur(mod[0].a)) : 'horaires modifiés') : 'modifiée' + pl;
+      parts.push(mod.length === 1 ? 'Saisie ' + jEntryName(mod[0].a) + ' : ' + what : mod.length + ' saisies ' + what);
+    }
+  }
+  // cycle de paie
+  const cyc = ch.filter(c => c.k.startsWith('cy-'));
+  for (const c of cyc.filter(c => c.p[0] === 'closed')) parts.push('Cycle de ' + MONTHS_L[+c.k.slice(-2) - 1] + (c.a ? ' clôturé' : ' rouvert'));
+  const rows = cyc.filter(c => c.p[0] === 'rows');
+  if (rows.length) {
+    const mkl = MONTHS[+rows[0].k.slice(-2) - 1];
+    if (rows.length === 1) {
+      const c = rows[0], b = c.b || {}, a = c.a || {}, fs = Object.keys({ ...b, ...a }).filter(f => !jEq(b[f], a[f]));
+      const f = fs.find(f => J_F[f]) || fs[0];
+      const v = a[f], txt = !f ? 'modifié' : f === 'bs' ? 'nombre de BS ' + (v ?? '–') : f === 'alOk' ? 'alerte ' + ((a.alOk || []).length > (b.alOk || []).length ? 'traitée' : 'remise à faire') : f === 'corr' ? 'correction ' + ((a.corr || []).length ? 'notée' : 'effacée') : (J_F[f] || f) + (v ? ' notée le ' + (typeof v === 'string' && /^\d{4}-/.test(v) ? fmtDate(dOf(v)).slice(0, 5) : v) : ' effacée');
+      parts.push('Cycle ' + mkl + ' · ' + (clientOf(c.p[1])?.name || 'dossier') + ' : ' + txt);
+    } else parts.push('Cycle ' + mkl + ' : ' + rows.length + ' dossiers modifiés');
+  }
+  // référentiel et réglages
+  for (const c of ch.filter(c => c.k === 'meta')) {
+    if (parts.length >= 3) break;
+    const [arr, id] = c.p;
+    if (arr === 'settings') { parts.push('Réglage modifié : ' + (J_SET[id] || id)); continue; }
+    if (arr === 'favorites') { parts.push('Favoris modifiés'); continue; }
+    const T = J_ARR[arr], b = c.b, a = c.a, nm = (a || b).name;
+    let txt;
+    if (!b) txt = T + ' créé' + (arr === 'tasks' || arr === 'persons' ? 'e' : '') + ' : ' + nm;
+    else if (!a) txt = T + ' supprimé' + (arr === 'tasks' || arr === 'persons' ? 'e' : '') + ' définitivement : ' + nm;
+    else if (!b.deletedAt && a.deletedAt) txt = T + ' mis à la corbeille : ' + nm;
+    else if (b.deletedAt && !a.deletedAt) txt = T + ' restauré : ' + nm;
+    else if (!b.archived !== !a.archived) txt = T + (a.archived ? ' archivé : ' : ' désarchivé : ') + nm;
+    else if (b.name !== a.name) txt = T + ' renommé : ' + b.name + ' → ' + a.name;
+    else if (arr === 'clients' && b.group !== a.group) txt = nm + ' : ' + (groupOf(a.group) ? 'groupe « ' + groupOf(a.group).name + ' »' : 'retiré du groupe');
+    else if (arr === 'clients' && isMine(b) !== isMine(a)) txt = nm + (isMine(a) ? ' : ajouté à mon portefeuille' : ' : retiré de mon portefeuille');
+    else if (arr === 'clients' && !jEq(b.alerts, a.alerts)) txt = nm + ' : alertes salarié modifiées';
+    else if (arr === 'clients' && !jEq(b.cy, a.cy)) txt = nm + ' : paramètres du cycle modifiés';
+    else txt = T + ' modifié' + (arr === 'tasks' || arr === 'persons' ? 'e' : '') + ' : ' + nm;
+    parts.push(txt);
+  }
+  const n = ch.filter(c => c.k === 'meta').length;
+  if (!parts.length) return 'Modification (' + ch.length + ' élément' + (ch.length > 1 ? 's' : '') + ')';
+  return parts.slice(0, 2).join(' · ') + (parts.length > 2 ? ' · +' + (parts.length - 2) : '') + (parts.length < 3 && n > 3 ? '' : '');
 }
 function setSync() {
   const el = $('#sync'); if (!el) return;
@@ -1125,6 +1578,7 @@ function startTimer(spec) {
   S.rev++; Store.put('running');
   UI.draft = { client: null, task: null, label: '', billable: S.meta.settings.defaultBillable, billTouched: false };
   syncTimerBar(); scheduleRender();
+  absWarn(dayKey(Date.now()));
 }
 function stopTimer(silent) {
   const r = S.running; if (!r) return;
@@ -1159,7 +1613,7 @@ function Combo(root, o) {
     list.innerHTML = items.length ? items.map(i => {
       if (i.head) return `<div class="opt-head">${esc(i.label)}</div>`;
       n++;
-      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? `<span class="pers-ic">${ICON.person}</span>` : i.cli ? cliIc(i.cli) : ''}<span>${esc(i.label)}</span>${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
+      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? `<span class="pers-ic">${ICON.person}</span>` : i.cli ? cliIc(i.cli) : ''}<span>${esc(i.label)}</span>${i.grp ? grpTag(groupOf(i.grp)) : ''}${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
     }).join('') : `<div class="opt-head">${typed ? 'Aucun résultat' : o.emptyText}</div>`;
     const h = list.querySelector('.opt.hi'); if (h) h.scrollIntoView({ block: 'nearest' });
   }
@@ -1208,9 +1662,9 @@ function clientOptions(q) {
   const u = usageStats();
   let cs = S.meta.clients.filter(c => !c.archived && !c.deletedAt);
   let ps = S.meta.persons.filter(x => !x.archived && !x.deletedAt);
-  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n)); ps = ps.filter(x => norm(x.name).includes(n) || norm(roleLabel(x.role)).includes(n)); }
+  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n) || norm(groupOf(c.group)?.name).includes(n)); ps = ps.filter(x => norm(x.name).includes(n) || norm(roleLabel(x.role)).includes(n)); }
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
-  const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), cli: c.id });
+  const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), cli: c.id, grp: c.group });
   const mapP = x => ({ id: x.id, label: x.name, sub: roleLabel(x.role), person: true });
   const intOpt = { id: INTERNAL_ID, label: INTERNAL_NAME, sub: 'formation, trajet, organisation… · non facturable', internal: true };
   const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : mapC(o);
@@ -1282,7 +1736,8 @@ function initTimerBar() {
     renderBillBtn();
   });
   $('#tb-go').addEventListener('click', () => { if (UI.mode === 'manual') addManual(); else goTimer(); });
-  $$('.modes button').forEach(b => b.addEventListener('click', () => { UI.mode = b.dataset.mode; syncTimerBar(); }));
+  $$('.modes button[data-mode]').forEach(b => b.addEventListener('click', () => { UI.mode = b.dataset.mode; syncTimerBar(); }));
+  $('#tb-abs').addEventListener('click', () => openAbsence(null, UI.mode === 'manual' && $('#mn-date').value ? $('#mn-date').value : null));
   $('#tb-clock').addEventListener('click', () => { if (S.running) { const i = $('#tb-start'); if (i) { i.focus(); i.showPicker?.(); } } });
   $('#mn-date').value = dayKey(Date.now());
 }
@@ -1299,6 +1754,7 @@ function addManual() {
   let e = e0; if (e <= s) e += DAY;
   saveEntry({ id: 'e' + newId(), client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : defaultBillable(d.client, d.task), start: s, end: e, invoicedAt: 0, logged: false });
   toast('Saisie ajoutée : ' + fmtDur(e - s));
+  setTimeout(() => absWarn(dayKey(s)), 400);
   $('#mn-start').value = $('#mn-end').value;
   $('#mn-end').value = '';
 }
@@ -1399,10 +1855,11 @@ window.addEventListener('hashchange', route);
 function statusOf(e) { return !e.billable ? 'no' : e.invoicedAt ? 'inv' : 'todo'; }
 function statusLabel(st) { return st === 'no' ? 'Non facturable' : st === 'inv' ? 'Facturé' : 'À facturer'; }
 function whatHTML(c, t) {
+  if (c === ABS_ID) return `<span class="abs-ic">${ICON.cal}</span><span class="cl">${esc(ABS_NAME)}</span>`;
   if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
   if (isPersonId(c)) { const p = personOf(c); return `<span class="pers-ic">${ICON.person}</span><span class="cl">${esc(clientName(c))}</span>${p?.role ? `<span class="role">${esc(roleLabel(p.role))}</span>` : ''}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`; }
   const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
-  return `${cliIc(c)}${c ? `<span class="cl">${esc(clientName(c))}</span>${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
+  return `${cliIc(c)}${c ? `<span class="cl">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
 }
 function recents() {
   const seen = new Set(), out = [];
@@ -1450,16 +1907,23 @@ function renderChrono() {
     <div class="card stat"><div class="k" title="Saisies des 31 derniers jours pas encore cochées « Reporté » (pas encore recopiées dans le logiciel du cabinet)">À reporter · 31 derniers jours</div><div class="v">${unlogged}</div><div class="s">saisies à reporter dans le logiciel du cabinet</div></div>
   </div>`;
   // Groupes par jour
-  const keys = Object.keys(S.days).sort().reverse();
+  const todayK = dayKey(now);
+  const keys = Object.keys(S.days).filter(k => Object.keys(S.days[k].entries || {}).length && !(k > todayK && Object.values(S.days[k].entries).every(e => e.allday))).sort().reverse();
   if (S.running && !keys.includes(dayKey(S.running.start))) { keys.push(dayKey(S.running.start)); keys.sort().reverse(); }
+  const hs = holSuggest(todayK);
+  if (hs) html += `<div class="card hol-sugg" data-k="${hs.k}"><span class="abs-ic">${ICON.cal}</span><span>${hs.k === todayK ? '<b>Aujourd’hui</b> est' : 'Le <b>' + esc(fmtDayLong(hs.k)) + '</b> est'} un jour férié : <b>${esc(hs.name)}</b>.</span><span class="sp" style="flex:1"></span><button class="btn sm primary" data-act="hol-note">Noter « Jour férié »</button><button class="icon xs" data-act="hol-hide" title="Ne plus proposer pour ce jour">${ICON.close}</button></div>`;
+  const upc = absUpcoming(todayK);
+  if (upc.length) html += `<h2>Absences et formations à venir</h2><div class="card abs-upc">${upc.map((u, i) => `<div class="abs-up" data-i="${i}"><span class="abs-ic ${u.t === 'form' ? 'is-form' : ''}">${ICON.cal}</span><b>${esc(absLabel(u.t))}</b><span>${u.from === u.to ? 'le ' + esc(fmtDayLong(dayKey(u.from))) + (u.half !== 'j' ? ' (' + HALF[u.half].toLowerCase() + ')' : '') : 'du ' + WD_S[new Date(u.from).getDay()] + ' ' + fmtDate(u.from).slice(0, 5) + ' au ' + WD_S[new Date(u.to).getDay()] + ' ' + fmtDate(u.to).slice(0, 5)}</span><span class="muted">${fmtDays(u.n)}</span><span class="sp" style="flex:1"></span>${u.ids.length === 1 ? '<button class="btn sm ghost" data-act="upc-edit">Modifier</button>' : ''}<button class="btn sm ghost" data-act="upc-del">Supprimer</button></div>`).join('')}</div>`;
+  body._upc = upc;
   const shown = keys.slice(0, UI.daysShown);
   if (shown.length) html += `<h2>Saisies</h2>`;
   for (const k of shown) {
     const list = Object.values(S.days[k]?.entries || {}).sort((a, b) => b.start - a.start);
     const run = S.running && dayKey(S.running.start) === k ? S.running : null;
-    const tot = list.reduce((s, e) => s + dur(e), 0);
+    const tot = list.filter(e => !isAbs(e)).reduce((s, e) => s + dur(e), 0);
     const totB = list.filter(e => e.billable).reduce((s, e) => s + dur(e), 0);
-    html += `<div class="card day" data-day="${k}"><div class="day-h"><span class="d">${esc(fmtDayLong(k))}</span>
+    const dAbs = list.filter(e => e.allday), hol = holidayOn(k);
+    html += `<div class="card day" data-day="${k}"><div class="day-h"><span class="d">${esc(fmtDayLong(k))}</span>${dAbs.map(e => `<span class="abs-chip ${isAbs(e) ? '' : 'is-form'}">${esc(isAbs(e) ? absLabel(e.abs) : 'Formation')}${e.allday !== 'j' ? ' · ' + HALF[e.allday].toLowerCase() : ''}</span>`).join('')}${hol && !dAbs.some(e => e.abs === 'fer') ? `<span class="abs-chip hol" title="Jour férié">${esc(hol)}</span>` : ''}
       <button class="btn sm ghost" data-act="recap" title="Totaux par client et tâche, à recopier dans le logiciel du cabinet">${ICON.list} Récap à reporter</button>
       <span class="tb">à facturer ${fmtDur(totB)}</span><span class="t">${fmtDur(tot)}</span></div>`;
     if (run) html += `<div class="row running"><div class="what">${whatHTML(run.client, run.task)}</div><div class="muted small lbl-ro">${esc(run.label) || 'En cours…'}</div><span class="bill ${run.billable ? '' : 'no'}" style="pointer-events:none">${run.billable ? 'À facturer' : 'Non facturable'}</span><span></span><span></span><span class="times mono small">${hhmm(run.start)} – …</span><span class="dur" data-live="clock">${fmtClock(dur(run))}</span><div class="acts"><button class="icon" data-act="stoprun" title="Arrêter">${ICON.stop}</button></div></div>`;
@@ -1471,6 +1935,7 @@ function renderChrono() {
   tick();
 }
 function rowHTML(e) {
+  if (e.allday) return absRowHTML(e);
   const st = statusOf(e);
   return `<div class="row" data-id="${e.id}">
     <button class="what" data-act="edit" title="${esc((clientName(e.client) || 'Sans client') + (e.task ? ' › ' + taskName(e.task) : ''))} — cliquer pour modifier">${whatHTML(e.client, e.task)}</button>
@@ -1492,6 +1957,7 @@ function bindEntryEvents(container) {
     else if (act === 'bill' && id) updateEntries([id], e => { e.billable = !e.billable; if (!e.billable) e.invoicedAt = 0; });
     else if (act === 'resume' && id) { const e = findEntry(id); if (e) startTimer({ client: e.client, task: e.task, label: e.label, billable: e.billable }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     else if (act === 'del' && id) deleteEntries([id]);
+    else if (act === 'absedit' && id) openAbsence(id);
   });
   container.addEventListener('change', ev => {
     const i = ev.target; const row = i.closest('[data-id]'); if (!row || !i.dataset.f) return;
@@ -1559,6 +2025,16 @@ function bindChrono() {
     else if (act === 'forgot') openForgot();
     else if (act === 'cyview') { (UI.pfv ||= {}).mode = 'cycle'; }
     else if (act === 'preset') { addPresetTasks(); }
+    else if (act === 'hol-note' || act === 'hol-hide') {
+      const k = b.closest('[data-k]').dataset.k;
+      if (act === 'hol-hide') { const h = holHidden(); h.push(k); lsSet('holHide', JSON.stringify(h.slice(-30))); renderChrono(); return; }
+      const st = timeOn(parseDay(k), '09:00'), e = { id: 'e' + newId(), client: ABS_ID, task: null, abs: 'fer', allday: 'j', start: st, end: st + absDayMs(), label: holidayOn(k), billable: false, invoicedAt: 0, logged: false };
+      saveEntry(e); toast('Jour férié noté : ' + holidayOn(k), 'Annuler', () => removeSilent([e.id]));
+    }
+    else if (act === 'upc-del' || act === 'upc-edit') {
+      const u = (body._upc || [])[+b.closest('[data-i]').dataset.i]; if (!u) return;
+      if (act === 'upc-edit') openAbsence(u.ids[0]); else deleteEntries(u.ids);
+    }
   });
 }
 
@@ -1991,7 +2467,9 @@ function renderCycle(P) {
   if (P.cfilter === 'todo') rows = rows.filter(r => !cyRowDone(mk, r.c, r.row));
   else if (P.cfilter === 'late') rows = rows.filter(r => ['rec', 'env', 'vir', 'dep', 'dsn'].some(f => ['late', 'warn'].includes(cyState(mk, r.c, r.row, f).st)));
   else if (P.cfilter === 'done') rows = rows.filter(r => cyRowDone(mk, r.c, r.row));
-  if (q) rows = rows.filter(r => norm(r.c.name).includes(q) || norm(r.c.code).includes(q));
+  if (q) rows = rows.filter(r => norm(r.c.name).includes(q) || norm(r.c.code).includes(q) || norm(groupOf(r.c.group)?.name).includes(q));
+  const grouped = hasGroups() && lsGet('cyGroup', '1') === '1';
+  if (grouped) { const order = Object.fromEntries(groupsAll().map((g, i) => [g.id, i])); const gi = r => groupOf(r.c.group) ? order[r.c.group] : 1e9; rows = rows.map((r, i) => [r, i]).sort((a, b) => gi(a[0]) - gi(b[0]) || a[1] - b[1]).map(x => x[0]); }
   const closed = nAll && done.length === nAll ? Math.max(...rows.concat([]).map(r => Math.max(dOf(r.row.dsn) || 0, dOf(r.row.dep) || 0, dOf(r.row.vir) || 0))) : 0;
   const todo = mk === cur || mk === prevMk(cur) ? cyTodo() : [];
   const showPrep = !!P.showPrep;
@@ -2031,13 +2509,13 @@ function renderCycle(P) {
       <span class="sp" style="flex:1"></span>${cyHistory(mk)}
     </div>
   </div>`;
-  html += `<div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>${densitySeg()}
+  html += `<div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>${hasGroups() ? `<label class="chk" title="Regrouper les dossiers sous le nom de leur groupe (clic sur le nom du groupe pour plier / déplier)"><input type="checkbox" data-cy="grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}${densitySeg()}
     <div class="seg" data-seg="cyf">${[['all', 'Tous'], ['todo', 'En cours'], ['late', 'À surveiller'], ['done', 'Terminés']].map(([v, l]) => `<button data-v="${v}" class="${(P.cfilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
   <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'al'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}" ${cols.find(x => x[1] === l)[0] === 'note' ? 'title="Remarque permanente : conservée de mois en mois"' : cols.find(x => x[1] === l)[0] === 'al' ? 'title="Alertes sur des salariés (ex. TPT), conservées jusqu’à leur suppression ou leur mois limite"' : ''}>${l}</th>`).join('')}<th></th></tr></thead><tbody>
-  ${rows.map(({ c, row }) => {
-    const p = cyOf(c), fin = cyRowDone(mk, c, row);
-    return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''}"><td class="mono small">${esc(c.code || '')}</td>
-      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button></td>
+  ${cyGroupRows(mk, rows, cols.length + 3, grouped, ({ c, row }) => {
+    const p = cyOf(c), fin = cyRowDone(mk, c, row), gg = groupOf(c.group);
+    return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''} ${gg ? 'has-grp' : ''}" ${gg ? `style="--g:${grpColor(gg)}"` : ''}><td class="mono small">${esc(c.code || '')}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
       ${cols.map(([f]) => {
         if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
         if (f === 'al') return `<td>${alCellHTML(mk, c, row)}</td>`;
@@ -2046,7 +2524,7 @@ function renderCycle(P) {
         return cyCellHTML(mk, c, row, f);
       }).join('')}
       <td><button class="icon xs" data-cy="start" title="Démarrer le chrono sur ce dossier">${ICON.play}</button></td></tr>`;
-  }).join('') || `<tr><td colspan="${cols.length + 3}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.'}</td></tr>`}
+  }) || `<tr><td colspan="${cols.length + 3}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.'}</td></tr>`}
   ${rows.length ? `<tr class="tot"><td></td><td>Total (${rows.length})</td>${cols.map(([f]) => f === 'bs' ? `<td class="c num">${rows.reduce((a, r) => a + (effBs(mk, r.c.id).n || 0), 0) || ''}</td>` : '<td></td>').join('')}<td></td></tr>` : ''}
   </tbody></table></div>
   <div class="cy-legend muted small"><span><i class="lg-done"></i>fait</span><span><i class="lg-warn"></i>échéance proche</span><span><i class="lg-late"></i>en retard</span><span><i class="lg-na"></i>non concerné / automatique</span> · Clic sur une case vide : date du jour. Clic sur une case remplie : modifier, corriger ou effacer. Clic sur le nom : paramètres et remarques du dossier.</div>`;
@@ -2112,6 +2590,7 @@ function openCyParams(cid) {
   const opt = (v, l, cur) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${l}</option>`;
   const m = modal(`<div class="modal-h"><h3>Cycle de paie — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
+      <label class="fld"><span>Groupe de dossiers</span><select id="cp-grp">${groupSelOpts(c.group)}</select></label>
       <div class="fld-row"><label class="fld"><span>Réception des variables</span><select id="cp-rec">${opt('var', 'Avec variables', p.rec)}${opt('auto', 'Automatique (sans variables)', p.rec)}${opt('robot', 'Automate Silae', p.rec)}</select></label>
       <label class="fld"><span>Jour d’envoi prévu (auto)</span><select id="cp-recday">${opt('', '—', p.recDay || '')}${[16, 19, 20, 25, 30].map(d => opt(d, 'vers le ' + d, p.recDay || '')).join('')}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Réception habituelle des variables</span><select id="cp-varday">${opt('', '— (relance le ' + CY_REL_DEF + ')', p.varDay || '')}${Array.from({ length: 21 }, (_, i) => i + 10).map(d => opt('m' + d, 'Vers le ' + d, p.varDay || '')).join('')}${opt('m31', 'Fin de mois', p.varDay || '')}${Array.from({ length: 10 }, (_, i) => i + 1).map(d => opt('n' + d, 'Le ' + (d === 1 ? '1er' : d) + ' du mois suivant', p.varDay || '')).join('')}</select></label>
@@ -2134,12 +2613,41 @@ function openCyParams(cid) {
     const u = q('#cp-usesug'); if (u) u.onclick = () => { q('#cp-varday').value = sug.code; hint(); };
   };
   q('#cp-varday').addEventListener('change', hint); hint();
+  q('#cp-grp').addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || c.group); }); });
   q('#cp-ok').addEventListener('click', () => {
     const dd = parseInt(q('#cp-depday').value, 10);
     c.cy = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, varDay: q('#cp-varday').value || null, envDelay: q('#cp-envdelay').value === '' ? null : +q('#cp-envdelay').value, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
     if (c.cy.dep === 'fixed' && !c.cy.depDay) c.cy.dep = 'next';
+    const gv = q('#cp-grp').value; if (gv && gv !== '__newgrp') c.group = gv; else if (!gv) delete c.group;
     touchMeta(); m.close();
   });
+}
+
+/* ---------- Mon cycle : regroupement par groupe de dossiers ---------- */
+const cyFold = () => { try { return new Set(JSON.parse(lsGet('cyFold', '[]'))); } catch (e) { return new Set(); } };
+function cyGroupRows(mk, rows, span, grouped, fn) {
+  if (!grouped) return rows.map(fn).join('');
+  const fold = cyFold(); let out = '', cur = null;
+  for (const r of rows) {
+    const k = grpKeyOf(r.c);
+    if (k !== cur) { cur = k; out += cyGrpHead(mk, groupOf(r.c.group), rows.filter(x => grpKeyOf(x.c) === k).length, span, fold.has(k)); }
+    if (!fold.has(k)) out += fn(r);
+  }
+  return out;
+}
+function cyGrpHead(mk, g, nShown, span, folded) {
+  const k = g ? g.id : 'none', cs = cyClients().filter(c => grpKeyOf(c) === k);
+  let dsn = 0, fin = 0, al = 0, late = 0;
+  for (const c of cs) {
+    const row = cyRow(mk, c.id);
+    if (row.dsn) dsn++;
+    if (cyRowDone(mk, c, row)) fin++;
+    al += alActive(c, mk).filter(a => alState(mk, c, row, a) === 'due').length;
+    if (['rec', 'env', 'vir', 'dep', 'dsn'].some(f => cyState(mk, c, row, f).st === 'late')) late++;
+  }
+  const pl = (n, w) => n + ' ' + w + (n > 1 ? 's' : '');
+  return `<tr class="cy-grp ${folded ? 'folded' : ''}" data-g="${k}" ${g ? `style="--g:${grpColor(g)}"` : ''}><td colspan="${span}"><button class="cy-grp-b" data-cy="fold" aria-expanded="${!folded}" title="${folded ? 'Afficher' : 'Masquer'} les dossiers du groupe"><span class="car">${ICON.chev}</span>${g ? grpTag(g, 'lg') : '<span class="grp-none">Sans groupe</span>'}
+    <span class="cy-grp-s">${pl(cs.length, 'dossier')} · DSN <b>${dsn}/${cs.length}</b> · ${pl(fin, 'terminé')}${late ? ` · <span class="g-late">${late} en retard</span>` : ''}${al ? ` · <span class="g-al">${pl(al, 'alerte')} à traiter</span>` : ''}${nShown < cs.length ? ` · <span class="muted">${nShown} affiché${nShown > 1 ? 's' : ''} avec ce filtre</span>` : ''}</span></button></td></tr>`;
 }
 function bindCycle() {
   const body = $('#portefeuille-body');
@@ -2152,6 +2660,7 @@ function bindCycle() {
   body.addEventListener('change', ev => {
     const i = ev.target, P = UI.pfv; if (!P || P.mode === 'temps') return;
     if (i.dataset.cy === 'prep') { P.showPrep = i.checked; renderPortfolio(); return; }
+    if (i.dataset.cy === 'grp') { lsSet('cyGroup', i.checked ? '1' : '0'); renderPortfolio(); return; }
     const tr = i.closest('tr[data-id]'); if (!tr || !i.dataset.in) return;
     const k = i.dataset.in;
     if (k === 'bs') { const n = parseInt(i.value, 10); cySet(P.cmonth, tr.dataset.id, { bs: n >= 0 ? n : null }); i.classList.toggle('sugg', !(n >= 0)); }
@@ -2190,6 +2699,7 @@ function bindCycle() {
     else if (a === 'reopen') { const mk = P.cmonth, old = cyClosed(mk), man = !!S.cycles[mk]?.manual; cySetClosed(mk, null); toast('Cycle rouvert', 'Annuler', () => cySetClosed(mk, old, man)); }
     else if (a === 'goapril') { P.cmonth = new Date().getFullYear() + '-04'; renderPortfolio(); }
     else if (a === 'params' && cid) openCyParams(cid);
+    else if (a === 'fold') { const k = b.closest('tr[data-g]').dataset.g, f = cyFold(); f.has(k) ? f.delete(k) : f.add(k); lsSet('cyFold', JSON.stringify([...f])); renderPortfolio(); }
     else if (a === 'start' && cid) { startTimer({ client: cid, task: null, label: '' }); location.hash = 'chrono'; setTimeout(() => cbTask.focus(), 50); }
     else if (a === 'tododone') {
       const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return;
@@ -2201,7 +2711,8 @@ function bindCycle() {
     else if (a === 'copy') {
       const rows = body._cyRows || [], cols = body._cyCols || [];
       const val = (row, f, cid) => f === 'al' ? alActive(clientOf(cid), P.cmonth).map(a => a.name + (a.tag ? ' (' + a.tag + ')' : '')).join(' ; ') : f === 'note' ? (cyOf(clientOf(cid)).notes || '') : f === 'bs' ? (effBs(P.cmonth, cid).n ?? '') : f === 'corr' ? (row.corr || []).map(x => fmtDate(dOf(x)).slice(0, 5)).join(' ; ') : ['rec', 'prep', 'env', 'vir', 'dep', 'dsn'].includes(f) ? (row[f] ? fmtDate(dOf(row[f])).slice(0, 5) : '') : f === 'doeth' || f === 'tal' ? (CY_TRI[row[f] || ''] || '') : (row[f] || '');
-      copyText(['Cycle de paie — ' + body._cyMonth, ['N°', 'Dossier', ...cols.map(c => c[1])].join('\t'), ...rows.map(({ c, row }) => [c.code || '', c.name, ...cols.map(([f]) => val(row, f, c.id))].join('\t'))].join('\n'));
+      const hg = hasGroups();
+      copyText(['Cycle de paie — ' + body._cyMonth, ['N°', 'Dossier', ...(hg ? ['Groupe'] : []), ...cols.map(c => c[1])].join('\t'), ...rows.map(({ c, row }) => [c.code || '', c.name, ...(hg ? [groupOf(c.group)?.name || ''] : []), ...cols.map(([f]) => val(row, f, c.id))].join('\t'))].join('\n'));
     }
   });
 }
@@ -2602,6 +3113,7 @@ function filtered() {
     if (r.client && e.client !== r.client) return false;
     if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none' || k === 'internal') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
     if (r.task && e.task !== r.task) return false;
+    if (r.grp) { const g = groupOfClient(e.client); if (r.grp === 'none' ? g : (!g || g.id !== r.grp)) return false; }
     const st = statusOf(e);
     if (r.bill === 'bill' && !e.billable) return false;
     if (r.bill === 'todo' && st !== 'todo') return false;
@@ -2628,6 +3140,7 @@ function renderReports() {
     <label>Période<select data-r="period">${periodOpts.map(([v, l]) => `<option value="${v}" ${r.period === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     ${r.period === 'custom' ? `<label>Du<input type="date" data-r="from" value="${r.from || dayKey(from)}"></label><label>Au<input type="date" data-r="to" value="${r.to || dayKey(to - 1)}"></label>` : `<label>&nbsp;<span class="small" style="padding:7px 0;color:var(--ink-2)">${fmtDate(from)} → ${fmtDate(to - 1)}</span></label>`}
     <label>Portefeuille<select data-r="pf">${pfOpts(r.pf)}</select></label>
+    ${hasGroups() || r.grp ? `<label>Groupe<select data-r="grp"><option value="">Tous</option>${groupsAll().map(g => `<option value="${g.id}" ${r.grp === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}<option value="none" ${r.grp === 'none' ? 'selected' : ''}>Sans groupe</option></select></label>` : ''}
     <label>Client / personne<select data-r="client">${targetOpts(r.client, 'Tous')}</select></label>
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
@@ -2642,6 +3155,7 @@ function renderReports() {
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-nobill)"></span>Non facturable</div><div class="v">${fmtDur(t.no)}</div></div>
     <div class="card stat"><div class="k">Hors de mon portefeuille</div><div class="v">${fmtDur(list.filter(e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none' && k !== 'internal'; }).reduce((a, e) => a + dur(e), 0))}</div><div class="s">autres clients et temps avec des personnes</div></div>
     <div class="card stat"><div class="k"><span class="int-ic">${ICON.building}</span> Temps interne</div><div class="v">${fmtDur(list.filter(e => isInternalId(e.client)).reduce((a, e) => a + dur(e), 0))}</div><div class="s">${t.all ? Math.round(list.filter(e => isInternalId(e.client)).reduce((a, e) => a + dur(e), 0) * 100 / t.all) + ' % du temps · ' : ''}formation, trajet, organisation…</div></div>
+    ${(() => { const al = Object.keys(S.days).filter(k => { const d = parseDay(k); return d >= startOfDay(from) && d < to; }).flatMap(k => dayAllday(k).filter(isAbs)); if (!al.length) return ''; const by = {}; al.forEach(e => { by[e.abs] = (by[e.abs] || 0) + (e.allday === 'j' ? 1 : 0.5); }); const n = Object.values(by).reduce((a, b) => a + b, 0); return `<div class="card stat"><div class="k"><span class="abs-ic">${ICON.cal}</span> Absences</div><div class="v">${fmtDays(n)}</div><div class="s">${Object.entries(by).map(([k, v]) => esc(absLabel(k)) + ' ' + fmtDays(v)).join(' · ')} · hors temps travaillé</div></div>`; })()}
   </div>`;
   // graphique
   const months = [];
@@ -2658,8 +3172,8 @@ function renderReports() {
   // tableau croisé
   const multiMonth = months.length > 1;
   const cols = multiMonth && r.cols === 'month' ? 'month' : 'status';
-  html += `<div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : 'tâche puis client'}</h2><span class="sp"></span>
-    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button><button data-v="pf" class="${r.group === 'pf' ? 'on' : ''}">Portefeuille › Client</button></div>
+  html += `<div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : r.group === 'grp' ? 'groupe puis client' : 'tâche puis client'}</h2><span class="sp"></span>
+    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button><button data-v="pf" class="${r.group === 'pf' ? 'on' : ''}">Portefeuille › Client</button>${hasGroups() || r.group === 'grp' ? `<button data-v="grp" class="${r.group === 'grp' ? 'on' : ''}">Groupe › Client</button>` : ''}</div>
     ${multiMonth ? `<div class="seg" data-seg="cols"><button data-v="status" class="${cols === 'status' ? 'on' : ''}">Colonnes : statuts</button><button data-v="month" class="${cols === 'month' ? 'on' : ''}">Colonnes : mois</button></div>` : ''}
     <button class="btn sm" data-act="copy-pivot">${ICON.copy} Copier</button></div>`;
   const pv = pivot(list, r.group, cols, months);
@@ -2677,7 +3191,7 @@ function renderReports() {
       <button class="btn sm" data-bulk="nobill" ${sel.size ? '' : 'disabled'}>Passer non facturable</button>
       <span class="sp" style="flex:1"></span><button class="btn sm danger" data-bulk="del" ${sel.size ? '' : 'disabled'}>Supprimer</button></div>
     <div class="tbl-wrap"><table class="t"><thead><tr><th><input type="checkbox" data-selall ${shown.length && shown.every(e => sel.has(e.id)) ? 'checked' : ''}></th><th>Date</th><th>Client</th><th>Tâche</th><th>Libellé</th><th>Horaires</th><th class="n">Durée</th><th>Statut</th><th>Reporté</th><th></th></tr></thead><tbody>
-    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${esc(clientName(e.client) || '—')}</td><td>${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
+    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
     </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
   const body = $('#rapports-body');
   body.innerHTML = html;
@@ -2687,9 +3201,9 @@ function renderReports() {
 }
 function pivot(list, group, cols, months) {
   const tgt = id => isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) || 'Sans client';
-  const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : e => e.task || '';
+  const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : group === 'grp' ? e => groupOfClient(e.client)?.id || '' : e => e.task || '';
   const k2 = group === 'client' ? e => e.task || '' : e => e.client || '';
-  const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : id => taskName(id) || 'Sans tâche';
+  const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : group === 'grp' ? id => groupOf(id)?.name || 'Sans groupe' : id => taskName(id) || 'Sans tâche';
   const n2 = group === 'client' ? id => taskName(id) || 'Sans tâche' : tgt;
   const g = new Map();
   for (const e of list) {
@@ -2705,14 +3219,14 @@ function pivot(list, group, cols, months) {
     return totals(l);
   };
   const cell = v => v ? fmtDur(v) : '<span class="zero">–</span>';
-  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : group === 'pf' ? 'Portefeuille / Client' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
-  const tsvRows = [[group === 'client' ? 'Client' : group === 'pf' ? 'Portefeuille' : 'Tâche', group === 'client' ? 'Tâche' : 'Client', ...colDefs.map(c => c[1] + ' (h)')].join('\t')];
+  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : group === 'pf' ? 'Portefeuille / Client' : group === 'grp' ? 'Groupe / Client' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
+  const tsvRows = [[group === 'client' ? 'Client' : group === 'pf' ? 'Portefeuille' : group === 'grp' ? 'Groupe' : 'Tâche', group === 'client' ? 'Tâche' : 'Client', ...colDefs.map(c => c[1] + ' (h)')].join('\t')];
   let rows = '';
   const pfRank = k => k === 'mine' ? 0 : k === 'none' ? 3 : k === 'others' ? 2 : 1;
-  const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
+  const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : group === 'grp' ? (a[0] ? 0 : 1) - (b[0] ? 0 : 1) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
-    rows += `<tr class="grp"><td>${group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `${cliIc(a)} `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
+    rows += `<tr class="grp"><td>${group === 'grp' ? (groupOf(a) ? grpDot(groupOf(a)) + ' ' : '') : group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `${cliIc(a)} `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
     const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
     for (const [b, l] of subs) {
       const sv = vals(l);
@@ -2772,8 +3286,8 @@ function bindChart(root, b) {
 }
 function detailTSV(list, sep) {
   const q = v => sep === ';' ? '"' + String(v ?? '').replace(/"/g, '""') + '"' : String(v ?? '').replace(/[\t\n]/g, ' ');
-  const head = ['Date', 'Client / personne', 'Code client', 'Portefeuille', 'Tâche', 'Libellé', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
-  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', pfName(pfKey(e.client)), taskName(e.task), e.label, hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
+  const head = ['Date', 'Client / personne', 'Code client', 'Groupe', 'Portefeuille', 'Tâche', 'Libellé', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
+  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', groupOfClient(e.client)?.name || '', pfName(pfKey(e.client)), taskName(e.task), e.label, hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
   return [head.map(q).join(sep), ...rows].join('\n');
 }
 function bindReports() {
@@ -2816,24 +3330,37 @@ function renderBilling() {
   const list = allEntries().filter(e => e.billable && !e.invoicedAt && e.start < until);
   const byC = new Map();
   for (const e of list) { const k = e.client || ''; if (!byC.has(k)) byC.set(k, []); byC.get(k).push(e); }
-  const groups = [...byC.entries()].map(([c, l]) => ({ c, l, ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
+  const byGrp = (f.by || lsGet('facBy', 'client')) === 'grp' && hasGroups();
+  let groups;
+  if (byGrp) {
+    const byG = new Map();
+    for (const e of list) { const g = groupOfClient(e.client), k = 'g:' + (g ? g.id : ''); if (!byG.has(k)) byG.set(k, []); byG.get(k).push(e); }
+    groups = [...byG.entries()].map(([c, l]) => { const g = groupOf(c.slice(2)); return { c, l, g, isG: true, title: g ? g.name : 'Sans groupe', ms: l.reduce((s, e) => s + dur(e), 0) }; }).sort((a, b) => (a.g ? 0 : 1) - (b.g ? 0 : 1) || b.ms - a.ms);
+  } else groups = [...byC.entries()].map(([c, l]) => ({ c, l, title: clientName(c) || 'Sans client', ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
   const tot = groups.reduce((s, g) => s + g.ms, 0);
   const lastMonthEnd = dayKey(startOfMonth(Date.now()) - 1);
   let html = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Temps facturable pas encore facturé</div><div class="muted small">Quand la facture est émise, marquez le temps comme facturé : il sort de cette liste et reste dans les rapports.</div></div>
     <label>Temps jusqu’au<input type="date" data-f="until" value="${esc(f.until)}"></label>
-    <label>&nbsp;<span style="display:flex;gap:6px"><button class="btn sm" data-act="until-lm">Fin du mois dernier</button><button class="btn sm" data-act="until-clear">Tout</button></span></label></div>`;
-  html += `<div class="stats" style="margin-top:12px"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${groups.length} client${groups.length > 1 ? 's' : ''} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div></div>`;
+    <label>&nbsp;<span style="display:flex;gap:6px"><button class="btn sm" data-act="until-lm">Fin du mois dernier</button><button class="btn sm" data-act="until-clear">Tout</button></span></label>
+    ${hasGroups() ? `<label>Présentation<div class="seg" data-seg="fby"><button data-v="client" class="${byGrp ? '' : 'on'}">Par client</button><button data-v="grp" class="${byGrp ? 'on' : ''}">Par groupe</button></div></label>` : ''}</div>`;
+  html += `<div class="stats" style="margin-top:12px"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${(() => { const n = new Set(list.map(e => e.client || '')).size; return n + ' client' + (n > 1 ? 's' : ''); })()} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div></div>`;
   if (!groups.length) html += `<div class="card empty" style="margin-top:14px">Rien à facturer${f.until ? ' jusqu’à cette date' : ''}. 🎉</div>`;
   for (const g of groups) {
     const open = f.open.has(g.c);
     const first = Math.min(...g.l.map(e => e.start)), last = Math.max(...g.l.map(e => e.start));
     html += `<div class="card bclient" data-c="${esc(g.c)}"><div class="bclient-h">
-      <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span>${cliIc(g.c)}${esc(clientName(g.c) || 'Sans client')}</button>
-      <span class="meta">${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}</span>
+      <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span>${g.isG ? (g.g ? grpTag(g.g, 'lg') : '<span class="grp-none">Sans groupe</span>') : cliIc(g.c) + esc(g.title) + ' ' + grpTag(groupOfClient(g.c))}</button>
+      <span class="meta">${g.isG ? (() => { const n = new Set(g.l.map(e => e.client || '')).size; return n + ' dossier' + (n > 1 ? 's' : '') + ' · '; })() : ''}${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}</span>
       <span class="amt">${fmtDur(g.ms)}</span>
       <button class="btn sm" data-act="copy-client">${ICON.copy} Copier le détail</button>
       <button class="btn sm primary" data-act="inv-client">Marquer facturé</button></div>`;
-    if (open) {
+    if (open && g.isG) {
+      const byCl = new Map(); g.l.forEach(e => { const k = e.client || ''; if (!byCl.has(k)) byCl.set(k, []); byCl.get(k).push(e); });
+      g.cls = [...byCl.entries()].map(([c, l]) => ({ c, l, ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
+      html += `<div class="bclient-body tbl-wrap"><table class="t"><thead><tr><th>Client</th><th>Tâches</th><th class="n">Saisies</th><th class="n">Durée</th><th class="n">Heures</th><th></th></tr></thead><tbody>
+        ${g.cls.map((x, i) => `<tr><td>${cliIc(x.c)} ${esc(clientName(x.c) || 'Sans client')}</td><td class="lab">${esc([...new Set(x.l.map(e => taskName(e.task)).filter(Boolean))].join(' ; '))}</td><td class="n">${x.l.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td><td><button class="btn sm" data-act="inv-cli" data-i="${i}">Facturé</button></td></tr>`).join('')}
+        </tbody></table></div>`;
+    } else if (open) {
       const byT = aggregate(g.l);
       html += `<div class="bclient-body tbl-wrap"><table class="t"><thead><tr><th>Tâche</th><th>Libellés</th><th class="n">Saisies</th><th class="n">Durée</th><th class="n">Heures</th><th></th></tr></thead><tbody>
         ${byT.map((x, i) => `<tr><td>${esc(taskName(x.task) || '—')}</td><td class="lab" title="${esc(x.labels.join(' ; '))}">${esc(x.labels.join(' ; '))}</td><td class="n">${x.ids.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td><td><button class="btn sm" data-act="inv-task" data-i="${i}">Facturé</button></td></tr>`).join('')}
@@ -2847,6 +3374,7 @@ function bindBilling() {
   const body = $('#facturation-body');
   body.addEventListener('change', ev => { if (ev.target.dataset.f === 'until') { UI.fac.until = ev.target.value; renderBilling(); } });
   body.addEventListener('click', ev => {
+    const sg = ev.target.closest('.seg[data-seg=fby] button'); if (sg) { UI.fac.by = sg.dataset.v; lsSet('facBy', sg.dataset.v); renderBilling(); return; }
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act;
     if (act === 'until-lm') { UI.fac.until = dayKey(startOfMonth(Date.now()) - 1); renderBilling(); return; }
@@ -2857,11 +3385,15 @@ function bindBilling() {
     else if (act === 'inv-client') {
       const ids = g.l.map(e => e.id), now = Date.now();
       updateEntries(ids, e => { e.invoicedAt = now; });
-      toast(fmtDur(g.ms) + ' marqué facturé pour ' + (clientName(c) || 'Sans client'), 'Annuler', () => updateEntries(ids, e => { if (e.invoicedAt === now) e.invoicedAt = 0; }));
+      toast(fmtDur(g.ms) + ' marqué facturé pour ' + g.title, 'Annuler', () => updateEntries(ids, e => { if (e.invoicedAt === now) e.invoicedAt = 0; }));
     } else if (act === 'inv-task') {
       const x = aggregate(g.l)[+b.dataset.i]; const now = Date.now();
       updateEntries(x.ids, e => { e.invoicedAt = now; });
       toast('Marqué facturé', 'Annuler', () => updateEntries(x.ids, e => { if (e.invoicedAt === now) e.invoicedAt = 0; }));
+    } else if (act === 'inv-cli') {
+      const x = (g.cls || [])[+b.dataset.i]; if (!x) return; const ids = x.l.map(e => e.id), now = Date.now();
+      updateEntries(ids, e => { e.invoicedAt = now; });
+      toast('Marqué facturé : ' + (clientName(x.c) || 'Sans client'), 'Annuler', () => updateEntries(ids, e => { if (e.invoicedAt === now) e.invoicedAt = 0; }));
     } else if (act === 'copy-client') copyText(detailTSV(g.l, '\t'));
   });
 }
@@ -2876,7 +3408,7 @@ function addPresetTasks() {
   for (const name of PAYROLL_TASKS) if (!S.meta.tasks.some(t => norm(t.name) === norm(name))) { S.meta.tasks.push({ id: 't' + newId(), name, billing: 'auto', archived: false }); n++; }
   touchMeta(); toast(n ? n + ' tâches ajoutées (modifiables dans « Clients & tâches »)' : 'Les tâches standards sont déjà présentes');
 }
-const objOf = (kind, id) => kind === 'client' ? clientOf(id) : kind === 'person' ? personOf(id) : taskOf(id);
+const objOf = (kind, id) => kind === 'group' ? groupOf(id) : kind === 'client' ? clientOf(id) : kind === 'person' ? personOf(id) : taskOf(id);
 function roleOpts(cur) {
   const std = Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${v}</option>`).join('');
   const custom = cur && !ROLES[cur] ? `<option value="${esc(cur)}" selected>${esc(cur)}</option>` : '';
@@ -2918,7 +3450,8 @@ function renderRefs() {
   const byArch = (a, b) => (a.archived ? 1 : 0) - (b.archived ? 1 : 0) || a.name.localeCompare(b.name, 'fr');
   const allC = S.meta.clients.filter(c => !c.deletedAt && (showA || !c.archived));
   const nMine = allC.filter(isMine).length, nOther = allC.length - nMine;
-  const cs = allC.filter(c => (f === 'all' || (f === 'mine') === isMine(c)) && (!q || norm(c.name).includes(q) || norm(c.code).includes(q))).sort(byArch);
+  const cs = allC.filter(c => (f === 'all' || (f === 'mine') === isMine(c)) && (!q || norm(c.name).includes(q) || norm(c.code).includes(q) || norm(groupOf(c.group)?.name).includes(q))).sort(byArch);
+  const gs = groupsAll(), gCount = {}; S.meta.clients.forEach(c => { if (!c.deletedAt && c.group) gCount[c.group] = (gCount[c.group] || 0) + 1; });
   const ts = S.meta.tasks.filter(t => !t.deletedAt && (showA || !t.archived)).sort(byArch);
   const ps = S.meta.persons.filter(x => !x.deletedAt && (showA || !x.archived)).sort(byArch);
   const owned = {}; S.meta.clients.forEach(c => { if (!c.deletedAt && !isMine(c) && c.owner) owned[c.owner] = (owned[c.owner] || 0) + 1; });
@@ -2937,6 +3470,7 @@ function renderRefs() {
       <input id="ref-q" placeholder="Rechercher un client ou un numéro…" value="${esc(UI.refQ || '')}" autocomplete="off"></div>
     <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}">${cliIc(c.id)}
       <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
+      <span class="grp-pick" ${groupOf(c.group) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}><select data-k="group" title="Groupe de dossiers">${groupSelOpts(c.group)}</select></span>
       <button class="pf ${isMine(c) ? 'on' : ''}" data-act="toggle-mine" title="Cliquer pour changer">${isMine(c) ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
       ${isMine(c) ? '' : `<select data-k="owner" title="À qui appartient ce client ?">${ownerOpts(c.owner || '')}</select>`}
       <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Facturation par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
@@ -2944,6 +3478,13 @@ function renderRefs() {
       <button class="icon" data-act="to-person" title="Convertir en personne (si ce « client » est en fait un collaborateur)">${ICON.person}</button>
       <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
       <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">${q || f !== 'all' ? 'Aucun client ne correspond.' : 'Aucun client pour l’instant.'}</div>`}</div></div>
+  <div class="toolbar"><h2>Groupes de dossiers</h2><span class="muted small">Un groupe rassemble les dossiers d’un même groupe de sociétés : tag de couleur, regroupement pliable dans Mon cycle, totaux dans Rapports et À facturer.</span></div>
+  <div class="card"><div class="ref-add"><input id="new-group" maxlength="60" placeholder="Nouveau groupe (ex. Groupe Martin)"><button class="btn primary" data-act="add-group">Ajouter</button></div>
+    <div class="ref-list grp-list">${gs.map(g => `<div class="ref-row" data-kind="group" data-id="${g.id}">${grpDot(g)}
+      <input class="nm" data-k="name" value="${esc(g.name)}">
+      <span class="grp-sws" role="radiogroup" aria-label="Couleur du groupe">${GROUP_COLORS.map((col, i) => `<button class="grp-sw ${(g.color || 0) === i ? 'on' : ''}" data-act="grp-color" data-i="${i}" style="--g:${col}" title="${GROUP_COLOR_NAMES[i]}" aria-label="${GROUP_COLOR_NAMES[i]}"></button>`).join('')}</span>
+      <span class="use">${gCount[g.id] ? gCount[g.id] + ' dossier' + (gCount[g.id] > 1 ? 's' : '') : 'aucun dossier'}</span>
+      <button class="icon" data-act="del-group" title="Supprimer le groupe (les dossiers sont conservés)">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun groupe. Créez-en un ici, puis choisissez le groupe de chaque dossier dans la liste des clients (ou dans les paramètres du dossier, depuis Mon cycle).</div>`}</div></div>
   <div class="grid2" style="margin-top:4px">
     <div><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
       <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
@@ -2985,6 +3526,7 @@ function renderSettings() {
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
       <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
       <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à ${esc(st.dayEnd)} (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
+      <div class="setting"><div>Durée d’une journée d’absence<div class="d">Congé, maladie, férié, formation saisis en journée entière (la demi-journée compte la moitié). Ex. 7h ou 7h48.</div></div><input data-s="absDay" value="${esc(fmtDur((+st.absDay || 420) * 60000, 'hm'))}" style="width:80px;text-align:center" class="mono"></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div></div>
@@ -3027,12 +3569,14 @@ function bindRefsOn(body) {
     i.value = ''; code.value = ''; i.focus();
   };
   const addT = () => { const i = $('#new-task'); addTask(i.value); i.value = ''; i.focus(); };
+  const addG = () => { const i = $('#new-group'); if (!i) return; if (addGroup(i.value)) setTimeout(() => $('#new-group')?.focus(), 30); i.value = ''; };
   const addP = () => { const i = $('#new-person'), r = $('#new-person-role'); UI.newPersonRole = r.value; if (addPerson(i.value, r.value)) setTimeout(() => $('#new-person')?.focus(), 30); i.value = ''; };
   body.addEventListener('keydown', ev => {
     if (ev.key !== 'Enter') return;
     if (ev.target.id === 'new-client' || ev.target.id === 'new-client-code') addC();
     else if (ev.target.id === 'new-task') addT();
     else if (ev.target.id === 'new-person') addP();
+    else if (ev.target.id === 'new-group') addG();
     else if (ev.target.matches('.ref-row input')) ev.target.blur();
   });
   let qT;
@@ -3049,6 +3593,13 @@ function bindRefsOn(body) {
     if (act === 'add-client') addC();
     else if (act === 'add-task') addT();
     else if (act === 'add-person') addP();
+    else if (act === 'add-group') addG();
+    else if (act === 'grp-color' && obj) { obj.color = +b.dataset.i; touchMeta(); }
+    else if (act === 'del-group' && obj) {
+      const ids = S.meta.clients.filter(c => c.group === obj.id).map(c => c.id);
+      S.meta.groups = S.meta.groups.filter(g => g !== obj); S.meta.clients.forEach(c => { if (c.group === obj.id) delete c.group; }); touchMeta();
+      toast('Groupe « ' + obj.name + ' » supprimé' + (ids.length ? ' (' + ids.length + ' dossier' + (ids.length > 1 ? 's' : '') + ' sans groupe)' : ''), 'Annuler', () => { S.meta.groups.push(obj); ids.forEach(id => { const c = clientOf(id); if (c) c.group = obj.id; }); touchMeta(); });
+    }
     else if (act === 'new-mine') { UI.newClientMine = UI.newClientMine === false; const kn = $('#new-client').value, kc = $('#new-client-code').value; renderRefs(); $('#new-client').value = kn; $('#new-client-code').value = kc; }
     else if (act === 'preset') addPresetTasks();
     else if (act === 'install') Install.run();
@@ -3071,10 +3622,15 @@ function bindRefsOn(body) {
     if (i.id === 'new-client-owner') { UI.newClientOwner = i.value; return; }
     if (i.id === 'new-person-role') { UI.newPersonRole = i.value; return; }
     if (i.id === 'set-quote') { lsSet('quote', i.value); if (i.value === '1') showQuote(true); return; }
+    if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
     if (i.dataset.s === 'dayEnd') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayEnd; toast('Heure non comprise (ex. 18:00)'); return; } S.meta.settings.dayEnd = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
     if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : k === 'defaultBillable' ? i.value === '1' : i.value; touchMeta(); return; }
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
     const o = objOf(row.dataset.kind, row.dataset.id); if (!o) return;
+    if (i.dataset.k === 'group') {
+      if (i.value === '__newgrp') { askGroupName(id => { if (id) { o.group = id; touchMeta(); } else renderRefs(); }); return; }
+      if (i.value) o.group = i.value; else delete o.group; touchMeta(); return;
+    }
     const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
     if (i.dataset.k === 'owner' && !v) delete o.owner; else o[i.dataset.k] = v;
     touchMeta(); syncTimerBar();
@@ -3111,11 +3667,13 @@ function importFile(file) {
         if (!x || !x.id || !x.name) continue;
         if (arr.some(y => y.id === x.id)) continue;
         const same = arr.find(y => norm(y.name) === norm(x.name));
-        if (same) { remap[x.id] = same.id; if (isClient && !same.code && x.code) { same.code = x.code; ncode++; } if (isClient && x.cy && !same.cy) same.cy = x.cy; if (isClient && x.alerts && !same.alerts) same.alerts = x.alerts; continue; }
+        if (same) { remap[x.id] = same.id; if (isClient && !same.code && x.code) { same.code = x.code; ncode++; } if (isClient && x.cy && !same.cy) same.cy = x.cy; if (isClient && x.alerts && !same.alerts) same.alerts = x.alerts; if (isClient && x.group && !same.group) same.group = x.group; continue; }
         arr.push({ ...x }); isClient ? nc++ : nt++;
       }
     };
+    mergeArr(S.meta.groups, m.groups, false);
     mergeArr(S.meta.clients, m.clients, true); mergeArr(S.meta.tasks, m.tasks, false); mergeArr(S.meta.persons, m.persons, false);
+    S.meta.clients.forEach(c => { if (c.group && remap[c.group]) c.group = remap[c.group]; });
     S.meta.clients.forEach(c => { if (c.owner && remap[c.owner]) c.owner = remap[c.owner]; });
     const R = id => remap[id] || id;
     for (const f of m.favorites) { const g = { c: R(f.c), t: R(f.t) }; if (!S.meta.favorites.some(x => x.c === g.c && x.t === g.t)) S.meta.favorites.push(g); }
@@ -3614,6 +4172,8 @@ async function boot() {
   setInterval(tick, 1000);
   setTimeout(checkForgotten, 800);
   setTimeout(cyDailyReminder, 1500);
+  $('#hist-btn').onclick = ev => { ev.stopPropagation(); Journal.toggle(); };
+  Journal.load(); setTimeout(() => { Journal.ready = true; }, 2500);
 }
 boot();
 </script>
