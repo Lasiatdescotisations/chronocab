@@ -258,6 +258,29 @@ h2:first-child{margin-top:0}
 .cy-mini .cy-pg-fill{display:block}
 .cy-mini b{font-family:var(--mono);color:var(--ink)}
 .tipbox{position:fixed;z-index:400;max-width:420px;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.45;padding:7px 10px;border-radius:7px;white-space:pre-wrap;word-break:break-word;box-shadow:0 6px 18px rgba(0,0,0,.18);pointer-events:none}
+.cy-al{min-width:150px;max-width:240px;min-height:22px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;cursor:pointer;padding:1px 4px;border:1px solid transparent;border-radius:6px}
+.cy-al:hover,.cy-al:focus{border-color:var(--line);outline:0}
+.cy-al.none{color:var(--muted)}
+.al-chip{display:inline-flex;align-items:center;gap:5px;background:var(--todo-soft);border-radius:10px;padding:1px 3px 1px 8px;font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-chip b,.al-tag{font-size:10.5px;font-weight:600;background:var(--surface);color:var(--s-todo);border-radius:8px;padding:0 6px;letter-spacing:.02em}
+.al-chip.ok{background:var(--accent-soft);color:var(--ink-2)}
+.al-chip.ok b{color:var(--accent)}
+.al-more{font-size:11px;color:var(--muted)}
+#cy-al-pop{position:absolute;z-index:160;background:var(--surface);border:1px solid var(--accent);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:8px;font-size:13px}
+.alp-h{display:flex;align-items:center;gap:6px;padding:2px 2px 8px;border-bottom:1px solid var(--line)}
+.alp-h button{margin-left:auto}
+.alp-list{max-height:220px;overflow:auto;padding:4px 0}
+.alp-i{display:flex;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px solid var(--line)}
+.alp-i.ok .alp-t b{text-decoration:line-through;color:var(--muted)}
+.alp-t{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.alp-form{background:var(--surface-2);border-radius:8px;padding:8px;margin-top:6px}
+.alp-fh{font-weight:600;font-size:12px;margin-bottom:6px}
+.alp-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.alp-row input{flex:1;min-width:0;padding:6px 8px}
+.alp-row select{flex:1;min-width:0;padding:5px 6px}
+.alp-act{margin-bottom:0}
+#al-err{color:var(--stop);min-height:0}
+@media (hover: none), (max-width: 700px){ .cy-al{border-color:var(--line);background:var(--surface-2)} .cy-al.none{background:transparent;border-color:transparent} }
 #cy-note-pop{position:absolute;z-index:160;background:var(--surface);border:1px solid var(--accent);border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:6px}
 #cy-note-pop textarea{width:100%;border:0;outline:0;resize:none;font:inherit;font-size:14px;line-height:1.45;background:transparent;color:var(--ink);padding:4px 6px}
 .cnp-h{font-size:11px;color:var(--muted);padding:2px 6px 0}
@@ -679,7 +702,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.9.1';
+const APP_VERSION = '1.10.0';
 const APP_DATE = '12/11/2026';
 /* =========================================================
    Utilitaires
@@ -1680,7 +1703,7 @@ async function downloadText(filename, txt, mime) {
 
 /* ---------- Cycle de paie (onglet Mon portefeuille) ----------
    Paramètres par dossier : client.cy = { rec: var|auto|robot, recDay, varDay: 'm27' | 'n3' (réception habituelle des variables, mois du cycle ou mois suivant), vir: file|client|odep|nc, dep: next|fixed|nc, depDay, dsn: 5|15, notes }
-   Données du mois : S.cycles['AAAA-MM'] = { rows: { idClient: { rec, rel, prep, env, corr: [dates], bs, vir, dep, dsn, tpt, tptDone, note, doeth, tal } } }
+   Données du mois : S.cycles['AAAA-MM'] = { rows: { idClient: { rec, rel, prep, env, corr: [dates], bs, vir, dep, dsn, alOk: [ids d'alertes traitées], doeth, tal } } }
    Les dates sont stockées au format 'AAAA-MM-JJ'. */
 const CY_DEF = { rec: 'var', recDay: null, varDay: null, envDelay: null, vir: 'file', dep: 'next', depDay: null, dsn: 15, notes: '' };
 const cyOf = c => ({ ...CY_DEF, ...(c && c.cy || {}) });
@@ -1880,9 +1903,11 @@ function cyTodo() {
       if (!row.dsn && today >= addDays(due.dsn, -3) && (row.env || p.rec === 'robot' || today > due.dsn)) add('dsn', 'DSN à déposer — ' + c.name + ' (échéance le ' + fmtDate(due.dsn).slice(0, 5) + ')', due.dsn);
     }
   }
-  // Attestations de mi-temps thérapeutique : début du mois suivant
-  const pm = prevMk(cur);
-  if (new Date(today).getDate() <= 10) for (const c of cs) { const row = cyRow(pm, c.id); if (row.tpt && !row.tptDone) items.push({ mk: pm, cid: c.id, f: 'tptDone', txt: 'Attestation mi-temps thérapeutique (Net-Entreprises) — ' + c.name + ' : ' + row.tpt }); }
+  // Alertes salariés actives et pas encore traitées sur le cycle (cycle en cours, et cycle précédent s'il est suivi et non clôturé)
+  for (const mk of [prevMk(cur), cur]) {
+    if (cyClosed(mk) || (mk !== cur && !Object.keys((S.cycles[mk] && S.cycles[mk].rows) || {}).length)) continue;
+    for (const c of cs) { const ok = cyRow(mk, c.id).alOk || []; for (const a of alActive(c, mk)) if (!ok.includes(a.id)) items.push({ mk, cid: c.id, f: 'al', aid: a.id, txt: 'Alerte salarié — ' + c.name + ' : ' + a.name + (a.tag ? ' (' + a.tag + ')' : '') + (mk === cur ? '' : ' (cycle de ' + MONTHS_L[+mk.slice(5) - 1] + ')') }); }
+  }
   // Campagne de la DSN d'avril
   const y = new Date(today).getFullYear(), amk = y + '-04';
   if (today >= parseDay(y + '-04-15') && today <= parseDay(y + '-05-15')) {
@@ -1904,6 +1929,7 @@ function cyCellHTML(mk, c, row, f) {
 }
 const CY_TRI = { '': '', ok: 'OK', nc: 'NC', exo: 'Exo' };
 function renderCycle(P) {
+  cyMigrateLegacy();
   const mk = P.cmonth, cs = cyClients(), [yy, mm] = mk.split('-').map(Number);
   const monthLabel = MONTHS_L[mm - 1] + ' ' + yy, isApril = mm === 4, cur = monthKey(Date.now());
   const q = norm(P.cq || '');
@@ -1918,14 +1944,14 @@ function renderCycle(P) {
   const closed = nAll && done.length === nAll ? Math.max(...rows.concat([]).map(r => Math.max(dOf(r.row.dsn) || 0, dOf(r.row.dep) || 0, dOf(r.row.vir) || 0))) : 0;
   const todo = mk === cur || mk === prevMk(cur) ? cyTodo() : [];
   const showPrep = !!P.showPrep;
-  const cols = [['rec', 'Réception'], ...(showPrep ? [['prep', 'Prépa']] : []), ['env', '1er envoi'], ['corr', 'Corrigé'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['tpt', 'TPT'], ['note', 'Remarques']];
+  const cols = [['rec', 'Réception'], ...(showPrep ? [['prep', 'Prépa']] : []), ['env', '1er envoi'], ['corr', 'Corrigé'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['al', 'Alerte salarié'], ['note', 'Remarques']];
   let html = `<div class="card filters pf-head">${pfSwitch(P)}
     <div class="month-nav"><button class="icon" data-cy="prev" title="Cycle précédent">‹</button><b>Cycle de ${esc(monthLabel)}</b><button class="icon" data-cy="next" title="Cycle suivant">›</button>${mk === cur ? '' : '<button class="btn sm ghost" data-cy="today">Cycle du mois</button>'}</div>
     <span class="sp" style="flex:1"></span>
     <input id="cy-q" placeholder="Rechercher un dossier…" value="${esc(P.cq || '')}" autocomplete="off" style="min-width:200px">
     <label class="chk"><input type="checkbox" data-cy="prep" ${showPrep ? 'checked' : ''}> Colonne Prépa</label>
     <button class="btn sm" data-cy="copy">${ICON.copy} Copier pour Excel</button></div>`;
-  if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div><div class="cy-todo-list">${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div></div>`;
+  if (todo.length) html += `<div class="card cy-todo"><div class="cy-todo-h">📌 À faire aujourd’hui <span class="muted small">(${todo.length})</span></div><div class="cy-todo-list">${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : t.f === 'al' ? 'Traité' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div></div>`;
   if (isApril) html += `<div class="warn" style="margin-top:12px">Cycle d’avril : la DSN doit déclarer la <b>DOETH</b> et la <b>taxe d’apprentissage libératoire</b>. Cochez les deux colonnes dédiées pour chaque dossier (OK, NC ou Exo).</div>`;
   const g = cyProgress(mk), cl = cyClosed(mk), restDsn = g.dsn[1] - g.dsn[0], pbs = cyProgress(prevMk(mk)).bs;
   const closeBtn = cl ? `<span class="cy-closed-badge">✓ Clôturé</span><button class="btn sm ghost" data-cy="reopen">Rouvrir</button>` : `<button class="btn sm ${g.allDsn ? 'primary' : ''}" data-cy="close" title="${g.allDsn ? 'Déclarer le cycle de paie terminé' : 'Toutes les DSN ne sont pas déposées : clôture manuelle possible (ex. cycles non suivis dans Antevorta)'}">${g.allDsn ? 'Clôturer le cycle' : 'Clôturer manuellement…'}</button>`;
@@ -1956,15 +1982,15 @@ function renderCycle(P) {
   </div>`;
   html += `<div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>${densitySeg()}
     <div class="seg" data-seg="cyf">${[['all', 'Tous'], ['todo', 'En cours'], ['late', 'À surveiller'], ['done', 'Terminés']].map(([v, l]) => `<button data-v="${v}" class="${(P.cfilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
-  <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'tpt'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}">${l}</th>`).join('')}<th></th></tr></thead><tbody>
+  <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'al'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}" ${cols.find(x => x[1] === l)[0] === 'note' ? 'title="Remarque permanente : conservée de mois en mois"' : cols.find(x => x[1] === l)[0] === 'al' ? 'title="Alertes sur des salariés (ex. TPT), conservées jusqu’à leur suppression ou leur mois limite"' : ''}>${l}</th>`).join('')}<th></th></tr></thead><tbody>
   ${rows.map(({ c, row }) => {
     const p = cyOf(c), fin = cyRowDone(mk, c, row);
     return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''}"><td class="mono small">${esc(c.code || '')}</td>
-      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier${p.notes ? ' — ' + esc(p.notes) : ''}">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${p.notes ? '<span class="cy-note-ic" title="' + esc(p.notes) + '">📝</span>' : ''}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${p.notes ? `<div class="cy-perm" data-tip>${esc(p.notes)}</div>` : ''}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button></td>
       ${cols.map(([f]) => {
         if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
-        if (f === 'tpt') return `<td><input class="cy-in" data-in="tpt" data-tip value="${esc(row.tpt || '')}" placeholder="—" title="Salariés en mi-temps thérapeutique (rappel d’attestation le mois suivant)">${row.tpt ? `<label class="chk small" title="Attestation faite"><input type="checkbox" data-in="tptDone" ${row.tptDone ? 'checked' : ''}>att.</label>` : ''}</td>`;
-        if (f === 'note') return `<td><div class="cy-note ${row.note ? '' : 'nonote'}" data-tip data-note tabindex="0" role="button" aria-label="Remarque du mois">${row.note ? esc(row.note) : '—'}</div></td>`;
+        if (f === 'al') return `<td>${alCellHTML(mk, c, row)}</td>`;
+        if (f === 'note') return `<td><div class="cy-note ${p.notes ? '' : 'nonote'}" data-tip data-note tabindex="0" role="button" aria-label="Remarque permanente du dossier">${p.notes ? esc(p.notes) : '—'}</div></td>`;
         if (f === 'doeth' || f === 'tal') return `<td class="c"><button class="cy-tri v-${row[f] || 'none'}" data-tri="${f}">${CY_TRI[row[f] || ''] || '…'}</button></td>`;
         return cyCellHTML(mk, c, row, f);
       }).join('')}
@@ -2045,7 +2071,7 @@ function openCyParams(cid) {
       <label class="fld"><span>Échéance DSN</span><select id="cp-dsn">${opt(15, 'Le 15 du mois suivant', p.dsn)}${opt(5, 'Le 5 du mois suivant', p.dsn)}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Dépôt des bulletins</span><select id="cp-dep">${opt('next', 'Le lendemain des virements', p.dep)}${opt('valid', 'Le jour de la validation de la paie', p.dep)}${opt('fixed', 'Un jour fixe', p.dep)}${opt('nc', 'Non concerné (MySilae…)', p.dep)}</select></label>
       <label class="fld"><span>Jour fixe de dépôt</span><input id="cp-depday" inputmode="numeric" value="${esc(p.depDay || '')}" placeholder="ex. 30"></label></div>
-      <label class="fld"><span>Remarques permanentes (affichées sous le nom du dossier)</span><textarea id="cp-notes" rows="3" placeholder="ex. Paies sur quel RIB ? · Virement au DJM-2 · MySilae uniquement">${esc(p.notes || '')}</textarea></label>
+      <label class="fld"><span>Remarque permanente (colonne Remarques)</span><textarea id="cp-notes" rows="3" placeholder="ex. Paies sur quel RIB ? · Virement au DJM-2 · MySilae uniquement">${esc(p.notes || '')}</textarea></label>
     </div>
     <div class="modal-f"><span class="muted small">N° ${esc(c.code || '—')}</span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
   const q = s => m.el.querySelector(s);
@@ -2077,8 +2103,7 @@ function bindCycle() {
     if (i.dataset.cy === 'prep') { P.showPrep = i.checked; renderPortfolio(); return; }
     const tr = i.closest('tr[data-id]'); if (!tr || !i.dataset.in) return;
     const k = i.dataset.in;
-    if (k === 'tptDone') cySet(P.cmonth, tr.dataset.id, { tptDone: i.checked || null });
-    else if (k === 'bs') { const n = parseInt(i.value, 10); cySet(P.cmonth, tr.dataset.id, { bs: n >= 0 ? n : null }); i.classList.toggle('sugg', !(n >= 0)); }
+    if (k === 'bs') { const n = parseInt(i.value, 10); cySet(P.cmonth, tr.dataset.id, { bs: n >= 0 ? n : null }); i.classList.toggle('sugg', !(n >= 0)); }
     else cySet(P.cmonth, tr.dataset.id, { [k]: i.value.trim() || null });
   });
   body.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.matches('.cy-in')) ev.target.blur(); });
@@ -2118,15 +2143,113 @@ function bindCycle() {
     else if (a === 'tododone') {
       const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return;
       if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
-      cySet(t.mk, t.cid, t.f === 'tptDone' ? { tptDone: true } : { [t.f]: isoDay(Date.now()) });
+      if (t.f === 'al') { alSetOk(t.mk, t.cid, t.aid, true); toast('Alerte notée comme traitée pour ce cycle', 'Annuler', () => alSetOk(t.mk, t.cid, t.aid, false)); return; }
+      cySet(t.mk, t.cid, { [t.f]: isoDay(Date.now()) });
       toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
     }
     else if (a === 'copy') {
       const rows = body._cyRows || [], cols = body._cyCols || [];
-      const val = (row, f, cid) => f === 'bs' ? (effBs(P.cmonth, cid).n ?? '') : f === 'corr' ? (row.corr || []).map(x => fmtDate(dOf(x)).slice(0, 5)).join(' ; ') : ['rec', 'prep', 'env', 'vir', 'dep', 'dsn'].includes(f) ? (row[f] ? fmtDate(dOf(row[f])).slice(0, 5) : '') : f === 'doeth' || f === 'tal' ? (CY_TRI[row[f] || ''] || '') : (row[f] || '');
+      const val = (row, f, cid) => f === 'al' ? alActive(clientOf(cid), P.cmonth).map(a => a.name + (a.tag ? ' (' + a.tag + ')' : '')).join(' ; ') : f === 'note' ? (cyOf(clientOf(cid)).notes || '') : f === 'bs' ? (effBs(P.cmonth, cid).n ?? '') : f === 'corr' ? (row.corr || []).map(x => fmtDate(dOf(x)).slice(0, 5)).join(' ; ') : ['rec', 'prep', 'env', 'vir', 'dep', 'dsn'].includes(f) ? (row[f] ? fmtDate(dOf(row[f])).slice(0, 5) : '') : f === 'doeth' || f === 'tal' ? (CY_TRI[row[f] || ''] || '') : (row[f] || '');
       copyText(['Cycle de paie — ' + body._cyMonth, ['N°', 'Dossier', ...cols.map(c => c[1])].join('\t'), ...rows.map(({ c, row }) => [c.code || '', c.name, ...cols.map(([f]) => val(row, f, c.id))].join('\t'))].join('\n'));
     }
   });
+}
+/* ---------- Alertes salariés (colonne « Alerte salarié » du cycle de paie) ----------
+   client.alerts = [{ id, name, tag, from: 'AAAA-MM', until: 'AAAA-MM' | null }]
+   Traitement mois par mois : S.cycles[mk].rows[idClient].alOk = [id d'alerte] */
+const ALERT_TAGS = ['TPT', 'Saisie sur salaire', 'Arrêt maladie', 'Accident du travail', 'Maternité / paternité', 'Entrée', 'Sortie', 'Rupture conventionnelle', 'Mutuelle / prévoyance', 'Prime / variable', 'Temps partiel', 'Apprenti'];
+const alActive = (c, mk) => ((c && c.alerts) || []).filter(a => (!a.from || a.from <= mk) && (!a.until || mk <= a.until));
+const mkLabel = mk => MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4);
+function alSetOk(mk, cid, aid, on) {
+  const cur = (cyRow(mk, cid).alOk || []).filter(x => x !== aid);
+  if (on) cur.push(aid);
+  cySet(mk, cid, { alOk: cur.length ? cur : null });
+}
+function alCellHTML(mk, c, row) {
+  const list = alActive(c, mk), ok = row.alOk || [];
+  if (!list.length) return `<div class="cy-al none" data-alert tabindex="0" role="button" title="Ajouter une alerte sur un salarié">—</div>`;
+  const chip = a => `<span class="al-chip ${ok.includes(a.id) ? 'ok' : ''}" title="${esc(a.name + (a.tag ? ' — ' + a.tag : '') + (a.until ? ' · jusqu’au cycle de ' + mkLabel(a.until) : ' · sans limite') + (ok.includes(a.id) ? ' · traité ce mois' : ''))}">${ok.includes(a.id) ? '✓ ' : ''}${esc(a.name)}${a.tag ? `<b>${esc(a.tag)}</b>` : ''}</span>`;
+  return `<div class="cy-al" data-alert tabindex="0" role="button">${list.slice(0, 2).map(chip).join('')}${list.length > 2 ? `<span class="al-more">+${list.length - 2}</span>` : ''}</div>`;
+}
+function openAlertEditor(anchor, mk, cid) {
+  document.getElementById('cy-al-pop')?.remove();
+  const c = clientOf(cid); if (!c) return;
+  const r = anchor.getBoundingClientRect(), w = Math.min(440, innerWidth - 16);
+  const box = document.createElement('div'); box.id = 'cy-al-pop';
+  box.style.width = w + 'px';
+  box.style.left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8) + window.scrollX + 'px';
+  box.style.top = r.top + window.scrollY - 4 + 'px';
+  document.body.appendChild(box);
+  let editId = null;
+  const months = []; for (let m = mk, i = 0; i < 24; i++, m = nextMk(m)) months.push(m);
+  const draw = () => {
+    const list = alActive(c, mk), ok = cyRow(mk, cid).alOk || [], ed = editId && (c.alerts || []).find(a => a.id === editId);
+    const later = (c.alerts || []).filter(a => a.from && a.from > mk);
+    box.innerHTML = `<div class="alp-h"><b>Alertes salariés</b> — ${esc(c.name)}<span class="muted small"> · cycle de ${esc(mkLabel(mk))}</span><button class="icon xs" data-x="close" title="Fermer">${ICON.close}</button></div>
+      <div class="alp-list">${list.map(a => `<div class="alp-i ${ok.includes(a.id) ? 'ok' : ''}" data-id="${a.id}">
+        <label class="chk" title="Traité pour le cycle de ${esc(mkLabel(mk))}"><input type="checkbox" data-x="ok" ${ok.includes(a.id) ? 'checked' : ''}></label>
+        <span class="alp-t"><b>${esc(a.name)}</b>${a.tag ? `<span class="al-tag">${esc(a.tag)}</span>` : ''}<span class="muted small">${a.until ? 'jusqu’au cycle de ' + esc(mkLabel(a.until)) : 'sans limite'}${a.from && a.from < mk ? ' · depuis ' + esc(mkLabel(a.from)) : ''}</span></span>
+        <button class="icon xs" data-x="edit" title="Modifier">✎</button><button class="icon xs" data-x="del" title="Supprimer l’alerte">${ICON.trash}</button></div>`).join('') || '<div class="muted small" style="padding:6px 4px">Aucune alerte active sur ce cycle.</div>'}
+        ${later.length ? `<div class="muted small" style="padding:4px">${later.length} alerte${later.length > 1 ? 's' : ''} commençant plus tard.</div>` : ''}</div>
+      <div class="alp-form">
+        <div class="alp-fh">${ed ? 'Modifier l’alerte' : 'Nouvelle alerte'}</div>
+        <div class="alp-row"><input id="al-name" placeholder="Salarié (ex. Durand)" maxlength="60" value="${esc(ed ? ed.name : '')}">
+          <input id="al-tag" list="al-tags" placeholder="Étiquette (ex. TPT)" maxlength="40" value="${esc(ed ? ed.tag || '' : '')}"><datalist id="al-tags">${ALERT_TAGS.map(t => `<option value="${esc(t)}">`).join('')}</datalist></div>
+        <div class="alp-row"><label class="small muted" for="al-until">Afficher</label><select id="al-until"><option value="">sans limite, jusqu’à suppression</option>${months.map(m => `<option value="${m}" ${ed && ed.until === m ? 'selected' : ''}>jusqu’au cycle de ${esc(mkLabel(m))}</option>`).join('')}</select></div>
+        <div class="alp-row alp-act">${ed ? '<button class="btn sm ghost" data-x="cancel">Annuler</button>' : ''}<span class="sp" style="flex:1"></span><button class="btn sm primary" data-x="save">${ed ? 'Enregistrer' : 'Ajouter l’alerte'}</button></div>
+        <div class="err small" id="al-err"></div>
+      </div>`;
+    const n = box.querySelector('#al-name');
+    n.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
+    box.querySelector('#al-tag').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
+  };
+  const save = () => {
+    const name = box.querySelector('#al-name').value.trim().replace(/\s+/g, ' ');
+    const tag = box.querySelector('#al-tag').value.trim().replace(/\s+/g, ' ');
+    const until = box.querySelector('#al-until').value || null;
+    if (!name) { box.querySelector('#al-err').textContent = 'Indiquez le salarié concerné.'; box.querySelector('#al-name').focus(); return; }
+    c.alerts ||= [];
+    if (editId) { const a = c.alerts.find(x => x.id === editId); if (a) { a.name = name; a.tag = tag; a.until = until; } editId = null; toast('Alerte modifiée'); }
+    else { c.alerts.push({ id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, tag, from: mk, until }); toast('Alerte ajoutée'); }
+    touchMeta(); draw(); box.querySelector('#al-name').focus();
+  };
+  box.addEventListener('click', e => {
+    const b = e.target.closest('[data-x]'); if (!b) return;
+    const x = b.dataset.x, id = b.closest('.alp-i')?.dataset.id;
+    if (x === 'close') close();
+    else if (x === 'save') save();
+    else if (x === 'cancel') { editId = null; draw(); }
+    else if (x === 'edit') { editId = id; draw(); box.querySelector('#al-name').focus(); }
+    else if (x === 'del') {
+      const i = (c.alerts || []).findIndex(a => a.id === id); if (i < 0) return;
+      const [old] = c.alerts.splice(i, 1); touchMeta(); draw();
+      toast('Alerte « ' + old.name + ' » supprimée', 'Annuler', () => { c.alerts.splice(i, 0, old); touchMeta(); if (document.body.contains(box)) draw(); });
+    }
+  });
+  box.addEventListener('change', e => { if (e.target.dataset.x === 'ok') { alSetOk(mk, cid, e.target.closest('.alp-i').dataset.id, e.target.checked); draw(); } });
+  const outside = e => { if (!box.contains(e.target) && !e.target.closest('.toast')) close(); };
+  const key = e => { if (e.key === 'Escape') close(); };
+  function close() { box.remove(); document.removeEventListener('pointerdown', outside, true); document.removeEventListener('keydown', key, true); }
+  setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', key, true); }, 0);
+  draw(); box.querySelector('#al-name').focus();
+}
+document.addEventListener('click', ev => { const el = ev.target.closest && ev.target.closest('[data-alert]'); if (!el) return; const tr = el.closest('tr[data-id]'); if (tr && UI.pfv) { tipHide(); openAlertEditor(el, UI.pfv.cmonth, tr.dataset.id); } });
+document.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-alert]')) { ev.preventDefault(); ev.target.click(); } });
+// Reprise des anciennes données : colonne TPT (par mois) → alertes ; remarque du mois → remarque permanente
+function cyMigrateLegacy() {
+  let metaCh = false;
+  for (const mk of Object.keys(S.cycles).sort()) {
+    const rows = (S.cycles[mk] && S.cycles[mk].rows) || {};
+    for (const cid in rows) {
+      const row = rows[cid], c = clientOf(cid); if (!c) continue;
+      if (!row.tpt && !row.tptDone && !row.note) continue;
+      const patch = {};
+      if (row.tpt) { const a = { id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: row.tpt, tag: 'TPT', from: mk, until: mk }; (c.alerts ||= []).push(a); metaCh = true; if (row.tptDone) patch.alOk = [...(row.alOk || []), a.id]; }
+      if (row.note) { const cur = (c.cy && c.cy.notes) || ''; if (!cur.includes(row.note)) { c.cy = { ...(c.cy || {}), notes: cur ? cur + ' · ' + row.note : row.note }; metaCh = true; } }
+      cySet(mk, cid, { ...patch, tpt: null, tptDone: null, note: null });
+    }
+  }
+  if (metaCh) touchMeta();
 }
 /* ---------- Info-bulles sur les textes tronqués + édition confortable des remarques ---------- */
 const Tip = { el: null, t: null, cur: null };
@@ -2158,9 +2281,9 @@ function openNoteEditor(inp, mk, cid) {
   document.getElementById('cy-note-pop')?.remove();
   const r = inp.getBoundingClientRect(), w = Math.min(420, innerWidth - 16);
   const box = document.createElement('div'); box.id = 'cy-note-pop';
-  box.innerHTML = `<textarea rows="3" maxlength="500" placeholder="Remarque du mois pour ce dossier…"></textarea><div class="cnp-h">${canHover() ? 'Entrée pour valider · Maj+Entrée pour aller à la ligne · Échap pour annuler' : 'Touchez ailleurs pour enregistrer'}</div>`;
+  box.innerHTML = `<textarea rows="3" maxlength="500" placeholder="Remarque permanente pour ce dossier (conservée de mois en mois)…"></textarea><div class="cnp-h">${canHover() ? 'Entrée pour valider · Maj+Entrée pour aller à la ligne · Échap pour annuler' : 'Touchez ailleurs pour enregistrer'}</div>`;
   document.body.appendChild(box);
-  const ta = box.querySelector('textarea'); ta.value = cyRow(mk, cid).note || '';
+  const ta = box.querySelector('textarea'), cl = clientOf(cid); ta.value = (cl && cl.cy && cl.cy.notes) || '';
   box.style.width = w + 'px';
   box.style.left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8) + window.scrollX + 'px';
   box.style.top = r.top + window.scrollY - 4 + 'px';
@@ -2171,7 +2294,7 @@ function openNoteEditor(inp, mk, cid) {
   const finish = save => {
     if (done) return; done = true; box.remove();
     const v = ta.value.trim();
-    if (save && v !== (cyRow(mk, cid).note || '')) { cySet(mk, cid, { note: v || null }); toast(v ? 'Remarque enregistrée' : 'Remarque effacée'); }
+    if (save && cl && v !== ((cl.cy && cl.cy.notes) || '')) { cl.cy = { ...(cl.cy || {}), notes: v }; touchMeta(); toast(v ? 'Remarque permanente enregistrée' : 'Remarque effacée'); }
   };
   ta.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
@@ -2878,7 +3001,7 @@ function importFile(file) {
         if (!x || !x.id || !x.name) continue;
         if (arr.some(y => y.id === x.id)) continue;
         const same = arr.find(y => norm(y.name) === norm(x.name));
-        if (same) { remap[x.id] = same.id; if (isClient && !same.code && x.code) { same.code = x.code; ncode++; } if (isClient && x.cy && !same.cy) same.cy = x.cy; continue; }
+        if (same) { remap[x.id] = same.id; if (isClient && !same.code && x.code) { same.code = x.code; ncode++; } if (isClient && x.cy && !same.cy) same.cy = x.cy; if (isClient && x.alerts && !same.alerts) same.alerts = x.alerts; continue; }
         arr.push({ ...x }); isClient ? nc++ : nt++;
       }
     };
