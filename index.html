@@ -412,9 +412,11 @@ h2:first-child{margin-top:0}
 .cy-chip button{border:0;background:transparent;color:var(--muted);padding:0 2px;cursor:pointer}
 .opt-head{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:6px 9px 3px}
 .pf-ic{display:inline-grid;place-items:center;width:16px;height:16px;flex:none;color:var(--line-2);vertical-align:-3px}
+#cb-ff{max-width:260px}#cb-ff.on{border-color:var(--accent);background:var(--accent-soft)}
 .pf-ic svg{width:15px;height:15px}
 .pf-ic.mine{color:var(--pf-brown)}
-#portefeuille-body .pf-ic{display:none} /* inutile dans Mon portefeuille : tous les dossiers en font partie */
+.pf-ic{position:relative}.pf-st{position:absolute;right:-3px;bottom:-1px;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--surface)}.pf-st.st-cours{background:#8a9aa6}.pf-st.st-warn{background:#e39b2b}.pf-st.st-late{background:var(--stop)}.pf-st.st-fin{background:#2f9e6a}
+#portefeuille-body .cy-table .pf-ic{display:none} /* inutile dans Mon portefeuille : tous les dossiers en font partie */
 .dot{width:9px;height:9px;border-radius:50%;background:var(--c,#999);flex:none;display:inline-block}
 
 /* recents */
@@ -626,6 +628,8 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .tl-ident summary{cursor:pointer;font-size:13px;color:var(--ink-2)}.tl-ident[open] summary{margin-bottom:6px}
 .th-sws{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.th-sw{width:26px;height:26px;border-radius:50%;background:var(--c);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line-2);padding:0}.th-sw.on{box-shadow:0 0 0 2px var(--ink)}
+.cc-list{display:grid;gap:4px;max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.liss-sw{margin:8px 0;padding:6px 10px;background:var(--accent-soft);border-radius:8px}.liss-row td{font-style:italic;color:var(--ink-2)}
 .tl-acts{display:flex;justify-content:flex-end;gap:6px;border-top:1px dashed var(--line);padding-top:8px;margin-top:-4px}
 .aev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.aev-in{display:flex;gap:4px}.aev-in input{flex:1 1 auto;min-width:0;width:auto}.aev-in select{flex:0 0 96px;width:96px;min-width:0}
 .aev-best{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}.aev-tag{color:var(--accent);font-weight:600}
@@ -1028,7 +1032,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.36.0';
+const APP_VERSION = '1.37.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1078,9 +1082,24 @@ function roundMs(ms) {
   return Math.max(r, stepMs);
 }
 // Icône de dossier : porte-documents marron pour Mon portefeuille, gris pour les autres
+// État du cycle de paie du mois d'un dossier de mon portefeuille (v1.37.0), mémorisé par révision des données
+const CLI_ST = { cours: 'cycle en cours', warn: 'échéance proche', late: 'en retard', fin: 'cycle terminé' };
+let _cliSt = { rev: -1, m: new Map() };
+function cliCyState(c) {
+  if (!c || !isMine(c) || c.archived || c.deletedAt || typeof cyRow !== 'function') return null;
+  if (_cliSt.rev !== S.rev) _cliSt = { rev: S.rev, m: new Map() };
+  if (_cliSt.m.has(c.id)) return _cliSt.m.get(c.id);
+  let st = null;
+  try {
+    const mk = defaultCycleMonth(), row = cyRow(mk, c.id);
+    if (cyClosed(mk) || cyRowDone(mk, c, row)) st = 'fin';
+    else { const ss = ['rec', 'env', 'val', 'vir', 'dep', 'dsn'].map(f => cyState(mk, c, row, f).st); st = ss.includes('late') ? 'late' : ss.includes('warn') ? 'warn' : Object.keys(row).length ? 'cours' : null; }
+  } catch (e) { st = null; }
+  _cliSt.m.set(c.id, st); return st;
+}
 function cliIc(id) {
-  const c = id && clientOf(id), mine = !!c && isMine(c);
-  return `<span class="pf-ic ${mine ? 'mine' : ''}" title="${mine ? 'Mon portefeuille' : 'Hors de mon portefeuille'}">${ICON.case}</span>`;
+  const c = id && clientOf(id), mine = !!c && isMine(c), st = cliCyState(c);
+  return `<span class="pf-ic ${mine ? 'mine' : ''}" title="${mine ? 'Mon portefeuille' : 'Hors de mon portefeuille'}${st ? ' · ' + CLI_ST[st] : ''}">${ICON.case}${st ? `<i class="pf-st st-${st}"></i>` : ''}</span>`;
 }
 function colorFor(id) {
   if (!id) return '#9a9a92';
@@ -1611,7 +1630,7 @@ function applyDoc(key, body) {
 const J_MAX = 10;
 const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', val: 'validation client', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
 const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
-const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils', liss: 'lissage des temps' };
 const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
 const Journal = {
   snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
@@ -2519,6 +2538,13 @@ const motherMark = c => isMother(c) ? `<span class="g-mere" title="Société mè
 function setMother(gid, cid) { const g = groupOf(gid); if (!g) return; if (cid) g.mother = cid; else delete g.mother; touchMeta(); }
 const grpMembers = g => S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group === g.id).sort((a, b) => (isMother(b) - isMother(a)) || (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
 const cbFold = () => { try { return new Set(JSON.parse(lsGet('cbFold', '[]'))); } catch (e) { return new Set(); } };
+const ccnKey = k => k.i != null ? 'i' + k.i : 't' + norm(k.t);
+function cbFilterHTML(base, ff) { // filtre des tuiles (v1.37.0) : points en cours, alertes, relation, convention collective
+  const ccns = new Map(); for (const x of base) for (const k of (cbPeek(x).ccn || [])) { const key = ccnKey(k); const e = ccns.get(key) || { k, n: 0 }; e.n++; ccns.set(key, e); }
+  const lst = [...ccns.entries()].sort((a, b) => b[1].n - a[1].n || ccnShort(a[1].k).localeCompare(ccnShort(b[1].k), 'fr'));
+  const o = (v, l) => `<option value="${esc(v)}" ${ff === v ? 'selected' : ''}>${esc(l)}</option>`;
+  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
+}
 function renderCarnet() {
   const body = $('#carnet-body');
   if (UI.cbG) { const g = groupOf(UI.cbG); if (!g) { UI.cbG = null; location.replace('#carnet'); return; } renderCarnetGroupe(body, g); return; }
@@ -2528,15 +2554,25 @@ function renderCarnet() {
   const f = UI.cb.f, q = norm(UI.cb.q || '');
   const all = S.meta.clients.filter(x => !x.deletedAt && !x.archived);
   const nMine = all.filter(isMine).length;
-  const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && (!q || [x.name, x.code, x.siret, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q))))
+  const mk0 = defaultCycleMonth(), ff = UI.cb.ff || '';
+  const ffOk = x => { if (!ff) return true; const b = cbPeek(x), cc = b.ccn || [];
+    if (ff === 'pts') return (b.points || []).some(p => !p.done);
+    if (ff === 'al') return alActive(x, mk0).length > 0;
+    if (ff === 'rel') return ['surveiller', 'difficile'].includes(b.rel && b.rel.lvl);
+    if (ff === 'noccn') return !cc.length;
+    if (ff === 'oldccn') return cc.some(k => k.i != null && ccnOld(ccnOf(k.i)));
+    if (ff.startsWith('ccn:')) return cc.some(k => ccnKey(k) === ff.slice(4));
+    return true; };
+  const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && ffOk(x) && (!q || [x.name, x.code, x.siret, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q))))
     .sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
   const mk = defaultCycleMonth(), today = dayKey(Date.now());
   const hasG = hasGroups(), grouped = hasG && lsGet('cbGroup', '1') === '1';
   let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
     <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off">
+    ${cbFilterHTML(all.filter(x => f === 'all' || (f === 'mine') === isMine(x)), ff)}
     ${hasG ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}</div>`;
   html += `<i data-b="carnets" data-t="Carnets de bord"></i><h2>Carnets de bord (${list.length})</h2>`;
-  if (!list.length) html += `<div class="card empty">${q ? 'Aucun dossier ne correspond.' : f === 'mine' ? 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.' : 'Aucun dossier.'}</div>`;
+  if (!list.length) html += `<div class="card empty">${q || ff ? 'Aucun dossier ne correspond.' : f === 'mine' ? 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.' : 'Aucun dossier.'}</div>`;
   else if (!grouped) html += `<div class="cb-tiles">${list.map(x => cbTileHTML(x, mk, today)).join('')}</div>`;
   else {
     const fold = cbFold(), gs = groupsAll().filter(g => list.some(x => x.group === g.id)), none = list.filter(x => !groupOf(x.group));
@@ -2709,6 +2745,7 @@ function bindCarnet() {
   body.addEventListener('change', ev => {
     const t = ev.target;
     if (t.id === 'cb-grp') { lsSet('cbGroup', t.checked ? '1' : '0'); renderCarnet(); return; }
+    if (t.id === 'cb-ff') { UI.cb.ff = t.value; renderCarnet(); return; }
     const c = cur(); if (!c) return;
     if (t.dataset.cbf) {
       const v = t.value.replace(/\s+$/, ''), b = cbOf(c);
@@ -3552,6 +3589,7 @@ function selectOpts(arr, cur, empty) {
   return `<option value="">${empty}</option>` + arr.filter(x => (!x.archived && !x.deletedAt) || x.id === cur).slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
 }
 function openEdit(id) {
+  if (String(id).startsWith('liss-')) { toast('Complément calculé par le lissage : rien à modifier (passez le filtre « Temps » sur « Réels »)'); return; }
   const e = findEntry(id); if (!e) return;
   const m = modal(`<div class="modal-h"><h3>Modifier la saisie</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
@@ -3592,6 +3630,45 @@ function openEdit(id) {
   q('#ed-dup').addEventListener('click', () => { saveEntry({ ...e, id: 'e' + newId(), invoicedAt: 0, logged: false }); m.close(); toast('Saisie dupliquée'); });
 }
 
+/* ---------- Lissage des temps (v1.37.0) : vue lissée, les saisies réelles ne sont jamais modifiées ----------
+   settings.liss = { mode: 'none' | 'coef' | 'fill', task: id de tâche interne (complément) }.
+   Cible = temps prévu du jour (planning habituel, fériés et absences déduits). Jours sans saisie ou déjà au-dessus : inchangés. */
+const lissCfg = () => ({ mode: 'none', task: null, ...(S.meta.settings.liss || {}) });
+const lissOn = () => lissCfg().mode !== 'none';
+let _lissC = { rev: -1, list: null };
+function lissedEntries() { // pour les Rapports : saisies mises à l'échelle (coef) ou complétées (fill), jour par jour
+  if (!lissOn()) return allEntries();
+  if (_lissC.rev === S.rev && _lissC.mode === lissCfg().mode) return _lissC.list;
+  const L = lissCfg(), byDay = new Map(), out = [], today = dayKey(Date.now());
+  for (const e of allEntries()) { const k = dayKey(e.start); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(e); }
+  for (const [k, es] of byDay) {
+    const real = es.reduce((a, e) => a + dur(e), 0), T = k <= today ? plannedOn(k) : 0;
+    if (!T || real <= 0 || real >= T) { out.push(...es); continue; }
+    if (L.mode === 'coef') { const f = T / real; es.forEach(e => out.push({ ...e, end: e.start + Math.round(dur(e) * f), _liss: 'coef' })); }
+    else { out.push(...es); const st = Math.max(...es.map(e => e.end || e.start)); out.push({ id: 'liss-' + k, client: INTERNAL_ID, task: L.task, label: 'Complément (lissage)', billable: false, start: st, end: st + (T - real), invoicedAt: 0, logged: es.every(e => e.logged), _liss: 'fill' }); }
+  }
+  out.sort((a, b) => b.start - a.start);
+  _lissC = { rev: S.rev, mode: L.mode, list: out };
+  return out;
+}
+// Récap du jour : répartit la cible en pas d'arrondi (plus forts restes) pour que le total lissé soit exactement la journée prévue
+function lissGroups(k, groups) {
+  const L = lissCfg(), work = groups.filter(g => g.client !== ABS_ID), real = work.reduce((a, g) => a + g.ms, 0), T = plannedOn(k);
+  if (L.mode === 'none' || !T || real <= 0 || real >= T) return null;
+  const step = (S.meta.settings.roundStep || 1) * 60000;
+  if (L.mode === 'coef') {
+    const units = Math.round(T / step), ex = work.map(g => g.ms * T / real / step), base = ex.map(Math.floor);
+    let rest = units - base.reduce((a, b) => a + b, 0);
+    ex.map((x, i) => [x - base[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (rest > 0) { base[i]++; rest--; } });
+    work.forEach((g, i) => { g.lms = base[i] * step; });
+    groups.filter(g => g.client === ABS_ID).forEach(g => { g.lms = roundMs(g.ms); });
+    return { T, real, mode: 'coef', groups };
+  }
+  groups.forEach(g => { g.lms = roundMs(g.ms); });
+  const realR = work.reduce((a, g) => a + g.lms, 0), extra = T - realR;
+  if (extra > 0) groups.push({ client: INTERNAL_ID, task: L.task, billable: false, ms: 0, lms: extra, labels: ['Complément (lissage)'], ids: [], logged: true, fill: true });
+  return { T, real, mode: 'fill', groups };
+}
 /* ---------- Récapitulatif à reporter ---------- */
 function aggregate(entries) {
   const map = new Map();
@@ -3603,22 +3680,26 @@ function aggregate(entries) {
   }
   return [...map.values()].sort((a, b) => clientName(a.client).localeCompare(clientName(b.client), 'fr') || taskName(a.task).localeCompare(taskName(b.task), 'fr'));
 }
-function openRecap(k) {
+function openRecap(k, useLiss = true) {
   const entries = Object.values(S.days[k]?.entries || {});
-  const groups = aggregate(entries);
-  const rounding = S.meta.settings.roundStep > 0;
-  const tot = groups.reduce((s, g) => s + g.ms, 0), totR = groups.reduce((s, g) => s + roundMs(g.ms), 0);
+  let groups = aggregate(entries);
+  const lz = lissOn() ? lissGroups(k, groups.map(g => ({ ...g }))) : null, lv = !!(lz && useLiss);
+  if (lv) groups = lz.groups;
+  const rounding = S.meta.settings.roundStep > 0, fin = g => lv ? g.lms : roundMs(g.ms);
+  const tot = groups.reduce((s, g) => s + g.ms, 0), totR = groups.reduce((s, g) => s + roundMs(g.ms), 0), totF = groups.reduce((s, g) => s + fin(g), 0);
   const tsv = ['Date\tClient\tCode\tTâche\tLibellés\tDurée (h:mm)\tDurée (h déc.)\tFacturation',
-    ...groups.map(g => [fmtDate(parseDay(k)), clientName(g.client), clientOf(g.client)?.code || '', taskName(g.task), g.labels.join(' ; '), fmtDur(roundMs(g.ms), 'hm'), hoursDec(roundMs(g.ms)), g.billable ? 'À facturer' : 'Non facturable'].join('\t'))].join('\n');
+    ...groups.map(g => [fmtDate(parseDay(k)), clientName(g.client), clientOf(g.client)?.code || '', taskName(g.task), g.labels.join(' ; '), fmtDur(fin(g), 'hm'), hoursDec(fin(g)), g.billable ? 'À facturer' : 'Non facturable'].join('\t'))].join('\n');
   const m = modal(`<div class="modal-h"><h3>Récap à reporter · ${esc(fmtDayLong(k))}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b"><div class="muted small">Totaux regroupés par client et tâche, prêts à recopier dans le logiciel de gestion des temps du cabinet.${rounding ? ' Arrondi appliqué : ' + S.meta.settings.roundStep + ' min (' + (S.meta.settings.roundMode === 'up' ? 'au supérieur' : 'au plus proche') + ').' : ''}</div>
-    <div class="tbl-wrap card"><table class="t"><thead><tr><th>Client</th><th>Tâche</th><th>Libellés</th><th class="n">Durée</th>${rounding ? '<th class="n">Arrondi</th>' : ''}<th class="n">Heures</th><th>Facturation</th><th>Reporté</th></tr></thead><tbody>
-    ${groups.map((g, i) => `<tr><td>${cliIc(g.client)} ${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}<td class="n">${hoursDec(roundMs(g.ms))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td><input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}></td></tr>`).join('')}
-    <tr class="tot"><td colspan="3">Total</td><td class="n">${fmtDur(tot, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(totR, 'hm')}</td>` : ''}<td class="n">${hoursDec(rounding ? totR : tot)}</td><td colspan="2"></td></tr></tbody></table></div>
+    ${lz ? `<label class="chk liss-sw"><input type="checkbox" id="rc-liss" ${lv ? 'checked' : ''}> Temps lissés sur la journée prévue (${fmtDur(lz.T, 'hm')} ; saisi : ${fmtDur(lz.real, 'hm')}) — ${lz.mode === 'coef' ? 'coefficient ' + (lz.T / lz.real).toLocaleString('fr-FR', { maximumFractionDigits: 3 }) + ' sur les saisies' : 'complément en temps interne'}</label>` : ''}
+    <div class="tbl-wrap card"><table class="t"><thead><tr><th>Client</th><th>Tâche</th><th>Libellés</th><th class="n">Durée</th>${rounding ? '<th class="n">Arrondi</th>' : ''}${lv ? '<th class="n">Lissé</th>' : ''}<th class="n">Heures</th><th>Facturation</th><th>Reporté</th></tr></thead><tbody>
+    ${groups.map((g, i) => `<tr class="${g.fill ? 'liss-row' : ''}"><td>${cliIc(g.client)} ${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${g.fill ? '—' : fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${g.fill ? '—' : fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}${lv ? `<td class="n"><b>${fmtDur(g.lms, 'hm')}</b></td>` : ''}<td class="n">${hoursDec(fin(g))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td>${g.fill ? '' : `<input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}>`}</td></tr>`).join('')}
+    <tr class="tot"><td colspan="3">Total</td><td class="n">${fmtDur(tot, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(totR, 'hm')}</td>` : ''}${lv ? `<td class="n">${fmtDur(totF, 'hm')}</td>` : ''}<td class="n">${hoursDec(lv ? totF : rounding ? totR : tot)}</td><td colspan="2"></td></tr></tbody></table></div>
     <textarea class="copy" id="rc-txt" hidden readonly></textarea></div>
     <div class="modal-f"><button class="btn" id="rc-copy">${ICON.copy} Copier pour Excel</button><span class="sp"></span><button class="btn primary" id="rc-all">Tout marquer comme reporté</button></div>`, 'wide');
   m.el.querySelectorAll('input[data-g]').forEach(cb => cb.addEventListener('change', () => { const g = groups[+cb.dataset.g]; updateEntries(g.ids, e => { e.logged = cb.checked; }); }));
   m.el.querySelector('#rc-copy').addEventListener('click', () => copyText(tsv, m.el.querySelector('#rc-txt')));
+  m.el.querySelector('#rc-liss')?.addEventListener('change', ev => { m.close(); openRecap(k, ev.target.checked); });
   m.el.querySelector('#rc-all').addEventListener('click', () => { updateEntries(entries.map(e => e.id), e => { e.logged = true; }); m.close(); toast('Journée marquée comme reportée'); });
 }
 async function copyText(txt, fallbackTa) {
@@ -4027,6 +4108,28 @@ function openCyCell(mk, cid, f, anchor) {
     else if (b.dataset.clear) { cySet(mk, cid, isCorr ? { corr: null } : { [f]: null, ...(f === 'rec' ? { rel: null } : {}) }); closeCyPop(); }
   });
 }
+// Copie des dates et échéances du cycle d'un dossier vers d'autres (v1.37.0) ; chaque dossier reste ensuite indépendant
+const CY_COPY_KEYS = ['rec', 'recDay', 'varDay', 'envDelay', 'valid', 'valDelay', 'vir', 'dep', 'depDay', 'dsn'];
+function openCyCopy(c, src) {
+  const cs = cyClients().filter(x => x.id !== c.id), g = groupOf(c.group), gm = g ? cs.filter(x => x.group === g.id) : [];
+  const m = modal(`<div class="modal-h"><h3>Copier les paramètres de ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:8px"><div class="small muted">Copie les dates et échéances du cycle de paie (réception, envoi, alertes, validation, virements, dépôt, DSN), telles qu’affichées dans la fenêtre des paramètres. La remarque permanente n’est pas copiée. Chaque dossier reste ensuite modifiable séparément.</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${gm.length ? `<button class="btn sm" id="cc-grp">Tout le groupe ${esc(g.name)} (${gm.length})</button>` : ''}<button class="btn sm ghost" id="cc-none">Tout décocher</button><input id="cc-q" placeholder="Filtrer…" style="flex:1;min-width:140px"></div>
+      <div class="cc-list">${cs.map(x => `<label class="chk" data-n="${esc(norm(x.name + ' ' + (x.code || '') + ' ' + (groupOf(x.group)?.name || '')))}"><input type="checkbox" value="${x.id}"> ${esc(x.name)}${x.code ? ' <span class="muted small">' + esc(x.code) + '</span>' : ''} ${grpTag(groupOf(x.group), 'sm')}</label>`).join('') || '<div class="muted">Aucun autre dossier dans votre portefeuille.</div>'}</div></div>
+    <div class="modal-f"><span class="muted small" id="cc-n">0 dossier</span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cc-ok" disabled>Copier</button></div>`);
+  const q = x => m.el.querySelector(x), boxes = () => [...m.el.querySelectorAll('.cc-list input')];
+  const upd = () => { const n = boxes().filter(b => b.checked).length; q('#cc-n').textContent = n + ' dossier' + (n > 1 ? 's' : ''); q('#cc-ok').disabled = !n; };
+  m.el.addEventListener('change', upd);
+  q('#cc-grp')?.addEventListener('click', () => { boxes().forEach(b => { if (gm.some(x => x.id === b.value)) b.checked = true; }); upd(); });
+  q('#cc-none').addEventListener('click', () => { boxes().forEach(b => { b.checked = false; }); upd(); });
+  q('#cc-q').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('.cc-list label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
+  q('#cc-ok').addEventListener('click', () => {
+    const ids = boxes().filter(b => b.checked).map(b => b.value), before = ids.map(id => [id, clientOf(id).cy ? JSON.parse(JSON.stringify(clientOf(id).cy)) : null]);
+    for (const id of ids) { const x = clientOf(id); x.cy = { ...cyOf(x), ...Object.fromEntries(CY_COPY_KEYS.map(k => [k, src[k]])) }; }
+    touchMeta(); m.close();
+    toast('Paramètres copiés vers ' + ids.length + ' dossier' + (ids.length > 1 ? 's' : ''), 'Annuler', () => { for (const [id, cy] of before) { const x = clientOf(id); if (cy) x.cy = cy; else delete x.cy; } touchMeta(); });
+  });
+}
 function openCyParams(cid) {
   const c = clientOf(cid); if (!c) return;
   const p = cyOf(c);
@@ -4049,7 +4152,7 @@ function openCyParams(cid) {
       <label class="fld"><span>Jour fixe de dépôt</span><input id="cp-depday" inputmode="numeric" value="${esc(p.depDay || '')}" placeholder="ex. 30"></label></div>
       <label class="fld"><span>Remarque permanente (colonne Remarques)</span><textarea id="cp-notes" rows="3" placeholder="ex. Paies sur quel RIB ? · Virement au DJM-2 · MySilae uniquement">${esc(p.notes || '')}</textarea></label>
     </div>
-    <div class="modal-f"><span class="muted small">N° ${esc(c.code || '—')}</span><a class="btn sm ghost" href="#carnet/${encodeURIComponent(c.id)}" data-close>📖 Carnet de bord</a><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
+    <div class="modal-f"><span class="muted small">N° ${esc(c.code || '—')}</span><a class="btn sm ghost" href="#carnet/${encodeURIComponent(c.id)}" data-close>📖 Carnet de bord</a><button class="btn sm ghost" id="cp-copyto" title="Appliquer les dates et échéances de ce dossier à d’autres dossiers">Copier vers…</button><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
   const q = s => m.el.querySelector(s);
   const sug = cyVarSuggest(cid);
   const hint = () => {
@@ -4061,10 +4164,15 @@ function openCyParams(cid) {
   q('#cp-varday').addEventListener('change', hint); hint();
   q('#cp-grp').addEventListener('change', ev => { q('#cp-mother-w').hidden = !ev.target.value || ev.target.value === '__newgrp'; });
   q('#cp-grp').addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || c.group); }); });
-  q('#cp-ok').addEventListener('click', () => {
+  const readCp = () => {
     const dd = parseInt(q('#cp-depday').value, 10);
-    c.cy = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, varDay: q('#cp-varday').value || null, envDelay: q('#cp-envdelay').value === '' ? null : +q('#cp-envdelay').value, valid: q('#cp-valid').value === '1', valDelay: q('#cp-valdelay').value === '' ? null : +q('#cp-valdelay').value, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
-    if (c.cy.dep === 'fixed' && !c.cy.depDay) c.cy.dep = 'next';
+    const o = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, varDay: q('#cp-varday').value || null, envDelay: q('#cp-envdelay').value === '' ? null : +q('#cp-envdelay').value, valid: q('#cp-valid').value === '1', valDelay: q('#cp-valdelay').value === '' ? null : +q('#cp-valdelay').value, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
+    if (o.dep === 'fixed' && !o.depDay) o.dep = 'next';
+    return o;
+  };
+  q('#cp-copyto').addEventListener('click', () => { const { notes, ...src } = readCp(); openCyCopy(c, src); });
+  q('#cp-ok').addEventListener('click', () => {
+    c.cy = readCp();
     const gv = q('#cp-grp').value, wasM = isMother(c), oldG = c.group; if (gv && gv !== '__newgrp') c.group = gv; else if (!gv) delete c.group;
     if (wasM && oldG !== c.group) { const og = groupOf(oldG); if (og) delete og.mother; }
     if (c.group) { const ng = groupOf(c.group), want = q('#cp-mother').checked; if (want) ng.mother = c.id; else if (ng.mother === c.id) delete ng.mother; }
@@ -4459,7 +4567,7 @@ function renderPortfolio() {
     <span class="sp" style="flex:1"></span>
     <input id="pf-q" placeholder="Rechercher un dossier ou un numéro…" value="${esc(P.q)}" autocomplete="off" style="min-width:220px">
     <button class="btn sm" data-pf="copy">${ICON.copy} Copier pour Excel</button></div>
-  <div class="stats" style="margin-top:12px">
+  <i data-b="tsynth" data-t="Synthèse du mois"></i><div class="stats" style="margin-top:12px">
     <div class="card stat"><div class="k">Dossiers actifs ce mois</div><div class="v">${active.length}<span class="of"> / ${nAll}</span></div><div class="s">${idle.length ? `<a href="#portefeuille" data-pf-filter="idle">${idle.length} sans temps saisi</a>` : 'tous ont du temps saisi'}</div></div>
     <div class="card stat"><div class="k">Temps sur mon portefeuille</div><div class="v">${fmtDur(tot.m)}</div><div class="s">${tot.prev ? 'mois précédent : ' + fmtDur(tot.prev) + ' ' + delta(tot.m, tot.prev) : '&nbsp;'}</div></div>
     <div class="card stat"><div class="k">Temps facturable</div><div class="v">${fmtDur(tot.bill)}</div><div class="s">${pct} % du temps du mois</div></div>
@@ -4467,7 +4575,7 @@ function renderPortfolio() {
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Saisies à facturer</div><div class="v">${tot.todo}</div><div class="s">${tot.todo ? `<a href="#portefeuille" data-pf-filter="todo">voir les dossiers</a>` : 'rien en attente'}</div></div>
     ${data.hasBs ? `<div class="card stat"><div class="k">Bulletins (BS) du mois</div><div class="v">${nAll - noBs}<span class="of"> / ${nAll}</span></div><div class="s">${noBs ? `<a href="#portefeuille" data-pf-filter="nobs">${noBs} dossier${noBs > 1 ? 's' : ''} sans BS saisi</a>` : 'tous les dossiers ont du temps BS'}</div></div>` : ''}
   </div>
-  <div class="toolbar"><h2>Mes dossiers (${rows.length})</h2><span class="sp"></span>${densitySeg()}
+  <i data-b="tdossiers"></i><div class="toolbar"><h2>Mes dossiers (${rows.length})</h2><span class="sp"></span>${densitySeg()}
     <div class="seg" data-seg="pff">${[['all', 'Tous'], ['active', 'Avec temps'], ['idle', 'Sans temps'], ['todo', 'À facturer'], ...(data.hasBs ? [['nobs', 'Sans BS']] : [])].map(([v, l]) => `<button data-v="${v}" class="${P.filter === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
   <div class="card tbl-wrap"><table class="t pf-table"><thead><tr><th></th>${cols.map(([k, l]) => `<th class="${['m', 'prev', 'bill', 'inv', 'todo'].includes(k) ? 'n' : ''} ${['bs', 'dsn'].includes(k) ? 'c' : ''}"><button class="sort ${P.sort === k ? 'on' : ''}" data-sort="${k}">${l}${P.sort === k ? (P.dir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`).join('')}<th></th></tr></thead><tbody>
   ${rows.map(r => {
@@ -4496,6 +4604,7 @@ function renderPortfolio() {
   <div class="muted small" style="margin-top:8px">Seuls les clients marqués « ★ Mon portefeuille » et non archivés apparaissent ici. Les colonnes BS et DSN indiquent si du temps a été saisi ce mois sur une tâche Bulletins / DSN.</div>`;
   const body = $('#portefeuille-body');
   body.innerHTML = html;
+  blkify(body, 'temps');
   body._rows = rows; body._cols = cols; body._month = monthLabel;
 }
 function bindPortfolio() {
@@ -4559,7 +4668,7 @@ function periodRange() {
 }
 function filtered() {
   const r = UI.rep, [from, to] = periodRange(), q = norm(r.q);
-  return allEntries().filter(e => {
+  return (lissOn() && r.liss !== 'real' ? lissedEntries() : allEntries()).filter(e => {
     if (e.start < from || e.start >= to) return false;
     if (r.client && e.client !== r.client) return false;
     if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none' || k === 'internal') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
@@ -4596,6 +4705,7 @@ function renderReports() {
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Report logiciel<select data-r="logged">${[['all', 'Tout'], ['no', 'Non reporté'], ['yes', 'Reporté']].map(([v, l]) => `<option value="${v}" ${r.logged === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    ${lissOn() ? `<label>Temps<select data-r="liss"><option value="liss" ${r.liss !== 'real' ? 'selected' : ''}>Lissés</option><option value="real" ${r.liss === 'real' ? 'selected' : ''}>Réels</option></select></label>` : ''}
     <label style="flex:1;min-width:160px">Recherche<input data-r="q" value="${esc(r.q)}" placeholder="Libellé, client, tâche…"></label>
   </div>`;
   html += `<i data-b="synthese"></i><h2>Synthèse</h2><div class="stats">
@@ -5002,6 +5112,14 @@ function schedHTML() {
   }
   return `<i data-b="planning"></i><h2>Planning habituel</h2><div class="card settings sch" id="sch-card"><div class="setting"><div>Type d’organisation<div class="d">Définit vos heures de début et de fin jour par jour, la durée des absences, le temps prévu dans le Résumé et la pause du déjeuner</div></div>${seg}</div>${inner}</div>`;
 }
+function lissHTML() {
+  const L = lissCfg(), ints = S.meta.tasks.filter(t => !t.deletedAt && !t.archived), names = new Set(ints.map(t => norm(t.name)));
+  const opts = ints.slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(t => `<option value="${t.id}" ${L.task === t.id ? 'selected' : ''}>${esc(t.name)}</option>`).join('') + INTERNAL_TASKS.filter(n => !names.has(norm(n))).map(n => `<option value="new:${esc(n)}">${esc(n)} (à créer)</option>`).join('');
+  return `<i data-b="lissage"></i><h2>Lissage des temps</h2><div class="card settings"><div class="setting"><div>Lissage des récaps et des rapports<div class="d">Quand il faut déclarer un temps égal à la journée prévue par votre planning (fériés et absences déduits). Vos saisies réelles ne sont jamais modifiées : seuls le récap à reporter, les Rapports et leurs exports sont lissés (bascule « Réels / Lissés » possible). Les journées sans saisie ou déjà au-dessus restent telles quelles.</div></div>
+    <select id="liss-mode"><option value="none" ${L.mode === 'none' ? 'selected' : ''}>Désactivé</option><option value="coef" ${L.mode === 'coef' ? 'selected' : ''}>Coefficient sur les saisies réelles</option><option value="fill" ${L.mode === 'fill' ? 'selected' : ''}>Compléter par du temps interne</option></select></div>
+    ${L.mode === 'fill' ? `<div class="setting"><div>Tâche du complément<div class="d">Le temps manquant est affecté à « Interne (cabinet) » sur cette tâche, non facturable.</div></div><select id="liss-task"><option value="">— choisir —</option>${opts}</select></div>` : ''}
+    ${L.mode === 'coef' ? `<div class="sch-hint">Ex. 6h00 saisies pour 7h00 prévues : chaque temps est multiplié par 7/6, puis réparti en pas d’arrondi (${S.meta.settings.roundStep ? S.meta.settings.roundStep + ' min' : 'à la minute'}) pour que le total fasse exactement 7h00.</div>` : ''}</div>`;
+}
 function schSave(mut) { const c = schedCfg(); const n = { mode: c.mode, week: JSON.parse(JSON.stringify(c.week)), forfait: { ...c.forfait, days: [...(c.forfait.days || [])] } }; mut(n); n.week = Object.fromEntries(Object.entries(n.week).map(([k, v]) => [k, v.map(r => (r[0] || '') + '-' + (r[1] || ''))])); S.meta.settings.sched = n; touchMeta(); }
 /* ---------- Remise à zéro (v1.29.0) ----------
    1) choix de ce qui est effacé (tout coché par défaut) ; 2) sauvegarde complète téléchargée obligatoirement ;
@@ -5367,6 +5485,7 @@ function renderSettings() {
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div>
     ${schedHTML()}
+    ${lissHTML()}
     ${tabsHTML()}`;
   $('#reglages-body').innerHTML = html;
   blkify($('#reglages-body'), 'reglages');
@@ -5476,6 +5595,13 @@ function bindRefsOn(body) {
       schSave(n => { n.forfait[k] = pad(hm[0]) + ':' + pad(hm[1]); }); return;
     }
     if (i.dataset.schday) { const wd = +i.dataset.schday; schSave(n => { const d = new Set(n.forfait.days); i.checked ? d.add(wd) : d.delete(wd); n.forfait.days = [...d].sort(); }); return; }
+    if (i.id === 'liss-mode' || i.id === 'liss-task') {
+      const L = lissCfg(); let v = i.value;
+      if (i.id === 'liss-task' && v.startsWith('new:')) v = addTask(v.slice(4));
+      S.meta.settings.liss = { ...L, ...(i.id === 'liss-mode' ? { mode: v } : { task: v || null }) };
+      if (S.meta.settings.liss.mode === 'fill' && !S.meta.settings.liss.task) { const t = S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm('Administratif interne')); if (t) S.meta.settings.liss.task = t.id; }
+      touchMeta(); return;
+    }
     if (i.id === 'set-quote') { lsSet('quote', i.value); if (i.value === '1') showQuote(true); return; }
     if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
     if (i.dataset.s === 'dayStart') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayStart; toast('Heure non comprise (ex. 07:30)'); return; } S.meta.settings.dayStart = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
