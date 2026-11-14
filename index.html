@@ -1023,7 +1023,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.31.0';
+const APP_VERSION = '1.31.1';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2810,7 +2810,8 @@ function aevCalc(st) {
   else if (fAlt != null) steps.f.push(`<li><span class="tl-lb muted">${fNote} : moins favorable</span></li>`);
   // ----- Réel -----
   let r = null, rErr = '';
-  if (!kmT || kmP == null) rErr = 'Saisissez les kilométrages personnel et total de l’année.';
+  if (!st.reel) rErr = '';
+  else if (!kmT || kmP == null) rErr = 'Saisissez les kilométrages personnel et total de l’année.';
   else if (kmP > kmT) rErr = 'Le kilométrage personnel dépasse le kilométrage total.';
   else {
     const base = own === 'achat' ? prix * (old ? 10 : 20) / 100 : loc, tot = base + ass + ent;
@@ -2995,17 +2996,20 @@ const TOOLS = [
         <label class="chk"><input type="checkbox" data-k="elec" data-rr="1" ${elec ? 'checked' : ''}> Véhicule 100 % électrique ayant le score environnemental minimal (liste éco-score) — frais de recharge non comptés</label>
         ${elec ? `<label class="tl-inl">Année de calcul (plafond de l’abattement) <select data-k="yr">${Object.keys(AEV_PLAF).map(y => `<option ${String(st.yr || Math.min(Math.max(new Date().getFullYear(), 2025), 2026)) === y ? 'selected' : ''}>${y}</option>`).join('')}</select></label>` : ''}
         <div class="tl-row aev-grid">${own === 'achat' ? aevAmt(st, 'prix', 'Coût d’achat TTC (remises déduites)', 'ex. 35 000', false) : aevAmt(st, 'loc', 'Location TTC', 'ex. 600') + aevAmt(st, 'pub', 'Prix public TTC du véhicule (facultatif, plafond)', 'ex. 40 000', false)}
-          ${aevAmt(st, 'ass', 'Assurance TTC')}${aevAmt(st, 'ent', 'Entretien TTC')}${fuel ? aevAmt(st, 'carb', 'Carburant des trajets personnels payé (réel)') : ''}${aevAmt(st, 'part', 'Participation du salarié')}</div>
-        <div class="tl-row aev-grid"><label class="fld"><span>Km personnels de l’année (réel)</span><input data-k="kmP" inputmode="numeric" value="${esc(st.kmP || '')}" placeholder="ex. 6 000"></label><label class="fld"><span>Km totaux de l’année (réel)</span><input data-k="kmT" inputmode="numeric" value="${esc(st.kmT || '')}" placeholder="ex. 25 000"></label></div>
+          ${own === 'loc' || st.reel ? aevAmt(st, 'ass', 'Assurance TTC') + aevAmt(st, 'ent', 'Entretien TTC') : ''}${fuel ? aevAmt(st, 'carb', 'Carburant des trajets personnels payé (réel)') : ''}${aevAmt(st, 'part', 'Participation du salarié')}</div>
+        <label class="chk"><input type="checkbox" data-k="reel" data-rr="1" ${st.reel ? 'checked' : ''}> Comparer avec l’évaluation aux dépenses réelles (kilométrage personnel justifié)</label>
+        ${st.reel ? `<div class="tl-row aev-grid"><label class="fld"><span>Km personnels de l’année</span><input data-k="kmP" inputmode="numeric" value="${esc(st.kmP || '')}" placeholder="ex. 6 000"></label><label class="fld"><span>Km totaux de l’année</span><input data-k="kmT" inputmode="numeric" value="${esc(st.kmT || '')}" placeholder="ex. 25 000"></label></div>` : ''}
         <div class="tl-inl"><label class="chk" style="margin:0"><input type="checkbox" data-k="pp" data-rr="1" ${st.pp ? 'checked' : ''}> Mise à disposition sur une partie de l’année</label>${st.pp ? `<label class="tl-inl">nombre de mois <input data-k="mois" inputmode="numeric" value="${esc(st.mois || '')}" placeholder="ex. 5" style="width:60px"></label>` : ''}</div>`;
     },
     calc: st => {
       const o = aevCalc(st); if (o.err) return `<div class="tl-empty">${esc(o.err)}</div>`;
       const box = (h, v, best) => `<div class="tl-m ${best ? 'aev-best' : ''}"><div class="tl-mh">${h}${best ? ' · <span class="aev-tag">le plus favorable</span>' : ''}</div>${v == null ? `<div class="tl-empty">${esc(o.rErr)}</div>` : `<div class="tl-big">${eur(v / (o.months / 12) / 12)} <span class="muted" style="font-size:14px;font-weight:500">par mois</span></div><div class="small">${eur(v)} ${o.months < 12 ? 'sur ' + plur(o.months, 'mois') : 'par an'}</div>`}</div>`;
       const both = o.r != null, bf = both && o.f <= o.r, br = both && o.r < o.f;
-      return `<div class="tl-two">${box('Forfait', o.f, bf)}${box('Dépenses réelles', o.r, br)}</div>
-        <div class="tl-two"><div><div class="tl-mh">Forfait</div><ol class="tl-steps">${o.steps.f.join('')}</ol></div><div><div class="tl-mh">Dépenses réelles</div>${o.r == null ? '<div class="tl-empty">—</div>' : `<ol class="tl-steps">${o.steps.r.join('')}</ol>`}</div></div>
-        <div class="tl-note">Règles applicables aux véhicules mis à disposition <b>à compter du 1er février 2025</b> (arrêté du 10 décembre 2002 modifié par l’arrêté du 25 février 2025). Forfait annuel : véhicule acheté 15 % du coût d’achat TTC (10 % au-delà de 5 ans), 20 % / 15 % avec le carburant, ou 15 % / 10 % + carburant réel ; véhicule loué 50 % du coût global annuel (location, entretien, assurance), 67 % avec le carburant, ou 50 % + carburant réel, sans dépasser le forfait « achat » calculé sur le prix public TTC. Réel : amortissement 20 % (10 %) ou location + assurance + entretien, au prorata des km personnels (justificatifs nécessaires, sinon l’Urssaf applique le forfait), + carburant des trajets personnels. Véhicule 100 % électrique éco-scoré (jusqu’au 31/12/2027) : abattement de 70 % au forfait (plafond 4 582 € en 2025, 4 641,60 € en 2026) ou 50 % au réel (2 000,30 € / 2 026,30 €), recharge non comptée. La participation du salarié vient en déduction. Montant mensuel = annuel ÷ 12.
+      const res = st.reel ? `<div class="tl-two">${box('Forfait', o.f, bf)}${box('Dépenses réelles', o.r, br)}</div>
+        <div class="tl-two"><div><div class="tl-mh">Forfait</div><ol class="tl-steps">${o.steps.f.join('')}</ol></div><div><div class="tl-mh">Dépenses réelles</div>${o.r == null ? '<div class="tl-empty">—</div>' : `<ol class="tl-steps">${o.steps.r.join('')}</ol>`}</div></div>`
+        : `${box('Forfait', o.f, false)}<ol class="tl-steps">${o.steps.f.join('')}</ol>`;
+      return `${res}
+        <div class="tl-note">Règles applicables aux véhicules mis à disposition <b>à compter du 1er février 2025</b> (arrêté du 10 décembre 2002 modifié par l’arrêté du 25 février 2025). Forfait annuel : véhicule acheté 15 % du coût d’achat TTC (10 % au-delà de 5 ans), 20 % / 15 % avec le carburant, ou 15 % / 10 % + carburant réel ; véhicule loué 50 % du coût global annuel (location, entretien, assurance), 67 % avec le carburant, ou 50 % + carburant réel, sans dépasser le forfait « achat » calculé sur le prix public TTC. Réel : amortissement 20 % (10 %) ou location + assurance + entretien, au prorata des km personnels (justificatifs nécessaires, sinon l’Urssaf applique le forfait), + carburant des trajets personnels. Véhicule 100 % électrique éco-scoré (jusqu’au 31/12/2027) : abattement de 70 % au forfait (plafond 4 582 € en 2025, 4 641,60 € en 2026) ou 50 % au réel (2 000,30 € / 2 026,30 €), recharge non comptée. La participation du salarié vient en déduction. Montant mensuel = annuel ÷ 12. En achat, l’assurance et l’entretien sont couverts par le forfait : ils ne servent qu’à l’évaluation au réel.
           <br>Sources : <a href="https://boss.gouv.fr/portail/accueil/avantages-en-nature/avantages-en-nature.html" target="_blank" rel="noopener">BOSS — Avantages en nature ↗</a> · <a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000250212" target="_blank" rel="noopener">Arrêté du 10 décembre 2002 modifié ↗</a> · <a href="https://www.urssaf.fr/accueil/employeur/beneficier-exonerations/avantages-en-nature/vehicule.html" target="_blank" rel="noopener">Urssaf ↗</a></div>`;
     } },
   { id: 'prorata', t: 'Prorata d’un montant', d: 'Entrée ou sortie en cours de mois, absence, temps partiel',
