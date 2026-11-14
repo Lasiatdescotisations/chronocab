@@ -930,7 +930,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.20.0';
+const APP_VERSION = '1.20.1';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1113,7 +1113,9 @@ function askGroupName(cb) {
 const WD_L = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const WD_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const SCHED_DEF = { mode: 'none', week: { 1: [['08:00', '12:00'], ['13:30', '17:00']], 2: [['08:00', '12:00'], ['13:30', '17:00']], 3: [['08:00', '12:00'], ['13:30', '17:00']], 4: [['08:00', '12:00'], ['13:30', '17:00']], 5: [['08:00', '12:00'], ['13:30', '17:00']] }, forfait: { hours: 450, start: '08:30', end: '18:30', days: [1, 2, 3, 4, 5], total: 218 } };
-const schedCfg = () => { const c = S.meta.settings.sched || {}; return { mode: c.mode || 'none', week: c.week || SCHED_DEF.week, forfait: { ...SCHED_DEF.forfait, ...(c.forfait || {}) } }; };
+// Firestore refuse les tableaux imbriqués : les plages sont enregistrées sous forme de texte « 08:00-12:00 » et relues en [début, fin]
+const rngOf = x => Array.isArray(x) ? [x[0] || '', x[1] || ''] : typeof x === 'string' ? [x.split('-')[0] || '', x.split('-')[1] || ''] : x && typeof x === 'object' ? [x.s || '', x.e || ''] : ['', ''];
+const schedCfg = () => { const c = S.meta.settings.sched || {}, w = c.week || SCHED_DEF.week; return { mode: c.mode || 'none', week: Object.fromEntries(Object.entries(w).map(([k, v]) => [k, (Array.isArray(v) ? v : []).map(rngOf)])), forfait: { ...SCHED_DEF.forfait, ...(c.forfait || {}) } }; };
 const hmMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
 const okRange = x => x && hmMin(x[0]) != null && hmMin(x[1]) != null && hmMin(x[1]) > hmMin(x[0]);
 function schedOf(ms) {
@@ -4314,7 +4316,7 @@ function schedHTML() {
   }
   return `<i data-b="planning"></i><h2>Planning habituel</h2><div class="card settings sch" id="sch-card"><div class="setting"><div>Type d’organisation<div class="d">Définit vos heures de début et de fin jour par jour, la durée des absences, le temps prévu dans le Résumé et la pause du déjeuner</div></div>${seg}</div>${inner}</div>`;
 }
-function schSave(mut) { const c = schedCfg(); const n = { mode: c.mode, week: JSON.parse(JSON.stringify(c.week)), forfait: { ...c.forfait, days: [...(c.forfait.days || [])] } }; mut(n); S.meta.settings.sched = n; touchMeta(); }
+function schSave(mut) { const c = schedCfg(); const n = { mode: c.mode, week: JSON.parse(JSON.stringify(c.week)), forfait: { ...c.forfait, days: [...(c.forfait.days || [])] } }; mut(n); n.week = Object.fromEntries(Object.entries(n.week).map(([k, v]) => [k, v.map(r => (r[0] || '') + '-' + (r[1] || ''))])); S.meta.settings.sched = n; touchMeta(); }
 function renderSettings() {
   const st = S.meta.settings;
   const html = `<i data-b="reglages" data-half="1"></i><h2>Réglages</h2><div class="card settings">
