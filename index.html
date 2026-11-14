@@ -1025,7 +1025,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.34.0';
+const APP_VERSION = '1.34.2';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2828,6 +2828,7 @@ function aevCalc(st) {
     if (elec) { const a = Math.min(v * (m === 'f' ? 0.7 : 0.5), m === 'f' ? pl.f : pl.r); v -= a; L(m, '− Abattement véhicule électrique ' + (m === 'f' ? '70 %' : '50 %'), v, 'abattement ' + eur(a) + ' (plafond ' + yr + ' : ' + eur(m === 'f' ? pl.f : pl.r) + ' par an)'); }
     if (months < 12) { v = v * k; L(m, '× ' + months + ' / 12 (mise à disposition sur ' + plur(months, 'mois') + ')', v, ''); }
     if (part) { const p = part * k; v = Math.max(0, v - p); L(m, '− Participation du salarié', v, eur(p) + (months < 12 ? ' sur ' + months + ' mois' : ' par an')); }
+    L(m, '= Avantage en nature mensuel', v / months, eur(v) + ' ÷ ' + months + ' mois', 'key');
     return v;
   };
   f = fin('f', f); r = fin('r', r);
@@ -3067,7 +3068,7 @@ function tlExtract(sec) {
       if (!vals[0]) return; data.push({ l, v: vals.filter(Boolean).join(' ') }); return;
     }
     if (el.matches('label.chk')) { const c = el.querySelector('input[type=checkbox]'); if (c && c.checked) { const inner = el.querySelector('label.tl-inl'); data.push({ v: '✓ ' + tlTxt(el.cloneNode(true)).replace(inner ? tlTxt(inner) : '\u0000', '').trim() }); } return; }
-    if (el.matches('label.tl-inl')) { if (el.querySelector('input[type=checkbox]')) { const c = el.querySelector('input[type=checkbox]'); if (c.checked) data.push({ v: '✓ ' + tlTxt(el) }); return; } data.push({ v: tlValOf(el) }); }
+    if (el.matches('label.tl-inl')) { if (el.querySelector('input[type=checkbox]')) { const c = el.querySelector('input[type=checkbox]'); if (c.checked) data.push({ v: '✓ ' + tlTxt(el) }); return; } const ins = [...el.querySelectorAll('input:not([type=checkbox])')]; if (ins.length && ins.every(i => !i.value.trim() || numIn(i.value) === 0)) return; data.push({ v: tlValOf(el) }); }
   });
   const walk = node => {
     for (const el of node.children) {
