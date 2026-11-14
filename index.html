@@ -586,6 +586,9 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-m{background:var(--surface-2);border-radius:10px;padding:10px 12px}
 .tl-mh{font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
 @media (max-width:900px){.tl-two{grid-template-columns:1fr}}
+.tl-month{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tl-month .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.tl-opt-h{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
 .tl-pick{align-items:flex-start;white-space:normal;font-size:13.5px;color:var(--ink);padding:6px 4px}
 .tl-card{min-width:0;overflow:hidden}
 .tl-card input,.tl-card select{min-width:0;max-width:100%;box-sizing:border-box}
@@ -973,7 +976,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.23.0';
+const APP_VERSION = '1.24.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1556,7 +1559,7 @@ function applyDoc(key, body) {
 const J_MAX = 10;
 const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
 const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
-const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils' };
 const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
 const Journal = {
   snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
@@ -2661,8 +2664,9 @@ function bindCarnet() {
 let TLAM = false;
 function amHolidays(y) { const E = easterMs(y), o = {}; o[dayKey(addDays(E, -2))] = 'Vendredi saint'; o[dayKey(new Date(y, 11, 26).getTime())] = 'Saint-Étienne (26 décembre)'; return o; }
 const tlHol = k => holidayOn(k) || (TLAM ? amHolidays(+k.slice(0, 4))[k] || null : null);
-const amBox = st => `<label class="chk"><input type="checkbox" data-k="am" ${st.am ? 'checked' : ''}> Jours fériés d’Alsace-Moselle (Vendredi saint, 26 décembre)</label>`;
-const ferNote = () => TLAM ? 'Jours fériés d’Alsace-Moselle inclus (Vendredi saint, 26 décembre).' : 'Jours fériés de France métropolitaine (cochez Alsace-Moselle si besoin).';
+// Réglage commun à tous les outils (synchronisé) : settings.toolsAMShow = choix visible dans l'en-tête de l'onglet ; settings.toolsAM = fériés d'Alsace-Moselle appliqués
+const toolsAM = () => !!(S.meta.settings.toolsAMShow && S.meta.settings.toolsAM);
+const ferNote = () => TLAM ? 'Jours fériés d’Alsace-Moselle inclus (Vendredi saint, 26 décembre).' : 'Jours fériés de France métropolitaine' + (S.meta.settings.toolsAMShow ? ' (choix Alsace-Moselle en haut de l’onglet).' : ' (Alsace-Moselle : à activer dans « Choisir mes outils »).');
 const isOuvrable = ms => new Date(ms).getDay() !== 0 && !tlHol(dayKey(ms));          // lundi → samedi, hors fériés
 const isOuvre = ms => { const w = new Date(ms).getDay(); return w >= 1 && w <= 5 && !tlHol(dayKey(ms)); }; // lundi → vendredi, hors fériés
 const isProrog = ms => { const w = new Date(ms).getDay(); return w === 0 || w === 6 || !!tlHol(dayKey(ms)); }; // samedi, dimanche ou férié : délai prorogé (R1231-1)
@@ -2715,7 +2719,7 @@ const TOOLS = [
         <div class="tl-opts"><label class="chk"><input type="checkbox" data-k="depOuvre" ${st.depOuvre ? 'checked' : ''}> Dépôt de la demande un jour ouvré (lundi → vendredi, hors fériés)</label>
           <label class="tl-inl">Marge avant le dépôt <input data-k="mDep" inputmode="numeric" value="${esc(st.mDep ?? '0')}"> j</label>
           <label class="tl-inl">Réception de la demande <input data-k="post" inputmode="numeric" value="${esc(st.post ?? '0')}"> j après l’envoi <span class="muted small">(0 avec TéléRC)</span></label>
-          <label class="tl-inl">Marge avant la rupture <input data-k="mRup" inputmode="numeric" value="${esc(st.mRup ?? '0')}"> j</label>${amBox(st)}</div>`;
+          <label class="tl-inl">Marge avant la rupture <input data-k="mRup" inputmode="numeric" value="${esc(st.mRup ?? '0')}"> j</label></div>`;
     },
     calc: st => {
       const mode = st.mode || 'sig', o = { depOuvre: !!st.depOuvre, mDep: Math.max(0, parseInt(st.mDep, 10) || 0), post: Math.max(0, parseInt(st.post, 10) || 0), mRup: Math.max(0, parseInt(st.mRup, 10) || 0) };
@@ -2788,7 +2792,7 @@ const TOOLS = [
   { id: 'fj', t: 'Forfait jours : jours de repos', d: 'Jours non travaillés (JNT) d’un forfait annuel, année complète ou entrée / sortie en cours d’année',
     html: st => { const y = new Date().getFullYear(); return `<div class="tl-row"><label class="fld"><span>Jours du forfait (année complète)</span><input data-k="n" inputmode="numeric" value="${esc(st.n ?? '218')}"></label><label class="fld"><span>Congés payés d’une année complète (jours ouvrés)</span><input data-k="cpf" inputmode="decimal" value="${esc(st.cpf ?? '25')}"></label><label class="fld"><span>Congés payés pris sur la période</span><input data-k="cp" inputmode="decimal" value="${esc(st.cp ?? '')}"></label></div>
       <div class="tl-row"><label class="fld"><span>Début de période (entrée en cours d’année : modifier)</span><input type="date" data-k="a" value="${esc(st.a || y + '-01-01')}"></label><label class="fld"><span>Fin de période (sortie : modifier)</span><input type="date" data-k="b" value="${esc(st.b || y + '-12-31')}"></label></div>
-      <label class="chk"><input type="checkbox" data-k="sol" ${st.sol ? 'checked' : ''}> Journée de solidarité à effectuer sur la période (+1 jour à travailler ; déjà incluse dans les 218 jours d’une année complète)</label>${amBox(st)}`; },
+      <label class="chk"><input type="checkbox" data-k="sol" ${st.sol ? 'checked' : ''}> Journée de solidarité à effectuer sur la période (+1 jour à travailler ; déjà incluse dans les 218 jours d’une année complète)</label>`; },
     sync: (root, st) => { // CP pris par défaut : 25 pour une année complète, 0 pour une entrée en cours d’année
       if (st.cpSet) return;
       const y0 = new Date().getFullYear(), a = dIn(st.a || y0 + '-01-01'), b = dIn(st.b || y0 + '-12-31'); if (a == null || b == null) return;
@@ -2840,14 +2844,16 @@ const TOOLS = [
         <div class="tl-note">Règle : pour un salarié qui n’a pas un droit complet aux congés payés (entrée en cours d’année), le plafond de jours est « augmenté à due concurrence » des congés non acquis (circulaire DRT n° 2000-7 du 6 décembre 2000, sauf accord collectif contraire ; plafond de 218 jours, art. L3121-64). La loi ne fixe pas la méthode de proratisation : A et B sont deux pratiques courantes, à choisir selon l’accord collectif. ${ferNote()}</div>`;
     } },
   { id: 'add', t: 'Ajouter ou retirer des jours', d: 'Date ± N jours calendaires, ouvrables ou ouvrés',
-    html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>${amBox(st)}`,
+    html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>`,
     calc: st => {
       const d = dIn(st.d), n = parseInt(st.n, 10); if (d == null || isNaN(n)) return '<div class="tl-empty">Saisissez une date et un nombre de jours.</div>';
       const r = addTyped(d, n, st.type || 'cal'), lb = { cal: 'calendaire', ouvrable: 'ouvrable', ouvre: 'ouvré' }[st.type || 'cal'];
       return `<div class="tl-big">${dLong(r)}</div><div class="tl-res"><div>${dLong(d)} ${n >= 0 ? '+' : '−'} ${plur(Math.abs(n), 'jour')} ${lb}${Math.abs(n) > 1 ? 's' : ''}${st.type && st.type !== 'cal' ? ' (dimanches' + (st.type === 'ouvre' ? ', samedis' : '') + ' et jours fériés non comptés)' : ''}</div>${tlHol(dayKey(r)) ? `<div class="tl-note">Ce jour est férié : ${esc(tlHol(dayKey(r)))}.</div>` : ''}</div>`;
     } },
   { id: 'count', t: 'Compter les jours', d: 'Jours calendaires, ouvrables, ouvrés et fériés entre deux dates',
-    html: st => `<div class="tl-row"><label class="fld"><span>Mois entier</span><input type="month" data-k="mo" value="${esc(st.mo || '')}"></label><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>${amBox(st)}`,
+    html: st => { const mk = monthKey(dIn(st.a) ?? Date.now()), whole = cntWhole(st); return `<div class="tl-month"><span class="muted small">Mois entier :</span><button type="button" class="btn sm ghost" data-tla="mo" data-d="-1" title="Mois précédent">‹</button><button type="button" class="btn sm ${whole ? 'on' : ''}" data-tla="mo" data-d="0" title="Du 1er au dernier jour de ce mois">${esc(MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4))}</button><button type="button" class="btn sm ghost" data-tla="mo" data-d="1" title="Mois suivant">›</button><button type="button" class="btn sm ghost" data-tla="mo" data-d="cur">Ce mois-ci</button></div>
+      <div class="tl-row"><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>`; },
+    sync: (root, st) => { const b = root.querySelector('[data-tla=mo][data-d="0"]'); if (!b) return; const mk = monthKey(dIn(st.a) ?? Date.now()); b.textContent = MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4); b.classList.toggle('on', cntWhole(st)); },
     calc: st => {
       let a = dIn(st.a), b = dIn(st.b); if (a == null || b == null) return '<div class="tl-empty">Choisissez un mois entier ou saisissez les deux dates.</div>'; if (b < a) [a, b] = [b, a];
       if ((b - a) / DAY > 3700) return '<div class="tl-empty">Période trop longue (10 ans maximum).</div>';
@@ -2856,7 +2862,7 @@ const TOOLS = [
     } },
   { id: 'prorata', t: 'Prorata d’un montant', d: 'Entrée ou sortie en cours de mois, absence, temps partiel',
     html: st => { const m = st.mode || 'cal'; return `<div class="tl-row"><label class="fld"><span>Montant (mois complet)</span><input data-k="amt" inputmode="decimal" value="${esc(st.amt || '')}" placeholder="ex. 2 500,00"></label><label class="fld"><span>Base de calcul</span><select data-k="mode">${[['cal', 'Jours calendaires du mois'], ['ouvre', 'Jours ouvrés du mois'], ['ouvrable', 'Jours ouvrables du mois'], ['free', 'Saisie libre (heures, jours…)']].map(([v, l]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
-      <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>${m === 'free' ? '' : amBox(st)}`; },
+      <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>`; },
     calc: st => {
       const m = st.mode || 'cal', amt = numIn(st.amt); if (amt == null) return '<div class="tl-empty">Saisissez le montant.</div>';
       let num, den, txt;
@@ -2872,19 +2878,20 @@ const TOOLS = [
 ];
 const TOOLS_V121 = ['dates', 'rc', 'hm', 'pct', 'subro', 'add', 'count', 'prorata'];
 // Outils choisis ; un outil ajouté dans une version ultérieure s'affiche par défaut
+const cntWhole = st => { const a = dIn(st.a), b = dIn(st.b); return a != null && b != null && new Date(a).getDate() === 1 && b === addDays(addMonths(a, 1), -1); };
 const toolsOn = () => { const t = S.meta.settings.tools; if (!Array.isArray(t)) return TOOLS.map(x => x.id); const seen = Array.isArray(S.meta.settings.toolsSeen) ? S.meta.settings.toolsSeen : TOOLS_V121; return TOOLS.map(x => x.id).filter(id => t.includes(id) || !seen.includes(id)); };
 UI.tl = {};
 function toolCalc(sec) {
   const tool = TOOLS.find(x => x.id === sec.dataset.tool); if (!tool) return;
   const st = (UI.tl[tool.id] ||= {});
-  TLAM = !!st.am;
+  TLAM = toolsAM();
   if (tool.sync) tool.sync(sec, st);
   const out = sec.querySelector('.tl-out'); if (out) out.innerHTML = tool.calc(st);
   TLAM = false;
 }
 function renderOutils() {
   const body = $('#outils-body'), on = toolsOn();
-  let html = `<div class="card filters tl-head"><div><b>Outils du gestionnaire de paie</b><div class="muted small">Calculs indicatifs : vérifiez toujours les règles de votre convention collective.</div></div><span class="sp" style="flex:1"></span><button class="btn sm" data-tla="choose">⚙ Choisir mes outils (${on.length}/${TOOLS.length})</button></div>`;
+  let html = `<div class="card filters tl-head"><div><b>Outils du gestionnaire de paie</b><div class="muted small">Calculs indicatifs : vérifiez toujours les règles de votre convention collective.</div></div><span class="sp" style="flex:1"></span>${S.meta.settings.toolsAMShow ? `<div class="seg" role="radiogroup" aria-label="Jours fériés utilisés par les outils" title="S’applique à tous les outils"><button type="button" data-tla="am" data-v="0" class="${toolsAM() ? '' : 'on'}">Fériés métropole</button><button type="button" data-tla="am" data-v="1" class="${toolsAM() ? 'on' : ''}">Fériés Alsace-Moselle</button></div>` : ''}<button class="btn sm" data-tla="choose">⚙ Choisir mes outils (${on.length}/${TOOLS.length})</button></div>`;
   if (!on.length) html += `<div class="card empty">Aucun outil affiché. <button class="btn sm" data-tla="choose">Choisir mes outils</button></div>`;
   for (const id of on) { const t = TOOLS.find(x => x.id === id), st = (UI.tl[id] ||= {}); html += `<i data-b="tool-${id}" data-half="${['hm', 'pct', 'add', 'count', 'dates', 'prorata'].includes(id) ? '1' : ''}" data-t="${esc(t.t)}"></i><h2>${esc(t.t)}</h2><div class="card tl-card" data-tool="${id}"><div class="tl-in">${t.html(st)}</div><div class="tl-out"></div></div>`; }
   body.innerHTML = html.replace(/data-half=""/g, '');
@@ -2894,18 +2901,17 @@ function renderOutils() {
 function openToolChooser() {
   const on = new Set(toolsOn());
   const m = modal(`<div class="modal-h"><h3>Choisir mes outils</h3><button class="icon" data-close>${ICON.close}</button></div>
-    <div class="modal-b" style="display:grid;gap:8px">${TOOLS.map(t => `<label class="chk tl-pick"><input type="checkbox" value="${t.id}" ${on.has(t.id) ? 'checked' : ''}><span><b>${esc(t.t)}</b><span class="muted small" style="display:block">${esc(t.d)}</span></span></label>`).join('')}</div>
+    <div class="modal-b" style="display:grid;gap:8px">${TOOLS.map(t => `<label class="chk tl-pick"><input type="checkbox" value="${t.id}" ${on.has(t.id) ? 'checked' : ''}><span><b>${esc(t.t)}</b><span class="muted small" style="display:block">${esc(t.d)}</span></span></label>`).join('')}
+      <div class="tl-opt-h">Options</div><label class="chk tl-pick"><input type="checkbox" id="tl-amshow" ${S.meta.settings.toolsAMShow ? 'checked' : ''}><span><b>Proposer les jours fériés d’Alsace-Moselle</b><span class="muted small" style="display:block">Affiche en haut de l’onglet le choix « Fériés métropole / Fériés Alsace-Moselle » (Vendredi saint et 26 décembre), appliqué à tous les outils en même temps.</span></span></label></div>
     <div class="modal-f"><button class="btn ghost" id="tl-all">Tout cocher</button><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tl-ok">Enregistrer</button></div>`);
-  m.el.querySelector('#tl-all').addEventListener('click', () => m.el.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = true; }));
-  m.el.querySelector('#tl-ok').addEventListener('click', () => { S.meta.settings.tools = [...m.el.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value); S.meta.settings.toolsSeen = TOOLS.map(x => x.id); touchMeta(); m.close(); });
+  m.el.querySelector('#tl-all').addEventListener('click', () => m.el.querySelectorAll('input[type=checkbox][value]').forEach(c => { c.checked = true; }));
+  m.el.querySelector('#tl-ok').addEventListener('click', () => { S.meta.settings.tools = [...m.el.querySelectorAll('input[type=checkbox][value]:checked')].map(c => c.value); S.meta.settings.toolsAMShow = m.el.querySelector('#tl-amshow').checked; S.meta.settings.toolsSeen = TOOLS.map(x => x.id); touchMeta(); m.close(); });
 }
 function bindOutils() {
   const body = $('#outils-body');
   const read = (el) => {
     const sec = el.closest('[data-tool]'); if (!sec) return;
     const st = (UI.tl[sec.dataset.tool] ||= {});
-    if (el.dataset.k === 'mo' && sec.dataset.tool === 'count') { st.mo = el.value; if (/^\d{4}-\d{2}$/.test(el.value)) { st.a = el.value + '-01'; st.b = dayKey(addDays(addMonths(parseDay(st.a), 1), -1)); sec.querySelector('[data-k=a]').value = st.a; sec.querySelector('[data-k=b]').value = st.b; } toolCalc(sec); return; }
-    if ((el.dataset.k === 'a' || el.dataset.k === 'b') && sec.dataset.tool === 'count') { st.mo = ''; const m = sec.querySelector('[data-k=mo]'); if (m) m.value = ''; }
     if (el.dataset.k === 'cp' && sec.dataset.tool === 'fj') st.cpSet = el.value.trim() !== '';
     if (el.dataset.k) { st[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; if (sec.dataset.tool === 'hm' && (el.dataset.k === 'hm' || el.dataset.k === 'dec')) st.last = el.dataset.k; }
     if (el.dataset.pal) { const [i, k] = el.dataset.pal.split(':'); st.pal ||= [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]; st.pal[+i][k] = el.value; }
@@ -2917,6 +2923,11 @@ function bindOutils() {
     const sg = ev.target.closest('[data-kseg] button'); if (sg) { const sec = sg.closest('[data-tool]'), st = (UI.tl[sec.dataset.tool] ||= {}); st[sg.parentElement.dataset.kseg] = sg.dataset.v; renderOutils(); return; }
     const a = ev.target.closest('[data-tla]'); if (!a) return;
     if (a.dataset.tla === 'choose') { openToolChooser(); return; }
+    if (a.dataset.tla === 'am') { S.meta.settings.toolsAM = a.dataset.v === '1'; touchMeta(); return; }
+    if (a.dataset.tla === 'mo') { // mois entier : du 1er au dernier jour
+      const st = (UI.tl.count ||= {}), d = a.dataset.d, base = d === 'cur' ? startOfMonth(Date.now()) : addMonths(startOfMonth(dIn(st.a) ?? Date.now()), +d);
+      st.a = dayKey(base); st.b = dayKey(addDays(addMonths(base, 1), -1)); renderOutils(); return;
+    }
     const st = (UI.tl.subro ||= {}); st.pal ||= [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }];
     if (a.dataset.tla === 'paladd') { st.pal.push({ n: '30', l: '' }); renderOutils(); }
     else if (a.dataset.tla === 'paldel') { st.pal.splice(+a.dataset.i, 1); renderOutils(); }
