@@ -969,7 +969,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.21.0';
+const APP_VERSION = '1.22.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2775,6 +2775,29 @@ const TOOLS = [
       pal.forEach((x, i) => { const use = Math.max(0, x.n - deja); deja = Math.max(0, deja - x.n); if (!use) { rows.push(`<li><span class="tl-lb">Palier ${i + 1} (${esc(x.l)})</span><span class="tl-dt">déjà épuisé</span></li>`); return; } const e = addDays(cur, use - 1); rows.push(`<li class="key"><span class="tl-lb">Palier ${i + 1} (${esc(x.l)})</span><span class="tl-dt">du ${fmtDate(cur)} au ${dLong(e)}</span><span class="tl-sb">${plur(use, 'jour')}${use < x.n ? ' (sur ' + x.n + ', compte tenu des jours déjà maintenus)' : ''}</span></li>`); cur = addDays(e, 1); last = e; });
       return `<div class="tl-big">${last != null ? 'Fin de subrogation : ' + dLong(last) : 'Aucun jour de maintien restant'}</div><ol class="tl-steps">${rows.join('')}</ol>`;
     } },
+  { id: 'fj', t: 'Forfait jours : jours de repos', d: 'Jours non travaillés (JNT) d’un forfait annuel, année complète ou entrée en cours d’année',
+    html: st => { const y = new Date().getFullYear(); return `<div class="tl-row"><label class="fld"><span>Jours du forfait (année complète)</span><input data-k="n" inputmode="numeric" value="${esc(st.n ?? '218')}"></label><label class="fld"><span>Congés payés (jours ouvrés)</span><input data-k="cp" inputmode="decimal" value="${esc(st.cp ?? '25')}"></label></div>
+      <div class="tl-row"><label class="fld"><span>Début de période (entrée en cours d’année : modifier)</span><input type="date" data-k="a" value="${esc(st.a || y + '-01-01')}"></label><label class="fld"><span>Fin de période</span><input type="date" data-k="b" value="${esc(st.b || y + '-12-31')}"></label></div>`; },
+    calc: st => {
+      const y0 = new Date().getFullYear(), a = dIn(st.a || y0 + '-01-01'), b = dIn(st.b || y0 + '-12-31'), n = numIn(st.n ?? '218'), cp = numIn(st.cp ?? '25');
+      if (a == null || b == null || n == null || cp == null) return '<div class="tl-empty">Renseignez le forfait, les congés payés et la période.</div>';
+      if (b < a) return '<div class="tl-empty">La fin de période est avant le début.</div>';
+      if (new Date(a).getFullYear() !== new Date(b).getFullYear()) return '<div class="tl-empty">La période doit rester dans une même année civile.</div>';
+      const y = new Date(a).getFullYear(), yd = countDays(parseDay(y + '-01-01'), parseDay(y + '-12-31')).cal, o = countDays(a, b), full = o.cal === yd;
+      const ferOuvres = o.fer.filter(([d]) => { const w = new Date(d).getDay(); return w >= 1 && w <= 5; }), ferWe = o.fer.length - ferOuvres.length;
+      const ouvres = o.cal - o.we - ferOuvres.length, fp = full ? n : n * o.cal / yd, jnt = ouvres - cp - fp, up = Math.ceil(jnt * 2) / 2;
+      const line = (l, v, sub, op = '') => `<li><span class="tl-lb">${op}${l}</span><span class="tl-dt"><b>${v}</b></span>${sub ? `<span class="tl-sb">${sub}</span>` : ''}</li>`;
+      return `<div class="tl-big">${jnt < 0 ? 'Forfait supérieur aux jours ouvrés disponibles' : nf(jnt, 2) + ' jour' + (jnt > 1 ? 's' : '') + ' de repos'}${jnt >= 0 && up !== jnt ? ` <span class="muted" style="font-size:14px;font-weight:500">(arrondi au demi-jour supérieur : ${nf(up, 1)})</span>` : ''}</div>
+        <ol class="tl-steps">
+        ${line('Jours calendaires de la période', o.cal, full ? 'Année ' + y + (yd === 366 ? ' (bissextile)' : '') : 'du ' + fmtDate(a) + ' au ' + fmtDate(b) + ' (année : ' + yd + ' jours)')}
+        ${line('Samedis et dimanches', o.we, '', '− ')}
+        ${line('Jours fériés tombant un jour ouvré', ferOuvres.length, ferOuvres.length ? ferOuvres.map(([d, h]) => esc(h) + ' ' + WD_S[new Date(d).getDay()] + ' ' + fmtDate(d).slice(0, 5)).join(' · ') + (ferWe ? ' · ' + ferWe + ' férié(s) tombant un week-end, déjà déduit(s)' : '') : (ferWe ? ferWe + ' férié(s) tombant un week-end, déjà déduit(s)' : ''), '− ')}
+        <li class="key"><span class="tl-lb">= Jours ouvrés de la période</span><span class="tl-dt"><b>${ouvres}</b></span></li>
+        ${line('Congés payés', nf(cp, 2), full ? '' : 'Congés payés pris ou à prendre sur la période (à ajuster pour une entrée en cours d’année)', '− ')}
+        ${line('Jours du forfait' + (full ? '' : ' proratisés'), nf(fp, 2), full ? '' : nf(n, 2) + ' × ' + o.cal + ' / ' + yd + ' jours calendaires', '− ')}
+        <li class="key"><span class="tl-lb">= Jours non travaillés (repos)</span><span class="tl-dt"><b>${nf(jnt, 2)}</b></span></li></ol>
+        <div class="tl-note">Méthode habituelle de calcul ; l’accord collectif ou la convention peut prévoir d’autres règles (jours d’ancienneté, de fractionnement, ponts, arrondi). Le forfait de 218 jours inclut la journée de solidarité. Jours fériés de France métropolitaine (hors Alsace-Moselle).</div>`;
+    } },
   { id: 'add', t: 'Ajouter ou retirer des jours', d: 'Date ± N jours calendaires, ouvrables ou ouvrés',
     html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>`,
     calc: st => {
@@ -2783,9 +2806,9 @@ const TOOLS = [
       return `<div class="tl-big">${dLong(r)}</div><div class="tl-res"><div>${dLong(d)} ${n >= 0 ? '+' : '−'} ${plur(Math.abs(n), 'jour')} ${lb}${Math.abs(n) > 1 ? 's' : ''}${st.type && st.type !== 'cal' ? ' (dimanches' + (st.type === 'ouvre' ? ', samedis' : '') + ' et jours fériés non comptés)' : ''}</div>${holidayOn(dayKey(r)) ? `<div class="tl-note">Ce jour est férié : ${esc(holidayOn(dayKey(r)))}.</div>` : ''}</div>`;
     } },
   { id: 'count', t: 'Compter les jours', d: 'Jours calendaires, ouvrables, ouvrés et fériés entre deux dates',
-    html: st => `<div class="tl-row"><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>`,
+    html: st => `<div class="tl-row"><label class="fld"><span>Mois entier</span><input type="month" data-k="mo" value="${esc(st.mo || '')}"></label><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>`,
     calc: st => {
-      let a = dIn(st.a), b = dIn(st.b); if (a == null || b == null) return '<div class="tl-empty">Saisissez les deux dates.</div>'; if (b < a) [a, b] = [b, a];
+      let a = dIn(st.a), b = dIn(st.b); if (a == null || b == null) return '<div class="tl-empty">Choisissez un mois entier ou saisissez les deux dates.</div>'; if (b < a) [a, b] = [b, a];
       if ((b - a) / DAY > 3700) return '<div class="tl-empty">Période trop longue (10 ans maximum).</div>';
       const o = countDays(a, b);
       return `<div class="tl-grid"><div><span>Calendaires</span><b>${o.cal}</b></div><div><span>Ouvrables</span><b>${o.ouvrable}</b></div><div><span>Ouvrés</span><b>${o.ouvre}</b></div><div><span>Samedis et dimanches</span><b>${o.we}</b></div></div>${o.fer.length ? `<div class="tl-note">Jours fériés dans la période (${o.fer.length}) : ${o.fer.map(([d, h]) => esc(h) + ' ' + WD_S[new Date(d).getDay()] + ' ' + fmtDate(d).slice(0, 5)).join(' · ')}</div>` : '<div class="tl-note">Aucun jour férié dans la période.</div>'}`;
@@ -2806,7 +2829,9 @@ const TOOLS = [
       return `<div class="tl-big">${nf(amt * num / den, 2)}</div><div class="tl-res"><div>${nf(amt, 2)} × ${txt}</div><div class="tl-note">Méthode à vérifier selon votre convention collective et la jurisprudence (ex. entrée / sortie en cours de mois : jours calendaires ou jours ouvrés réels).</div></div>`;
     } },
 ];
-const toolsOn = () => { const t = S.meta.settings.tools; return Array.isArray(t) ? t.filter(id => TOOLS.some(x => x.id === id)) : TOOLS.map(x => x.id); };
+const TOOLS_V121 = ['dates', 'rc', 'hm', 'pct', 'subro', 'add', 'count', 'prorata'];
+// Outils choisis ; un outil ajouté dans une version ultérieure s'affiche par défaut
+const toolsOn = () => { const t = S.meta.settings.tools; if (!Array.isArray(t)) return TOOLS.map(x => x.id); const seen = Array.isArray(S.meta.settings.toolsSeen) ? S.meta.settings.toolsSeen : TOOLS_V121; return TOOLS.map(x => x.id).filter(id => t.includes(id) || !seen.includes(id)); };
 UI.tl = {};
 function toolCalc(sec) {
   const tool = TOOLS.find(x => x.id === sec.dataset.tool); if (!tool) return;
@@ -2829,13 +2854,15 @@ function openToolChooser() {
     <div class="modal-b" style="display:grid;gap:8px">${TOOLS.map(t => `<label class="chk tl-pick"><input type="checkbox" value="${t.id}" ${on.has(t.id) ? 'checked' : ''}><span><b>${esc(t.t)}</b><span class="muted small" style="display:block">${esc(t.d)}</span></span></label>`).join('')}</div>
     <div class="modal-f"><button class="btn ghost" id="tl-all">Tout cocher</button><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tl-ok">Enregistrer</button></div>`);
   m.el.querySelector('#tl-all').addEventListener('click', () => m.el.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = true; }));
-  m.el.querySelector('#tl-ok').addEventListener('click', () => { S.meta.settings.tools = [...m.el.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value); touchMeta(); m.close(); });
+  m.el.querySelector('#tl-ok').addEventListener('click', () => { S.meta.settings.tools = [...m.el.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value); S.meta.settings.toolsSeen = TOOLS.map(x => x.id); touchMeta(); m.close(); });
 }
 function bindOutils() {
   const body = $('#outils-body');
   const read = (el) => {
     const sec = el.closest('[data-tool]'); if (!sec) return;
     const st = (UI.tl[sec.dataset.tool] ||= {});
+    if (el.dataset.k === 'mo' && sec.dataset.tool === 'count') { st.mo = el.value; if (/^\d{4}-\d{2}$/.test(el.value)) { st.a = el.value + '-01'; st.b = dayKey(addDays(addMonths(parseDay(st.a), 1), -1)); sec.querySelector('[data-k=a]').value = st.a; sec.querySelector('[data-k=b]').value = st.b; } toolCalc(sec); return; }
+    if ((el.dataset.k === 'a' || el.dataset.k === 'b') && sec.dataset.tool === 'count') { st.mo = ''; const m = sec.querySelector('[data-k=mo]'); if (m) m.value = ''; }
     if (el.dataset.k) { st[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; if (sec.dataset.tool === 'hm' && (el.dataset.k === 'hm' || el.dataset.k === 'dec')) st.last = el.dataset.k; }
     if (el.dataset.pal) { const [i, k] = el.dataset.pal.split(':'); st.pal ||= [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]; st.pal[+i][k] = el.value; }
     toolCalc(sec);
