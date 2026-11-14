@@ -622,6 +622,7 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-pal{display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap}
 .tl-pal input{width:60px;text-align:center}
 .tl-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tl-ident summary{cursor:pointer;font-size:13px;color:var(--ink-2)}.tl-ident[open] summary{margin-bottom:6px}
 .tl-acts{display:flex;justify-content:flex-end;gap:6px;border-top:1px dashed var(--line);padding-top:8px;margin-top:-4px}
 .aev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.aev-in{display:flex;gap:4px}.aev-in input{flex:1 1 auto;min-width:0;width:auto}.aev-in select{flex:0 0 96px;width:96px;min-width:0}
 .aev-best{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}.aev-tag{color:var(--accent);font-weight:600}
@@ -1024,7 +1025,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.32.1';
+const APP_VERSION = '1.34.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2781,7 +2782,7 @@ function rcLatestSig(target, o) { // signature au plus tard pour une rupture au 
    Arrêté du 10/12/2002 modifié par l'arrêté du 25/02/2025 ; BOSS Avantages en nature. */
 const AEV_PLAF = { 2025: { f: 4582, r: 2000.30 }, 2026: { f: 4641.60, r: 2026.30 } }; // abattement véhicule électrique : plafonds annuels (forfait 70 %, réel 50 %)
 const eur = n => n == null || !isFinite(n) ? '—' : n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-const aevAmt = (st, k, l, ph, per = true) => `<label class="fld aev-f"><span>${l}</span><span class="aev-in"><input data-k="${k}" inputmode="decimal" value="${esc(st[k] || '')}" placeholder="${ph || '0,00'}">${per ? `<select data-k="u_${k}" title="Montant mensuel ou annuel"><option value="a" ${(st['u_' + k] || 'a') === 'a' ? 'selected' : ''}>par an</option><option value="m" ${st['u_' + k] === 'm' ? 'selected' : ''}>par mois</option></select>` : ''}</span></label>`;
+const aevAmt = (st, k, l, ph, per = true) => `<label class="fld aev-f"><span>${l}</span><span class="aev-in"><input data-k="${k}" data-eur="1" inputmode="decimal" value="${esc(st[k] || '')}" placeholder="${ph || '0,00'}">${per ? `<select data-k="u_${k}" title="Montant mensuel ou annuel"><option value="a" ${(st['u_' + k] || 'a') === 'a' ? 'selected' : ''}>par an</option><option value="m" ${st['u_' + k] === 'm' ? 'selected' : ''}>par mois</option></select>` : ''}</span></label>`;
 const aevYear = (st, k) => { const v = numIn(st[k]); return v == null ? 0 : st['u_' + k] === 'm' ? v * 12 : v; };
 function aevCalc(st) {
   const own = st.own || 'achat', old = st.age === 'old', elec = !!st.elec, fuel = !elec && st.fuel === 'oui';
@@ -2832,6 +2833,8 @@ function aevCalc(st) {
   f = fin('f', f); r = fin('r', r);
   return { f, r, rErr, months, steps, elec, yr };
 }
+// Champs d'identification facultatifs (texte libre), repris dans l'export
+const tlIdent = (st, defs) => `<details class="tl-ident" ${defs.some(([k]) => st[k]) ? 'open' : ''}><summary>Informations (facultatif)</summary><div class="tl-row aev-grid">${defs.map(([k, l, ph, list]) => `<label class="fld"><span>${l}</span><input data-k="${k}" data-txt="1" autocomplete="off" maxlength="80" value="${esc(st[k] || '')}" placeholder="${esc(ph || '')}"${list ? ` list="dl-${k}"` : ''}>${list ? `<datalist id="dl-${k}">${list.map(x => `<option value="${esc(x)}">`).join('')}</datalist>` : ''}</label>`).join('')}</div></details>`;
 const TOOLS = [
   { id: 'dates', t: 'Écart entre deux dates', d: 'Nombre de jours, mois et années entre deux dates',
     html: st => `<div class="tl-row"><label class="fld"><span>Date de début</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Date de fin</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>
@@ -2844,7 +2847,8 @@ const TOOLS = [
   { id: 'rc', t: 'Rupture conventionnelle', d: 'Calendrier : rétractation, dépôt, homologation, date de rupture',
     html: st => {
       const mode = st.mode || 'sig';
-      return `<div class="seg" data-kseg="mode">${[['sig', 'Date de signature'], ['ent', 'Date d’entretien'], ['ret', 'Fin de rétractation'], ['rup', 'Date de rupture souhaitée']].map(([v, l]) => `<button type="button" data-v="${v}" class="${mode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+      return `${tlIdent(st, [['sal', 'Salarié', 'ex. M. Martin'], ['classif', 'Classification', 'ex. Niveau III, coefficient 240'], ['statut', 'Statut', 'ex. Cadre', ['Ouvrier', 'Employé', 'Technicien', 'Agent de maîtrise', 'Cadre', 'Apprenti']], ['anc', 'Ancienneté', 'ex. 6 ans et 4 mois']])}
+        <div class="seg" data-kseg="mode">${[['sig', 'Date de signature'], ['ent', 'Date d’entretien'], ['ret', 'Fin de rétractation'], ['rup', 'Date de rupture souhaitée']].map(([v, l]) => `<button type="button" data-v="${v}" class="${mode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="tl-row">${mode === 'ent' ? `<label class="fld"><span>Date de l’entretien</span><input type="date" data-k="ent" value="${esc(st.ent || '')}"></label><label class="fld"><span>Délai jusqu’à la signature (jours)</span><input data-k="dEnt" inputmode="numeric" value="${esc(st.dEnt ?? '0')}"></label>` : `<label class="fld"><span>${{ sig: 'Date de signature de la convention', ret: 'Date de fin du délai de rétractation', rup: 'Date de rupture souhaitée (au plus tard)' }[mode]}</span><input type="date" data-k="d_${mode}" value="${esc(st['d_' + mode] || '')}"></label>`}</div>
         <div class="tl-opts"><label class="chk"><input type="checkbox" data-k="depOuvre" ${st.depOuvre ? 'checked' : ''}> Dépôt de la demande un jour ouvré (lundi → vendredi, hors fériés)</label>
           <label class="tl-inl">Marge avant le dépôt <input data-k="mDep" inputmode="numeric" value="${esc(st.mDep ?? '0')}"> j</label>
@@ -2876,7 +2880,7 @@ const TOOLS = [
         ${o.post ? li('Réception par l’administration', p.rec, plur(o.post, 'jour') + ' après l’envoi') : ''}
         ${li('Fin de l’instruction (homologation tacite)', p.iEnd, '15 jours ouvrables à partir du ' + fmtDate(p.iStart).slice(0, 5) + (fi.length ? ' · férié(s) non compté(s) : ' + fi.join(', ') : '') + (p.iEnd !== p.iRaw ? ' · 15e jour le ' + dLong(p.iRaw) + ', prorogé' : ''), true)}
         ${li('Date de rupture au plus tôt', p.rup, o.mRup ? 'avec ' + plur(o.mRup, 'jour') + ' de marge' : 'lendemain de l’homologation', true)}</ol>
-        <div class="tl-note">Règles : rétractation de 15 jours calendaires à partir du lendemain de la signature (art. L1237-13) ; instruction de 15 jours ouvrables à partir du lendemain de la réception (art. L1237-14) ; un délai qui expire un samedi, un dimanche ou un jour férié est prorogé au premier jour ouvrable suivant (art. R1231-1). ${ferNote()} Calendrier indicatif : <a href="https://www.telerc.travail.gouv.fr/simulateur/calendrier" target="_blank" rel="noopener">contrôler avec le simulateur TéléRC ↗</a></div>`;
+        <div class="tl-note tl-legal">Règles : rétractation de 15 jours calendaires à partir du lendemain de la signature (art. L1237-13) ; instruction de 15 jours ouvrables à partir du lendemain de la réception (art. L1237-14) ; un délai qui expire un samedi, un dimanche ou un jour férié est prorogé au premier jour ouvrable suivant (art. R1231-1). ${ferNote()} Calendrier indicatif : <a href="https://www.telerc.travail.gouv.fr/simulateur/calendrier" target="_blank" rel="noopener">contrôler avec le simulateur TéléRC ↗</a></div>`;
     } },
   { id: 'hm', t: 'Heures : sexagésimal ⇄ décimal', d: 'Convertir 7h45 en 7,75 h et inversement',
     html: st => `<div class="tl-row"><label class="fld"><span>Heures et minutes</span><input data-k="hm" value="${esc(st.hm || '')}" placeholder="ex. 7h45, 7:45, 151h40" autocomplete="off"></label><span class="tl-eq">⇄</span><label class="fld"><span>Heures décimales</span><input data-k="dec" value="${esc(st.dec || '')}" placeholder="ex. 7,75" inputmode="decimal" autocomplete="off"></label></div>`,
@@ -2908,7 +2912,7 @@ const TOOLS = [
   { id: 'subro', t: 'Fin de subrogation', d: 'Carence et paliers de maintien de salaire en jours calendaires',
     html: st => { const pal = st.pal || [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]; return `<div class="tl-row"><label class="fld"><span>Premier jour d’arrêt</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Carence (jours calendaires)</span><input data-k="car" inputmode="numeric" value="${esc(st.car ?? '7')}"></label><label class="fld"><span>Jours déjà maintenus (12 derniers mois)</span><input data-k="deja" inputmode="numeric" value="${esc(st.deja ?? '0')}"></label></div>
       <div class="tl-pals">${pal.map((x, i) => `<div class="tl-pal"><span class="muted small">Palier ${i + 1}</span><input data-pal="${i}:n" inputmode="numeric" value="${esc(x.n)}" aria-label="Nombre de jours du palier ${i + 1}"> jours à <input data-pal="${i}:l" value="${esc(x.l)}" style="width:90px" aria-label="Taux du palier ${i + 1}">${pal.length > 1 ? `<button type="button" class="icon xs" data-tla="paldel" data-i="${i}" title="Retirer">×</button>` : ''}</div>`).join('')}<button type="button" class="btn sm ghost" data-tla="paladd">+ palier</button></div>
-      <div class="tl-note">Carence et durées selon votre convention collective ou le Code du travail (art. L1226-1 et D1226-1 à D1226-8 : maintien légal après 7 jours de carence, 0 en cas d’accident du travail ou de maladie professionnelle, durées selon l’ancienneté).</div>`; },
+      <div class="tl-note tl-legal">Carence et durées selon votre convention collective ou le Code du travail (art. L1226-1 et D1226-1 à D1226-8 : maintien légal après 7 jours de carence, 0 en cas d’accident du travail ou de maladie professionnelle, durées selon l’ancienneté).</div>`; },
     calc: st => {
       const d = dIn(st.d); if (d == null) return '<div class="tl-empty">Saisissez le premier jour d’arrêt.</div>';
       const car = Math.max(0, parseInt(st.car, 10) || 0); let deja = Math.max(0, parseInt(st.deja, 10) || 0);
@@ -2955,7 +2959,7 @@ const TOOLS = [
         return `<div class="tl-big">${res(jnt)} jour${jnt > 1 ? 's' : ''} de repos${rnd(jnt)}</div>${head}<ol class="tl-steps">
           ${line('Jours de travail du forfait', n)}${cp < cpf ? line('+ Congés payés non acquis', nf(cpf - cp, 2), cpf + ' − ' + nf(cp, 2) + ' : ajoutés aux jours à travailler (circulaire DRT n° 2000-7)') : ''}
           ${line('= Jours à travailler', nf(work, 2), '', 'key')}${line('= Jours non travaillés (repos)', nf(jnt, 2), 'jours ouvrés − CP pris − jours à travailler', 'key')}</ol>
-          <div class="tl-note">Le forfait de 218 jours suppose un droit complet aux congés payés et inclut la journée de solidarité. ${ferNote()} Une convention ou un accord collectif peut prévoir d’autres règles (jours d’ancienneté, de fractionnement, ponts, arrondi).</div>`;
+          <div class="tl-note tl-legal">Le forfait de 218 jours suppose un droit complet aux congés payés et inclut la journée de solidarité. ${ferNote()} Une convention ou un accord collectif peut prévoir d’autres règles (jours d’ancienneté, de fractionnement, ponts, arrondi).</div>`;
       }
       return `<div class="tl-two"><div class="tl-m"><div class="tl-mh">Méthode A · forfait proratisé + CP non acquis</div><div class="tl-big">${res(jntA)} j de repos${rnd(jntA)}</div></div><div class="tl-m"><div class="tl-mh">Méthode B · base annuelle reconstituée</div><div class="tl-big">${res(jntB)} j de repos${rnd(jntB)}</div></div></div>
         ${head}
@@ -2971,7 +2975,7 @@ const TOOLS = [
           ${sol ? line('+ Journée de solidarité', 1) : ''}${cp ? line('− Congés payés pris', nf(cp, 2)) : ''}
           ${line('= Jours à travailler', nf(workB, 2), '', 'key')}
           ${line('= Jours non travaillés (repos)', nf(jntB, 2), 'jours ouvrés ' + ouvres + ' − CP pris ' + nf(cp, 2) + ' − jours à travailler', 'key')}</ol></div></div>
-        <div class="tl-note">Règle : pour un salarié qui n’a pas un droit complet aux congés payés (entrée en cours d’année), le plafond de jours est « augmenté à due concurrence » des congés non acquis (circulaire DRT n° 2000-7 du 6 décembre 2000, sauf accord collectif contraire ; plafond de 218 jours, art. L3121-64). La loi ne fixe pas la méthode de proratisation : A et B sont deux pratiques courantes, à choisir selon l’accord collectif. ${ferNote()}</div>`;
+        <div class="tl-note tl-legal">Règle : pour un salarié qui n’a pas un droit complet aux congés payés (entrée en cours d’année), le plafond de jours est « augmenté à due concurrence » des congés non acquis (circulaire DRT n° 2000-7 du 6 décembre 2000, sauf accord collectif contraire ; plafond de 218 jours, art. L3121-64). La loi ne fixe pas la méthode de proratisation : A et B sont deux pratiques courantes, à choisir selon l’accord collectif. ${ferNote()}</div>`;
     } },
   { id: 'add', t: 'Ajouter ou retirer des jours', d: 'Date ± N jours calendaires, ouvrables ou ouvrés',
     html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>`,
@@ -2993,7 +2997,8 @@ const TOOLS = [
   { id: 'aev', t: 'Avantage en nature véhicule', d: 'Véhicule mis à disposition depuis le 1er février 2025 : forfait et réel comparés, électrique, participation',
     html: st => {
       const own = st.own || 'achat', elec = !!st.elec, fuel = !elec && st.fuel === 'oui', seg = (k, def, opts) => `<div class="seg" data-kseg="${k}">${opts.map(([v, l]) => `<button type="button" data-v="${v}" class="${(st[k] || def) === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
-      return `<div class="tl-row" style="gap:10px">${seg('own', 'achat', [['achat', 'Véhicule acheté'], ['loc', 'Véhicule loué (LLD, LOA)']])}${own === 'achat' ? seg('age', 'new', [['new', '5 ans au plus'], ['old', 'Plus de 5 ans']]) : ''}${elec ? '' : seg('fuel', 'non', [['non', 'Carburant non pris en charge'], ['oui', 'Carburant personnel payé par l’employeur']])}</div>
+      return `${tlIdent(st, [['sal', 'Salarié', 'ex. Mme Durand'], ['veh', 'Véhicule', 'ex. Peugeot 308 SW'], ['immat', 'Immatriculation', 'ex. AB-123-CD']])}
+        <div class="tl-row" style="gap:10px">${seg('own', 'achat', [['achat', 'Véhicule acheté'], ['loc', 'Véhicule loué (LLD, LOA)']])}${own === 'achat' ? seg('age', 'new', [['new', '5 ans au plus'], ['old', 'Plus de 5 ans']]) : ''}${elec ? '' : seg('fuel', 'non', [['non', 'Carburant non pris en charge'], ['oui', 'Carburant personnel payé par l’employeur']])}</div>
         <label class="chk"><input type="checkbox" data-k="elec" data-rr="1" ${elec ? 'checked' : ''}> Véhicule 100 % électrique ayant le score environnemental minimal (liste éco-score) — frais de recharge non comptés</label>
         ${elec ? `<label class="tl-inl">Année de calcul (plafond de l’abattement) <select data-k="yr">${Object.keys(AEV_PLAF).map(y => `<option ${String(st.yr || Math.min(Math.max(new Date().getFullYear(), 2025), 2026)) === y ? 'selected' : ''}>${y}</option>`).join('')}</select></label>` : ''}
         <div class="tl-row aev-grid">${own === 'achat' ? aevAmt(st, 'prix', 'Coût d’achat TTC (remises déduites)', 'ex. 35 000', false) : aevAmt(st, 'loc', 'Location TTC', 'ex. 600') + aevAmt(st, 'pub', 'Prix public TTC du véhicule (facultatif, plafond)', 'ex. 40 000', false)}
@@ -3010,11 +3015,11 @@ const TOOLS = [
         <div class="tl-two"><div><div class="tl-mh">Forfait</div><ol class="tl-steps">${o.steps.f.join('')}</ol></div><div><div class="tl-mh">Dépenses réelles</div>${o.r == null ? '<div class="tl-empty">—</div>' : `<ol class="tl-steps">${o.steps.r.join('')}</ol>`}</div></div>`
         : `${box('Forfait', o.f, false)}<ol class="tl-steps">${o.steps.f.join('')}</ol>`;
       return `${res}
-        <div class="tl-note">Règles applicables aux véhicules mis à disposition <b>à compter du 1er février 2025</b> (arrêté du 10 décembre 2002 modifié par l’arrêté du 25 février 2025). Forfait annuel : véhicule acheté 15 % du coût d’achat TTC (10 % au-delà de 5 ans), 20 % / 15 % avec le carburant, ou 15 % / 10 % + carburant réel ; véhicule loué 50 % du coût global annuel (location, entretien, assurance), 67 % avec le carburant, ou 50 % + carburant réel, sans dépasser le forfait « achat » calculé sur le prix public TTC. Réel : amortissement 20 % (10 %) ou location + assurance + entretien, au prorata des km personnels (justificatifs nécessaires, sinon l’Urssaf applique le forfait), + carburant des trajets personnels. Véhicule 100 % électrique éco-scoré (jusqu’au 31/12/2027) : abattement de 70 % au forfait (plafond 4 582 € en 2025, 4 641,60 € en 2026) ou 50 % au réel (2 000,30 € / 2 026,30 €), recharge non comptée. La participation du salarié vient en déduction. Montant mensuel = annuel ÷ 12. En achat, l’assurance et l’entretien sont couverts par le forfait : ils ne servent qu’à l’évaluation au réel.
+        <div class="tl-note tl-legal">Règles applicables aux véhicules mis à disposition <b>à compter du 1er février 2025</b> (arrêté du 10 décembre 2002 modifié par l’arrêté du 25 février 2025). Forfait annuel : véhicule acheté 15 % du coût d’achat TTC (10 % au-delà de 5 ans), 20 % / 15 % avec le carburant, ou 15 % / 10 % + carburant réel ; véhicule loué 50 % du coût global annuel (location, entretien, assurance), 67 % avec le carburant, ou 50 % + carburant réel, sans dépasser le forfait « achat » calculé sur le prix public TTC. Réel : amortissement 20 % (10 %) ou location + assurance + entretien, au prorata des km personnels (justificatifs nécessaires, sinon l’Urssaf applique le forfait), + carburant des trajets personnels. Véhicule 100 % électrique éco-scoré (jusqu’au 31/12/2027) : abattement de 70 % au forfait (plafond 4 582 € en 2025, 4 641,60 € en 2026) ou 50 % au réel (2 000,30 € / 2 026,30 €), recharge non comptée. La participation du salarié vient en déduction. Montant mensuel = annuel ÷ 12. En achat, l’assurance et l’entretien sont couverts par le forfait : ils ne servent qu’à l’évaluation au réel.
           <br>Sources : <a href="https://boss.gouv.fr/portail/accueil/avantages-en-nature/avantages-en-nature.html" target="_blank" rel="noopener">BOSS — Avantages en nature ↗</a> · <a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000250212" target="_blank" rel="noopener">Arrêté du 10 décembre 2002 modifié ↗</a> · <a href="https://www.urssaf.fr/accueil/employeur/beneficier-exonerations/avantages-en-nature/vehicule.html" target="_blank" rel="noopener">Urssaf ↗</a></div>`;
     } },
   { id: 'prorata', t: 'Prorata d’un montant', d: 'Entrée ou sortie en cours de mois, absence, temps partiel',
-    html: st => { const m = st.mode || 'cal'; return `<div class="tl-row"><label class="fld"><span>Montant (mois complet)</span><input data-k="amt" inputmode="decimal" value="${esc(st.amt || '')}" placeholder="ex. 2 500,00"></label><label class="fld"><span>Base de calcul</span><select data-k="mode">${[['cal', 'Jours calendaires du mois'], ['ouvre', 'Jours ouvrés du mois'], ['ouvrable', 'Jours ouvrables du mois'], ['free', 'Saisie libre (heures, jours…)']].map(([v, l]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+    html: st => { const m = st.mode || 'cal'; return `<div class="tl-row"><label class="fld"><span>Montant (mois complet)</span><input data-k="amt" data-eur="1" inputmode="decimal" value="${esc(st.amt || '')}" placeholder="ex. 2 500,00"></label><label class="fld"><span>Base de calcul</span><select data-k="mode">${[['cal', 'Jours calendaires du mois'], ['ouvre', 'Jours ouvrés du mois'], ['ouvrable', 'Jours ouvrables du mois'], ['free', 'Saisie libre (heures, jours…)']].map(([v, l]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
       <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>`; },
     calc: st => {
       const m = st.mode || 'cal', amt = numIn(st.amt); if (amt == null) return '<div class="tl-empty">Saisissez le montant.</div>';
@@ -3026,7 +3031,7 @@ const TOOLS = [
         const mo = countDays(startOfMonth(a), addDays(addMonths(startOfMonth(a), 1), -1)), pr = countDays(a, b), k = m === 'cal' ? 'cal' : m;
         num = pr[k]; den = mo[k]; txt = num + ' / ' + den + ' jours ' + { cal: 'calendaires', ouvre: 'ouvrés', ouvrable: 'ouvrables' }[m] + ' de ' + MONTHS_L[new Date(a).getMonth()];
       }
-      return `<div class="tl-big">${nf(amt * num / den, 2)}</div><div class="tl-res"><div>${nf(amt, 2)} × ${txt}</div><div class="tl-note">Méthode à vérifier selon votre convention collective et la jurisprudence (ex. entrée / sortie en cours de mois : jours calendaires ou jours ouvrés réels).</div></div>`;
+      return `<div class="tl-big">${nf(amt * num / den, 2)}</div><div class="tl-res"><div>${nf(amt, 2)} × ${txt}</div><div class="tl-note tl-legal">Méthode à vérifier selon votre convention collective et la jurisprudence (ex. entrée / sortie en cours de mois : jours calendaires ou jours ouvrés réels).</div></div>`;
     } },
 ];
 const TOOLS_V121 = ['dates', 'rc', 'hm', 'pct', 'subro', 'add', 'count', 'prorata'];
@@ -3058,7 +3063,7 @@ function tlExtract(sec) {
     if (el.matches('.seg')) { const on = el.querySelector('button.on'); if (on && !el.closest('.tl-head')) data.push({ v: tlTxt(on) }); return; }
     if (el.matches('label.fld')) {
       const l = tlTxt(el.querySelector('span')), ins = [...el.querySelectorAll('input,select')];
-      const vals = ins.map(i => i.tagName === 'SELECT' ? i.selectedOptions[0]?.text || '' : i.type === 'date' ? (i.value ? fmtDate(parseDay(i.value)) : '') : (/^-?[\d\s]+([.,]\d+)?$/.test(i.value.trim()) ? nf(numIn(i.value), 2) : i.value.trim()));
+      const vals = ins.map(i => i.tagName === 'SELECT' ? i.selectedOptions[0]?.text || '' : i.type === 'date' ? (i.value ? fmtDate(parseDay(i.value)) : '') : i.dataset.txt ? i.value.trim() : (/^-?[\d\s\u00a0\u202f]+([.,]\d+)?\s*€?$/.test(i.value.trim()) && numIn(i.value.replace('€', '')) != null ? (i.dataset.eur ? eur(numIn(i.value.replace('€', ''))) : nf(numIn(i.value), 2)) : i.value.trim()));
       if (!vals[0]) return; data.push({ l, v: vals.filter(Boolean).join(' ') }); return;
     }
     if (el.matches('label.chk')) { const c = el.querySelector('input[type=checkbox]'); if (c && c.checked) { const inner = el.querySelector('label.tl-inl'); data.push({ v: '✓ ' + tlTxt(el.cloneNode(true)).replace(inner ? tlTxt(inner) : '\u0000', '').trim() }); } return; }
@@ -3070,7 +3075,7 @@ function tlExtract(sec) {
       else if (el.matches('.tl-big')) out.push({ t: 'big', s: tlTxt(el) });
       else if (el.matches('.tl-steps')) el.querySelectorAll('li').forEach(li => out.push({ t: 'step', l: tlTxt(li.querySelector('.tl-lb')), v: tlTxt(li.querySelector('.tl-dt')), sub: tlTxt(li.querySelector('.tl-sb')), key: li.classList.contains('key') }));
       else if (el.matches('.tl-grid')) [...el.children].forEach(d => out.push({ t: 'step', l: tlTxt(d.querySelector('span')), v: tlTxt(d.querySelector('b')) }));
-      else if (el.matches('.tl-note')) out.push({ t: 'note', s: tlTxt(el) });
+      else if (el.matches('.tl-note')) out.push({ t: 'note', s: tlTxt(el), legal: el.classList.contains('tl-legal') });
       else if (el.matches('.tl-empty')) out.push({ t: 'p', s: tlTxt(el) });
       else if (el.matches('table')) el.querySelectorAll('tr').forEach(tr => out.push({ t: 'row', cells: [...tr.children].map(tlTxt) }));
       else if (el.children.length && !el.matches('.small, .tl-res > div')) walk(el);
@@ -3080,7 +3085,7 @@ function tlExtract(sec) {
   walk(sec.querySelector('.tl-out'));
   return { data, out };
 }
-function tlToText(title, who, x) {
+function tlToText(title, who, x, legal = true) {
   const L = [title.toUpperCase(), 'Calcul du ' + fmtDate(Date.now()) + (who ? ' · ' + who : ''), ''];
   if (x.data.length) { L.push('Données'); x.data.forEach(d => L.push('  ' + (d.l ? d.l + ' : ' : '') + d.v)); L.push(''); }
   L.push('Résultat');
@@ -3089,12 +3094,12 @@ function tlToText(title, who, x) {
     else if (b.t === 'big') L.push('  ' + b.s);
     else if (b.t === 'step') L.push('  ' + b.l + (b.v ? ' : ' + b.v : '') + (b.sub ? ' (' + b.sub + ')' : ''));
     else if (b.t === 'row') L.push('  ' + b.cells.filter(Boolean).join(' · '));
-    else if (b.t === 'note') L.push('', b.s);
+    else if (b.t === 'note') { if (legal || !b.legal) L.push('', b.s); }
     else L.push('  ' + b.s);
   }
   return L.join('\n').replace(/\n{3,}/g, '\n\n');
 }
-function tlToCanvas(title, who, x) {
+function tlToCanvas(title, who, x, legal = true) {
   const W = 760, P = 28, S = 2, F = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
   const css = getComputedStyle(document.documentElement), acc = '#0d6656', ink = '#1f2a27', ink2 = '#4a5653', mute = '#7a8582', line = '#dfe4e2';
   const cv = document.createElement('canvas'), c = cv.getContext('2d');
@@ -3103,7 +3108,7 @@ function tlToCanvas(title, who, x) {
   const text = (t, font, color, x0, w, lh) => { const ls = wrap(t, font, w); ls.forEach((s, i) => ops.push(['t', s, font, color, x0, y + i * lh])); y += ls.length * lh; };
   // En-tête
   ops.push(['r', 0, 0, W, 4, acc]);
-  text('ANTEVORTA', '600 11px ' + F, acc, P, W - 2 * P, 16);
+  y += 4;
   text(title, '650 20px ' + F, ink, P, W - 2 * P, 26);
   text('Calcul du ' + fmtDate(Date.now()) + (who ? '  ·  ' + who : ''), '13px ' + F, ink2, P, W - 2 * P, 18);
   y += 10; ops.push(['l', P, y, W - P, y, line]); y += 14;
@@ -3118,7 +3123,7 @@ function tlToCanvas(title, who, x) {
     else if (b.t === 'big') { text(b.s, '650 22px ' + F, acc, P, W - 2 * P, 29); y += 2; }
     else if (b.t === 'step') { const y0 = y; if (b.key) ops.push(['c', P + 4, y0 + 7, acc]); else ops.push(['c', P + 4, y0 + 7, line]); text(b.l, (b.key ? '600 ' : '') + '13px ' + F, ink, P + 16, 380, 18); const y1 = y; y = y0; if (b.v) text(b.v, '650 13px ' + F, ink, P + 410, W - 2 * P - 410, 18); y = Math.max(y, y1); if (b.sub) text(b.sub, '11.5px ' + F, mute, P + 16, W - 2 * P - 16, 15); y += 5; }
     else if (b.t === 'row') { text(b.cells.filter(Boolean).join('   ·   '), '12.5px ' + F, ink, P, W - 2 * P, 17); y += 2; }
-    else if (b.t === 'note') { y += 6; text(b.s, '11.5px ' + F, mute, P, W - 2 * P, 16); y += 4; }
+    else if (b.t === 'note') { if (legal || !b.legal) { y += 6; text(b.s, '11.5px ' + F, mute, P, W - 2 * P, 16); y += 4; } }
     else text(b.s, (b.t === 'small' ? '12.5px ' : '13px ') + F, ink2, P, W - 2 * P, 18);
   }
   y += 6;
@@ -3138,16 +3143,17 @@ function openToolExport(sec, fmt) {
   const m = modal(`<div class="modal-h"><h3>${fmt === 'img' ? 'Copier en image' : 'Copier en texte'}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b" style="display:grid;gap:10px"><div class="small muted">${esc(tool.t)} · calcul du ${fmtDate(Date.now())}</div>
       <label class="fld"><span>Dossier ou salarié (facultatif)</span><input id="tx-who" list="tx-names" autocomplete="off" maxlength="80" placeholder="ex. Dupont SAS · M. Martin"><datalist id="tx-names">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist></label>
-      <div class="small muted">Le calcul (données saisies, résultat, détail et règles) est copié dans le presse-papiers : collez-le dans un mail, une note ou Teams.</div></div>
+      <label class="chk"><input type="checkbox" id="tx-legal" ${lsGet('expLegal', '1') === '1' ? 'checked' : ''}> Inclure les règles et sources en bas de page</label>
+      <div class="small muted">Le calcul (données saisies, résultat, détail${''}) est copié dans le presse-papiers : collez-le dans un mail, une note ou Teams.</div></div>
     <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tx-go">${ICON.copy} Copier</button></div>`);
   const inp = m.el.querySelector('#tx-who'); setTimeout(() => inp.focus(), 30);
   const go = () => {
-    const who = inp.value.trim(), x = tlExtract(sec);
+    const who = inp.value.trim(), x = tlExtract(sec), legal = m.el.querySelector('#tx-legal').checked; lsSet('expLegal', legal ? '1' : '0');
     if (fmt === 'txt') {
-      const t = tlToText(tool.t, who, x);
+      const t = tlToText(tool.t, who, x, legal);
       (navigator.clipboard?.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Calcul copié en texte'), () => { downloadText('calcul_' + tool.id + '_' + dayKey(Date.now()) + '.txt', t, 'text/plain'); toast('Copie impossible dans ce navigateur : fichier texte téléchargé'); });
     } else {
-      const cv = tlToCanvas(tool.t, who, x), blob = new Promise(res => cv.toBlob(res, 'image/png'));
+      const cv = tlToCanvas(tool.t, who, x, legal), blob = new Promise(res => cv.toBlob(res, 'image/png'));
       const fallback = () => blob.then(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'calcul_' + tool.id + '_' + dayKey(Date.now()) + '.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('Copie d’image impossible dans ce navigateur : image téléchargée'); });
       try { navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => toast('Calcul copié en image : collez-le dans votre mail'), fallback); } catch (e) { fallback(); }
     }
