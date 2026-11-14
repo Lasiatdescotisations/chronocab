@@ -442,6 +442,22 @@ h2:first-child{margin-top:0}
 .day-h .d{font-weight:600}
 .day-h .t{margin-left:auto;font-family:var(--mono);font-weight:600}
 .day-h .tb{color:var(--muted);font-size:12px}
+.g-mere{color:var(--g, #8a6d12);font-size:14px;margin-left:5px;line-height:1;filter:saturate(1.2)}
+.cy-table tr.is-mother > td{background:color-mix(in srgb,var(--g) 11%,var(--surface))}
+.cy-table tr.is-mother td.cy-name{font-weight:650}
+.cb-tile.is-mother{background:color-mix(in srgb,var(--g) 10%,var(--surface));border-color:color-mix(in srgb,var(--g) 45%,var(--surface))}
+.ref-row.is-mother{background:color-mix(in srgb,var(--g) 9%,var(--surface))}
+.cb-tw{display:grid;gap:4px}
+.cb-mbtn{justify-self:start;font-size:12px}
+.cb-mbtn.on{color:var(--ink);font-weight:600}
+.grp-row .what{gap:6px}
+.g-car{display:inline-flex;width:14px;color:var(--muted);transition:transform .15s}
+.grp-row.open .g-car{transform:rotate(90deg)}
+.g-n{font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:0 7px;margin-left:4px}
+.lbl-ro{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;padding:0 4px}
+.g-dur{font-weight:600;text-align:right}
+.grp-sub{background:var(--surface-2);border-left:3px solid var(--accent-soft)}
+.grp-sub .row{padding-left:28px}
 .row{display:grid;grid-template-columns:minmax(220px,2.2fr) minmax(140px,1.4fr) auto auto auto auto 62px auto;align-items:center;gap:10px;padding:6px 10px 6px 14px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .row:hover{background:color-mix(in srgb,var(--surface-2) 50%,transparent)}
@@ -1000,7 +1016,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.26.0';
+const APP_VERSION = '1.28.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2462,15 +2478,19 @@ function cbTileHTML(x, mk, today) {
   const open = (b.points || []).filter(p => !p.done), late = open.filter(p => p.due && p.due < today).length, dueNow = open.filter(p => p.due && p.due <= today).length;
   const al = alActive(x, mk).length, nv = cbNextVir(x), eb = effBs(mk, x.id).n, rel = b.rel && b.rel.lvl && b.rel.lvl !== 'neutre' ? b.rel.lvl : null;
   const owner = !mine && x.owner && personOf(x.owner) ? personOf(x.owner).name : '';
-  return `<button class="cb-tile ${mine ? '' : 'other'}" data-cb="${x.id}" title="Ouvrir le carnet de bord de ${esc(x.name)}">
-    <div class="t1">${cliIc(x.id)}<span class="nm">${esc(x.name)}</span></div>
+  return `<button class="cb-tile ${mine ? '' : 'other'} ${isMother(x) ? 'is-mother' : ''}" data-cb="${x.id}" title="Ouvrir le carnet de bord de ${esc(x.name)}" ${g ? `style="--g:${grpColor(g)}"` : ''}>
+    <div class="t1">${cliIc(x.id)}<span class="nm">${esc(x.name)}</span>${motherMark(x)}</div>
     <div class="t2">${x.code ? `<span class="mono">n° ${esc(x.code)}</span>` : ''}${g ? grpTag(g) : ''}${mine ? '' : `<span>${owner ? 'portef. ' + esc(owner) : 'hors portefeuille'}</span>`}</div>
     <div class="ccn ${ccn ? '' : 'none'}" title="${ccn ? esc((ccn.i != null ? 'IDCC ' + idccStr(ccn.i) + ' — ' : '') + ccn.t) : ''}">${ccn ? (ccn.i != null && !ccnIsNone(ccn) ? `<b class="mono">${idccStr(ccn.i)}</b> ` : '') + esc(ccnShort(ccn)) + (b.ccn.length > 1 ? ` <span class="muted">+${b.ccn.length - 1}</span>` : '') : 'Convention collective non renseignée'}</div>
     <div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
   </button>`;
 }
 const grpTitle = g => /^groupe\b/i.test(g.name.trim()) ? g.name : 'Groupe ' + g.name;
-const grpMembers = g => S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group === g.id).sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
+// Société mère d'un groupe (v1.28.0) : group.mother = id du dossier ; affichée en premier, ligne teintée, couronne ♛
+const isMother = c => { const g = c && groupOf(c.group); return !!g && g.mother === c.id; };
+const motherMark = c => isMother(c) ? '<span class="g-mere" title="Société mère du groupe">♛</span>' : '';
+function setMother(gid, cid) { const g = groupOf(gid); if (!g) return; if (cid) g.mother = cid; else delete g.mother; touchMeta(); }
+const grpMembers = g => S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group === g.id).sort((a, b) => (isMother(b) - isMother(a)) || (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
 const cbFold = () => { try { return new Set(JSON.parse(lsGet('cbFold', '[]'))); } catch (e) { return new Set(); } };
 function renderCarnet() {
   const body = $('#carnet-body');
@@ -2494,7 +2514,7 @@ function renderCarnet() {
   else {
     const fold = cbFold(), gs = groupsAll().filter(g => list.some(x => x.group === g.id)), none = list.filter(x => !groupOf(x.group));
     for (const g of gs) {
-      const mem = list.filter(x => x.group === g.id), gb = cbPeek(g), gOpen = (gb.points || []).filter(p => !p.done), gLate = gOpen.filter(p => p.due && p.due < today).length;
+      const mem = list.filter(x => x.group === g.id).sort((a, b) => isMother(b) - isMother(a)), gb = cbPeek(g), gOpen = (gb.points || []).filter(p => !p.done), gLate = gOpen.filter(p => p.due && p.due < today).length;
       const tot = grpMembers(g).length, folded = fold.has(g.id);
       html += `<div class="cb-ghead ${folded ? 'folded' : ''}" data-cbgf="${g.id}" style="--g:${grpColor(g)}"><button class="cb-gfold" data-cbgfold="${g.id}" aria-expanded="${!folded}" title="Plier / déplier"><span class="car">${ICON.chev}</span>${grpTag(g, 'big')}<span class="cb-gs">${mem.length}${mem.length < tot ? ' / ' + tot : ''} dossier${tot > 1 ? 's' : ''}${gOpen.length ? ` · <span class="${gLate ? 'late' : ''}">${gOpen.length} point${gOpen.length > 1 ? 's' : ''} du groupe</span>` : ''}${gb.notes ? ' · 📝 notes' : ''}</span></button><span class="sp" style="flex:1"></span><button class="btn sm" data-cbg="${g.id}">📖 Carnet du groupe</button></div>`;
       if (!folded) html += `<div class="cb-tiles cb-gtiles" style="--g:${grpColor(g)}">${mem.map(x => cbTileHTML(x, mk, today)).join('')}</div>`;
@@ -2532,7 +2552,7 @@ function renderCarnetGroupe(body, g) {
   html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
     <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
     <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
-  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => cbTileHTML(x, mk, today)).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans Clients & tâches ou dans ses paramètres de cycle.</div>'}`;
+  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}">♛ ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans Clients & tâches ou dans ses paramètres de cycle.</div>'}`;
   html += `<i data-b="gsynthese"></i><h2>Synthèse du groupe</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${bs || '—'}</dd><dt>Alertes salariés actives</dt><dd>${als || '—'}</dd>
     <dt>Conventions collectives</dt><dd>${ccnMap.size ? [...ccnMap.values()].map(({ k, ds }) => `<div>${k.i != null ? `<b class="mono">${idccStr(k.i)}</b> ` : ''}${esc(ccnShort(k))} <span class="muted">— ${ds.map(x => esc(x.name)).join(', ')}</span></div>`).join('') : '—'}${noCcn.length && ccnMap.size ? `<div class="muted small">Non renseignée : ${noCcn.map(x => esc(x.name)).join(', ')}</div>` : ''}</dd>
@@ -2675,6 +2695,7 @@ function bindCarnet() {
     if (t.dataset.cba === 'ptdone') { const id = t.closest('[data-pt]').dataset.pt; cbPointDone(c.id, id, t.checked); return; }
   });
   body.addEventListener('click', ev => {
+    const mb = ev.target.closest('[data-cbmother]'); if (mb && UI.cbG) { const g = groupOf(UI.cbG), id = mb.dataset.cbmother; setMother(g.id, g.mother === id ? null : id); return; }
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     const tile = ev.target.closest('[data-cb]'); if (tile) { location.hash = 'carnet/' + encodeURIComponent(tile.dataset.cb); window.scrollTo(0, 0); return; }
@@ -3019,7 +3040,8 @@ function renderChrono() {
   if (upc.length) html += `<div class="card abs-upc">${upc.map((u, i) => `<div class="abs-up" data-i="${i}"><span class="abs-ic ${u.t === 'form' ? 'is-form' : ''}">${ICON.cal}</span><b>${esc(absLabel(u.t))}</b><span>${u.from === u.to ? 'le ' + esc(fmtDayLong(dayKey(u.from))) + (u.half !== 'j' ? ' (' + HALF[u.half].toLowerCase() + ')' : '') : 'du ' + WD_S[new Date(u.from).getDay()] + ' ' + fmtDate(u.from).slice(0, 5) + ' au ' + WD_S[new Date(u.to).getDay()] + ' ' + fmtDate(u.to).slice(0, 5)}</span><span class="muted">${fmtDays(u.n)}</span><span class="sp" style="flex:1"></span>${u.ids.length === 1 ? '<button class="btn sm ghost" data-act="upc-edit">Modifier</button>' : ''}<button class="btn sm ghost" data-act="upc-del">Supprimer</button></div>`).join('')}</div>`;
   body._upc = upc;
   const shown = keys.slice(0, UI.daysShown);
-  if (shown.length) html += `<i data-b="saisies"></i><h2>Saisies</h2>`;
+  const chGrp = lsGet('chGroup', '1') === '1';
+  if (shown.length) html += `<i data-b="saisies"></i><div class="toolbar"><h2>Saisies</h2><span class="sp"></span><label class="chk" title="Une ligne par client, tâche et libellé identiques dans la journée (statuts identiques)"><input type="checkbox" id="ch-grp" ${chGrp ? 'checked' : ''}> Regrouper les lignes identiques</label></div>`;
   for (const k of shown) {
     const list = Object.values(S.days[k]?.entries || {}).sort((a, b) => b.start - a.start);
     const run = S.running && dayKey(S.running.start) === k ? S.running : null;
@@ -3030,13 +3052,39 @@ function renderChrono() {
       <button class="btn sm ghost" data-act="recap" title="Totaux par client et tâche, à recopier dans le logiciel du cabinet">${ICON.list} Récap à reporter</button>
       <span class="tb">à facturer ${fmtDur(totB)}</span><span class="t">${fmtDur(tot)}</span></div>`;
     if (run) html += `<div class="row running"><div class="what">${whatHTML(run.client, run.task)}</div><div class="muted small lbl-ro">${esc(run.label) || 'En cours…'}</div><span class="bill ${run.billable ? '' : 'no'}" style="pointer-events:none">${run.billable ? 'À facturer' : 'Non facturable'}</span><span></span><span></span><span class="times mono small">${hhmm(run.start)} – …</span><span class="dur" data-live="clock">${fmtClock(dur(run))}</span><div class="acts"><button class="icon" data-act="stoprun" title="Arrêter">${ICON.stop}</button></div></div>`;
-    html += list.map(rowHTML).join('');
+    html += chGrp ? groupRowsHTML(k, list) : list.map(rowHTML).join('');
     html += `</div>`;
   }
   if (keys.length > UI.daysShown) html += `<div class="more"><button class="btn" data-act="more">Afficher les jours précédents</button></div>`;
   body.innerHTML = html;
   blkify(body, 'chrono');
   tick();
+}
+/* Regroupement d'affichage des lignes identiques d'une journée (v1.27.0) : même client / personne / interne, même tâche,
+   même libellé et mêmes statuts (facturable, facturé, reporté). Les saisies d'origine restent intactes. */
+const grpKeyE = e => [e.client || '', e.task || '', norm(e.label || '').trim(), e.billable ? 1 : 0, e.invoicedAt ? 1 : 0, e.logged ? 1 : 0].join('|');
+UI.chOpen ||= new Set();
+function groupRowsHTML(day, list) {
+  const out = [], seen = new Map();
+  for (const e of list) {
+    if (e.allday) { out.push({ e }); continue; }
+    const k = grpKeyE(e); if (seen.has(k)) { seen.get(k).l.push(e); continue; }
+    const g = { k, l: [e] }; seen.set(k, g); out.push(g);
+  }
+  return out.map(x => x.e ? rowHTML(x.e) : x.l.length === 1 ? rowHTML(x.l[0]) : groupRowHTML(day, x)).join('');
+}
+function groupRowHTML(day, g) {
+  const l = g.l.slice().sort((a, b) => a.start - b.start), e = l[0], tot = l.reduce((a, x) => a + dur(x), 0), key = day + '|' + g.k, open = UI.chOpen.has(key), ids = l.map(x => x.id).join(',');
+  return `<div class="row grp-row ${open ? 'open' : ''}" data-gids="${ids}" data-gkey="${esc(key)}">
+    <button class="what" data-act="gtoggle" title="${open ? 'Replier' : 'Voir les ' + l.length + ' saisies'}"><span class="g-car">${ICON.chev}</span>${whatHTML(e.client, e.task)}<span class="g-n">×${l.length}</span></button>
+    <span class="lbl lbl-ro" title="${esc(e.label)}">${esc(e.label) || '<span class="muted">Sans libellé</span>'}</span>
+    <button class="bill ${e.billable ? '' : 'no'}" data-act="gbill" title="Basculer facturable / non facturable (toutes les saisies du groupe)">${e.billable ? 'À facturer' : 'Non facturable'}</button>
+    <label class="chk ${e.billable ? '' : 'dis'}"><input type="checkbox" data-gf="invoiced" ${e.invoicedAt ? 'checked' : ''} ${e.billable ? '' : 'disabled'}>Facturé</label>
+    <label class="chk"><input type="checkbox" data-gf="logged" ${e.logged ? 'checked' : ''}>Reporté</label>
+    <span class="times small muted" title="Première et dernière saisie">${hhmm(l[0].start)} … ${hhmm(l[l.length - 1].end)}</span>
+    <span class="dur-in g-dur mono" title="Durée totale des ${l.length} saisies">${fmtDur(tot)}</span>
+    <div class="acts"><button class="icon" data-act="gresume" title="Relancer cette tâche">${ICON.play}</button><button class="icon" data-act="gtoggle" title="${open ? 'Replier' : 'Déplier'}">${ICON.list}</button></div>
+  </div>${open ? `<div class="grp-sub">${l.slice().reverse().map(rowHTML).join('')}</div>` : ''}`;
 }
 function rowHTML(e) {
   if (e.allday) return absRowHTML(e);
@@ -3054,6 +3102,14 @@ function rowHTML(e) {
 }
 function bindEntryEvents(container) {
   container.addEventListener('click', ev => {
+    const gb = ev.target.closest('[data-act^=g]'), gr = gb && gb.closest('[data-gids]');
+    if (gb && gr && ['gtoggle', 'gbill', 'gresume'].includes(gb.dataset.act)) {
+      const ids = gr.dataset.gids.split(','), a = gb.dataset.act;
+      if (a === 'gtoggle') { const k = gr.dataset.gkey; UI.chOpen.has(k) ? UI.chOpen.delete(k) : UI.chOpen.add(k); renderChrono(); }
+      else if (a === 'gbill') { const e0 = findEntry(ids[0]); const v = !(e0 && e0.billable); updateEntries(ids, e => { e.billable = v; if (!v) e.invoicedAt = 0; }); }
+      else { const e = findEntry(ids[ids.length - 1]) || findEntry(ids[0]); if (e) startTimer({ client: e.client, task: e.task, label: e.label, billable: e.billable }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      return;
+    }
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const row = b.closest('[data-id]'); const id = row?.dataset.id;
     const act = b.dataset.act;
@@ -3064,6 +3120,9 @@ function bindEntryEvents(container) {
     else if (act === 'absedit' && id) openAbsence(id);
   });
   container.addEventListener('change', ev => {
+    const gi = ev.target, gr = gi.dataset && gi.dataset.gf && gi.closest('[data-gids]');
+    if (gr) { const ids = gr.dataset.gids.split(','), now = Date.now(); if (gi.dataset.gf === 'invoiced') updateEntries(ids, e => { e.invoicedAt = gi.checked ? now : 0; }); else updateEntries(ids, e => { e.logged = gi.checked; }); return; }
+    if (gi.id === 'ch-grp') { lsSet('chGroup', gi.checked ? '1' : '0'); renderChrono(); return; }
     const i = ev.target; const row = i.closest('[data-id]'); if (!row || !i.dataset.f) return;
     const id = row.dataset.id, f = i.dataset.f;
     if (f === 'invoiced') updateEntries([id], e => { e.invoicedAt = i.checked ? Date.now() : 0; });
@@ -3606,7 +3665,7 @@ function renderCycle(P) {
   else if (P.cfilter === 'done') rows = rows.filter(r => cyRowDone(mk, r.c, r.row));
   if (q) rows = rows.filter(r => norm(r.c.name).includes(q) || norm(r.c.code).includes(q) || norm(groupOf(r.c.group)?.name).includes(q));
   const grouped = hasGroups() && lsGet('cyGroup', '1') === '1';
-  if (grouped) { const order = Object.fromEntries(groupsAll().map((g, i) => [g.id, i])); const gi = r => groupOf(r.c.group) ? order[r.c.group] : 1e9; rows = rows.map((r, i) => [r, i]).sort((a, b) => gi(a[0]) - gi(b[0]) || a[1] - b[1]).map(x => x[0]); }
+  if (grouped) { const order = Object.fromEntries(groupsAll().map((g, i) => [g.id, i])); const gi = r => groupOf(r.c.group) ? order[r.c.group] : 1e9; rows = rows.map((r, i) => [r, i]).sort((a, b) => gi(a[0]) - gi(b[0]) || (isMother(b[0].c) - isMother(a[0].c)) || a[1] - b[1]).map(x => x[0]); }
   const closed = nAll && done.length === nAll ? Math.max(...rows.concat([]).map(r => Math.max(dOf(r.row.dsn) || 0, dOf(r.row.dep) || 0, dOf(r.row.vir) || 0))) : 0;
   const todo = mk === cur || mk === prevMk(cur) ? cyTodo() : [];
   const showPrep = !!P.showPrep;
@@ -3652,8 +3711,8 @@ function renderCycle(P) {
   <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'al'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}" ${cols.find(x => x[1] === l)[0] === 'note' ? 'title="Remarque permanente : conservée de mois en mois"' : cols.find(x => x[1] === l)[0] === 'al' ? 'title="Alertes sur des salariés (ex. TPT), conservées jusqu’à leur suppression ou leur mois limite"' : ''}>${l}</th>`).join('')}<th></th></tr></thead><tbody>
   ${cyGroupRows(mk, rows, cols.length + 3, grouped, ({ c, row }) => {
     const p = cyOf(c), fin = cyRowDone(mk, c, row), gg = groupOf(c.group);
-    return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''} ${gg ? 'has-grp' : ''}" ${gg ? `style="--g:${grpColor(gg)}"` : ''}><td class="mono small">${esc(c.code || '')}</td>
-      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
+    return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''} ${gg ? 'has-grp' : ''} ${isMother(c) ? 'is-mother' : ''}" ${gg ? `style="--g:${grpColor(gg)}"` : ''}><td class="mono small">${esc(c.code || '')}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${motherMark(c)}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
       ${cols.map(([f]) => {
         if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
         if (f === 'al') return `<td>${alCellHTML(mk, c, row)}</td>`;
@@ -3730,6 +3789,7 @@ function openCyParams(cid) {
   const m = modal(`<div class="modal-h"><h3>Cycle de paie — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
       <label class="fld"><span>Groupe de dossiers</span><select id="cp-grp">${groupSelOpts(c.group)}</select></label>
+      <label class="chk" id="cp-mother-w" ${c.group ? '' : 'hidden'}><input type="checkbox" id="cp-mother" ${isMother(c) ? 'checked' : ''}> ♛ Société mère du groupe</label>
       <div class="fld-row"><label class="fld"><span>Réception des variables</span><select id="cp-rec">${opt('var', 'Avec variables', p.rec)}${opt('auto', 'Automatique (sans variables)', p.rec)}${opt('robot', 'Automate Silae', p.rec)}</select></label>
       <label class="fld"><span>Jour d’envoi prévu (auto)</span><select id="cp-recday">${opt('', '—', p.recDay || '')}${[16, 19, 20, 25, 30].map(d => opt(d, 'vers le ' + d, p.recDay || '')).join('')}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Réception habituelle des variables</span><select id="cp-varday">${opt('', '— (relance le ' + CY_REL_DEF + ')', p.varDay || '')}${Array.from({ length: 21 }, (_, i) => i + 10).map(d => opt('m' + d, 'Vers le ' + d, p.varDay || '')).join('')}${opt('m31', 'Fin de mois', p.varDay || '')}${Array.from({ length: 10 }, (_, i) => i + 1).map(d => opt('n' + d, 'Le ' + (d === 1 ? '1er' : d) + ' du mois suivant', p.varDay || '')).join('')}</select></label>
@@ -3752,12 +3812,15 @@ function openCyParams(cid) {
     const u = q('#cp-usesug'); if (u) u.onclick = () => { q('#cp-varday').value = sug.code; hint(); };
   };
   q('#cp-varday').addEventListener('change', hint); hint();
+  q('#cp-grp').addEventListener('change', ev => { q('#cp-mother-w').hidden = !ev.target.value || ev.target.value === '__newgrp'; });
   q('#cp-grp').addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || c.group); }); });
   q('#cp-ok').addEventListener('click', () => {
     const dd = parseInt(q('#cp-depday').value, 10);
     c.cy = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, varDay: q('#cp-varday').value || null, envDelay: q('#cp-envdelay').value === '' ? null : +q('#cp-envdelay').value, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
     if (c.cy.dep === 'fixed' && !c.cy.depDay) c.cy.dep = 'next';
-    const gv = q('#cp-grp').value; if (gv && gv !== '__newgrp') c.group = gv; else if (!gv) delete c.group;
+    const gv = q('#cp-grp').value, wasM = isMother(c), oldG = c.group; if (gv && gv !== '__newgrp') c.group = gv; else if (!gv) delete c.group;
+    if (wasM && oldG !== c.group) { const og = groupOf(oldG); if (og) delete og.mother; }
+    if (c.group) { const ng = groupOf(c.group), want = q('#cp-mother').checked; if (want) ng.mother = c.id; else if (ng.mother === c.id) delete ng.mother; }
     touchMeta(); m.close();
   });
 }
@@ -4611,7 +4674,7 @@ function renderRefs() {
       <button class="btn primary" data-act="add-client">Ajouter</button></div>
     <div class="ref-tools"><div class="seg" data-seg="refpf"><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${allC.length})</button><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${nOther})</button></div>
       <input id="ref-q" placeholder="Rechercher un client ou un numéro…" value="${esc(UI.refQ || '')}" autocomplete="off"></div>
-    <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''}" data-kind="client" data-id="${c.id}">${cliIc(c.id)}
+    <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''} ${isMother(c) ? 'is-mother' : ''}" data-kind="client" data-id="${c.id}" ${isMother(c) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}>${cliIc(c.id)}${motherMark(c)}
       <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
       <span class="grp-pick" ${groupOf(c.group) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}><select data-k="group" title="Groupe de dossiers">${groupSelOpts(c.group)}</select></span>
       <button class="pf ${isMine(c) ? 'on' : ''}" data-act="toggle-mine" title="Cliquer pour changer">${isMine(c) ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
@@ -4627,6 +4690,7 @@ function renderRefs() {
       <input class="nm" data-k="name" value="${esc(g.name)}">
       <span class="grp-sws" role="radiogroup" aria-label="Couleur du groupe">${GROUP_COLORS.map((col, i) => `<button class="grp-sw ${(g.color || 0) === i ? 'on' : ''}" data-act="grp-color" data-i="${i}" style="--g:${col}" title="${GROUP_COLOR_NAMES[i]}" aria-label="${GROUP_COLOR_NAMES[i]}"></button>`).join('')}</span>
       <span class="use">${gCount[g.id] ? gCount[g.id] + ' dossier' + (gCount[g.id] > 1 ? 's' : '') : 'aucun dossier'}</span>
+      ${gCount[g.id] ? `<select data-k="mother" title="Société mère du groupe" class="grp-sel"><option value="">♛ Société mère : aucune</option>${grpMembers(g).map(x => `<option value="${x.id}" ${g.mother === x.id ? 'selected' : ''}>♛ ${esc(x.name)}</option>`).join('')}</select>` : ''}
       <button class="icon" data-act="del-group" title="Supprimer le groupe (les dossiers sont conservés)">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun groupe. Créez-en un ici, puis choisissez le groupe de chaque dossier dans la liste des clients (ou dans les paramètres du dossier, depuis Mon cycle).</div>`}</div></div>
   <i data-b="taches" data-half="1"></i><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
       <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
@@ -4828,7 +4892,7 @@ function bindRefsOn(body) {
       if (i.value) o.group = i.value; else delete o.group; touchMeta(); return;
     }
     const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
-    if (i.dataset.k === 'owner' && !v) delete o.owner; else o[i.dataset.k] = v;
+    if ((i.dataset.k === 'owner' || i.dataset.k === 'mother') && !v) delete o[i.dataset.k]; else o[i.dataset.k] = v;
     touchMeta(); syncTimerBar();
   });
 }
