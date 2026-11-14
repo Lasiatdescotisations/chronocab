@@ -388,6 +388,18 @@ h2:first-child{margin-top:0}
 #acces-body{margin-top:22px}
 .setting select,.setting input{flex:none}
 #acces-body[hidden]{display:none}
+.cmd-ov{position:fixed;inset:0;background:rgba(10,12,12,.32);z-index:200;display:flex;justify-content:center;align-items:flex-start;padding:10vh 12px 12px}
+.cmd{width:min(640px,100%);background:var(--surface);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;display:flex;flex-direction:column;max-height:76vh}
+.cmd-in{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}.cmd-in svg{width:18px;height:18px;color:var(--muted);flex:none}.cmd-in input{flex:1;border:0;font-size:16px;padding:4px 0;background:transparent}.cmd-in kbd{font-size:11px;color:var(--muted);border:1px solid var(--line-2);border-radius:5px;padding:1px 5px}
+.cmd-res{overflow:auto;padding:6px}.cmd-h{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:8px 10px 3px}.cmd-e{padding:14px 10px;color:var(--muted);font-size:13.5px}
+.cmd-i{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:8px 10px;border-radius:8px;cursor:pointer}.cmd-i.sub{padding-left:30px}.cmd-i.on,.cmd-i:hover{background:var(--accent-soft)}
+.cmd-i .ic{width:20px;text-align:center;flex:none}.cmd-i .tx{display:flex;flex-direction:column;min-width:0}.cmd-i .tx b{font-weight:500;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cmd-i .tx span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmd-f{padding:7px 14px;border-top:1px solid var(--line)}
+.blk-flash{animation:blkflash 1.4s ease}@keyframes blkflash{0%,60%{box-shadow:0 0 0 3px var(--accent-soft)}100%{box-shadow:none}}
+@media (max-width:700px){.cmd-ov{padding-top:8px}.cmd-f{display:none}}
+.cy-upc details summary{cursor:pointer}.cy-upc details div{margin-top:3px}
+.cy-upc{padding:6px 12px}.cy-upc-i{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}.cy-upc-i:last-child{border:0}.cy-upc-i .d{min-width:74px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+#chrono-body .cy-todo-i .icon.xs{margin-left:auto}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
 .cy-banner span{flex:1}
 .cy-legend{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
@@ -943,17 +955,18 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
 <header class="top">
   <div class="brand"><div class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg></div><span class="txt">Antevorta</span></div>
   <nav class="nav">
-    <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span>Chrono</span></a>
+    <a href="#chrono" data-view="chrono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></svg><span class="lg">Ma journée</span><span class="sm">Journée</span></a>
     <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span class="lg">Mon cycle</span><span class="sm">Cycle</span><span class="cyc-badge" id="cyc-badge" hidden><span class="cyc-m"></span></span></a>
     <a href="#carnet" data-view="carnet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg><span class="lg">Carnet de bord</span><span class="sm">Carnet</span></a>
     <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
     <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
-    <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
+    <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Références</span><span class="sm">Réf.</span></a>
     <a href="#outils" data-view="outils"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="lg">Outils</span><span class="sm">Outils</span></a>
     <a href="#reglages" data-view="reglages" id="nav-reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="lg">Réglages</span><span class="sm">Réglages</span><span class="count" id="acc-count" hidden></span></a>
   </nav>
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
+    <button id="cmd-btn" class="icon hist-btn" title="Rechercher et agir (Ctrl+K) : dossier, onglet, outil, saisie rapide" aria-label="Rechercher et agir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <button id="call-btn" class="icon hist-btn call-btn" title="Appel ou interruption : met le chrono en pause et lance un chrono d’appel" aria-label="Appel ou interruption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="call-t mono"></span></button>
     <button id="hist-btn" class="icon hist-btn" title="Historique : vos 10 dernières actions, restaurables en un clic" aria-label="Historique des actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
@@ -1032,7 +1045,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.37.0';
+const APP_VERSION = '1.38.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1825,7 +1838,7 @@ function setSync() {
   else { cls = 'ok'; txt = 'Synchronisé'; }
   el.className = 'sync ' + cls;
   el.querySelector('span').textContent = txt;
-  el.title = Store.mode === 'firebase' ? 'Données dans votre base Firebase, liées à votre compte Google.' : Store.mode === 'cloud' ? 'Données privées liées à votre compte Claude, accessibles depuis n’importe quel poste.' : 'Données stockées uniquement dans ce navigateur. Pensez à exporter une sauvegarde (onglet Clients & tâches).';
+  el.title = Store.mode === 'firebase' ? 'Données dans votre base Firebase, liées à votre compte Google.' : Store.mode === 'cloud' ? 'Données privées liées à votre compte Claude, accessibles depuis n’importe quel poste.' : 'Données stockées uniquement dans ce navigateur. Pensez à exporter une sauvegarde (Réglages › Données).';
 }
 window.addEventListener('beforeunload', e => { if (Store.queue.size || Store.inflight) { e.preventDefault(); e.returnValue = ''; } });
 
@@ -2033,7 +2046,7 @@ function onPick() {
 }
 function initTimerBar() {
   cbClient = Combo($('#cb-client'), {
-    options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer (les personnes se créent dans Clients & tâches)',
+    options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer (les personnes se créent dans Références)',
     onCreate: name => addClient(name), createLabel: q => '+ Créer le client « ' + q + ' »',
     onSelect: id => { setSpec({ client: id }); onPick(); if (id) cbTask.focus(); },
   });
@@ -2162,7 +2175,7 @@ function renderHeader() {
   renderPill();
 }
 /* ---------- Onglets affichés (v1.26.0, propre à chaque appareil : localStorage « chronocab:tabsHidden ») ---------- */
-const TABS = [['chrono', 'Chrono'], ['portefeuille', 'Mon cycle'], ['carnet', 'Carnet de bord'], ['rapports', 'Rapports'], ['facturation', 'À facturer'], ['referentiel', 'Clients & tâches'], ['outils', 'Outils']];
+const TABS = [['chrono', 'Ma journée'], ['portefeuille', 'Mon cycle'], ['carnet', 'Carnet de bord'], ['rapports', 'Rapports'], ['facturation', 'À facturer'], ['referentiel', 'Références'], ['outils', 'Outils']];
 const TAB_PROFILES = [['all', 'Complet', TABS.map(t => t[0])], ['temps', 'Saisie des temps', ['chrono', 'rapports', 'facturation', 'referentiel']], ['cycle', 'Cycle de paie', ['portefeuille', 'carnet', 'outils']], ['outils', 'Outils seulement', ['outils']]];
 const tabsHidden = () => { try { const h = JSON.parse(lsGet('tabsHidden', '[]')); return Array.isArray(h) ? h : []; } catch (e) { return []; } };
 const tabOn = v => v === 'reglages' || !tabsHidden().includes(v);
@@ -2552,7 +2565,8 @@ function renderCarnet() {
   if (UI.cbId && (!c || c.deletedAt)) { UI.cbId = null; location.replace('#carnet'); return; }
   if (c) { renderCarnetDossier(body, c); return; }
   const f = UI.cb.f, q = norm(UI.cb.q || '');
-  const all = S.meta.clients.filter(x => !x.deletedAt && !x.archived);
+  const cbList = lsGet('cbView', 'tiles') === 'list';
+  const all = S.meta.clients.filter(x => !x.deletedAt && (!x.archived || (cbList && UI.refArch)));
   const nMine = all.filter(isMine).length;
   const mk0 = defaultCycleMonth(), ff = UI.cb.ff || '';
   const ffOk = x => { if (!ff) return true; const b = cbPeek(x), cc = b.ccn || [];
@@ -2567,12 +2581,22 @@ function renderCarnet() {
     .sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
   const mk = defaultCycleMonth(), today = dayKey(Date.now());
   const hasG = hasGroups(), grouped = hasG && lsGet('cbGroup', '1') === '1';
-  let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
+  let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbv" title="Présentation"><button data-v="tiles" class="${cbList ? '' : 'on'}">Tuiles</button><button data-v="list" class="${cbList ? 'on' : ''}">Liste</button></div><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
     <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off">
     ${cbFilterHTML(all.filter(x => f === 'all' || (f === 'mine') === isMine(x)), ff)}
     ${hasG ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}</div>`;
+  if (cbList) {
+    const u = {}; for (const e of allEntries()) if (e.client) u[e.client] = (u[e.client] || 0) + dur(e);
+    const nArch = S.meta.clients.filter(x => x.archived && !x.deletedAt).length, newMine = UI.newClientMine !== false;
+    html += `<i data-b="cbliste" data-t="Dossiers"></i><div class="toolbar"><h2>Dossiers (${list.length})</h2><span class="sp"></span>${nArch ? `<label class="chk"><input type="checkbox" data-act="arch" ${UI.refArch ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
+      <div class="card clients-card"><div class="ref-add"><input id="new-client" placeholder="Nouveau dossier (ex. Alpha SARL)"><input id="new-client-code" placeholder="N° dossier" style="flex:0 0 110px">
+        <button class="pf ${newMine ? 'on' : ''}" data-act="new-mine" title="Cliquer pour changer">${newMine ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
+        ${newMine ? '' : `<select id="new-client-owner">${ownerOpts(UI.newClientOwner || '')}</select>`}<button class="btn primary" data-act="add-client">Ajouter</button></div>
+        <div class="ref-list">${list.map(c => clientRowHTML(c, u)).join('') || `<div class="empty">${q || ff ? 'Aucun dossier ne correspond.' : 'Aucun dossier pour l’instant : ajoutez-en un ci-dessus, ou importez une liste (Réglages › Données).'}</div>`}</div></div>`;
+    body.innerHTML = html; blkify(body, 'carnetliste'); return;
+  }
   html += `<i data-b="carnets" data-t="Carnets de bord"></i><h2>Carnets de bord (${list.length})</h2>`;
-  if (!list.length) html += `<div class="card empty">${q || ff ? 'Aucun dossier ne correspond.' : f === 'mine' ? 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.' : 'Aucun dossier.'}</div>`;
+  if (!list.length) html += `<div class="card empty">${q || ff ? 'Aucun dossier ne correspond.' : f === 'mine' ? 'Aucun dossier dans votre portefeuille : marquez vos dossiers « ★ Mon portefeuille » dans le Carnet de bord (vue Liste).' : 'Aucun dossier.'}</div>`;
   else if (!grouped) html += `<div class="cb-tiles">${list.map(x => cbTileHTML(x, mk, today)).join('')}</div>`;
   else {
     const fold = cbFold(), gs = groupsAll().filter(g => list.some(x => x.group === g.id)), none = list.filter(x => !groupOf(x.group));
@@ -2615,7 +2639,7 @@ function renderCarnetGroupe(body, g) {
   html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
     <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
     <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
-  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans Clients & tâches ou dans ses paramètres de cycle.</div>'}`;
+  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans le Carnet de bord (vue Liste) ou dans ses paramètres de cycle.</div>'}`;
   html += `<i data-b="gsynthese"></i><h2>Synthèse du groupe</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${bs || '—'}</dd><dt>Alertes salariés actives</dt><dd>${als || '—'}</dd>
     <dt>Conventions collectives</dt><dd>${ccnMap.size ? [...ccnMap.values()].map(({ k, ds }) => `<div>${k.i != null ? `<b class="mono">${idccStr(k.i)}</b> ` : ''}${esc(ccnShort(k))} <span class="muted">— ${ds.map(x => esc(x.name)).join(', ')}</span></div>`).join('') : '—'}${noCcn.length && ccnMap.size ? `<div class="muted small">Non renseignée : ${noCcn.map(x => esc(x.name)).join(', ')}</div>` : ''}</dd>
@@ -2764,6 +2788,7 @@ function bindCarnet() {
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     const tile = ev.target.closest('[data-cb]'); if (tile) { location.hash = 'carnet/' + encodeURIComponent(tile.dataset.cb); window.scrollTo(0, 0); return; }
     const sg = ev.target.closest('.seg[data-seg=cbf] button'); if (sg) { UI.cb.f = sg.dataset.v; renderCarnet(); return; }
+    const sv = ev.target.closest('.seg[data-seg=cbv] button'); if (sv) { lsSet('cbView', sv.dataset.v); renderCarnet(); return; }
     const rb = ev.target.closest('[data-rel]'); const c = cur();
     if (rb && c) { const b = cbOf(c); b.rel = { ...b.rel, lvl: rb.dataset.rel, d: isoDay(Date.now()) }; touchMeta(); return; }
     const a = ev.target.closest('[data-cba]'); if (!a || !c || a.tagName === 'INPUT') return;
@@ -3273,11 +3298,17 @@ function renderChrono() {
   const rec = recents();
   let html = '';
   const cyt = tabOn('portefeuille') ? cyTodo() : [];
-  if (cyt.length) html += `<div class="cy-banner card"><span>📌 <b>${cyt.length}</b> rappel${cyt.length > 1 ? 's' : ''} de cycle de paie aujourd’hui : ${esc(cyt.slice(0, 2).map(t => t.txt).join(' · '))}${cyt.length > 2 ? '…' : ''}</span><a class="btn sm" href="#portefeuille" data-act="cyview">Voir</a></div>`;
+  if (cyt.length) html += `<i data-b="afaire"></i><div class="toolbar"><h2>📌 À faire aujourd’hui (${cyt.length})</h2><span class="sp"></span><a class="btn sm ghost" href="#portefeuille" data-act="cyview">Mon cycle</a></div><div class="card cy-todo"><div class="cy-todo-list">${cyt.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.cid ? `<button class="icon xs" data-act="cystart" title="Démarrer le chrono sur ce dossier">${ICON.play}</button>` : ''}${t.campaign ? '<a class="btn sm" href="#portefeuille">Voir</a>' : `<button class="btn sm" data-act="cytodo">${cyTodoLbl(t)}</button>`}</div>`).join('')}</div></div>`;
+  const upc7 = tabOn('portefeuille') ? cyUpcoming(7) : [];
+  if (upc7.length) { // regroupées par date et par étape (« DSN — 12 dossiers », dépliable)
+    const gs = []; for (const u of upc7) { const g = gs.find(x => x.d === u.d && x.k === u.k); if (g) g.n.push(u.nm); else gs.push({ d: u.d, k: u.k, n: [u.nm] }); }
+    html += `<i data-b="echeances" data-half="1"></i><h2>Échéances des 7 prochains jours</h2><div class="card cy-upc">${gs.map(g => `<div class="cy-upc-i"><span class="d">${WD_S[new Date(g.d).getDay()]} ${fmtDate(g.d).slice(0, 5)}</span>${g.n.length <= 2 ? `<span>${esc(g.k)} — ${esc(g.n.join(', '))}</span>` : `<details><summary>${esc(g.k)} — <b>${g.n.length} dossiers</b></summary><div class="muted small">${esc(g.n.join(' · '))}</div></details>`}</div>`).join('')}</div>`;
+  }
+  body._cyTodo = cyt;
   html += `<div class="warn" id="long-warn" hidden><span>Le chrono tourne depuis très longtemps : un oubli d’arrêt ?</span><button class="btn sm" data-act="forgot">Ajuster l’heure de fin</button></div>`;
   if (!S.meta.clients.length && !entries.length) {
     html += `<div class="card empty" style="margin-top:18px"><b>Bienvenue.</b><br>Tapez un nom de client dans « Client / dossier » pour le créer, puis une tâche (ex. « Production des bulletins »), et appuyez sur ▶.<br><br>
-      <button class="btn" data-act="preset">Ajouter les tâches standards</button> &nbsp; <a class="btn ghost" href="#referentiel">Gérer clients et tâches</a></div>`;
+      <button class="btn" data-act="preset">Ajouter les tâches standards</button> &nbsp; <a class="btn ghost" href="#carnet" onclick="lsSet('cbView','list')">Gérer les dossiers</a></div>`;
   }
   if (rec.length) {
     html += `<i data-b="raccourcis"></i><h2>Raccourcis</h2><div class="chips">` + rec.map(r => `<div class="chip" data-c="${esc(r.c || '')}" data-t="${esc(r.t || '')}">
@@ -3286,7 +3317,7 @@ function renderChrono() {
       <button class="play" data-act="quick" title="Démarrer tout de suite">${ICON.play}</button></div>`).join('') + `</div>`;
   }
   html += `<i data-b="resume"></i><h2>Résumé</h2><div class="stats">
-    <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div>${schedCfg().mode !== 'none' ? `<div class="s">${plannedOn(dayKey(now)) ? 'prévu : ' + fmtDur(plannedOn(dayKey(now))) : 'pas de temps prévu aujourd’hui'}</div>` : ''}</div>
+    <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div>${schedCfg().mode !== 'none' ? `<div class="s">${plannedOn(dayKey(now)) ? 'prévu : ' + fmtDur(plannedOn(dayKey(now))) : 'pas de temps prévu aujourd’hui'}</div>` : ''}${plannedOn(dayKey(now)) ? `<div class="cy-pg-track" style="margin-top:6px" title="${Math.min(100, Math.round(sum(today) * 100 / plannedOn(dayKey(now))))} % de la journée prévue"><div class="cy-pg-fill ${sum(today) >= plannedOn(dayKey(now)) ? 'full' : ''}" style="width:${Math.min(100, Math.round(sum(today) * 100 / plannedOn(dayKey(now))))}%"></div></div>` : ''}</div>
     <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer${schedCfg().mode !== 'none' ? ' · prévu : ' + fmtDur(Array.from({ length: 7 }, (_, i) => plannedOn(dayKey(addDays(wk, i)))).reduce((a, b) => a + b, 0)) : ''}</div></div>
     ${schedCfg().mode === 'forfait' && +schedCfg().forfait.total ? (() => { const y = new Date(now).getFullYear(), n = forfaitCount(y), t = +schedCfg().forfait.total; return `<div class="card stat"><div class="k">Forfait jours ${y}</div><div class="v">${fmtDays(n)}</div><div class="s">sur ${t} j · ${fmtDays(Math.max(0, t - n))} restant${t - n > 1 ? 's' : ''}</div></div>`; })() : ''}
     <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
@@ -3431,6 +3462,7 @@ function bindChrono() {
   body.addEventListener('click', ev => {
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act;
+    if (act === 'cytodo' || act === 'cystart') { const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return; if (act === 'cytodo') cyTodoDo(t); else if (t.cid) startTimer({ client: t.cid, task: null, label: '' }); return; }
     const chip = b.closest('.chip');
     if (chip) {
       const c = chip.dataset.c || null, t = chip.dataset.t || null;
@@ -3669,6 +3701,96 @@ function lissGroups(k, groups) {
   if (extra > 0) groups.push({ client: INTERNAL_ID, task: L.task, billable: false, ms: 0, lms: extra, labels: ['Complément (lissage)'], ids: [], logged: true, fill: true });
   return { T, real, mode: 'fill', groups };
 }
+/* ---------- Barre de commande (v1.38.0) : Ctrl+K ou loupe de l'en-tête ----------
+   Dossiers (carnet, chrono, cycle, étape du jour), navigation (onglets, réglages, outils), saisie rapide « 1h30 Dupont paie octobre ». */
+const CY_STEP_L = { rec: 'réception des variables', env: '1er envoi', val: 'validation client', vir: 'virements', dep: 'dépôt des bulletins', dsn: 'DSN' };
+function cyNextStep(c) {
+  if (!c || !isMine(c)) return null;
+  const mk = defaultCycleMonth(), row = cyRow(mk, c.id);
+  for (const f of ['rec', 'env', 'val', 'vir', 'dep', 'dsn']) { if (row[f]) continue; const st = cyState(mk, c, row, f).st; if (st === 'na' || st === 'auto') continue; return { f, mk }; }
+  return null;
+}
+function cmdQuick(q) { // saisie rapide : durée + dossier + tâche + libellé (+ « hier »)
+  const words = q.trim().split(/\s+/); let mins = null, di = -1;
+  words.forEach((w, i) => { if (mins == null && /\d/.test(w) && /[h:,.]|min|mn/i.test(w)) { const m = parseDur(w); if (m && m <= 24 * 60) { mins = m; di = i; } } });
+  if (mins == null) return null;
+  let rest = words.filter((_, i) => i !== di), day = 0;
+  rest = rest.filter(w => { const n = norm(w); if (n === 'hier') { day = -1; return false; } if (n === 'aujourdhui' || n === "aujourd'hui") return false; return true; });
+  const pick = (arr, label) => { for (let k = rest.length; k >= 1; k--) { const ws = rest.slice(0, k).map(norm); const cand = arr.filter(x => !x.deletedAt && !x.archived && ws.every(w => norm(label(x)).includes(w))); if (cand.length) { const best = cand.sort((a, b) => (norm(label(b)).startsWith(ws[0]) - norm(label(a)).startsWith(ws[0])) || label(a).length - label(b).length)[0]; rest = rest.slice(k); return best; } } return null; };
+  const c = pick(S.meta.clients, x => x.name + ' ' + (x.code || '')) || pick(S.meta.persons, x => x.name), t = pick(S.meta.tasks, x => x.name);
+  return { mins, client: c ? c.id : null, task: t ? t.id : null, label: rest.join(' '), day };
+}
+function cmdQuickSave(o) {
+  const ms = o.mins * 60000; let start, end;
+  if (o.day === 0) { end = Date.now(); start = end - ms; }
+  else { const d = addDays(startOfDay(Date.now()), o.day), k = dayKey(d), es = Object.values(S.days[k]?.entries || {}).filter(e => !isAbs(e)); const s0 = timeOn(d, schedOf(d).start || '09:00') ?? d + 9 * 3600000; start = es.length ? Math.max(...es.map(e => e.end || e.start)) : s0; end = start + ms; }
+  const e = { id: 'e' + newId(), client: o.client, task: o.task, label: o.label, billable: defaultBillable(o.client, o.task), start, end, invoicedAt: 0, logged: false };
+  saveEntry(e); toast('Saisie créée : ' + fmtDur(ms) + (o.client ? ' · ' + clientName(o.client) : '') + (o.day ? ' (hier)' : ''), 'Annuler', () => deleteEntries([e.id]));
+}
+function cmdItems(q) {
+  const n = norm(q).trim(), out = [];
+  const qk = n ? cmdQuick(q) : null;
+  if (qk) out.push({ ic: '⏱', t: 'Créer la saisie : ' + fmtDur(qk.mins * 60000) + ' · ' + (qk.client ? clientName(qk.client) : 'sans dossier') + (qk.task ? ' · ' + taskName(qk.task) : '') + (qk.label ? ' · « ' + qk.label + ' »' : '') + (qk.day ? ' · hier' : ' · aujourd’hui'), s: 'Entrée pour enregistrer', run: () => cmdQuickSave(qk) });
+  const cl = S.meta.clients.filter(c => !c.deletedAt);
+  let ds = [];
+  if (n) {
+    const ws = n.split(/\s+/);
+    ds = cl.map(c => { const h = norm(c.name + ' ' + (c.code || '') + ' ' + (c.siret || '') + ' ' + (groupOf(c.group)?.name || '')); if (!ws.every(w => h.includes(w))) return null; return [c, (norm(c.name).startsWith(ws[0]) ? 3 : 0) + (norm(c.code) === n ? 5 : 0) + (isMine(c) ? 1 : 0) - (c.archived ? 2 : 0)]; }).filter(Boolean).sort((a, b) => b[1] - a[1] || a[0].name.localeCompare(b[0].name, 'fr')).slice(0, qk ? 3 : 7).map(x => x[0]);
+  } else {
+    const seen = new Set(); for (const e of allEntries()) { if (e.client && clientOf(e.client) && !seen.has(e.client)) { seen.add(e.client); if (seen.size >= 5) break; } }
+    ds = [...seen].map(clientOf).filter(c => c && !c.deletedAt);
+  }
+  ds.forEach((c, i) => {
+    const sub = (c.code ? 'n° ' + c.code + ' · ' : '') + (isMine(c) ? 'Mon portefeuille' : 'Autre portefeuille') + (groupOf(c.group) ? ' · ' + groupOf(c.group).name : '') + (c.archived ? ' · archivé' : '');
+    out.push({ ic: '📖', t: c.name, s: (n ? '' : 'Récent · ') + sub + ' — ouvrir le carnet', run: () => { location.hash = 'carnet/' + encodeURIComponent(c.id); } });
+    if (i < 2 && n && !qk) {
+      out.push({ ic: '▶', t: 'Lancer le chrono — ' + c.name, sub: true, run: () => { startTimer({ client: c.id, task: null, label: '' }); location.hash = 'chrono'; } });
+      if (isMine(c) && tabOn('portefeuille')) {
+        out.push({ ic: '🗓', t: 'Voir dans Mon cycle — ' + c.name, sub: true, run: () => { (UI.pfv ||= {}).mode = 'cycle'; UI.pfv.cq = c.name; location.hash = 'portefeuille'; renderPortfolio(); } });
+        const ns = cyNextStep(c); if (ns) out.push({ ic: '✓', t: 'Noter « ' + CY_STEP_L[ns.f] + ' » aujourd’hui — ' + c.name, sub: true, s: 'cycle de ' + mkLabel(ns.mk), run: () => { cySet(ns.mk, c.id, { [ns.f]: isoDay(Date.now()) }); toast(c.name + ' : « ' + CY_STEP_L[ns.f] + ' » fait aujourd’hui', 'Annuler', () => cySet(ns.mk, c.id, { [ns.f]: null })); } });
+      }
+    }
+  });
+  // Navigation
+  const nav = [...TABS.filter(t => tabOn(t[0])).map(([v, l]) => ({ ic: '→', t: l, s: 'Onglet', k: l, run: () => { location.hash = v; } })), { ic: '⚙', t: 'Réglages', s: 'Onglet', k: 'reglages parametres options', run: () => { location.hash = 'reglages'; } },
+    ...[['planning', 'Planning habituel', 'horaires forfait'], ['lissage', 'Lissage des temps', ''], ['onglets', 'Onglets affichés', ''], ['donnees', 'Données', 'sauvegarde export import conventions remise a zero']].map(([b, l, k]) => ({ ic: '⚙', t: 'Réglages › ' + l, s: 'Section', k: l + ' ' + k, run: () => cmdGoBlk('reglages', b) })),
+    ...(tabOn('outils') ? TOOLS.map(t => ({ ic: '🧮', t: 'Outil : ' + t.t, s: t.d, k: t.t + ' ' + t.d, run: () => cmdGoBlk('outils', 'tool-' + t.id) })) : []),
+    ...groupsAll().map(g => ({ ic: '📖', t: 'Carnet du groupe ' + g.name, s: 'Groupe', k: 'groupe ' + g.name, run: () => { location.hash = 'carnet/groupe/' + encodeURIComponent(g.id); } }))];
+  const navF = n ? nav.filter(x => n.split(/\s+/).every(w => norm(x.t + ' ' + x.k).includes(w))).slice(0, 8) : nav.filter(x => x.s === 'Onglet');
+  if (navF.length) out.push({ head: n ? 'Aller à' : 'Onglets' }, ...navF);
+  if (!out.length) out.push({ empty: true, t: 'Aucun résultat. Astuce : « 1h30 Dupont paie octobre » crée une saisie.' });
+  return out;
+}
+function cmdGoBlk(view, blk) {
+  location.hash = view;
+  setTimeout(() => { const el = document.querySelector(`#v-${view} section.blk[data-blk="${blk}"]`); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.add('blk-flash'); setTimeout(() => el.classList.remove('blk-flash'), 1400); } }, 120);
+}
+function openCmd() {
+  if ($('#cmd-ov')) return;
+  const ov = document.createElement('div'); ov.id = 'cmd-ov'; ov.className = 'cmd-ov';
+  ov.innerHTML = `<div class="cmd" role="dialog" aria-label="Rechercher et agir"><div class="cmd-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cmd-q" placeholder="Dossier, onglet, outil… ou « 1h30 Dupont paie octobre »" autocomplete="off" spellcheck="false"><kbd>Échap</kbd></div><div class="cmd-res" id="cmd-res" role="listbox"></div><div class="cmd-f muted small">↑↓ pour choisir · Entrée pour valider · saisie rapide : durée + dossier + tâche + libellé (+ « hier »)</div></div>`;
+  document.body.appendChild(ov);
+  const inp = ov.querySelector('#cmd-q'), res = ov.querySelector('#cmd-res'); let items = [], sel = 0;
+  const close = () => { ov.remove(); document.removeEventListener('keydown', key, true); };
+  const draw = () => {
+    items = cmdItems(inp.value); const act = items.filter(x => x.run); sel = Math.min(sel, Math.max(0, act.length - 1)); let j = -1;
+    res.innerHTML = items.map(x => { if (x.head) return `<div class="cmd-h">${esc(x.head)}</div>`; if (x.empty) return `<div class="cmd-e">${esc(x.t)}</div>`; j++; return `<button type="button" class="cmd-i ${x.sub ? 'sub' : ''} ${j === sel ? 'on' : ''}" data-j="${j}" role="option"><span class="ic">${x.ic}</span><span class="tx"><b>${esc(x.t)}</b>${x.s ? `<span>${esc(x.s)}</span>` : ''}</span></button>`; }).join('');
+    res.querySelector('.cmd-i.on')?.scrollIntoView({ block: 'nearest' });
+  };
+  const run = j => { const it = items.filter(x => x.run)[j]; if (!it) return; close(); it.run(); };
+  const key = ev => {
+    if (ev.key === 'Escape') { ev.preventDefault(); close(); }
+    else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); const n = items.filter(x => x.run).length; if (n) { sel = (sel + (ev.key === 'ArrowDown' ? 1 : n - 1)) % n; draw(); } }
+    else if (ev.key === 'Enter') { ev.preventDefault(); run(sel); }
+  };
+  document.addEventListener('keydown', key, true);
+  inp.addEventListener('input', () => { sel = 0; draw(); });
+  res.addEventListener('click', ev => { const b = ev.target.closest('[data-j]'); if (b) run(+b.dataset.j); });
+  ov.addEventListener('mousedown', ev => { if (ev.target === ov) close(); });
+  draw(); setTimeout(() => inp.focus(), 20);
+}
+document.addEventListener('keydown', ev => { if ((ev.ctrlKey || ev.metaKey) && !ev.altKey && (ev.key === 'k' || ev.key === 'K')) { ev.preventDefault(); openCmd(); } });
+document.addEventListener('click', ev => { if (ev.target.closest('#cmd-btn')) openCmd(); });
 /* ---------- Récapitulatif à reporter ---------- */
 function aggregate(entries) {
   const map = new Map();
@@ -3963,6 +4085,31 @@ function cyTodo() {
   }
   return items;
 }
+// Action « Fait » d'un rappel du jour (Mon cycle et Ma journée)
+function cyTodoDo(t) {
+  if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
+  if (t.f === 'pt') { cbPointDone(t.cid || t.gid, t.pid, true); toast('Point clos', 'Annuler', () => cbPointDone(t.cid || t.gid, t.pid, false)); return; }
+  if (t.f === 'al') { alSetOk(t.mk, t.cid, t.aid, true); toast('Alerte notée comme traitée pour ce cycle', 'Annuler', () => alSetOk(t.mk, t.cid, t.aid, false)); return; }
+  cySet(t.mk, t.cid, { [t.f]: isoDay(Date.now()) });
+  toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
+}
+const cyTodoLbl = t => t.f === 'rel' ? 'Relance faite' : t.f === 'val' ? 'Validée aujourd’hui' : t.f === 'al' ? 'Traité' : t.f === 'pt' ? 'Point clos' : 'Fait aujourd’hui';
+// Échéances des prochains jours (Ma journée, v1.38.0) : cycle en cours et précédent, dossiers de mon portefeuille
+function cyUpcoming(days = 7) {
+  const today = startOfDay(Date.now()), lim = addDays(today, days), cur = monthKey(today), out = [];
+  const L = { env: '1er envoi (paie automatique)', vir: 'Virements', dep: 'Dépôt des bulletins', dsn: 'DSN' };
+  for (const mk of [prevMk(cur), cur]) {
+    if (cyClosed(mk)) continue;
+    for (const c of cyClients()) {
+      const row = cyRow(mk, c.id), p = cyOf(c), due = cyDue(mk, c, row), add = (d, txt) => { if (d && d > today && d <= lim) { const [k, nm] = txt.split(' — '); out.push({ d, txt, k, nm, cid: c.id, mk }); } };
+      for (const f of ['env', 'vir', 'dep', 'dsn']) if (!row[f] && due[f] && cyState(mk, c, row, f).st !== 'na') add(due[f], L[f] + ' — ' + c.name);
+      if (p.rec === 'var' && !row.rec && mk === cur) add(cyRelDates(mk, c).rel, 'Relance des variables — ' + c.name);
+      if (p.rec === 'var' && row.rec && !row.env) add(cyEnvAlert(c, row), '1er envoi attendu — ' + c.name);
+      if (p.valid && !row.val) add(cyValAlert(c, row), 'Relance de la validation — ' + c.name);
+    }
+  }
+  return out.sort((a, b) => a.d - b.d);
+}
 function cyCellHTML(mk, c, row, f) {
   const s = cyState(mk, c, row, f);
   let txt = '';
@@ -4047,7 +4194,7 @@ function renderCycle(P) {
         return cyCellHTML(mk, c, row, f);
       }).join('')}
       <td><button class="icon xs" data-cy="start" title="Démarrer le chrono sur ce dossier">${ICON.play}</button></td></tr>`;
-  }) || `<tr><td colspan="${cols.length + 3}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.'}</td></tr>`}
+  }) || `<tr><td colspan="${cols.length + 3}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun dossier dans votre portefeuille : marquez vos dossiers « ★ Mon portefeuille » dans le Carnet de bord (vue Liste).'}</td></tr>`}
   ${rows.length ? `<tr class="tot"><td></td><td>Total (${rows.length})</td>${cols.map(([f]) => f === 'bs' ? `<td class="c num">${rows.reduce((a, r) => a + (effBs(mk, r.c.id).n || 0), 0) || ''}</td>` : '<td></td>').join('')}<td></td></tr>` : ''}
   </tbody></table></div>
   <div class="cy-legend muted small"><span><i class="lg-done"></i>fait</span><span><i class="lg-warn"></i>échéance proche</span><span><i class="lg-late"></i>en retard</span><span><i class="lg-na"></i>non concerné / automatique</span> · Clic sur une case vide : date du jour. Clic sur une case remplie : modifier, corriger ou effacer. Clic sur le nom : paramètres et remarques du dossier.</div>`;
@@ -4260,11 +4407,7 @@ function bindCycle() {
     else if (a === 'start' && cid) { startTimer({ client: cid, task: null, label: '' }); location.hash = 'chrono'; setTimeout(() => cbTask.focus(), 50); }
     else if (a === 'tododone') {
       const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return;
-      if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
-      if (t.f === 'pt') { cbPointDone(t.cid || t.gid, t.pid, true); toast('Point clos', 'Annuler', () => cbPointDone(t.cid || t.gid, t.pid, false)); return; }
-      if (t.f === 'al') { alSetOk(t.mk, t.cid, t.aid, true); toast('Alerte notée comme traitée pour ce cycle', 'Annuler', () => alSetOk(t.mk, t.cid, t.aid, false)); return; }
-      cySet(t.mk, t.cid, { [t.f]: isoDay(Date.now()) });
-      toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
+      cyTodoDo(t);
     }
     else if (a === 'copy') {
       const rows = body._cyRows || [], cols = body._cyCols || [];
@@ -4598,7 +4741,7 @@ function renderPortfolio() {
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-pf="report">Voir dans Rapports</button>${r.c.code ? `<span class="muted small" style="align-self:center">Dossier n° ${esc(r.c.code)}</span>` : ''}</div></td></tr>`;
     }
     return h;
-  }).join('') || `<tr><td colspan="${cols.length + 2}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun client dans votre portefeuille. Marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.'}</td></tr>`}
+  }).join('') || `<tr><td colspan="${cols.length + 2}" class="empty">${nAll ? 'Aucun dossier ne correspond.' : 'Aucun client dans votre portefeuille. Marquez vos dossiers « ★ Mon portefeuille » dans le Carnet de bord (vue Liste).'}</td></tr>`}
   ${rows.length ? `<tr class="tot"><td></td>${cols.map(([k]) => k === 'name' ? `<td>Total (${rows.length} dossiers)</td>` : k === 'm' ? `<td class="n">${fmtDur(rows.reduce((a, r) => a + r.m, 0))}</td>` : k === 'prev' ? `<td class="n">${fmtDur(rows.reduce((a, r) => a + r.prev, 0))}</td>` : k === 'bill' ? `<td class="n">${fmtDur(rows.reduce((a, r) => a + r.bill, 0))}</td>` : k === 'inv' ? `<td class="n">${rows.reduce((a, r) => a + r.inv, 0)}</td>` : k === 'todo' ? `<td class="n">${rows.reduce((a, r) => a + r.todo, 0)}</td>` : '<td></td>').join('')}<td></td></tr>` : ''}
   </tbody></table></div>
   <div class="muted small" style="margin-top:8px">Seuls les clients marqués « ★ Mon portefeuille » et non archivés apparaissent ici. Les colonnes BS et DSN indiquent si du temps a été saisi ce mois sur une tâche Bulletins / DSN.</div>`;
@@ -4969,7 +5112,7 @@ const missingStandard = () => STANDARD_TASKS.filter(n => !S.meta.tasks.some(t =>
 function addPresetTasks() {
   let n = 0;
   for (const name of PAYROLL_TASKS) if (!S.meta.tasks.some(t => norm(t.name) === norm(name))) { S.meta.tasks.push({ id: 't' + newId(), name, billing: 'auto', archived: false }); n++; }
-  touchMeta(); toast(n ? n + ' tâches ajoutées (modifiables dans « Clients & tâches »)' : 'Les tâches standards sont déjà présentes');
+  touchMeta(); toast(n ? n + ' tâches ajoutées (modifiables dans « Références »)' : 'Les tâches standards sont déjà présentes');
 }
 const objOf = (kind, id) => kind === 'group' ? groupOf(id) : kind === 'client' ? clientOf(id) : kind === 'person' ? personOf(id) : taskOf(id);
 function roleOpts(cur) {
@@ -5006,6 +5149,17 @@ function ownerOpts(cur) {
   const ps = S.meta.persons.filter(x => !x.deletedAt && (!x.archived || x.id === cur)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   return `<option value="">Portefeuille de… (non attribué)</option>` + ps.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} · ${esc(roleLabel(x.role))}</option>`).join('');
 }
+function clientRowHTML(c, u) { return `<div class="ref-row ${c.archived ? 'arch' : ''} ${isMother(c) ? 'is-mother' : ''}" data-kind="client" data-id="${c.id}" ${isMother(c) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}>${cliIc(c.id)}${motherMark(c)}
+      <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
+      <span class="grp-pick" ${groupOf(c.group) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}><select data-k="group" title="Groupe de dossiers">${groupSelOpts(c.group)}</select></span>
+      <button class="pf ${isMine(c) ? 'on' : ''}" data-act="toggle-mine" title="Cliquer pour changer">${isMine(c) ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
+      ${isMine(c) ? '' : `<select data-k="owner" title="À qui appartient ce client ?">${ownerOpts(c.owner || '')}</select>`}
+      <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Facturation par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
+      <span class="use" title="Temps total enregistré">${u[c.id] ? fmtDur(u[c.id], 'hm') : ''}</span>
+      <a class="icon" href="#carnet/${encodeURIComponent(c.id)}" title="Ouvrir le carnet de bord" style="text-decoration:none">📖</a>
+      <button class="icon" data-act="to-person" title="Convertir en personne (si ce « client » est en fait un collaborateur)">${ICON.person}</button>
+      <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
+      <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`; }
 function renderRefs() {
   const u = {}; const ut = {};
   for (const e of allEntries()) { if (e.client) u[e.client] = (u[e.client] || 0) + dur(e); if (e.task) ut[e.task] = (ut[e.task] || 0) + dur(e); }
@@ -5023,24 +5177,7 @@ function renderRefs() {
   const trash = [...S.meta.clients.filter(c => c.deletedAt).map(o => ({ o, kind: 'client', use: u[o.id] || 0 })), ...S.meta.persons.filter(x => x.deletedAt).map(o => ({ o, kind: 'person', use: u[o.id] || 0 })), ...S.meta.tasks.filter(t => t.deletedAt).map(o => ({ o, kind: 'task', use: ut[o.id] || 0 }))].sort((a, b) => b.o.deletedAt - a.o.deletedAt);
   const kindLabel = { client: 'Client', person: 'Personne', task: 'Tâche' };
   const newMine = UI.newClientMine !== false;
-  let html = `<i data-b="clients"></i><div class="toolbar" style="margin-top:0"><h2>Clients</h2><span class="sp"></span>${nArch ? `<label class="chk"><input type="checkbox" data-act="arch" ${showA ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
-  <div class="card clients-card">
-    <div class="ref-add"><input id="new-client" placeholder="Nouveau client (ex. Alpha SARL)"><input id="new-client-code" placeholder="Code dossier" style="flex:0 0 110px">
-      <button class="pf ${newMine ? 'on' : ''}" data-act="new-mine" title="Cliquer pour changer">${newMine ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
-      ${newMine ? '' : `<select id="new-client-owner">${ownerOpts(UI.newClientOwner || '')}</select>`}
-      <button class="btn primary" data-act="add-client">Ajouter</button></div>
-    <div class="ref-tools"><div class="seg" data-seg="refpf"><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${allC.length})</button><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${nOther})</button></div>
-      <input id="ref-q" placeholder="Rechercher un client ou un numéro…" value="${esc(UI.refQ || '')}" autocomplete="off"></div>
-    <div class="ref-list">${cs.map(c => `<div class="ref-row ${c.archived ? 'arch' : ''} ${isMother(c) ? 'is-mother' : ''}" data-kind="client" data-id="${c.id}" ${isMother(c) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}>${cliIc(c.id)}${motherMark(c)}
-      <input class="nm" data-k="name" value="${esc(c.name)}"><input class="code" data-k="code" value="${esc(c.code)}" placeholder="code">
-      <span class="grp-pick" ${groupOf(c.group) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}><select data-k="group" title="Groupe de dossiers">${groupSelOpts(c.group)}</select></span>
-      <button class="pf ${isMine(c) ? 'on' : ''}" data-act="toggle-mine" title="Cliquer pour changer">${isMine(c) ? '★ Mon portefeuille' : '☆ Autre portefeuille'}</button>
-      ${isMine(c) ? '' : `<select data-k="owner" title="À qui appartient ce client ?">${ownerOpts(c.owner || '')}</select>`}
-      <select data-k="billing" title="Facturation par défaut"><option value="" ${!c.billing ? 'selected' : ''}>Facturation par défaut</option><option value="bill" ${c.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${c.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
-      <span class="use" title="Temps total enregistré">${u[c.id] ? fmtDur(u[c.id], 'hm') : ''}</span>
-      <button class="icon" data-act="to-person" title="Convertir en personne (si ce « client » est en fait un collaborateur)">${ICON.person}</button>
-      <button class="btn sm ghost" data-act="toggle-arch">${c.archived ? 'Restaurer' : 'Archiver'}</button>
-      <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">${q || f !== 'all' ? 'Aucun client ne correspond.' : 'Aucun client pour l’instant.'}</div>`}</div></div>
+  let html = `<div class="card ref-hint">📖 Les dossiers clients (création, n°, portefeuille, groupe, facturation, archivage) se gèrent maintenant dans le <a href="#carnet" onclick="lsSet('cbView','list')">Carnet de bord › vue Liste</a>.${nArch ? ` <label class="chk" style="display:inline-flex;margin-left:8px"><input type="checkbox" data-act="arch" ${showA ? 'checked' : ''}> Afficher les archivés (${nArch})</label>` : ''}</div>
   <i data-b="groupes"></i><div class="toolbar"><h2>Groupes de dossiers</h2><span class="muted small">Un groupe rassemble les dossiers d’un même groupe de sociétés : tag de couleur, regroupement pliable dans Mon cycle, totaux dans Rapports et À facturer.</span></div>
   <div class="card"><div class="ref-add"><input id="new-group" maxlength="60" placeholder="Nouveau groupe (ex. Groupe Martin)"><button class="btn primary" data-act="add-group">Ajouter</button></div>
     <div class="ref-list grp-list">${gs.map(g => `<div class="ref-row" data-kind="group" data-id="${g.id}">${grpDot(g)}
@@ -5510,12 +5647,14 @@ function openToPerson(cid) {
     toast('« ' + c.name + ' » est maintenant une personne' + (ids.length ? ' (' + ids.length + ' saisie' + (ids.length > 1 ? 's' : '') + ' transférée' + (ids.length > 1 ? 's' : '') + ')' : ''));
   });
 }
-function bindRefs() { bindRefsOn($('#referentiel-body')); bindRefsOn($('#reglages-body')); }
+const rerenderRefs = () => UI.view === 'carnet' ? renderCarnet() : renderRefs();
+function bindRefs() { bindRefsOn($('#referentiel-body')); bindRefsOn($('#reglages-body')); bindRefsOn($('#carnet-body')); }
 function bindRefsOn(body) {
   const addC = () => {
     const i = $('#new-client'), code = $('#new-client-code'); const id = addClient(i.value);
     if (id) { const c = clientOf(id); if (code.value.trim()) c.code = code.value.trim(); c.mine = UI.newClientMine !== false; if (!c.mine) { const o = $('#new-client-owner'); if (o && o.value) c.owner = o.value; } touchMeta(); }
     i.value = ''; code.value = ''; i.focus();
+    if (UI.view === 'carnet') { renderCarnet(); $('#new-client')?.focus(); }
   };
   const addT = () => { const i = $('#new-task'); addTask(i.value); i.value = ''; i.focus(); };
   const addG = () => { const i = $('#new-group'); if (!i) return; if (addGroup(i.value)) setTimeout(() => $('#new-group')?.focus(), 30); i.value = ''; };
@@ -5555,10 +5694,10 @@ function bindRefsOn(body) {
       S.meta.groups = S.meta.groups.filter(g => g !== obj); S.meta.clients.forEach(c => { if (c.group === obj.id) delete c.group; }); touchMeta();
       toast('Groupe « ' + obj.name + ' » supprimé' + (ids.length ? ' (' + ids.length + ' dossier' + (ids.length > 1 ? 's' : '') + ' sans groupe)' : ''), 'Annuler', () => { S.meta.groups.push(obj); ids.forEach(id => { const c = clientOf(id); if (c) c.group = obj.id; }); touchMeta(); });
     }
-    else if (act === 'new-mine') { UI.newClientMine = UI.newClientMine === false; const kn = $('#new-client').value, kc = $('#new-client-code').value; renderRefs(); $('#new-client').value = kn; $('#new-client-code').value = kc; }
+    else if (act === 'new-mine') { UI.newClientMine = UI.newClientMine === false; const kn = $('#new-client').value, kc = $('#new-client-code').value; rerenderRefs(); $('#new-client').value = kn; $('#new-client-code').value = kc; }
     else if (act === 'preset') addPresetTasks();
     else if (act === 'install') Install.run();
-    else if (act === 'arch') { UI.refArch = b.checked; renderRefs(); }
+    else if (act === 'arch') { UI.refArch = b.checked; rerenderRefs(); }
     else if (act === 'toggle-mine' && obj) { obj.mine = !isMine(obj); touchMeta(); }
     else if (act === 'to-person' && obj) openToPerson(obj.id);
     else if (act === 'toggle-arch' && obj) { obj.archived = !obj.archived; touchMeta(); }
@@ -5610,7 +5749,7 @@ function bindRefsOn(body) {
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
     const o = objOf(row.dataset.kind, row.dataset.id); if (!o) return;
     if (i.dataset.k === 'group') {
-      if (i.value === '__newgrp') { askGroupName(id => { if (id) { o.group = id; touchMeta(); } else renderRefs(); }); return; }
+      if (i.value === '__newgrp') { askGroupName(id => { if (id) { o.group = id; touchMeta(); } else rerenderRefs(); }); return; }
       if (i.value) o.group = i.value; else delete o.group; touchMeta(); return;
     }
     const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
