@@ -405,7 +405,7 @@ h2:first-child{margin-top:0}
 .amt-e{display:block;font-size:12px;font-weight:500;color:var(--ink-2);text-align:right}
 .ref-hint{padding:10px 14px}.ref-row .tag.pk{margin:0 6px;width:auto;white-space:nowrap}
 #print-area{display:none}
-@media print{body.printing > *:not(#print-area){display:none!important}body.printing{background:#fff}body.printing #print-area{display:block;font:11pt/1.45 Georgia,'Times New Roman',serif;color:#111;padding:0 4mm}
+@media print{html,body.printing{height:auto!important;overflow:visible!important}body.printing > *:not(#print-area){display:none!important}body.printing{background:#fff}body.printing #print-area{display:block;font:11pt/1.45 Georgia,'Times New Roman',serif;color:#111;padding:0 4mm}
 #print-area h1{font-size:18pt;margin:0 0 2pt}#print-area .pa-sub{color:#555;font-size:10pt;margin-bottom:12pt}#print-area h2{font-size:12.5pt;margin:14pt 0 4pt;border-bottom:1px solid #999;padding-bottom:2pt;break-after:avoid}
 #print-area table{border-collapse:collapse;width:100%}#print-area th{text-align:left;font-weight:600;width:34%;vertical-align:top;padding:2pt 8pt 2pt 0}#print-area td{padding:2pt 0;vertical-align:top}#print-area ul{margin:0;padding-left:16pt}#print-area li{margin:1pt 0}#print-area tr,#print-area li{break-inside:avoid}}
 .pers-nm{all:unset;cursor:pointer;font-weight:600;min-width:140px}.pers-nm:hover{text-decoration:underline}.pers-role{min-width:120px}
@@ -1059,7 +1059,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.41.0';
+const APP_VERSION = '1.41.1';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2633,45 +2633,105 @@ function openNewDossier() {
 /* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
 const CBX = {
-  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Notes du groupe']],
+  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours']],
   groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal']]
 };
-function cbxSel(kind) { try { const v = JSON.parse(lsGet('cbx-' + kind, 'null')); if (Array.isArray(v)) return new Set(v); } catch (e) {} return new Set(CBX[kind].filter(x => !x[2]).map(x => x[0])); }
+function cbxSel(kind) { // { sel: [...], all: [clés connues] } ; une rubrique ajoutée depuis le dernier choix prend sa valeur par défaut
+  const def = CBX[kind].filter(x => !x[2]).map(x => x[0]);
+  try { const v = JSON.parse(lsGet('cbx-' + kind, 'null')); if (v) { const sel = Array.isArray(v) ? v : v.sel || [], all = Array.isArray(v) ? ['ident', 'cycle', 'alertes', 'interloc', 'tarifs', 'pratiques', 'points', 'journal', 'vir', 'relation', 'gnotes', 'notes', 'dossiers'] : v.all || []; return new Set([...sel, ...def.filter(k => !all.includes(k))]); } } catch (e) {}
+  return new Set(def);
+}
 const ccnTxt = k => ccnIsNone(k) ? 'Sans convention collective (Code du travail, IDCC 9999)' : (k.i != null ? 'IDCC ' + idccStr(k.i) + ' — ' : '') + k.t + (k.i != null && ccnOld(ccnOf(k.i)) ? ' (' + ccnOldTxt(ccnOf(k.i)) + ')' : '');
 const ptTxt = x => x.t + (x.due ? ' (échéance le ' + fmtDate(parseDay(x.due)) + ')' : '') + ' — ouvert le ' + fmtDate(parseDay(x.open));
 const jrTxt = x => fmtDate(parseDay(x.d)) + ' : ' + x.t + (x.ref ? ' [réf. ' + x.ref + ']' : '');
 const pplTxt = x => [(x.civ ? x.civ + ' ' : '') + x.name, pRoleTxt(x), x.email, x.phone].filter(Boolean).join(' · ');
-function cbxModel(obj, isG, sel) {
-  const S2 = [], add = (k, t, items) => { if (sel.has(k) && items && items.length) S2.push({ t, items }); }, today = dayKey(Date.now()), mk = defaultCycleMonth();
+function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique cochée apparaît toujours (« aucun… » si vide)
+  const S2 = [], today = dayKey(Date.now()), mk = defaultCycleMonth(), d = v => v ? fmtDate(parseDay(v)) : '';
+  const add = (k, t, items, empty) => { if (!sel.has(k)) return; const it = (items || []).filter(x => x && x[1] !== '' && x[1] != null); S2.push({ t, items: it.length ? it : [['', empty || '—']] }); };
+  const ptsOf = (pts, lbl) => [...(pts || []).filter(x => !x.done).sort((x, y) => (x.due || '9').localeCompare(y.due || '9')).map(x => [lbl || '', ptTxt(x)]), ...(pts || []).filter(x => x.done).sort((x, y) => String(y.done).localeCompare(String(x.done))).slice(0, 10).map(x => [(lbl ? lbl + ' · ' : '') + 'clos', x.t + ' — clos le ' + d(x.done)])];
   if (!isG) {
-    const c = obj, b = cbPeek(c), p = cyOf(c), g = groupOf(c.group), owner = !isMine(c) && c.owner ? personOf(c.owner) : null;
-    add('ident', 'Identité et convention collective', [['Raison sociale', c.name], ['N° de dossier', c.code], ['SIRET', c.siret ? fmtSiret(c.siret) : ''], ['Groupe', g ? g.name + (isMother(c) ? ' (société mère)' : '') : ''], ['Portefeuille', isMine(c) ? 'Mon portefeuille' : owner ? 'Portefeuille de ' + owner.name : 'Hors de mon portefeuille'], ...((b.ccn || []).length ? b.ccn.map((k, i) => [i ? '' : 'Convention collective', ccnTxt(k)]) : [['Convention collective', 'non renseignée']])].filter(x => x[1]));
-    const a = cliAvg(c.id);
-    add('cycle', 'Cycle de paie', [['Réception des variables', (CY_LBL.rec[p.rec] || p.rec) + (p.rec !== 'var' && p.recDay ? ', envoi vers le ' + p.recDay : '') + (p.rec === 'var' && p.varDay ? ', habituellement ' + cyVarLabel(p.varDay) : '')], ['Validation client', p.valid ? 'demandée' : 'non demandée'], ['Virements', CY_LBL.vir[p.vir] || p.vir], ['Dépôt des bulletins', (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : '')], ['Échéance DSN', 'le ' + (p.dsn || 15) + ' du mois suivant'], ['Bulletins (cycle de ' + mkLabel(mk) + ')', effBs(mk, c.id).n ?? ''], ['Remarque permanente', p.notes], ['Temps moyen', a ? fmtDur(a.avg) + ' par mois (3 derniers mois)' : '']].filter(x => x[1] !== '' && x[1] != null));
-    add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + (x.until ? ' — jusqu’au cycle de ' + mkLabel(x.until) : '')]));
-    add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x)]));
-    add('tarifs', 'Tarifs de facturation', S.meta.tasks.filter(t => !t.deletedAt && rateOf(c.id, t.id)).map(t => [t.name, rateTxt(rateOf(c.id, t.id)) + (rateOf(c.id, t.id).own ? ' (propre au dossier)' : '')]));
-    add('pratiques', 'Pratiques et particularités', [['Pratiques du client', b.prat], ['Particularités du cycle et des salariés', b.part]].filter(x => x[1]));
-    add('points', 'Points en cours', (b.points || []).filter(x => !x.done).sort((x, y) => (x.due || '9').localeCompare(y.due || '9')).map(x => ['', ptTxt(x)]));
-    add('journal', 'Journal', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]));
-    const y = new Date().getFullYear(); add('vir', 'Calendrier des virements ' + y, Object.entries(b.vir || {}).filter(([m]) => m.startsWith(String(y))).sort().map(([m, d]) => [MONTHS_L[+m.slice(5) - 1], fmtDate(parseDay(d))]));
-    const rel = b.rel || {}; if (rel.lvl && rel.lvl !== 'neutre' || rel.note) add('relation', 'Relation client', [['Niveau', (CB_REL.find(r => r[0] === (rel.lvl || 'neutre')) || [, 'Neutre'])[1]], ['Commentaire', rel.note], ['Mise à jour', rel.d ? fmtDate(parseDay(rel.d)) : '']].filter(x => x[1]));
-    if (g) add('gnotes', 'Notes du groupe ' + g.name, cbPeek(g).notes ? [['', cbPeek(g).notes]] : []);
+    const c = obj, b = cbPeek(c), p = cyOf(c), g = groupOf(c.group), owner = !isMine(c) && c.owner ? personOf(c.owner) : null, row = cyRow(mk, c.id), eb = effBs(mk, c.id);
+    const others = g ? grpMembers(g).filter(x => x.id !== c.id).map(x => x.name).join(', ') : '';
+    add('ident', 'Identité et convention collective', [['Raison sociale', c.name], ['N° de dossier', c.code || '—'], ['SIRET', c.siret ? fmtSiret(c.siret) : '—'], ['Groupe', g ? g.name + (isMother(c) ? ' (société mère)' : '') : '—'], ['Autres dossiers du groupe', others], ['Portefeuille', isMine(c) ? 'Mon portefeuille' : owner ? 'Portefeuille de ' + owner.name : 'Hors de mon portefeuille'], ['Bulletins (cycle de ' + mkLabel(mk) + ')', eb.n != null ? String(eb.n) + (eb.own ? '' : ' (repris du cycle de ' + mkLabel(eb.from) + ')') : '—'], ...((b.ccn || []).length ? b.ccn.map((k, i) => [i ? '' : 'Convention collective', ccnTxt(k)]) : [['Convention collective', 'non renseignée']]), ...(c.archived ? [['État', 'dossier archivé']] : [])]);
+    const a = cliAvg(c.id), ed = p.envDelay === 0 ? 'pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception';
+    add('cycle', 'Cycle de paie', [['Réception des variables', (CY_LBL.rec[p.rec] || p.rec) + (p.rec !== 'var' && p.recDay ? ', envoi vers le ' + p.recDay : '') + (p.rec === 'var' ? ' · réception habituelle ' + (p.varDay ? cyVarLabel(p.varDay) : 'non renseignée (relance le ' + CY_REL_DEF + ')') : '')], ['Alerte 1er envoi', ed], ['Validation client', p.valid ? 'demandée · relance ' + (cyValDelay(c) ? cyValDelay(c) + ' jours ouvrés après l’envoi' : 'aucune') : 'non demandée'], ['Virements', (CY_LBL.vir[p.vir] || p.vir) + (Object.keys(b.vir || {}).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier' : '')], ['Dépôt des bulletins', (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : '')], ['Échéance DSN', 'le ' + (p.dsn || 15) + ' du mois suivant'], ['Remarque permanente', p.notes || '—'], ['Temps moyen', a ? fmtDur(a.avg) + ' par mois (3 derniers mois) · ce mois-ci : ' + fmtDur(a.cur) : '']]);
+    const st = f => { const v = f === 'corr' ? (row.corr || []).map(d).join(', ') : d(row[f]); if (v) return v; const x = cyState(mk, c, row, f); return x.st === 'na' ? 'non concerné' : x.st === 'auto' ? 'automatique' : x.st === 'late' ? 'en retard' : x.st === 'warn' ? 'à faire (échéance proche)' : 'à faire'; };
+    add('suivi', 'Suivi du cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' (clôturé)' : ''), [['Réception des variables', st('rec') + (row.rel ? ' · relancé le ' + d(row.rel) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') : '')], ['1er envoi', st('env')], ['Corrections', (row.corr || []).length ? st('corr') : '—'], ['Validation client', p.valid ? st('val') : 'non demandée'], ['Virements', st('vir')], ['Dépôt des bulletins', st('dep')], ['DSN', st('dsn')], ['Dossier terminé', cyRowDone(mk, c, row) ? 'oui' : 'non']]);
+    add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + ' — ' + (x.mode === 'validate' ? 'à valider : ' + alTrigText(x) : 'pour information') + (x.until ? ' · jusqu’au cycle de ' + mkLabel(x.until) : '')]), 'Aucune alerte active');
+    add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x) + (x.note ? ' — ' + x.note : '')]), 'Aucun interlocuteur');
+    add('tarifs', 'Tarifs de facturation', S.meta.tasks.filter(t => !t.deletedAt && rateOf(c.id, t.id)).map(t => [t.name, rateTxt(rateOf(c.id, t.id)) + (rateOf(c.id, t.id).own ? ' (propre au dossier)' : ' (tarif de la tâche)')]), 'Aucun tarif');
+    add('pratiques', 'Pratiques et particularités', [['Pratiques du client', b.prat || '—'], ['Particularités du cycle et des salariés', b.part || '—']]);
+    add('points', 'Points en cours', ptsOf(b.points), 'Aucun point');
+    add('journal', 'Journal', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]), 'Aucun événement');
+    add('vir', 'Calendrier des virements', Object.entries(b.vir || {}).sort().map(([m, v]) => [MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), d(v)]), 'Aucune date');
+    const rel = b.rel || {};
+    add('relation', 'Relation client', [['Niveau', (CB_REL.find(r => r[0] === (rel.lvl || 'neutre')) || [, 'Neutre'])[1]], ['Commentaire', rel.note || '—'], ['Mise à jour', d(rel.d)]]);
+    if (g) { const gb = cbPeek(g); add('gnotes', 'Groupe ' + g.name + ' : notes et points en cours', [['Notes', gb.notes || '—'], ...ptsOf(gb.points, 'Point')]); }
     return { title: c.name, sub: [c.code ? 'Dossier n° ' + c.code : '', g ? 'Groupe ' + g.name : ''].filter(Boolean).join(' · '), sections: S2 };
   }
   const g = obj, b = cbPeek(g), mem = grpMembers(g);
-  add('ident', 'Le groupe', [['Nom', g.name], ['Société mère', g.mother && clientOf(g.mother) ? clientOf(g.mother).name : ''], ['Nombre de dossiers', String(mem.length)]].filter(x => x[1]));
-  add('notes', 'Notes du groupe', b.notes ? [['', b.notes]] : []);
-  add('dossiers', 'Dossiers et conventions collectives', mem.map(x => [x.name + (x.code ? ' (n° ' + x.code + ')' : ''), (cbPeek(x).ccn || []).map(ccnTxt).join(' ; ') || 'convention non renseignée']));
-  add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).some(id => clientOf(id)?.group === g.id)).map(x => ['', pplTxt(x) + ' — ' + (x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', ')]));
-  add('points', 'Points en cours', [...(b.points || []).filter(x => !x.done).map(x => ['Groupe', ptTxt(x)]), ...mem.flatMap(x => (cbPeek(x).points || []).filter(p2 => !p2.done).map(p2 => [x.name, ptTxt(p2)]))]);
-  add('journal', 'Journal du groupe', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]));
+  add('ident', 'Le groupe', [['Nom', g.name], ['Société mère', g.mother && clientOf(g.mother) ? clientOf(g.mother).name : '—'], ['Nombre de dossiers', String(mem.length)], ['Bulletins (cycle de ' + mkLabel(mk) + ')', String(mem.reduce((a2, x) => a2 + (effBs(mk, x.id).n || 0), 0) || '—')]]);
+  add('notes', 'Notes du groupe', [['', b.notes || '—']]);
+  add('dossiers', 'Dossiers et conventions collectives', mem.map(x => [x.name + (x.code ? ' (n° ' + x.code + ')' : '') + (isMother(x) ? ' — société mère' : ''), ((cbPeek(x).ccn || []).map(ccnTxt).join(' ; ') || 'convention non renseignée') + (isMine(x) ? '' : ' · hors de mon portefeuille')]), 'Aucun dossier');
+  add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).some(id => clientOf(id)?.group === g.id)).map(x => ['', pplTxt(x) + ' — ' + (x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', ')]), 'Aucun interlocuteur');
+  add('points', 'Points en cours', [...ptsOf(b.points, 'Groupe'), ...mem.flatMap(x => ptsOf(cbPeek(x).points, x.name))], 'Aucun point');
+  add('journal', 'Journal du groupe', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]), 'Aucun événement');
   return { title: 'Groupe ' + g.name, sub: mem.length + ' dossier' + (mem.length > 1 ? 's' : ''), sections: S2 };
 }
 function cbxText(M) {
   const L = [M.title.toUpperCase(), ...(M.sub ? [M.sub] : []), 'Carnet de bord au ' + fmtDate(Date.now()), ''];
   for (const s2 of M.sections) { L.push(s2.t, '-'.repeat(Math.min(60, s2.t.length))); for (const [l, v] of s2.items) L.push(l ? l + ' : ' + v : '• ' + v); L.push(''); }
   return L.join('\n').trim() + '\n';
+}
+/* PDF écrit directement (sans bibliothèque) : A4, Helvetica (encodage WinAnsi), coupure des lignes et pagination */
+const WIN1252 = { 0x20AC: 0x80, 0x201A: 0x82, 0x0192: 0x83, 0x201E: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02C6: 0x88, 0x2030: 0x89, 0x0160: 0x8A, 0x2039: 0x8B, 0x0152: 0x8C, 0x017D: 0x8E, 0x2018: 0x91, 0x2019: 0x92, 0x201C: 0x93, 0x201D: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02DC: 0x98, 0x2122: 0x99, 0x0161: 0x9A, 0x203A: 0x9B, 0x0153: 0x9C, 0x017E: 0x9E, 0x0178: 0x9F };
+const pdfStr = t => { let o = ''; for (const ch of String(t).replace(/[  ]/g, ' ').replace(/[→]/g, '->').replace(/[✓✔]/g, 'v')) { let c = ch.codePointAt(0); if (c > 255 || (c >= 0x80 && c < 0xA0)) c = WIN1252[c] || 63; const x = String.fromCharCode(c); o += x === '(' || x === ')' || x === '\\' ? '\\' + x : x; } return '(' + o + ')'; };
+function cbxPdf(M) {
+  const W = 595.28, H = 841.89, ML = 50, MR = 50, MT = 56, MB = 56, cw = W - ML - MR;
+  const cv = document.createElement('canvas').getContext('2d'), FN = 'Helvetica, Arial, "Liberation Sans", "Nimbus Sans", sans-serif';
+  const tw = (t, sz, bold) => { cv.font = (bold ? 'bold ' : '') + sz + 'px ' + FN; return cv.measureText(t).width * 1.02; };
+  const wrap = (t, sz, w, bold) => { const out = []; for (const para of String(t).split('\n')) { let cur = ''; for (const wd of para.split(/ +/)) { const tt = cur ? cur + ' ' + wd : wd; if (tw(tt, sz, bold) > w && cur) { out.push(cur); cur = wd; } else cur = tt; } out.push(cur); } return out; };
+  const pages = []; let ops = [], y = H - MT;
+  const newPage = () => { pages.push(ops); ops = []; y = H - MT; };
+  const need = h => { if (y - h < MB) newPage(); };
+  const txt = (t, x, sz, bold, gray) => ops.push(`BT ${gray ? '0.38 g' : '0 g'} /${bold ? 'F2' : 'F1'} ${sz} Tf 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm ${pdfStr(t)} Tj ET`);
+  const rule = () => ops.push(`0.6 G 0.5 w ${ML} ${y.toFixed(2)} m ${W - MR} ${y.toFixed(2)} l S`);
+  for (const l of wrap(M.title, 18, cw, true)) { need(24); y -= 20; txt(l, ML, 18, true); }
+  y -= 16; txt([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, true); y -= 6;
+  for (const sec of M.sections) {
+    need(40); y -= 22; txt(sec.t.toUpperCase(), ML, 11, true); y -= 5; rule(); y -= 2;
+    const tab = sec.items.some(x => x[0]), LW = 165;
+    for (const [l, v] of sec.items) {
+      const lines = tab ? wrap(v, 9.5, cw - LW - 8) : wrap('• ' + v, 9.5, cw - 10), ll = tab ? wrap(l, 9.5, LW - 6, true) : [];
+      const n = Math.max(lines.length, ll.length); need(n * 12.5 + 3);
+      for (let i = 0; i < n; i++) { y -= 12.5; if (tab && ll[i]) txt(ll[i], ML, 9.5, true); if (lines[i] != null) txt(lines[i], tab ? ML + LW : ML + (i ? 9 : 0), 9.5); }
+      y -= 3;
+    }
+  }
+  pages.push(ops);
+  const N = pages.length, objs = [];
+  objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+  objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+  objs[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+  const kids = [];
+  pages.forEach((po, i) => {
+    const pid = 5 + i * 2, cid = pid + 1; kids.push(pid + ' 0 R');
+    const foot = `BT 0.45 g /F1 8 Tf 1 0 0 1 ${ML} 30 Tm ${pdfStr(M.title + ' — page ' + (i + 1) + ' / ' + N)} Tj ET`;
+    const st = po.concat(foot).join('\n');
+    objs[pid] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${cid} 0 R >>`;
+    objs[cid] = `<< /Length ${st.length} >>\nstream\n${st}\nendstream`;
+  });
+  objs[2] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${N} >>`;
+  let out = '%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'; const off = [];
+  for (let i = 1; i < objs.length; i++) { off[i] = out.length; out += `${i} 0 obj\n${objs[i]}\nendobj\n`; }
+  const xr = out.length; out += `xref\n0 ${objs.length}\n0000000000 65535 f \n` + off.slice(1).map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+  out += `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info << /Producer (Antevorta) /Title ${pdfStr(M.title)} >> >>\nstartxref\n${xr}\n%%EOF`;
+  const u8 = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) u8[i] = out.charCodeAt(i) & 255; return u8;
+}
+function cbxPdfSave(name, u8) {
+  if (Store.mode === 'cloud') throw new Error('cloud');
+  const url = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' })), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+  toast('PDF téléchargé : ' + name);
 }
 function cbxPrint(M) {
   document.getElementById('print-area')?.remove();
@@ -2686,17 +2746,18 @@ function openCbExport() {
   const isG = !!UI.cbG, obj = isG ? groupOf(UI.cbG) : clientOf(UI.cbId); if (!obj) return;
   const kind = isG ? 'groupe' : 'dossier', sel = cbxSel(kind);
   const m = modal(`<div class="modal-h"><h3>Exporter le carnet — ${esc(isG ? 'groupe ' + obj.name : obj.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
-    <div class="modal-b" style="display:grid;gap:6px"><div class="small muted">Rubriques à inclure (les rubriques vides sont ignorées) :</div>
+    <div class="modal-b" style="display:grid;gap:6px"><div class="small muted">Rubriques à inclure (une rubrique cochée apparaît toujours, avec « aucun… » si elle est vide) :</div>
       ${CBX[kind].map(([k, l, sens]) => `<label class="chk"><input type="checkbox" value="${k}" ${sel.has(k) ? 'checked' : ''}> ${esc(l)}${sens ? ' <span class="muted small">— sensible, à cocher si besoin</span>' : ''}</label>`).join('')}</div>
-    <div class="modal-f"><button class="btn" data-x="txt">${ICON.copy} Copier le texte</button><button class="btn" data-x="file">${ICON.down} Fichier .txt</button><span class="sp"></span><button class="btn primary" data-x="pdf">PDF (imprimer)</button></div>`);
+    <div class="modal-f"><button class="btn" data-x="txt">${ICON.copy} Copier le texte</button><button class="btn" data-x="file">${ICON.down} Fichier .txt</button><span class="sp"></span><button class="btn" data-x="print" title="Fenêtre d’impression du navigateur">Imprimer</button><button class="btn primary" data-x="pdf">Fichier PDF</button></div>`);
   m.el.querySelector('.modal-f').addEventListener('click', ev => {
     const b = ev.target.closest('[data-x]'); if (!b) return;
-    const ks = [...m.el.querySelectorAll('.modal-b input:checked')].map(i => i.value); lsSet('cbx-' + kind, JSON.stringify(ks));
+    const ks = [...m.el.querySelectorAll('.modal-b input:checked')].map(i => i.value); lsSet('cbx-' + kind, JSON.stringify({ sel: ks, all: CBX[kind].map(x => x[0]) }));
     const M = cbxModel(obj, isG, new Set(ks)); if (!M.sections.length) { toast('Aucune rubrique renseignée parmi celles cochées'); return; }
     const fn = 'carnet_' + norm(isG ? 'groupe ' + obj.name : obj.name).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '_' + dayKey(Date.now());
     if (b.dataset.x === 'txt') copyText(cbxText(M));
     else if (b.dataset.x === 'file') downloadText(fn + '.txt', cbxText(M), 'text/plain');
-    else { m.close(); cbxPrint(M); return; }
+    else if (b.dataset.x === 'print') { m.close(); cbxPrint(M); return; }
+    else { m.close(); try { cbxPdfSave(fn + '.pdf', cbxPdf(M)); } catch (e) { toast('Création du PDF impossible ici : utilisez « Imprimer » ou « Copier le texte »'); } return; }
     m.close();
   });
 }
