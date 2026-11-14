@@ -490,7 +490,10 @@ table.t{border-collapse:collapse;width:100%;font-size:13px}
 .toolbar h2{margin:0}
 /* Carnet de bord */
 .cb-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.cb-tools input{flex:1;min-width:220px}
+.cb-tools #cb-q{flex:1;min-width:220px}
+a.btn{text-decoration:none}
+a.btn:not(.primary){color:var(--ink)}
+@media (max-width:1520px) and (min-width:701px){.sync span{display:none}}
 .cb-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .cb-tile{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:grid;gap:7px;align-content:start;min-height:118px;transition:border-color .15s,box-shadow .15s}
 .cb-tile:hover,.cb-tile:focus-visible{border-color:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.06)}
@@ -549,6 +552,33 @@ table.t{border-collapse:collapse;width:100%;font-size:13px}
 .cb-rel button.on[data-v=difficile]{border-color:#c0392b;background:color-mix(in srgb,#c0392b 12%,var(--surface))}
 .cb-al{display:flex;gap:6px;flex-wrap:wrap}
 .cb-hint{font-size:12px;color:var(--muted)}
+.sch .seg{flex-wrap:wrap}
+.sch-grid{display:grid;gap:0;padding:4px 14px}
+.sch-row{display:grid;grid-template-columns:92px 1fr 64px;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.sch-row:last-child{border-bottom:0}
+.sch-row.off .sch-d{color:var(--muted)}
+.sch-d{font-weight:600;font-size:13px}
+.sch-rs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sch-r{display:inline-flex;align-items:center;gap:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:2px 3px 2px 6px}
+.sch-r.bad{border-color:#c0392b}
+.sch-r input{width:54px;text-align:center;font-family:var(--mono,monospace);font-size:13px;padding:3px 2px;border:0;background:transparent}
+.sch-gap{font-size:11.5px;color:var(--muted)}
+.sch-t{text-align:right;font-size:12.5px;color:var(--ink-2)}
+.sch-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--line)}
+.sch-hint{font-size:12px;color:var(--muted);padding:8px 14px}
+.sch-days{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:700px){.sch-row{grid-template-columns:1fr;gap:4px}.sch-t{text-align:left}}
+.cb-ghead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 8px;padding:6px 8px 6px 4px;border-bottom:2px solid color-mix(in srgb,var(--g,var(--line-2)) 45%,var(--surface))}
+.cb-ghead:first-of-type{margin-top:0}
+.cb-gfold{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap;border-radius:6px}
+.cb-gfold:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cb-gfold .car{display:inline-flex;width:15px;color:var(--muted);transform:rotate(90deg);transition:transform .15s}
+.cb-ghead.folded .car{transform:none}
+.cb-gs{font-size:12.5px;color:var(--ink-2)}
+.cb-gs .late{color:#c0392b;font-weight:600}
+.cb-gtiles .cb-tile{border-left:3px solid var(--g,var(--line))}
+.cb-gnote{border-left:3px solid var(--g,var(--line))}
+.cb-gtext{white-space:pre-wrap;font-size:13.5px;line-height:1.45}
 .cb-saved{font-size:11.5px;color:var(--accent);opacity:0;transition:opacity .3s}
 .cb-saved.on{opacity:1}
 @media (max-width:700px){.cb-kv{grid-template-columns:1fr}.cb-kv dt{margin-top:4px}.cb-head h1{font-size:18px}}
@@ -900,7 +930,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.18.0';
+const APP_VERSION = '1.20.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1075,6 +1105,50 @@ function askGroupName(cb) {
   obs.observe(document.body, { childList: true, subtree: true });
 }
 
+/* ---------- Planning habituel (v1.20.0) ----------
+   settings.sched = { mode: 'none' | 'fixed' | 'forfait',
+     week: { 0..6: [['HH:MM', 'HH:MM'], …] } (horaires fixes, jusqu'à 3 plages par jour),
+     forfait: { hours: minutes par jour, start, end, days: [jours travaillés 0..6], total: jours du forfait annuel } }
+   'none' : comportement d'avant (heures de début / fin et durée d'absence des réglages simples, lundi-vendredi). */
+const WD_L = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const WD_ORDER = [1, 2, 3, 4, 5, 6, 0];
+const SCHED_DEF = { mode: 'none', week: { 1: [['08:00', '12:00'], ['13:30', '17:00']], 2: [['08:00', '12:00'], ['13:30', '17:00']], 3: [['08:00', '12:00'], ['13:30', '17:00']], 4: [['08:00', '12:00'], ['13:30', '17:00']], 5: [['08:00', '12:00'], ['13:30', '17:00']] }, forfait: { hours: 450, start: '08:30', end: '18:30', days: [1, 2, 3, 4, 5], total: 218 } };
+const schedCfg = () => { const c = S.meta.settings.sched || {}; return { mode: c.mode || 'none', week: c.week || SCHED_DEF.week, forfait: { ...SCHED_DEF.forfait, ...(c.forfait || {}) } }; };
+const hmMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const okRange = x => x && hmMin(x[0]) != null && hmMin(x[1]) != null && hmMin(x[1]) > hmMin(x[0]);
+function schedOf(ms) {
+  const c = schedCfg(), wd = new Date(ms).getDay(), st = S.meta.settings;
+  if (c.mode === 'fixed') { const r = (c.week[wd] || []).filter(okRange).sort((a, b) => hmMin(a[0]) - hmMin(b[0])); return { mode: 'fixed', work: r.length > 0, ranges: r, start: r.length ? r[0][0] : null, end: r.length ? r[r.length - 1][1] : null, min: r.reduce((a, x) => a + hmMin(x[1]) - hmMin(x[0]), 0) }; }
+  if (c.mode === 'forfait') { const f = c.forfait, w = (f.days || []).includes(wd); return { mode: 'forfait', work: w, ranges: w ? [[f.start, f.end]] : [], start: f.start, end: f.end, min: w ? +f.hours || 0 : 0 }; }
+  const w = wd >= 1 && wd <= 5; return { mode: 'none', work: w, ranges: [[st.dayStart || '07:30', st.dayEnd || '18:00']], start: st.dayStart || '07:30', end: st.dayEnd || '18:00', min: w ? (+st.absDay || 420) : 0 };
+}
+function schedEndOf(ms) { // heure de fin de journée applicable au jour de « ms » (repli : la plus tardive de la semaine, puis le réglage simple)
+  const s = schedOf(ms); if (s.end) return s.end;
+  const c = schedCfg(); if (c.mode === 'fixed') { const ends = Object.values(c.week).flat().filter(okRange).map(x => x[1]).sort(); if (ends.length) return ends[ends.length - 1]; }
+  return S.meta.settings.dayEnd || '18:00';
+}
+function absSlot(k, h) { // créneau d'une journée / demi-journée d'absence selon le planning
+  const d = parseDay(k), s = schedOf(d), L = (+S.meta.settings.absDay || 420) * 60000;
+  if (s.mode === 'fixed' && s.work) {
+    const r = s.ranges, mins = x => (hmMin(x[1]) - hmMin(x[0])) * 60000;
+    if (h === 'j') return { st: timeOn(d, r[0][0]), len: s.min * 60000 };
+    if (r.length === 1) { const half = mins(r[0]) / 2; return h === 'am' ? { st: timeOn(d, r[0][0]), len: half } : { st: timeOn(d, r[0][0]) + half, len: half }; }
+    return h === 'am' ? { st: timeOn(d, r[0][0]), len: mins(r[0]) } : { st: timeOn(d, r[1][0]), len: r.slice(1).reduce((a, x) => a + mins(x), 0) };
+  }
+  const len = s.mode === 'forfait' && s.work ? s.min * 60000 : L, st0 = timeOn(d, s.mode === 'forfait' ? s.start : '09:00');
+  return h === 'j' ? { st: st0, len } : h === 'am' ? { st: st0, len: len / 2 } : { st: timeOn(d, '14:00'), len: len / 2 };
+}
+function plannedOn(k) { // temps prévu un jour donné : planning, moins fériés et absences notées
+  const d = parseDay(k), s = schedOf(d); if (!s.work || holidayOn(k)) return 0;
+  const abs = Object.values(S.days[k]?.entries || {}).filter(e => isAbs(e)).reduce((a, e) => a + dur(e), 0);
+  return Math.max(0, s.min * 60000 - abs);
+}
+function forfaitCount(year) { // jours travaillés au forfait : 1 jour si au moins la moitié des heures habituelles, ½ jour sinon
+  const f = schedCfg().forfait, half = (+f.hours || 420) * 30000, today = dayKey(Date.now()), byDay = {};
+  for (const e of allEntries()) { const k = dayKey(e.start); if (k.slice(0, 4) === String(year) && k <= today) byDay[k] = (byDay[k] || 0) + dur(e); }
+  if (S.running && dayKey(S.running.start).slice(0, 4) === String(year)) { const k = dayKey(S.running.start); byDay[k] = (byDay[k] || 0) + dur(S.running); }
+  return Object.values(byDay).reduce((a, ms) => a + (ms >= half ? 1 : ms > 0 ? 0.5 : 0), 0);
+}
 /* ---------- Absences et journées entières ----------
    Saisie « journée » : { client: 'abs', abs: type, allday: 'j' | 'am' | 'pm' } (absence, hors temps travaillé)
    ou { client: 'int', task: Formation, allday } (formation : temps interne travaillé) */
@@ -1144,7 +1218,7 @@ function openAbsence(editId, dayK) {
     for (let d = a; d <= b; d = addDays(d, 1)) {
       const k = dayKey(d), hol = holidayOn(k);
       if (single) { days.push(k); continue; }
-      if (!isWorkday(d)) continue;
+      if (!schedOf(d).work) continue;
       if (hol && type !== 'fer') { fer.push([k, hol]); continue; }
       days.push(k);
     }
@@ -1167,7 +1241,7 @@ function openAbsence(editId, dayK) {
     const repl = p.days.filter(k => dayAllday(k).some(e => e.id !== (ed && ed.id) && (p.half === 'j' || e.allday === 'j' || e.allday === p.half)));
     const hol = p.single && holidayOn(p.days[0]);
     sum.innerHTML = !p.days.length ? '<span class="cy-pg-w">Aucun jour ouvré dans cette période.</span>' :
-      `<b>${fmtDays(n)}</b>${p.single ? '' : ' ouvré' + (n > 1 ? 's' : '') + ' (sans les week-ends' + (type === 'fer' ? '' : ' ni les jours fériés') + ')'} · ${fmtDur(n * absDayMs())}
+      `<b>${fmtDays(n)}</b>${p.single ? '' : ' ouvré' + (n > 1 ? 's' : '') + ' (sans les jours non travaillés' + (type === 'fer' ? '' : ' ni les jours fériés') + ')'} · ${fmtDur(p.days.reduce((a, k) => a + absSlot(k, p.half).len, 0))}
       ${hol && type !== 'fer' ? `<div class="small">ℹ️ Ce jour est férié (${esc(hol)}).</div>` : ''}
       ${p.single && !isWorkday(p.a) ? '<div class="small">ℹ️ Ce jour tombe un week-end.</div>' : ''}
       ${busy.length ? `<div class="small">Du temps est déjà saisi le ${busy.map(k => fmtDate(parseDay(k)).slice(0, 5)).join(', ')} : il est conservé.</div>` : ''}
@@ -1184,7 +1258,7 @@ function openAbsence(editId, dayK) {
     const p = plan(); if (!p || !p.days.length) { toast('Aucun jour à enregistrer pour cette période.'); return; }
     const lbl = q('#ab-lbl').value.trim(), L = absDayMs();
     const mk = (k, typ, h, label) => {
-      const st = timeOn(parseDay(k), h === 'pm' ? '14:00' : '09:00'), len = h === 'j' ? L : L / 2;
+      const { st, len } = absSlot(k, h);
       const base = { id: 'e' + newId(), start: st, end: st + len, label, billable: false, invoicedAt: 0, logged: false, allday: h };
       return typ === 'form' ? { ...base, client: INTERNAL_ID, task: formationTaskId() } : { ...base, client: ABS_ID, task: null, abs: typ };
     };
@@ -1208,7 +1282,7 @@ function holSuggest(todayK) {
   const hid = holHidden();
   for (let i = 0, d = parseDay(todayK); i <= 14; i++, d = addDays(d, 1)) {
     const k = dayKey(d), name = holidayOn(k);
-    if (!name || !isWorkday(d) || hid.includes(k)) continue;
+    if (!name || !schedOf(d).work || hid.includes(k)) continue;
     if (dayAllday(k).some(e => e.allday === 'j')) continue;
     return { k, name };
   }
@@ -1437,7 +1511,7 @@ function applyDoc(key, body) {
 const J_MAX = 10;
 const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
 const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
-const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel' };
 const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
 const Journal = {
   snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
@@ -1968,8 +2042,9 @@ function renderHeader() {
 function route() {
   const h = (location.hash || '').slice(1);
   if (h === 'acces') { location.replace('#reglages'); return; }
-  if (h.startsWith('carnet/')) { UI.cbId = decodeURIComponent(h.slice(7)); UI.view = 'carnet'; }
-  else { if (h === 'carnet') UI.cbId = null; UI.view = ['chrono', 'portefeuille', 'carnet', 'rapports', 'facturation', 'referentiel', 'reglages'].includes(h) ? h : 'chrono'; }
+  if (h.startsWith('carnet/groupe/')) { UI.cbG = decodeURIComponent(h.slice(14)); UI.cbId = null; UI.view = 'carnet'; }
+  else if (h.startsWith('carnet/')) { UI.cbId = decodeURIComponent(h.slice(7)); UI.cbG = null; UI.view = 'carnet'; }
+  else { if (h === 'carnet') { UI.cbId = null; UI.cbG = null; } UI.view = ['chrono', 'portefeuille', 'carnet', 'rapports', 'facturation', 'referentiel', 'reglages'].includes(h) ? h : 'chrono'; }
   $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
   render();
 }
@@ -2281,15 +2356,32 @@ function ccnSearch(q) {
   return out.sort((a, b) => b[0] - a[0] || a[1][0] - b[1][0]).slice(0, 30).map(x => x[1]);
 }
 const CB_REL = [['neutre', 'Neutre'], ['fluide', 'Fluide'], ['surveiller', 'À surveiller'], ['difficile', 'Difficile']];
-const cbOf = c => { const b = (c.cb ||= {}); b.ccn ||= []; b.points ||= []; b.journal ||= []; b.vir ||= {}; b.rel ||= { lvl: 'neutre' }; return b; };
+const isGroupObj = o => !!o && S.meta.groups.includes(o);
+const cbOf = c => { const b = (c.cb ||= {}); b.points ||= []; b.journal ||= []; if (!isGroupObj(c)) { b.ccn ||= []; b.vir ||= {}; b.rel ||= { lvl: 'neutre' }; } return b; };
 const cbPeek = c => (c && c.cb) || {};
 function cbVirDate(c, mk) { const v = c && c.cb && c.cb.vir && c.cb.vir[mk]; return v ? parseDay(v) : null; }
-function cbPointDone(cid, pid, on) { const c = clientOf(cid); if (!c) return; const pt = cbOf(c).points.find(x => x.id === pid); if (!pt) return; if (on) pt.done = isoDay(Date.now()); else delete pt.done; touchMeta(); }
+function cbPointDone(cid, pid, on) { const c = clientOf(cid) || groupOf(cid); if (!c) return; const pt = cbOf(c).points.find(x => x.id === pid); if (!pt) return; if (on) pt.done = isoDay(Date.now()); else delete pt.done; touchMeta(); }
 function cbNextVir(c) { const v = cbPeek(c).vir || {}, today = dayKey(Date.now()); return Object.values(v).filter(d => d >= today).sort()[0] || null; }
 const CY_LBL = { rec: { var: 'Avec variables', auto: 'Automatique (sans variables)', robot: 'Automate Silae' }, vir: { file: 'Fichier de virement envoyé', odep: 'OD + état des paiements', client: 'Client autonome', nc: 'Non concerné' }, dep: { next: 'Le lendemain des virements', valid: 'Le jour de la validation de la paie', fixed: 'Un jour fixe', nc: 'Non concerné (MySilae…)' } };
 UI.cb = { f: 'mine', q: '' };
+function cbTileHTML(x, mk, today) {
+  const b = cbPeek(x), mine = isMine(x), ccn = (b.ccn || [])[0], g = groupOf(x.group);
+  const open = (b.points || []).filter(p => !p.done), late = open.filter(p => p.due && p.due < today).length, dueNow = open.filter(p => p.due && p.due <= today).length;
+  const al = alActive(x, mk).length, nv = cbNextVir(x), eb = effBs(mk, x.id).n, rel = b.rel && b.rel.lvl && b.rel.lvl !== 'neutre' ? b.rel.lvl : null;
+  const owner = !mine && x.owner && personOf(x.owner) ? personOf(x.owner).name : '';
+  return `<button class="cb-tile ${mine ? '' : 'other'}" data-cb="${x.id}" title="Ouvrir le carnet de bord de ${esc(x.name)}">
+    <div class="t1">${cliIc(x.id)}<span class="nm">${esc(x.name)}</span></div>
+    <div class="t2">${x.code ? `<span class="mono">n° ${esc(x.code)}</span>` : ''}${g ? grpTag(g) : ''}${mine ? '' : `<span>${owner ? 'portef. ' + esc(owner) : 'hors portefeuille'}</span>`}</div>
+    <div class="ccn ${ccn ? '' : 'none'}" title="${ccn ? esc((ccn.i != null ? 'IDCC ' + idccStr(ccn.i) + ' — ' : '') + ccn.t) : ''}">${ccn ? (ccn.i != null ? `<b class="mono">${idccStr(ccn.i)}</b> ` : '') + esc(ccnShort(ccn)) + (b.ccn.length > 1 ? ` <span class="muted">+${b.ccn.length - 1}</span>` : '') : 'Convention collective non renseignée'}</div>
+    <div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
+  </button>`;
+}
+const grpTitle = g => /^groupe\b/i.test(g.name.trim()) ? g.name : 'Groupe ' + g.name;
+const grpMembers = g => S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group === g.id).sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
+const cbFold = () => { try { return new Set(JSON.parse(lsGet('cbFold', '[]'))); } catch (e) { return new Set(); } };
 function renderCarnet() {
   const body = $('#carnet-body');
+  if (UI.cbG) { const g = groupOf(UI.cbG); if (!g) { UI.cbG = null; location.replace('#carnet'); return; } renderCarnetGroupe(body, g); return; }
   const c = UI.cbId ? clientOf(UI.cbId) : null;
   if (UI.cbId && (!c || c.deletedAt)) { UI.cbId = null; location.replace('#carnet'); return; }
   if (c) { renderCarnetDossier(body, c); return; }
@@ -2299,24 +2391,64 @@ function renderCarnet() {
   const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && (!q || [x.name, x.code, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q))))
     .sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
   const mk = defaultCycleMonth(), today = dayKey(Date.now());
-  const tile = x => {
-    const b = cbPeek(x), mine = isMine(x), ccn = (b.ccn || [])[0], g = groupOf(x.group);
-    const open = (b.points || []).filter(p => !p.done), late = open.filter(p => p.due && p.due < today).length, dueNow = open.filter(p => p.due && p.due <= today).length;
-    const al = alActive(x, mk).length, nv = cbNextVir(x), eb = effBs(mk, x.id).n, rel = b.rel && b.rel.lvl && b.rel.lvl !== 'neutre' ? b.rel.lvl : null;
-    const owner = !mine && x.owner && personOf(x.owner) ? personOf(x.owner).name : '';
-    return `<button class="cb-tile ${mine ? '' : 'other'}" data-cb="${x.id}" title="Ouvrir le carnet de bord de ${esc(x.name)}">
-      <div class="t1">${cliIc(x.id)}<span class="nm">${esc(x.name)}</span></div>
-      <div class="t2">${x.code ? `<span class="mono">n° ${esc(x.code)}</span>` : ''}${g ? grpTag(g) : ''}${mine ? '' : `<span>${owner ? 'portef. ' + esc(owner) : 'hors portefeuille'}</span>`}</div>
-      <div class="ccn ${ccn ? '' : 'none'}" title="${ccn ? esc((ccn.i != null ? 'IDCC ' + idccStr(ccn.i) + ' — ' : '') + ccn.t) : ''}">${ccn ? (ccn.i != null ? `<b class="mono">${idccStr(ccn.i)}</b> ` : '') + esc(ccnShort(ccn)) + (b.ccn.length > 1 ? ` <span class="muted">+${b.ccn.length - 1}</span>` : '') : 'Convention collective non renseignée'}</div>
-      <div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
-    </button>`;
-  };
+  const hasG = hasGroups(), grouped = hasG && lsGet('cbGroup', '1') === '1';
   let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
-    <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off"></div>`;
+    <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off">
+    ${hasG ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}</div>`;
   html += `<i data-b="carnets" data-t="Carnets de bord"></i><h2>Carnets de bord (${list.length})</h2>`;
-  html += list.length ? `<div class="cb-tiles">${list.map(tile).join('')}</div>` : `<div class="card empty">${q ? 'Aucun dossier ne correspond.' : f === 'mine' ? 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.' : 'Aucun dossier.'}</div>`;
+  if (!list.length) html += `<div class="card empty">${q ? 'Aucun dossier ne correspond.' : f === 'mine' ? 'Aucun dossier dans votre portefeuille : marquez vos clients « ★ Mon portefeuille » dans Clients & tâches.' : 'Aucun dossier.'}</div>`;
+  else if (!grouped) html += `<div class="cb-tiles">${list.map(x => cbTileHTML(x, mk, today)).join('')}</div>`;
+  else {
+    const fold = cbFold(), gs = groupsAll().filter(g => list.some(x => x.group === g.id)), none = list.filter(x => !groupOf(x.group));
+    for (const g of gs) {
+      const mem = list.filter(x => x.group === g.id), gb = cbPeek(g), gOpen = (gb.points || []).filter(p => !p.done), gLate = gOpen.filter(p => p.due && p.due < today).length;
+      const tot = grpMembers(g).length, folded = fold.has(g.id);
+      html += `<div class="cb-ghead ${folded ? 'folded' : ''}" data-cbgf="${g.id}" style="--g:${grpColor(g)}"><button class="cb-gfold" data-cbgfold="${g.id}" aria-expanded="${!folded}" title="Plier / déplier"><span class="car">${ICON.chev}</span>${grpTag(g, 'big')}<span class="cb-gs">${mem.length}${mem.length < tot ? ' / ' + tot : ''} dossier${tot > 1 ? 's' : ''}${gOpen.length ? ` · <span class="${gLate ? 'late' : ''}">${gOpen.length} point${gOpen.length > 1 ? 's' : ''} du groupe</span>` : ''}${gb.notes ? ' · 📝 notes' : ''}</span></button><span class="sp" style="flex:1"></span><button class="btn sm" data-cbg="${g.id}">📖 Carnet du groupe</button></div>`;
+      if (!folded) html += `<div class="cb-tiles cb-gtiles" style="--g:${grpColor(g)}">${mem.map(x => cbTileHTML(x, mk, today)).join('')}</div>`;
+    }
+    if (none.length) { const folded = fold.has('none'); html += `<div class="cb-ghead ${folded ? 'folded' : ''}"><button class="cb-gfold" data-cbgfold="none" aria-expanded="${!folded}"><span class="car">${ICON.chev}</span><span class="grp-none">Sans groupe</span><span class="cb-gs">${none.length} dossier${none.length > 1 ? 's' : ''}</span></button></div>${folded ? '' : `<div class="cb-tiles cb-gtiles">${none.map(x => cbTileHTML(x, mk, today)).join('')}</div>`}`; }
+  }
   body.innerHTML = html;
   blkify(body, 'carnets');
+}
+function cbPointsHTML(points, today, who) {
+  const open = points.filter(x => !x.done).sort((x, y) => (x.due || '9').localeCompare(y.due || '9')), closed = points.filter(x => x.done).sort((x, y) => y.done.localeCompare(x.done));
+  const it = x => `<div class="cb-it ${x.done ? 'done' : ''}" data-pt="${x.id}"><input type="checkbox" data-cba="ptdone" ${x.done ? 'checked' : ''} title="${x.done ? 'Rouvrir le point' : 'Clore le point'}"><span class="x">${esc(x.t)}<span class="ref">ouvert le ${fmtDate(parseDay(x.open))}${x.done ? ' · clos le ' + fmtDate(parseDay(x.done)) : ''}</span></span>${!x.done && x.due ? `<span class="due ${x.due < today ? 'late' : ''}" title="Échéance : rappel dans « À faire aujourd’hui »">⏰ ${fmtDate(parseDay(x.due)).slice(0, 5)}</span>` : ''}<button class="icon xs" data-cba="ptdel" title="Supprimer">${ICON.trash}</button></div>`;
+  return `<div class="cb-add"><input id="pt-t" placeholder="Nouveau point${who} (ex. Contrôle URSSAF en cours)" autocomplete="off"><label class="cb-hint" style="display:flex;gap:5px;align-items:center">Échéance <input type="date" id="pt-due"></label><button class="btn sm primary" data-cba="ptadd">Ajouter</button></div>
+    ${open.length ? `<div class="cb-list">${open.map(it).join('')}</div>` : '<div class="cb-hint">Aucun point en cours. Un point avec échéance apparaît dans « À faire aujourd’hui » le jour venu.</div>'}
+    ${closed.length ? `<details><summary class="cb-hint" style="cursor:pointer">Points clos (${closed.length})</summary><div class="cb-list">${closed.map(it).join('')}</div></details>` : ''}`;
+}
+function cbJournalHTML(journal, today) {
+  const jr = journal.slice().sort((x, y) => y.d.localeCompare(x.d) || (y.id > x.id ? 1 : -1));
+  return `<div class="cb-add"><input type="date" id="jr-d" value="${today}"><input id="jr-t" placeholder="Événement (ex. Rejet DSN de mars, courrier URSSAF…)" autocomplete="off"></div>
+    <div class="cb-add"><input id="jr-ref" placeholder="Référence du document dans la GED (facultatif)" autocomplete="off"><button class="btn sm primary" data-cba="jradd">Ajouter</button></div>
+    ${jr.length ? `<div class="cb-list">${jr.map(x => `<div class="cb-it" data-jr="${x.id}"><span class="d">${fmtDate(parseDay(x.d))}</span><span class="x">${esc(x.t)}${x.ref ? `<span class="ref">📎 ${esc(x.ref)}</span>` : ''}</span><button class="icon xs" data-cba="jrdel" title="Supprimer">${ICON.trash}</button></div>`).join('')}</div>` : '<div class="cb-hint">Aucun événement noté. Texte seul : pour un document, notez sa référence dans la GED du cabinet.</div>'}`;
+}
+function renderCarnetGroupe(body, g) {
+  const b = cbOf(g), mem = grpMembers(g), mk = defaultCycleMonth(), today = dayKey(Date.now());
+  const nMine = mem.filter(isMine).length;
+  // Synthèse : conventions, bulletins, points en cours des dossiers, relations à surveiller
+  const ccnMap = new Map();
+  for (const x of mem) for (const k of cbPeek(x).ccn || []) { const key = k.i != null ? 'i' + k.i : 't' + norm(k.t); if (!ccnMap.has(key)) ccnMap.set(key, { k, ds: [] }); ccnMap.get(key).ds.push(x); }
+  const bs = mem.reduce((a, x) => a + (effBs(mk, x.id).n || 0), 0), noCcn = mem.filter(x => !(cbPeek(x).ccn || []).length);
+  const pts = mem.flatMap(x => (cbPeek(x).points || []).filter(p => !p.done).map(p => ({ p, x }))).sort((a, b2) => (a.p.due || '9').localeCompare(b2.p.due || '9'));
+  const als = mem.reduce((a, x) => a + alActive(x, mk).length, 0), rels = mem.filter(x => { const l = cbPeek(x).rel?.lvl; return l && l !== 'neutre'; });
+  let html = `<div class="card filters cb-head" style="--g:${grpColor(g)}"><a class="btn sm ghost" href="#carnet">‹ Tous les carnets</a>
+    <h1>${grpTag(g, 'big')}</h1><span class="muted">Carnet du groupe · ${mem.length} dossier${mem.length > 1 ? 's' : ''}${mem.length && nMine < mem.length ? ' (dont ' + nMine + ' dans mon portefeuille)' : ''}</span>
+    <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span></div>`;
+  html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
+    <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
+    <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
+  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => cbTileHTML(x, mk, today)).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans Clients & tâches ou dans ses paramètres de cycle.</div>'}`;
+  html += `<i data-b="gsynthese"></i><h2>Synthèse du groupe</h2><div class="card cb-sec">
+    <dl class="cb-kv"><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${bs || '—'}</dd><dt>Alertes salariés actives</dt><dd>${als || '—'}</dd>
+    <dt>Conventions collectives</dt><dd>${ccnMap.size ? [...ccnMap.values()].map(({ k, ds }) => `<div>${k.i != null ? `<b class="mono">${idccStr(k.i)}</b> ` : ''}${esc(ccnShort(k))} <span class="muted">— ${ds.map(x => esc(x.name)).join(', ')}</span></div>`).join('') : '—'}${noCcn.length && ccnMap.size ? `<div class="muted small">Non renseignée : ${noCcn.map(x => esc(x.name)).join(', ')}</div>` : ''}</dd>
+    <dt>Relation client</dt><dd>${rels.length ? rels.map(x => `${esc(x.name)} : <b>${esc(CB_REL.find(r => r[0] === cbPeek(x).rel.lvl)[1])}</b>`).join(' · ') : 'Neutre ou fluide pour tous les dossiers'}</dd></dl>
+    ${pts.length ? `<div><div class="cb-hint" style="margin-bottom:4px">Points en cours des dossiers (${pts.length})</div><div class="cb-list">${pts.map(({ p, x }) => `<div class="cb-it"><a class="d" href="#carnet/${encodeURIComponent(x.id)}" style="min-width:120px">${esc(x.name)}</a><span class="x">${esc(p.t)}</span>${p.due ? `<span class="due ${p.due < today ? 'late' : ''}">⏰ ${fmtDate(parseDay(p.due)).slice(0, 5)}</span>` : ''}</div>`).join('')}</div></div>` : ''}</div>`;
+  html += `<i data-b="gpoints" data-half="1"></i><h2>Points en cours du groupe (${b.points.filter(x => !x.done).length})</h2><div class="card cb-sec">${cbPointsHTML(b.points, today, ' du groupe')}</div>`;
+  html += `<i data-b="gjournal" data-half="1"></i><h2>Journal du groupe (${b.journal.length})</h2><div class="card cb-sec">${cbJournalHTML(b.journal, today)}</div>`;
+  body.innerHTML = html;
+  blkify(body, 'carnetgroupe');
 }
 function renderCarnetDossier(body, c) {
   const b = cbOf(c), p = cyOf(c), mine = isMine(c), g = groupOf(c.group), mk = defaultCycleMonth(), row = cyRow(mk, c.id), today = dayKey(Date.now());
@@ -2329,7 +2461,7 @@ function renderCarnetDossier(body, c) {
   const jr = b.journal.slice().sort((x, y) => y.d.localeCompare(x.d) || (y.id > x.id ? 1 : -1));
   const ptHTML = x => `<div class="cb-it ${x.done ? 'done' : ''}" data-pt="${x.id}"><input type="checkbox" data-cba="ptdone" ${x.done ? 'checked' : ''} title="${x.done ? 'Rouvrir le point' : 'Clore le point'}"><span class="x">${esc(x.t)}<span class="ref">ouvert le ${fmtDate(parseDay(x.open))}${x.done ? ' · clos le ' + fmtDate(parseDay(x.done)) : ''}</span></span>${!x.done && x.due ? `<span class="due ${x.due < today ? 'late' : ''}" title="Échéance : rappel dans « À faire aujourd’hui »">⏰ ${fmtDate(parseDay(x.due)).slice(0, 5)}</span>` : ''}<button class="icon xs" data-cba="ptdel" title="Supprimer">${ICON.trash}</button></div>`;
   let html = `<div class="card filters cb-head"><a class="btn sm ghost" href="#carnet">‹ Tous les carnets</a>
-    <h1>${cliIc(c.id)}${esc(c.name)}</h1>${c.code ? `<span class="mono muted">n° ${esc(c.code)}</span>` : ''}${g ? grpTag(g, 'big') : ''}
+    <h1>${cliIc(c.id)}${esc(c.name)}</h1>${c.code ? `<span class="mono muted">n° ${esc(c.code)}</span>` : ''}${g ? `<a href="#carnet/groupe/${encodeURIComponent(g.id)}" title="Ouvrir le carnet du groupe" style="text-decoration:none">${grpTag(g, 'big')}</a>` : ''}
     <span class="cb-pf ${mine ? '' : 'other'}">${mine ? '★ Mon portefeuille' : owner ? 'Portefeuille de ' + esc(owner.name) : 'Hors de mon portefeuille'}</span>
     <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span>
     <button class="btn sm" data-cba="start" title="Démarrer le chrono sur ce dossier">${ICON.play} Chrono</button></div>`;
@@ -2339,6 +2471,13 @@ function renderCarnetDossier(body, c) {
     ${b.ccn.map((k, i) => { const r = k.i != null ? ccnOf(k.i) : null; const br = k.b || (r && r[4]) || ''; return `<div class="cb-ccn" data-ccn="${i}"><span class="ci">${k.i != null ? idccStr(k.i) : '—'}</span><div class="ct">${esc(k.t)}<div class="cs">${k.i != null ? 'IDCC ' + idccStr(k.i) : 'Convention non répertoriée (saisie libre)'}${br ? ' · brochure JO n° ' + esc(br) : ''} · <a href="${esc(ccnUrl(k))}" target="_blank" rel="noopener">Voir sur Légifrance ↗</a></div></div><button class="icon xs" data-cba="ccndel" title="Retirer cette convention">${ICON.trash}</button></div>`; }).join('')}
     <div class="ccn-search"><input id="ccn-q" placeholder="${b.ccn.length ? 'Ajouter une autre convention collective' : 'Convention collective'} : nom, IDCC (ex. 1486) ou n° de brochure JO (ex. 3018)" autocomplete="off"><div class="ccn-res" id="ccn-res" hidden></div></div>
     <div class="cb-hint">Liste officielle intégrée (${CCN_LIST.length} conventions) ; plusieurs conventions possibles (ex. établissements différents). Introuvable ? Tapez son nom puis choisissez « Ajouter tel quel ». Vérifiez toujours la convention applicable sur Légifrance.</div></div>`;
+  if (g) {
+    const gb = cbPeek(g), gOpen = (gb.points || []).filter(x => !x.done), others = grpMembers(g).filter(x => x.id !== c.id);
+    html += `<i data-b="groupe"></i><div class="toolbar"><h2>${esc(grpTitle(g))}</h2><span class="sp"></span><a class="btn sm" href="#carnet/groupe/${encodeURIComponent(g.id)}">📖 Carnet du groupe</a></div><div class="card cb-sec cb-gnote" style="--g:${grpColor(g)}">
+      ${gb.notes ? `<div class="cb-gtext">${esc(gb.notes)}</div>` : '<div class="cb-hint">Pas encore de notes pour ce groupe : ajoutez-les dans le carnet du groupe.</div>'}
+      ${gOpen.length ? `<div><div class="cb-hint" style="margin-bottom:2px">Points en cours du groupe</div>${gOpen.map(x => `<div class="cb-it"><span class="x">${esc(x.t)}</span>${x.due ? `<span class="due ${x.due < today ? 'late' : ''}">⏰ ${fmtDate(parseDay(x.due)).slice(0, 5)}</span>` : ''}</div>`).join('')}</div>` : ''}
+      ${others.length ? `<div class="cb-hint">Autres dossiers du groupe : ${others.map(x => `<a href="#carnet/${encodeURIComponent(x.id)}">${esc(x.name)}</a>`).join(' · ')}</div>` : ''}</div>`;
+  }
   // Cycle de paie (mêmes données que Mon cycle)
   html += `<i data-b="cycle" data-half="1"></i><div class="toolbar"><h2>Cycle de paie</h2><span class="sp"></span><button class="btn sm" data-cba="params">Modifier les paramètres</button></div><div class="card cb-sec">
     <dl class="cb-kv"><dt>Réception des variables</dt><dd>${esc(recTxt)}</dd><dt>Alerte 1er envoi</dt><dd>${p.envDelay === 0 ? 'Pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception'}</dd><dt>Virements</dt><dd>${esc(CY_LBL.vir[p.vir] || p.vir)}${Object.keys(b.vir).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier ci-dessous' : ''}</dd><dt>Dépôt des bulletins</dt><dd>${esc(CY_LBL.dep[p.dep] || p.dep)}${p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : ''}</dd><dt>Échéance DSN</dt><dd>${dsnTxt}</dd></dl>
@@ -2389,7 +2528,7 @@ function cbVirRule(mk, rule) {
 }
 function bindCarnet() {
   const body = $('#carnet-body');
-  const cur = () => UI.cbId ? clientOf(UI.cbId) : null;
+  const cur = () => UI.cbG ? groupOf(UI.cbG) : UI.cbId ? clientOf(UI.cbId) : null;
   let qT, sT;
   const showRes = inp => {
     const box = $('#ccn-res'); if (!box) return;
@@ -2428,10 +2567,13 @@ function bindCarnet() {
   });
   body.addEventListener('focusout', ev => { if (ev.target.id === 'ccn-q') setTimeout(() => { const b = $('#ccn-res'); if (b) b.hidden = true; }, 150); });
   body.addEventListener('change', ev => {
-    const t = ev.target, c = cur(); if (!c) return;
+    const t = ev.target;
+    if (t.id === 'cb-grp') { lsSet('cbGroup', t.checked ? '1' : '0'); renderCarnet(); return; }
+    const c = cur(); if (!c) return;
     if (t.dataset.cbf) {
       const v = t.value.replace(/\s+$/, ''), b = cbOf(c);
-      if (t.dataset.cbf === 'notes') c.cy = { ...cyOf(c), notes: v };
+      if (t.dataset.cbf === 'gnotes') b.notes = v;
+      else if (t.dataset.cbf === 'notes') c.cy = { ...cyOf(c), notes: v };
       else if (t.dataset.cbf === 'relnote') b.rel = { ...b.rel, note: v, d: isoDay(Date.now()) };
       else b[t.dataset.cbf] = v;
       touchMeta(); cbSaved(); return;
@@ -2440,6 +2582,8 @@ function bindCarnet() {
     if (t.dataset.cba === 'ptdone') { const id = t.closest('[data-pt]').dataset.pt; cbPointDone(c.id, id, t.checked); return; }
   });
   body.addEventListener('click', ev => {
+    const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
+    const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     const tile = ev.target.closest('[data-cb]'); if (tile) { location.hash = 'carnet/' + encodeURIComponent(tile.dataset.cb); window.scrollTo(0, 0); return; }
     const sg = ev.target.closest('.seg[data-seg=cbf] button'); if (sg) { UI.cb.f = sg.dataset.v; renderCarnet(); return; }
     const rb = ev.target.closest('[data-rel]'); const c = cur();
@@ -2487,8 +2631,9 @@ function renderChrono() {
       <button class="play" data-act="quick" title="Démarrer tout de suite">${ICON.play}</button></div>`).join('') + `</div>`;
   }
   html += `<i data-b="resume"></i><h2>Résumé</h2><div class="stats">
-    <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div></div>
-    <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer</div></div>
+    <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div>${schedCfg().mode !== 'none' ? `<div class="s">${plannedOn(dayKey(now)) ? 'prévu : ' + fmtDur(plannedOn(dayKey(now))) : 'pas de temps prévu aujourd’hui'}</div>` : ''}</div>
+    <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer${schedCfg().mode !== 'none' ? ' · prévu : ' + fmtDur(Array.from({ length: 7 }, (_, i) => plannedOn(dayKey(addDays(wk, i)))).reduce((a, b) => a + b, 0)) : ''}</div></div>
+    ${schedCfg().mode === 'forfait' && +schedCfg().forfait.total ? (() => { const y = new Date(now).getFullYear(), n = forfaitCount(y), t = +schedCfg().forfait.total; return `<div class="card stat"><div class="k">Forfait jours ${y}</div><div class="v">${fmtDays(n)}</div><div class="s">sur ${t} j · ${fmtDays(Math.max(0, t - n))} restant${t - n > 1 ? 's' : ''}</div></div>`; })() : ''}
     <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
     <div class="card stat"><div class="k">Hors portefeuille · ce mois</div><div class="v">${fmtDur(sum(mo, e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none' && k !== 'internal'; }))}</div><div class="s">autres clients et temps avec des personnes${(() => { const ti = sum(mo, e => isInternalId(e.client)); return ti ? ` · <b>${fmtDur(ti)}</b> en interne` : ''; })()}</div></div>
     <div class="card stat" data-k="todo"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
@@ -2617,7 +2762,7 @@ function bindChrono() {
     else if (act === 'hol-note' || act === 'hol-hide') {
       const k = b.closest('[data-k]').dataset.k;
       if (act === 'hol-hide') { const h = holHidden(); h.push(k); lsSet('holHide', JSON.stringify(h.slice(-30))); renderChrono(); return; }
-      const st = timeOn(parseDay(k), '09:00'), e = { id: 'e' + newId(), client: ABS_ID, task: null, abs: 'fer', allday: 'j', start: st, end: st + absDayMs(), label: holidayOn(k), billable: false, invoicedAt: 0, logged: false };
+      const sl = absSlot(k, 'j'), st = sl.st, e = { id: 'e' + newId(), client: ABS_ID, task: null, abs: 'fer', allday: 'j', start: st, end: st + sl.len, label: holidayOn(k), billable: false, invoicedAt: 0, logged: false };
       saveEntry(e); toast('Jour férié noté : ' + holidayOn(k), 'Annuler', () => removeSilent([e.id]));
     }
     else if (act === 'upc-del' || act === 'upc-edit') {
@@ -2634,7 +2779,7 @@ function isForgotten() {
 }
 function proposedEnd(r) {
   const now = Date.now();
-  let p = timeOn(startOfDay(r.start), S.meta.settings.dayEnd || '18:00');
+  let p = timeOn(startOfDay(r.start), schedEndOf(r.start));
   if (p == null || p <= r.start) p = r.start + 3600000; // commencé après l'heure de fin habituelle : 1 h proposée
   return Math.min(p, now);
 }
@@ -2654,7 +2799,7 @@ function stopRunningAt(t, msg) {
 function checkDayEnd() {
   const r = S.running, mode = S.meta.settings.dayEndAction || 'none';
   if (!r || mode === 'none' || $('.overlay')) return false;
-  const end = timeOn(startOfDay(r.start), S.meta.settings.dayEnd || '18:00');
+  const end = timeOn(startOfDay(r.start), schedEndOf(r.start));
   if (end == null || r.start >= end || Date.now() < end) return false; // commencé après l'heure de fin, ou pas encore l'heure
   const key = r.id + '@' + dayKey(end);
   if (mode === 'stop') { stopRunningAt(end, 'Chrono arrêté automatiquement à ' + hhmm(end) + (dayKey(end) !== dayKey(Date.now()) ? ' le ' + fmtDate(end) : '') + ' (heure de fin de journée)'); return true; }
@@ -2662,7 +2807,7 @@ function checkDayEnd() {
   DayEnd.asked[key] = Infinity; UI.forgotSeen = r.id;
   const what = (clientName(r.client) || 'Sans client') + (r.task ? ' › ' + taskName(r.task) : '');
   const m = modal(`<div class="modal-h"><h3>Fin de journée</h3><button class="icon" data-close>${ICON.close}</button></div>
-    <div class="modal-b"><div>Il est ${hhmm(Date.now())}${dayKey(end) !== dayKey(Date.now()) ? ' (le chrono tourne depuis le ' + fmtDate(r.start) + ')' : ''}. Le chrono <b>${esc(what)}</b> tourne encore alors que votre heure de fin de journée est <b>${esc(S.meta.settings.dayEnd)}</b>.</div></div>
+    <div class="modal-b"><div>Il est ${hhmm(Date.now())}${dayKey(end) !== dayKey(Date.now()) ? ' (le chrono tourne depuis le ' + fmtDate(r.start) + ')' : ''}. Le chrono <b>${esc(what)}</b> tourne encore alors que votre heure de fin de journée est <b>${hhmm(end)}</b>.</div></div>
     <div class="modal-f"><button class="btn" id="de-cont">Continuer sans redemander</button>${dayKey(end) === dayKey(Date.now()) ? '<button class="btn" id="de-snooze">Continuer 1 h</button>' : ''}<span class="sp"></span><button class="btn" id="de-now">Arrêter maintenant</button><button class="btn primary" id="de-end">Arrêter à ${hhmm(end)}</button></div>`);
   const q = x => m.el.querySelector(x);
   q('#de-end').addEventListener('click', () => { m.close(); stopRunningAt(end); });
@@ -2671,7 +2816,31 @@ function checkDayEnd() {
   q('#de-cont').addEventListener('click', () => m.close());
   return true;
 }
-setInterval(() => { if (!document.hidden) { checkDayEnd(); checkLaw(); } }, 30000);
+const BreakAsk = {};
+function checkBreak() {
+  const r = S.running; if (!r || $('.overlay')) return;
+  const s = schedOf(r.start); if (s.mode !== 'fixed' || s.ranges.length < 2) return;
+  const d0 = startOfDay(r.start), now = Date.now();
+  if (dayKey(now) !== dayKey(r.start)) return;
+  for (let i = 0; i < s.ranges.length - 1; i++) {
+    const b0 = timeOn(d0, s.ranges[i][1]), b1 = timeOn(d0, s.ranges[i + 1][0]);
+    if (b1 <= b0 || r.start >= b0 - 60000 || now < b0 + 5 * 60000) continue; // lancé pendant/après la pause, ou pause pas encore entamée
+    const key = r.id + '@' + i; if (BreakAsk[key]) continue; BreakAsk[key] = 1;
+    const after = now >= b1, what = (clientName(r.client) || 'Sans client') + (r.task ? ' › ' + taskName(r.task) : '');
+    const m = modal(`<div class="modal-h"><h3>☕ Pause habituelle</h3><button class="icon" data-close>${ICON.close}</button></div>
+      <div class="modal-b"><div>Le chrono <b>${esc(what)}</b> ${after ? 'a tourné' : 'tourne'} pendant votre pause habituelle (<b>${hhmm(b0)} – ${hhmm(b1)}</b>).</div></div>
+      <div class="modal-f"><button class="btn" data-close>${after ? 'Laisser tel quel' : 'Continuer'}</button><span class="sp"></span>${after ? `<button class="btn" id="bk-stop">Arrêter à ${hhmm(b0)}</button><button class="btn primary" id="bk-cut">Retirer la pause</button>` : `<button class="btn primary" id="bk-stop">Arrêter à ${hhmm(b0)}</button>`}</div>`);
+    m.el.querySelector('#bk-stop').addEventListener('click', () => { m.close(); stopRunningAt(b0, 'Chrono arrêté à ' + hhmm(b0) + ' (début de la pause)'); });
+    m.el.querySelector('#bk-cut')?.addEventListener('click', () => {
+      m.close(); const cur = S.running; if (!cur || cur.id !== r.id) return;
+      const first = { ...cur, end: b0 }, next = { ...cur, id: 'e' + newId(), start: b1 };
+      saveEntry(first); S.running = next; S.rev++; Store.put('running'); syncTimerBar(); scheduleRender();
+      toast('Pause retirée : ' + hhmm(b0) + ' – ' + hhmm(b1), 'Annuler', () => { removeSilent([first.id]); S.running = cur; S.rev++; Store.put('running'); syncTimerBar(); scheduleRender(); });
+    });
+    return;
+  }
+}
+setInterval(() => { if (!document.hidden) { checkDayEnd(); checkBreak(); checkLaw(); } }, 30000);
 function checkForgotten() {
   if (checkDayEnd()) return;
   if (!S.running || UI.forgotSeen === S.running.id || $('.overlay')) return;
@@ -2685,7 +2854,7 @@ function openForgot() {
   const m = modal(`<div class="modal-h"><h3>Chrono resté allumé ?</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b"><div>Le chrono <b>${esc(what)}</b> tourne depuis le <b>${esc(fmtDayLong(dayKey(r.start)).replace('Aujourd’hui · ', '').replace('Hier · ', ''))} à ${hhmm(r.start)}</b>, soit <b>${fmtDur(Date.now() - r.start)}</b>. Vous avez peut-être oublié de l’arrêter.</div>
       <div class="fld"><span>Heure de fin réelle proposée</span><div style="display:flex;gap:8px;align-items:center"><input type="date" id="fg-d" value="${dayKey(p)}"><input id="fg-t" class="mono" style="width:80px;text-align:center" value="${hhmm(p)}" inputmode="numeric"><span class="muted">durée retenue : <b id="fg-dur" class="mono"></b></span></div></div>
-      <div class="muted small">L’heure proposée est votre heure habituelle de fin de journée (${esc(S.meta.settings.dayEnd)}), modifiable dans Réglages.</div></div>
+      <div class="muted small">L’heure proposée est votre heure habituelle de fin de journée (${esc(schedEndOf(r.start))}), modifiable dans Réglages (planning habituel).</div></div>
     <div class="modal-f"><button class="btn" data-close>Le laisser tourner</button><button class="btn" id="fg-now">Arrêter maintenant (${fmtDur(Date.now() - r.start)})</button><span class="sp"></span><button class="btn primary" id="fg-ok">Arrêter à cette heure</button></div>`);
   const q = s => m.el.querySelector(s);
   const end = () => { const t = timeOn(parseDay(q('#fg-d').value || dayKey(p)), q('#fg-t').value); return t; };
@@ -3029,6 +3198,10 @@ function cyTodo() {
     if (c.deletedAt) continue;
     for (const pt of (c.cb && c.cb.points) || []) if (!pt.done && pt.due && today >= parseDay(pt.due)) items.push({ mk: cur, cid: c.id, f: 'pt', pid: pt.id, txt: 'Point en cours — ' + c.name + ' : ' + pt.t + ' (échéance le ' + fmtDate(parseDay(pt.due)).slice(0, 5) + ')', late: today > parseDay(pt.due), d: parseDay(pt.due) });
   }
+  for (const g of S.meta.groups) {
+    if (g.deletedAt) continue;
+    for (const pt of (g.cb && g.cb.points) || []) if (!pt.done && pt.due && today >= parseDay(pt.due)) items.push({ mk: cur, gid: g.id, f: 'pt', pid: pt.id, txt: 'Point en cours — ' + grpTitle(g) + ' : ' + pt.t + ' (échéance le ' + fmtDate(parseDay(pt.due)).slice(0, 5) + ')', late: today > parseDay(pt.due), d: parseDay(pt.due) });
+  }
   // Campagne de la DSN d'avril
   const y = new Date(today).getFullYear(), amk = y + '-04';
   if (today >= parseDay(y + '-04-15') && today <= parseDay(y + '-05-15')) {
@@ -3300,7 +3473,7 @@ function bindCycle() {
     else if (a === 'tododone') {
       const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return;
       if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
-      if (t.f === 'pt') { cbPointDone(t.cid, t.pid, true); toast('Point clos', 'Annuler', () => cbPointDone(t.cid, t.pid, false)); return; }
+      if (t.f === 'pt') { cbPointDone(t.cid || t.gid, t.pid, true); toast('Point clos', 'Annuler', () => cbPointDone(t.cid || t.gid, t.pid, false)); return; }
       if (t.f === 'al') { alSetOk(t.mk, t.cid, t.aid, true); toast('Alerte notée comme traitée pour ce cycle', 'Annuler', () => alSetOk(t.mk, t.cid, t.aid, false)); return; }
       cySet(t.mk, t.cid, { [t.f]: isoDay(Date.now()) });
       toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
@@ -4116,15 +4289,41 @@ function renderRefs() {
   $$('.ref-list', body).forEach((l, i) => { l.scrollTop = keep[i] || 0; });
   if (Math.abs(window.scrollY - wy) > 1) window.scrollTo(0, wy);
 }
+function schedHTML() {
+  const c = schedCfg(), f = c.forfait, y = new Date().getFullYear();
+  const seg = `<div class="seg" role="radiogroup">${[['none', 'Non renseigné'], ['fixed', 'Horaires fixes'], ['forfait', 'Forfait (sans horaire fixe)']].map(([v, l]) => `<button type="button" data-schmode="${v}" class="${c.mode === v ? 'on' : ''}" role="radio" aria-checked="${c.mode === v}">${l}</button>`).join('')}</div>`;
+  let inner = '';
+  if (c.mode === 'none') inner = `<div class="sch-hint">Sans planning, Antevorta utilise l’heure de début et de fin de journée et la durée d’une journée d’absence du bloc Réglages, du lundi au vendredi.</div>`;
+  else if (c.mode === 'fixed') {
+    let wkTot = 0;
+    const rows = WD_ORDER.map(wd => {
+      const r = c.week[wd] || [], tot = r.filter(okRange).reduce((a, x) => a + hmMin(x[1]) - hmMin(x[0]), 0); wkTot += tot;
+      return `<div class="sch-row ${r.length ? '' : 'off'}"><span class="sch-d">${WD_L[wd]}</span><span class="sch-rs">${r.map((x, i) => `<span class="sch-r ${okRange(x) ? '' : 'bad'}"><input data-schr="${wd}:${i}:0" value="${esc(x[0] || '')}" inputmode="numeric" maxlength="5" aria-label="${WD_L[wd]}, plage ${i + 1}, début"><span>–</span><input data-schr="${wd}:${i}:1" value="${esc(x[1] || '')}" inputmode="numeric" maxlength="5" aria-label="${WD_L[wd]}, plage ${i + 1}, fin"><button type="button" class="icon xs" data-schdel="${wd}:${i}" title="Retirer cette plage">×</button></span>`).join('<span class="sch-gap">puis</span>') || '<span class="muted small">Non travaillé</span>'}${r.length < 3 ? `<button type="button" class="btn sm ghost" data-schadd="${wd}">+ plage</button>` : ''}</span><span class="sch-t mono">${tot ? fmtDur(tot * 60000, 'hm') : ''}</span></div>`;
+    }).join('');
+    inner = `<div class="sch-grid">${rows}</div><div class="sch-foot"><button type="button" class="btn sm" data-sch="copy">Copier le lundi sur mardi → vendredi</button><span class="sp" style="flex:1"></span><span class="small">Total de la semaine : <b class="mono">${fmtDur(wkTot * 60000, 'hm')}</b></span></div>
+      <div class="sch-hint">Saisie : 8, 8h30, 830 ou 8:30. La 1re plage d’un jour sert de matinée et la suite d’après-midi pour les demi-journées d’absence ; la coupure entre deux plages est votre pause.</div>`;
+  } else {
+    const n = forfaitCount(y);
+    inner = `<div class="setting"><div>Durée habituelle d’une journée<div class="d">Compte aussi pour une journée d’absence (la moitié pour une demi-journée)</div></div><input data-schf="hours" value="${esc(fmtDur((+f.hours || 0) * 60000, 'hm'))}" style="width:80px;text-align:center" autocomplete="off"></div>
+      <div class="setting"><div>Heure de départ habituelle</div><input data-schf="start" value="${esc(f.start)}" style="width:80px;text-align:center" autocomplete="off"></div>
+      <div class="setting"><div>Heure de fin habituelle<div class="d">Sert à la fin de journée du chrono et aux rappels</div></div><input data-schf="end" value="${esc(f.end)}" style="width:80px;text-align:center" autocomplete="off"></div>
+      <div class="setting"><div>Jours travaillés</div><span class="sch-days">${WD_ORDER.map(wd => `<label class="chk"><input type="checkbox" data-schday="${wd}" ${(f.days || []).includes(wd) ? 'checked' : ''}>${WD_L[wd].slice(0, 3)}.</label>`).join('')}</span></div>
+      <div class="setting"><div>Forfait annuel (jours)<div class="d">Ex. 218 jours ; laisser vide si sans objet</div></div><input data-schf="total" value="${esc(f.total || '')}" inputmode="numeric" style="width:80px;text-align:center" autocomplete="off"></div>
+      ${+f.total ? `<div class="sch-hint">${y} : <b>${fmtDays(n)}</b> travaillés au ${fmtDate(Date.now())} sur ${+f.total} (${fmtDays(Math.max(0, +f.total - n))} restants). Un jour compte entier dès la moitié de la durée habituelle saisie, une demi-journée en dessous.</div>` : ''}
+      <div class="sch-hint">Au forfait jours, les rappels sur les durées maximales (10 h par jour, 48 h par semaine) ne s’affichent pas ; ceux sur le repos quotidien et hebdomadaire restent.</div>`;
+  }
+  return `<i data-b="planning"></i><h2>Planning habituel</h2><div class="card settings sch" id="sch-card"><div class="setting"><div>Type d’organisation<div class="d">Définit vos heures de début et de fin jour par jour, la durée des absences, le temps prévu dans le Résumé et la pause du déjeuner</div></div>${seg}</div>${inner}</div>`;
+}
+function schSave(mut) { const c = schedCfg(); const n = { mode: c.mode, week: JSON.parse(JSON.stringify(c.week)), forfait: { ...c.forfait, days: [...(c.forfait.days || [])] } }; mut(n); S.meta.settings.sched = n; touchMeta(); }
 function renderSettings() {
   const st = S.meta.settings;
   const html = `<i data-b="reglages" data-half="1"></i><h2>Réglages</h2><div class="card settings">
       <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
-      <div class="setting"><div>Heure habituelle de début de journée<div class="d">Avant cette heure (ou après la fin de journée), un rappel sur le temps de travail peut s’afficher parmi les citations</div></div><input data-s="dayStart" value="${esc(st.dayStart || '07:30')}" style="width:80px;text-align:center" autocomplete="off"></div>
-      <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>
-      <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à ${esc(st.dayEnd)} (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
-      <div class="setting"><div>Durée d’une journée d’absence<div class="d">Congé, maladie, férié, formation saisis en journée entière (la demi-journée compte la moitié). Ex. 7h ou 7h48.</div></div><input data-s="absDay" value="${esc(fmtDur((+st.absDay || 420) * 60000, 'hm'))}" style="width:80px;text-align:center" class="mono"></div>
+      ${schedCfg().mode === 'none' ? `      <div class="setting"><div>Heure habituelle de début de journée<div class="d">Avant cette heure (ou après la fin de journée), un rappel sur le temps de travail peut s’afficher parmi les citations</div></div><input data-s="dayStart" value="${esc(st.dayStart || '07:30')}" style="width:80px;text-align:center" autocomplete="off"></div>
+      <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>` : `<div class="setting"><div>Heures de début et de fin de journée<div class="d">Définies jour par jour par votre planning habituel (bloc Planning habituel)</div></div><a class="btn sm ghost" href="#reglages" data-act="go-planning">Voir</a></div>`}
+      <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à ${schedCfg().mode === 'none' ? esc(st.dayEnd) : 'l’heure de fin de la journée prévue au planning'} (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
+      ${schedCfg().mode === 'none' ? `      <div class="setting"><div>Durée d’une journée d’absence<div class="d">Congé, maladie, férié, formation saisis en journée entière (la demi-journée compte la moitié). Ex. 7h ou 7h48.</div></div><input data-s="absDay" value="${esc(fmtDur((+st.absDay || 420) * 60000, 'hm'))}" style="width:80px;text-align:center" class="mono"></div>` : ''}
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div>
@@ -4134,7 +4333,8 @@ function renderSettings() {
       <div class="setting"><div>Version de l’application<div class="d">Antevorta v${APP_VERSION} du ${APP_DATE}</div></div></div>
       <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.persons.length} personnes · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
-    </div>`;
+    </div>
+    ${schedHTML()}`;
   $('#reglages-body').innerHTML = html;
   blkify($('#reglages-body'), 'reglages');
   const ab = $('#acces-body');
@@ -4183,10 +4383,15 @@ function bindRefsOn(body) {
     qT = setTimeout(() => { const pos = ev.target.selectionStart; renderRefs(); const inp = $('#ref-q'); if (inp) { inp.focus(); inp.setSelectionRange(pos, pos); } }, 200);
   });
   body.addEventListener('click', ev => {
+    const sm = ev.target.closest('[data-schmode]'); if (sm) { schSave(n => { n.mode = sm.dataset.schmode; }); return; }
+    const sa = ev.target.closest('[data-schadd]'); if (sa) { const wd = sa.dataset.schadd; schSave(n => { const r = (n.week[wd] ||= []); const last = r[r.length - 1]; r.push(last && okRange(last) ? [pad(Math.min(23, Math.floor(hmMin(last[1]) / 60) + 1)) + ':00', '18:00'] : ['09:00', '12:00']); }); setTimeout(() => { const ins = body.querySelectorAll(`[data-schr^="${wd}:"]`); ins[ins.length - 2]?.focus(); }, 40); return; }
+    const sd = ev.target.closest('[data-schdel]'); if (sd) { const [wd, i] = sd.dataset.schdel.split(':'); schSave(n => { n.week[wd].splice(+i, 1); }); return; }
+    if (ev.target.closest('[data-sch=copy]')) { schSave(n => { for (const wd of [2, 3, 4, 5]) n.week[wd] = JSON.parse(JSON.stringify(n.week[1] || [])); }); toast('Horaires du lundi copiés sur mardi → vendredi'); return; }
     const sg = ev.target.closest('.seg[data-seg=refpf] button'); if (sg) { UI.refPf = sg.dataset.v; renderRefs(); return; }
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act, row = b.closest('.ref-row');
     const obj = row ? objOf(row.dataset.kind, row.dataset.id) : null;
+    if (b.dataset.act === 'go-planning') { ev.preventDefault(); $('#sch-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if (act === 'add-client') addC();
     else if (act === 'add-task') addT();
     else if (act === 'add-person') addP();
@@ -4218,6 +4423,19 @@ function bindRefsOn(body) {
     if (i.id === 'import-file') { importFile(i.files[0]); i.value = ''; return; }
     if (i.id === 'new-client-owner') { UI.newClientOwner = i.value; return; }
     if (i.id === 'new-person-role') { UI.newPersonRole = i.value; return; }
+    if (i.dataset.schr) {
+      const [wd, ri, k] = i.dataset.schr.split(':').map(Number), hm = parseHM(i.value);
+      if (!hm) { i.value = (schedCfg().week[wd] || [])[ri]?.[k] || ''; toast('Heure non comprise (ex. 8h30)'); return; }
+      schSave(n => { n.week[wd][ri][k] = pad(hm[0]) + ':' + pad(hm[1]); }); return;
+    }
+    if (i.dataset.schf) {
+      const k = i.dataset.schf;
+      if (k === 'hours') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { toast('Durée non comprise (ex. 7h30)'); renderSettings(); return; } schSave(n => { n.forfait.hours = mn; }); return; }
+      if (k === 'total') { const v = parseInt(i.value, 10); schSave(n => { n.forfait.total = v > 0 && v <= 366 ? v : null; }); return; }
+      const hm = parseHM(i.value); if (!hm) { toast('Heure non comprise (ex. 8h30)'); renderSettings(); return; }
+      schSave(n => { n.forfait[k] = pad(hm[0]) + ':' + pad(hm[1]); }); return;
+    }
+    if (i.dataset.schday) { const wd = +i.dataset.schday; schSave(n => { const d = new Set(n.forfait.days); i.checked ? d.add(wd) : d.delete(wd); n.forfait.days = [...d].sort(); }); return; }
     if (i.id === 'set-quote') { lsSet('quote', i.value); if (i.value === '1') showQuote(true); return; }
     if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
     if (i.dataset.s === 'dayStart') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayStart; toast('Heure non comprise (ex. 07:30)'); return; } S.meta.settings.dayStart = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
@@ -4764,6 +4982,8 @@ const LAW = {
   fer: [['Aujourd’hui est un jour férié prévu par la loi : le travail peut attendre demain.', 'Code du travail, art. L3133-1']],
   mai: [['Le 1er mai est un jour férié et chômé. Bonne fête du Travail… sans travail !', 'Code du travail, art. L3133-4']],
   cp: [['Les congés payés sont faits pour se reposer : tout salarié y a droit chaque année. Le cabinet tiendra sans vous.', 'Code du travail, art. L3141-1']],
+  off: [['Aujourd’hui n’est pas un jour travaillé dans votre planning habituel : le travail peut attendre.', 'Votre planning habituel'],
+    ['Un jour de repos est un vrai repos : le droit à la déconnexion vaut aussi pour lui.', 'Code du travail, art. L2242-17']],
   mal: [['Pendant un arrêt de travail indemnisé, il faut s’abstenir de toute activité non autorisée. Prenez soin de vous.', 'Code de la sécurité sociale, art. L323-6']],
   jour: [['Plus de 10 heures de travail aujourd’hui : c’est la durée quotidienne maximale, sauf dérogation. Il est temps de s’arrêter.', 'Code du travail, art. L3121-18']],
   sem: [['Plus de 48 heures cette semaine : c’est la durée maximale sur une même semaine (et 44 h en moyenne sur 12 semaines). Levez le pied !', 'Code du travail, art. L3121-20 et L3121-22']],
@@ -4778,11 +4998,15 @@ function lawSituation() {
   if (wd === 0) return lawSeen('we', k) ? 'dim' : 'we';
   if (wd === 6) return 'we';
   const worked = from => allEntries().filter(e => e.start >= from).reduce((a, e) => a + dur(e), 0) + (S.running.start >= from ? now - S.running.start : 0);
-  if (worked(startOfWeek(now)) > 48 * 3600000) return 'sem';
-  if (worked(startOfDay(now)) > 10 * 3600000) return 'jour';
+  const sc = schedOf(now);
+  if (!sc.work && sc.mode !== 'none') return 'off';
+  if (sc.mode !== 'forfait') { // au forfait jours, les durées maximales de 10 h et 48 h ne s'appliquent pas
+    if (worked(startOfWeek(now)) > 48 * 3600000) return 'sem';
+    if (worked(startOfDay(now)) > 10 * 3600000) return 'jour';
+  }
   const hm = hhmm(now);
-  if (hm >= (st.dayEnd || '18:00')) return 'soir';
-  if (hm < (st.dayStart || '07:30')) return 'matin';
+  if (sc.end && hm >= sc.end) return 'soir';
+  if (sc.start && hm < sc.start) return 'matin';
   return null;
 }
 const lawSeen = (sit, k) => { try { const o = JSON.parse(lsGet('lawShown', '{}')); return o.d === k && (o.s || []).includes(sit); } catch (e) { return false; } };
@@ -4794,7 +5018,7 @@ function checkLaw() {
   if (o.d !== k) o = { d: k, s: [] };
   o.s.push(sit); lsSet('lawShown', JSON.stringify(o));
   const arr = LAW[sit]; const [q, a] = arr[Math.floor(Math.random() * arr.length)];
-  showQuote(true, [q, '⚖️ ' + a]);
+  showQuote(true, [q, (/art\./.test(a) ? '⚖️ ' : '') + a]);
 }
 // Citation après 15 minutes d'inactivité, si aucun chrono ne tourne
 const IDLE_MS = 15 * 60 * 1000;
