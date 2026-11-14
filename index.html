@@ -70,6 +70,29 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 .hist-btn{width:32px;height:32px;display:inline-grid;place-items:center;border-radius:8px;color:var(--ink-2)}
 .hist-btn svg{width:18px;height:18px}
 .hist-btn.on{background:var(--accent-soft);color:var(--accent)}
+/* Mode appel (interruption) */
+.hist-btn.call-btn{width:auto;min-width:32px;padding:0 7px;gap:6px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.hist-btn.call-btn svg{flex:none}
+.hist-btn.call-btn .call-t{display:none;font-size:12px;font-weight:600}
+.hist-btn.call-btn.on{background:#c0392b;color:#fff;animation:callPulse 2s ease-in-out infinite}
+.hist-btn.call-btn.on .call-t{display:inline}
+@keyframes callPulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.35)}50%{box-shadow:0 0 0 5px rgba(192,57,43,0)}}
+@media (prefers-reduced-motion:reduce){.hist-btn.call-btn.on{animation:none}}
+.call-bar{position:fixed;right:18px;bottom:18px;z-index:70;width:min(430px,calc(100vw - 36px));background:var(--surface);border:1px solid var(--line-2);border-left:4px solid #c0392b;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:12px 14px;display:grid;gap:9px}
+.call-bar .cb-top{display:flex;align-items:center;gap:10px}
+.call-bar .cb-ic{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:color-mix(in srgb,#c0392b 14%,var(--surface));color:#c0392b;flex:none}
+.call-bar .cb-ic svg{width:16px;height:16px}
+.call-bar .cb-t{font-size:22px;font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums}
+.call-bar .cb-int{font-size:12px;color:var(--ink-2)}
+.call-bar .cb-row{display:flex;gap:8px;align-items:center}
+.call-bar select,.call-bar input{flex:1;min-width:0;font-size:13px;padding:6px 8px}
+.call-bar.min .cb-more{display:none}
+.call-kinds{display:flex;gap:6px;flex-wrap:wrap}
+.call-k{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+.call-k.on{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.call-sum{background:var(--surface-2);border-radius:8px;padding:9px 11px;font-size:13px}
+.call-sum b{font-size:15px}
+@media (max-width:700px){.call-bar{right:8px;left:8px;width:auto;bottom:74px}}
 .hist-pan{position:fixed;top:58px;right:16px;width:420px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);overflow:auto;z-index:60;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
 .hist-h{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
 .hist-h b{font-size:14px}
@@ -735,6 +758,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   </nav>
   <div class="top-right">
     <div id="pill" class="pill" hidden></div>
+    <button id="call-btn" class="icon hist-btn call-btn" title="Appel ou interruption : met le chrono en pause et lance un chrono d’appel" aria-label="Appel ou interruption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="call-t mono"></span></button>
     <button id="hist-btn" class="icon hist-btn" title="Historique : vos 10 dernières actions, restaurables en un clic" aria-label="Historique des actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
     <button id="install-btn" class="btn sm primary" hidden title="Installer Antevorta sur cet appareil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
@@ -810,8 +834,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.16.0';
-const APP_DATE = '13/11/2026';
+const APP_VERSION = '1.17.0';
+const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -2036,6 +2060,122 @@ document.addEventListener('pointerdown', ev => {
   };
   document.addEventListener('pointermove', move); document.addEventListener('pointerup', up);
 });
+/* ---------- Mode appel (interruption) ----------
+   Bouton 📞 de l'en-tête : si un chrono tourne, il est arrêté (1re saisie) et mémorisé ; un chrono d'appel démarre.
+   « Fin d'appel » : affecter le temps (client, collègue ou interne), puis reprendre la tâche interrompue (nouvelle saisie).
+   L'appel en cours est conservé sur cet appareil : localStorage « chronocab:call ». */
+const CALL_TASK = 'Appel téléphonique';
+const CALL_PHONE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+const Call = {
+  get() { try { return JSON.parse(lsGet('call', 'null')); } catch (e) { return null; } },
+  set(v) { if (v) lsSet('call', JSON.stringify(v)); else try { localStorage.removeItem('chronocab:call'); } catch (e) {} },
+  patch(o) { const c = this.get(); if (c) this.set({ ...c, ...o }); },
+};
+const intrLabel = i => i ? [clientName(i.client) || 'Sans client', taskName(i.task)].filter(Boolean).join(' › ') : '';
+function callToggle() { if (Call.get()) callEndDialog(); else callStart(); }
+function callStart() {
+  const now = Date.now(); let intr = null;
+  if (S.running) { const r = S.running; intr = { client: r.client, task: r.task, label: r.label, billable: r.billable }; stopTimer(true); }
+  Call.set({ start: now, intr, target: '', label: '' });
+  callUI();
+  toast(intr ? '📞 Appel en cours · « ' + intrLabel(intr) + ' » est en pause' : '📞 Appel en cours : chrono d’interruption lancé');
+}
+function callTargetOpts(cur) {
+  return targetOpts(isInternalId(cur) ? '' : cur, 'Pour qui ? (facultatif)').replace('</option>', `</option><option value="${INTERNAL_ID}" ${isInternalId(cur) ? 'selected' : ''}>${esc(INTERNAL_NAME)}</option>`);
+}
+let _callIv = null;
+function callUI() {
+  const c = Call.get(), btn = $('#call-btn');
+  let bar = document.getElementById('call-bar');
+  if (btn) { btn.classList.toggle('on', !!c); btn.title = c ? 'Appel en cours : cliquer pour terminer et affecter le temps' : 'Appel ou interruption : met le chrono en pause et lance un chrono d’appel'; }
+  if (!c) { bar?.remove(); clearInterval(_callIv); _callIv = null; return; }
+  if (!bar) {
+    const mini = lsGet('callMin', '') === '1';
+    bar = document.createElement('div'); bar.id = 'call-bar'; bar.className = 'call-bar' + (mini ? ' min' : ''); bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'Appel en cours');
+    bar.innerHTML = `<div class="cb-top"><span class="cb-ic">${CALL_PHONE}</span><div><b>Appel en cours</b><div class="cb-int"></div></div><span class="cb-t"></span></div>
+      <div class="cb-row cb-more"><select id="cb-target" title="Client, collègue ou interne : peut aussi être choisi à la fin">${callTargetOpts(c.target)}</select></div>
+      <div class="cb-row cb-more"><input id="cb-lbl" placeholder="Objet de l’appel (facultatif)" value="${esc(c.label || '')}" autocomplete="off"></div>
+      <div class="cb-row"><button class="btn sm ghost" id="cb-min">${mini ? 'Agrandir' : 'Réduire'}</button><span class="sp" style="flex:1"></span><button class="btn sm primary" id="cb-end">Fin d’appel</button></div>`;
+    document.body.appendChild(bar);
+    bar.querySelector('#cb-target').addEventListener('change', ev => Call.patch({ target: ev.target.value }));
+    bar.querySelector('#cb-lbl').addEventListener('input', ev => Call.patch({ label: ev.target.value }));
+    bar.querySelector('#cb-lbl').addEventListener('keydown', ev => { if (ev.key === 'Enter') callEndDialog(); });
+    bar.querySelector('#cb-end').addEventListener('click', callEndDialog);
+    bar.querySelector('#cb-min').addEventListener('click', ev => { const mn = !bar.classList.contains('min'); bar.classList.toggle('min', mn); lsSet('callMin', mn ? '1' : ''); ev.target.textContent = mn ? 'Agrandir' : 'Réduire'; });
+  }
+  bar.querySelector('.cb-int').textContent = c.intr ? 'En pause : ' + intrLabel(c.intr) : 'Aucune tâche en pause';
+  const upd = () => {
+    const cc = Call.get(); if (!cc) { callUI(); return; }
+    const t = fmtClock(Date.now() - cc.start);
+    const tt = document.querySelector('#call-bar .cb-t'); if (tt) tt.textContent = t;
+    const bt = document.querySelector('#call-btn .call-t'); if (bt) bt.textContent = t.replace(/^00:/, '');
+  };
+  upd(); if (!_callIv) _callIv = setInterval(upd, 1000);
+}
+function callEndDialog() {
+  const c = Call.get(); if (!c || document.getElementById('call-end')) return;
+  const end = Date.now(), d = end - c.start, short = d < 60000;
+  let kind = isInternalId(c.target) ? 'int' : isPersonId(c.target) ? 'coll' : 'client';
+  const callTask = S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm(CALL_TASK));
+  const ok = x => !x.archived && !x.deletedAt, byName = (a, b) => a.name.localeCompare(b.name, 'fr');
+  const cliOpts = cur => `<option value="">Choisir le client…</option>` + S.meta.clients.filter(ok).sort((a, b) => (isMine(b) - isMine(a)) || byName(a, b)).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}</option>`).join('');
+  const perOpts = cur => `<option value="">Choisir le collègue…</option>` + S.meta.persons.filter(ok).sort(byName).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} (${esc(roleLabel(x.role))})</option>`).join('');
+  const taskSel = (cur, extra) => `<option value="">Sans tâche</option>${extra || ''}` + S.meta.tasks.filter(ok).sort(byName).map(t => `<option value="${t.id}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('');
+  const m = modal(`<div class="modal-h"><h3>📞 Fin d’appel</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" id="call-end" style="display:grid;gap:12px">
+      <div class="call-sum">Durée : <b>${short ? Math.round(d / 1000) + ' s' : fmtDur(d)}</b> <span class="muted">(${hhmm(c.start)} – ${hhmm(end)})</span>${short ? '<div class="small" style="margin-top:4px">Appel de moins d’une minute : par défaut, il n’est pas enregistré.</div>' : ''}</div>
+      <div class="call-kinds">${[['client', 'Appel client'], ['coll', 'Sollicitation d’un collègue'], ['int', 'Interne / autre']].map(([k, l]) => `<button type="button" class="call-k" data-k="${k}">${l}</button>`).join('')}</div>
+      <label class="fld" id="ce-who-w"><span id="ce-who-l">Client</span><select id="ce-who"></select></label>
+      <label class="fld"><span>Tâche</span><select id="ce-task"></select></label>
+      <label class="fld"><span>Libellé</span><input id="ce-lbl" maxlength="120" value="${esc(c.label || '')}" placeholder="Objet de l’appel (facultatif)"></label>
+      <label class="chk"><input type="checkbox" id="ce-bill"> À facturer</label>
+      ${c.intr ? `<label class="chk" style="white-space:normal"><input type="checkbox" id="ce-res" checked> Reprendre la tâche interrompue : <b>${esc(intrLabel(c.intr))}</b>${S.running ? ' <span class="muted">(arrête le chrono en cours)</span>' : ''}</label>` : ''}
+    </div>
+    <div class="modal-f"><button class="btn ghost" id="ce-cont" title="Fermer cette fenêtre : l’appel continue">L’appel continue</button><span class="sp"></span>
+      <button class="btn ${short ? 'primary' : ''}" id="ce-skip">Ne pas enregistrer</button><button class="btn ${short ? '' : 'primary'}" id="ce-ok">${short ? 'Enregistrer quand même' : 'Enregistrer'}</button></div>`);
+  const q = x => m.el.querySelector(x);
+  const who = { client: kind === 'client' ? c.target : '', coll: kind === 'coll' ? c.target : '' };
+  const defTask = k => k === 'client' ? (callTask ? callTask.id : '__call') : '';
+  let task = defTask(kind), billTouched = false;
+  const draw = () => {
+    m.el.querySelectorAll('.call-k').forEach(b => b.classList.toggle('on', b.dataset.k === kind));
+    q('#ce-who-w').hidden = kind === 'int';
+    q('#ce-who-l').textContent = kind === 'coll' ? 'Collègue (temps passé avec lui ou elle)' : 'Client';
+    q('#ce-who').innerHTML = kind === 'coll' ? perOpts(who.coll) : cliOpts(who.client);
+    q('#ce-task').innerHTML = taskSel(task, !callTask ? `<option value="__call">${esc(CALL_TASK)} (nouvelle tâche)</option>` : '');
+    q('#ce-task').value = task;
+    if (!billTouched) { const cl = kind === 'client' ? who.client : ''; q('#ce-bill').checked = !!cl && defaultBillable(cl, task && task !== '__call' ? task : null); }
+  };
+  draw();
+  m.el.addEventListener('click', ev => { const b = ev.target.closest('.call-k'); if (b) { kind = b.dataset.k; task = defTask(kind); billTouched = false; draw(); } });
+  q('#ce-who').addEventListener('change', ev => { who[kind] = ev.target.value; Call.patch({ target: ev.target.value }); if (!billTouched) draw(); });
+  q('#ce-task').addEventListener('change', ev => { task = ev.target.value; if (!billTouched) draw(); });
+  q('#ce-bill').addEventListener('change', () => { billTouched = true; });
+  q('#ce-lbl').addEventListener('input', ev => Call.patch({ label: ev.target.value }));
+  q('#ce-cont').addEventListener('click', () => m.close());
+  const finish = save => {
+    const res = !!(c.intr && q('#ce-res') && q('#ce-res').checked);
+    let saved = null;
+    if (save) {
+      const client = kind === 'int' ? INTERNAL_ID : kind === 'coll' ? who.coll : who.client;
+      if (!client) { q('#ce-who').focus(); toast(kind === 'coll' ? 'Choisissez le collègue' : 'Choisissez le client, ou « Interne / autre »'); return; }
+      const tid = task === '__call' ? (S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm(CALL_TASK))?.id || addTask(CALL_TASK)) : (task || null);
+      saved = { id: 'e' + newId(), client, task: tid, label: q('#ce-lbl').value.trim(), billable: q('#ce-bill').checked, start: c.start, end, invoicedAt: 0, logged: false };
+      saveEntry(saved);
+    }
+    Call.set(null); m.close(); callUI();
+    if (res) startTimer({ client: c.intr.client, task: c.intr.task, label: c.intr.label, billable: c.intr.billable });
+    const msg = (saved ? '📞 ' + fmtDur(d) + ' affecté à ' + clientName(saved.client) : 'Appel non enregistré') + (res ? ' · reprise de « ' + intrLabel(c.intr) + ' »' : '');
+    toast(msg, 'Annuler', () => {
+      if (saved) removeSilent([saved.id]);
+      if (res && S.running) { S.running = null; S.rev++; Store.put('running'); syncTimerBar(); scheduleRender(); }
+      Call.set(c); callUI();
+    });
+  };
+  q('#ce-skip').addEventListener('click', () => finish(false));
+  q('#ce-ok').addEventListener('click', () => finish(true));
+  setTimeout(() => (short ? q('#ce-skip') : (kind === 'int' || (kind === 'client' ? who.client : who.coll)) ? q('#ce-ok') : q('#ce-who')).focus(), 40);
+}
 function renderChrono() {
   const body = $('#chrono-body');
   const entries = allEntries();
@@ -4397,6 +4537,7 @@ async function boot() {
   setTimeout(cyDailyReminder, 1500);
   $('#hist-btn').onclick = ev => { ev.stopPropagation(); Journal.toggle(); };
   Journal.load(); setTimeout(() => { Journal.ready = true; }, 2500);
+  $('#call-btn').onclick = ev => { ev.stopPropagation(); callToggle(); }; callUI();
 }
 boot();
 </script>
