@@ -628,6 +628,11 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-month{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .tl-month .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
 .tl-opt-h{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
+.imp-groups{display:grid;gap:4px}.imp-g{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:4px 8px;background:var(--surface-2);border-radius:8px}
+.imp-tbl{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:8px}.imp-tbl table{width:100%}.imp-tbl tr.off td{opacity:.5}
+.imp-st{font-size:12px;font-weight:600;padding:1px 6px;border-radius:6px}.imp-st.new{background:#e3f1e6;color:#25663a}.imp-st.ex{background:#e6eef8;color:#2f5f96}.imp-st.dup{background:#fbeedd;color:#8a5212}
+.rz-keep{background:var(--surface-2);border-radius:8px;padding:8px 10px;color:var(--ink-2)}
+.rz-step{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px}
 .tl-pick{align-items:flex-start;white-space:normal;font-size:13.5px;color:var(--ink);padding:6px 4px}
 .tl-card{min-width:0;overflow:hidden}
 .tl-card input,.tl-card select{min-width:0;max-width:100%;box-sizing:border-box}
@@ -1016,7 +1021,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.28.0';
+const APP_VERSION = '1.30.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2501,7 +2506,7 @@ function renderCarnet() {
   const f = UI.cb.f, q = norm(UI.cb.q || '');
   const all = S.meta.clients.filter(x => !x.deletedAt && !x.archived);
   const nMine = all.filter(isMine).length;
-  const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && (!q || [x.name, x.code, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q))))
+  const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && (!q || [x.name, x.code, x.siret, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q))))
     .sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
   const mk = defaultCycleMonth(), today = dayKey(Date.now());
   const hasG = hasGroups(), grouped = hasG && lsGet('cbGroup', '1') === '1';
@@ -2580,7 +2585,7 @@ function renderCarnetDossier(body, c) {
     <button class="btn sm" data-cba="start" title="Démarrer le chrono sur ce dossier">${ICON.play} Chrono</button></div>`;
   // Identité et conventions collectives
   html += `<i data-b="ident"></i><h2>Identité et convention collective</h2><div class="card cb-sec">
-    <dl class="cb-kv"><dt>Raison sociale</dt><dd>${esc(c.name)}</dd><dt>N° de dossier</dt><dd>${esc(c.code || '—')}</dd><dt>Groupe</dt><dd>${g ? grpTag(g) : '—'}</dd><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${effBs(mk, c.id).n ?? '—'}</dd></dl>
+    <dl class="cb-kv"><dt>Raison sociale</dt><dd>${esc(c.name)}</dd><dt>N° de dossier</dt><dd>${esc(c.code || '—')}</dd>${c.siret ? `<dt>SIRET</dt><dd class="mono">${esc(fmtSiret(c.siret))}</dd>` : ''}<dt>Groupe</dt><dd>${g ? grpTag(g) : '—'}</dd><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${effBs(mk, c.id).n ?? '—'}</dd></dl>
     ${b.ccn.map((k, i) => { const r = k.i != null ? ccnOf(k.i) : null; const br = k.b || (r && r[4]) || ''; return `<div class="cb-ccn" data-ccn="${i}"><span class="ci">${k.i != null ? idccStr(k.i) : '—'}</span><div class="ct">${esc(k.t)}<div class="cs">${ccnIsNone(k) ? 'Code IDCC 9999 à déclarer en DSN · seules les règles du Code du travail s’appliquent (et les accords d’entreprise éventuels)' : (k.i != null ? 'IDCC ' + idccStr(k.i) : 'Convention non répertoriée (saisie libre)') + (br ? ' · brochure JO n° ' + esc(br) : '') + ` · <a href="${esc(ccnUrl(k))}" target="_blank" rel="noopener">Voir sur Légifrance ↗</a>`}</div></div><button class="icon xs" data-cba="ccndel" title="Retirer cette convention">${ICON.trash}</button></div>`; }).join('')}
     ${b.ccn.some(ccnIsNone) ? '' : `<div class="ccn-search"><input id="ccn-q" placeholder="${b.ccn.length ? 'Ajouter une autre convention collective' : 'Convention collective'} : nom, IDCC (ex. 1486) ou n° de brochure JO (ex. 3018)" autocomplete="off"><div class="ccn-res" id="ccn-res" hidden></div></div>
     <div class="cb-hint">Liste officielle intégrée (${CCN_LIST.length - 2} conventions) ; plusieurs conventions possibles (ex. établissements différents). Introuvable ? Tapez son nom puis choisissez « Ajouter tel quel ». Vérifiez toujours la convention applicable sur Légifrance.${b.ccn.length ? '' : ' <button type="button" class="btn sm ghost" data-cba="ccnnone">Dossier sans convention collective (Code du travail)</button>'}</div>`}</div>`;
@@ -4756,6 +4761,289 @@ function schedHTML() {
   return `<i data-b="planning"></i><h2>Planning habituel</h2><div class="card settings sch" id="sch-card"><div class="setting"><div>Type d’organisation<div class="d">Définit vos heures de début et de fin jour par jour, la durée des absences, le temps prévu dans le Résumé et la pause du déjeuner</div></div>${seg}</div>${inner}</div>`;
 }
 function schSave(mut) { const c = schedCfg(); const n = { mode: c.mode, week: JSON.parse(JSON.stringify(c.week)), forfait: { ...c.forfait, days: [...(c.forfait.days || [])] } }; mut(n); n.week = Object.fromEntries(Object.entries(n.week).map(([k, v]) => [k, v.map(r => (r[0] || '') + '-' + (r[1] || ''))])); S.meta.settings.sched = n; touchMeta(); }
+/* ---------- Remise à zéro (v1.29.0) ----------
+   1) choix de ce qui est effacé (tout coché par défaut) ; 2) sauvegarde complète téléchargée obligatoirement ;
+   3) taper « EFFACER ». Réglages, planning, préférences de l'appareil et accès Firebase sont conservés.
+   Après effacement, le cycle en cours et les 23 précédents sont notés clôturés (manuellement) : aucun rappel ancien. */
+/* ---------- Import de dossiers (v1.30.0) : Silae XML 2003, .xlsx, .csv ----------
+   Colonnes reconnues par leur titre ; aperçu ; nouveaux dossiers dans Mon portefeuille ;
+   dossiers existants (n°, puis SIRET, puis nom) : seuls les champs vides sont complétés. */
+const fmtSiret = v => { const d = String(v || '').replace(/\D/g, ''); return d.length === 14 ? d.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, '$1 $2 $3 $4') : String(v || ''); };
+const IMPF = [
+  { k: 'code', l: 'N° de dossier', re: /^(n°|no|num(ero)?|code)?\s*(de\s*)?(dossier|code client|n° client|numero client|code)$/ },
+  { k: 'name', l: 'Raison sociale', re: /^(raison sociale|nom|nom du dossier|denomination|client|societe|entreprise|etablissement)$/ },
+  { k: 'group', l: 'Groupe', re: /^(groupe|groupe de dossiers|groupe de societes)$/ },
+  { k: 'siret', l: 'SIRET', re: /^(n°\s*)?siret$/ },
+  { k: 'idcc', l: 'IDCC (convention)', re: /^(idcc|code idcc|n° idcc|convention collective|ccn)$/ }
+];
+async function readTable(file) {
+  const buf = await file.arrayBuffer(), u8 = new Uint8Array(buf), name = file.name.toLowerCase();
+  if (u8[0] === 0x50 && u8[1] === 0x4b) return readXlsx(u8);
+  if (u8[0] === 0xd0 && u8[1] === 0xcf) throw new Error('Ancien format Excel (.xls) : enregistrez le fichier en .xlsx ou en CSV.');
+  let txt = new TextDecoder('utf-8').decode(u8);
+  if (txt.includes('\uFFFD')) txt = new TextDecoder('windows-1252').decode(u8);
+  txt = txt.replace(/^﻿/, '');
+  if (/<Workbook[\s>]/.test(txt) || /urn:schemas-microsoft-com:office:spreadsheet/.test(txt)) return readXml2003(txt);
+  if (/\.xml$/.test(name)) throw new Error('Fichier XML non reconnu (attendu : « XML Excel 2003 » de Silae).');
+  return readCsv(txt);
+}
+function readXml2003(txt) {
+  const doc = new DOMParser().parseFromString(txt, 'application/xml');
+  if (doc.querySelector('parsererror')) throw new Error('Fichier XML illisible.');
+  const ws = doc.getElementsByTagNameNS('*', 'Worksheet')[0]; if (!ws) throw new Error('Aucune feuille dans le fichier.');
+  const rows = [];
+  for (const r of ws.getElementsByTagNameNS('*', 'Row')) {
+    const ix = +(r.getAttribute('ss:Index') || 0); while (ix && rows.length < ix - 1) rows.push([]);
+    const row = [];
+    for (const c of r.getElementsByTagNameNS('*', 'Cell')) {
+      const ci = +(c.getAttribute('ss:Index') || 0); while (ci && row.length < ci - 1) row.push('');
+      const d = c.getElementsByTagNameNS('*', 'Data')[0]; row.push(d ? d.textContent.trim() : '');
+      const ma = +(c.getAttribute('ss:MergeAcross') || 0); for (let i = 0; i < ma; i++) row.push('');
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+function readCsv(txt) {
+  const first = txt.split(/\r?\n/).slice(0, 5).join('\n');
+  const sep = [';', '\t', ','].map(c => [c, first.split(c).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt[i];
+    if (q) { if (ch === '"') { if (txt[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === sep) { row.push(cur.trim()); cur = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && txt[i + 1] === '\n') i++; row.push(cur.trim()); rows.push(row); row = []; cur = ''; }
+    else cur += ch;
+  }
+  if (cur || row.length) { row.push(cur.trim()); rows.push(row); }
+  return rows;
+}
+async function unzipEntries(u8) {
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); let eocd = -1;
+  for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65600); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('Fichier .xlsx illisible.');
+  const n = dv.getUint16(eocd + 10, true); let p = dv.getUint32(eocd + 16, true); const out = {};
+  for (let k = 0; k < n; k++) {
+    const meth = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true), fl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+    const fname = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + fl)); p += 46 + fl + el + cl;
+    out[fname] = async () => {
+      const start = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true), data = u8.subarray(start, start + csz);
+      if (meth === 0) return new TextDecoder().decode(data);
+      const ds = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return await new Response(ds).text();
+    };
+  }
+  return out;
+}
+async function readXlsx(u8) {
+  const z = await unzipEntries(u8), P = s => new DOMParser().parseFromString(s, 'application/xml');
+  const sheetName = Object.keys(z).filter(f => /^xl\/worksheets\/sheet\d+\.xml$/.test(f)).sort((a, b) => parseInt(a.match(/\d+/)) - parseInt(b.match(/\d+/)))[0];
+  if (!sheetName) throw new Error('Aucune feuille dans le fichier .xlsx.');
+  const ss = z['xl/sharedStrings.xml'] ? [...P(await z['xl/sharedStrings.xml']()).getElementsByTagNameNS('*', 'si')].map(si => [...si.getElementsByTagNameNS('*', 't')].map(t => t.textContent).join('')) : [];
+  const doc = P(await z[sheetName]()), rows = [];
+  const colIx = ref => { let n = 0; for (const ch of ref.replace(/\d+/g, '')) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
+  for (const r of doc.getElementsByTagNameNS('*', 'row')) {
+    const ri = (+r.getAttribute('r') || rows.length + 1) - 1; while (rows.length < ri) rows.push([]);
+    const row = [];
+    for (const c of r.getElementsByTagNameNS('*', 'c')) {
+      const ci = c.getAttribute('r') ? colIx(c.getAttribute('r')) : row.length; while (row.length < ci) row.push('');
+      const t = c.getAttribute('t'), v = c.getElementsByTagNameNS('*', 'v')[0]?.textContent ?? '';
+      row.push((t === 's' ? ss[+v] ?? '' : t === 'inlineStr' ? [...c.getElementsByTagNameNS('*', 't')].map(x => x.textContent).join('') : v).trim());
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+const impHead = h => norm(h).replace(/\s+/g, ' ').trim();
+function impDetect(rows) {
+  for (let i = 0; i < Math.min(rows.length, 20); i++) {
+    const map = {}; (rows[i] || []).forEach((h, j) => { const f = IMPF.find(f => f.re.test(impHead(h))); if (f && map[f.k] == null) map[f.k] = j; });
+    if (map.name != null && Object.keys(map).length >= 2) return { hi: i, map };
+  }
+  return { hi: 0, map: {} };
+}
+async function importClientsFile(file) {
+  if (!file) return;
+  let rows; try { rows = await readTable(file); } catch (e) { toast(e.message || 'Fichier illisible'); return; }
+  rows = rows.filter(r => r && r.some(v => v));
+  if (!rows.length) { toast('Le fichier est vide.'); return; }
+  const det = impDetect(rows);
+  openImportClients(file.name, rows, det.hi, det.map);
+}
+function impPlan(rows, hi, map) {
+  const all = S.meta.clients, g = (r, k) => map[k] != null ? String(r[map[k]] ?? '').trim() : '';
+  const digits = v => String(v || '').replace(/\D/g, '');
+  const seenSiret = new Map(), seenName = new Map(), out = [];
+  rows.slice(hi + 1).forEach((r, i) => {
+    const it = { i, code: g(r, 'code'), name: g(r, 'name').replace(/\s+/g, ' '), group: g(r, 'group').replace(/\s+/g, ' '), siret: digits(g(r, 'siret')), idcc: digits(g(r, 'idcc')) };
+    if (!it.name) { if (it.code || it.siret) out.push({ ...it, st: 'skip', why: 'Raison sociale vide' }); return; }
+    let ex = it.code && all.find(c => c.code && norm(c.code) === norm(it.code));
+    if (!ex && it.siret.length === 14) ex = all.find(c => digits(c.siret) === it.siret);
+    if (!ex) ex = all.find(c => norm(c.name) === norm(it.name));
+    if (ex) { it.st = 'ex'; it.ex = ex; }
+    else {
+      const d = (it.siret && seenSiret.get(it.siret + '|' + norm(it.name))) || seenName.get(norm(it.name));
+      if (d) { it.st = 'dup'; it.why = 'même ' + (it.siret && seenSiret.has(it.siret + '|' + norm(it.name)) ? 'SIRET et raison sociale' : 'raison sociale') + ' que ' + (d.code || 'la ligne ' + (d.i + 1)); }
+      else it.st = 'new';
+    }
+    if (it.st !== 'skip') { if (it.siret) seenSiret.set(it.siret + '|' + norm(it.name), seenSiret.get(it.siret + '|' + norm(it.name)) || it); if (!seenName.has(norm(it.name))) seenName.set(norm(it.name), it); }
+    it.on = it.st === 'new' || it.st === 'ex';
+    out.push(it);
+  });
+  return out;
+}
+function impFill(it) {
+  // champs que l'import compléterait sur un dossier existant
+  const c = it.ex, f = [];
+  if (!c.code && it.code) f.push('n°'); if (!c.siret && it.siret) f.push('SIRET');
+  if (!groupOf(c.group) && it.group) f.push('groupe');
+  if (it.idcc && !(cbPeek(c).ccn || []).length && ccnOf(+it.idcc)) f.push('convention');
+  if (c.deletedAt || c.archived) f.push('restauré');
+  return f;
+}
+function openImportClients(fname, rows, hi, map) {
+  const width = Math.max(...rows.slice(0, hi + 30).map(r => r.length));
+  const heads = Array.from({ length: width }, (_, j) => rows[hi]?.[j] || 'Colonne ' + (j + 1));
+  const m = modal(`<div class="modal-h"><h3>Importer des dossiers</h3><button class="icon" data-close>${ICON.close}</button></div><div class="modal-b" id="imp-b"></div>
+    <div class="modal-f"><span class="muted small" id="imp-sum"></span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="imp-go">Importer</button></div>`, 'wide');
+  const q = x => m.el.querySelector(x);
+  let plan = [], mothers = {}, onMap = new Map();
+  const groupsOf = () => {
+    const gm = new Map();
+    for (const it of plan) {
+      if (!it.on) continue;
+      const gname = it.st === 'ex' && groupOf(it.ex.group) ? null : it.group; if (!gname) continue;
+      const exg = S.meta.groups.find(x => norm(x.name) === norm(gname)), key = exg ? exg.id : 'n:' + norm(gname);
+      if (!gm.has(key)) gm.set(key, { key, name: exg ? exg.name : gname, exg, items: [] });
+      gm.get(key).items.push(it);
+    }
+    return [...gm.values()];
+  };
+  const draw = () => {
+    plan = impPlan(rows, hi, map); plan.forEach(x => { if (onMap.has(x.i) && x.st !== 'skip') x.on = onMap.get(x.i); });
+    const sel = k => `<label class="fld" style="min-width:150px"><span>${IMPF.find(f => f.k === k).l}</span><select data-imap="${k}"><option value="">— aucune —</option>${heads.map((h, j) => `<option value="${j}" ${map[k] === j ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></label>`;
+    let html = `<div class="small muted">${esc(fname)} · ${rows.length - hi - 1} ligne${rows.length - hi - 1 > 1 ? 's' : ''} de dossiers. Colonnes reconnues, modifiables :</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${IMPF.map(f => sel(f.k)).join('')}</div>`;
+    if (map.name == null) { q('#imp-b').innerHTML = html + '<div class="warn">Choisissez la colonne « Raison sociale » pour continuer.</div>'; q('#imp-go').disabled = true; q('#imp-sum').textContent = ''; return bindSel(); }
+    const gs = groupsOf();
+    if (gs.length) {
+      html += `<h4 style="margin:6px 0 0">Groupes</h4><div class="imp-groups">${gs.map(G => {
+        const members = [...(G.exg ? S.meta.clients.filter(c => c.group === G.exg.id && !c.deletedAt).map(c => ({ v: c.id, n: c.name })) : []), ...G.items.filter(it => it.st === 'new').map(it => ({ v: 'r' + it.i, n: it.name })), ...G.items.filter(it => it.st === 'ex').map(it => ({ v: it.ex.id, n: it.ex.name }))];
+        const hasM = G.exg && G.exg.mother && clientOf(G.exg.mother);
+        if (!(G.key in mothers)) { const cand = hasM ? '' : (members.find(x => /^(groupe|holding)\b/.test(norm(x.n))) || members.find(x => norm(x.n) === norm(G.name))); mothers[G.key] = cand ? cand.v : ''; }
+        return `<div class="imp-g"><b>${esc(G.name)}</b> <span class="muted small">${G.exg ? 'groupe existant' : 'nouveau groupe'} · ${G.items.length} dossier${G.items.length > 1 ? 's' : ''}</span>
+          ${hasM ? `<span class="small">♛ ${esc(clientOf(G.exg.mother).name)} (inchangée)</span>` : `<label class="small">♛ Société mère <select data-imother="${esc(G.key)}"><option value="">aucune pour l’instant</option>${members.map(x => `<option value="${esc(x.v)}" ${mothers[G.key] === x.v ? 'selected' : ''}>${esc(x.n)}</option>`).join('')}</select></label>`}</div>`;
+      }).join('')}</div>`;
+    }
+    const stTxt = it => it.st === 'new' ? '<span class="imp-st new">Nouveau</span>' : it.st === 'ex' ? (() => { const f = impFill(it); return `<span class="imp-st ex">Existant</span> <span class="muted small">${f.length ? 'complète : ' + f.join(', ') : 'rien à compléter'}</span>`; })() : it.st === 'dup' ? `<span class="imp-st dup">Doublon ?</span> <span class="muted small">${esc(it.why)}</span>` : `<span class="muted small">${esc(it.why)}</span>`;
+    html += `<h4 style="margin:6px 0 0">Dossiers</h4><div class="imp-tbl"><table class="t"><thead><tr><th></th><th>N°</th><th>Raison sociale</th><th>Groupe</th><th>SIRET</th><th>Statut</th></tr></thead><tbody>${plan.map(it => `<tr class="${it.on ? '' : 'off'}"><td>${it.st === 'skip' ? '' : `<input type="checkbox" data-irow="${it.i}" ${it.on ? 'checked' : ''}>`}</td><td class="mono">${esc(it.code)}</td><td>${esc(it.name)}</td><td>${esc(it.group)}</td><td class="mono small" style="white-space:nowrap">${esc(fmtSiret(it.siret))}</td><td>${stTxt(it)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="muted small">Les nouveaux dossiers sont placés dans <b>Mon portefeuille</b>. Pour un dossier déjà présent, seuls les champs vides sont complétés : rien de ce que vous avez saisi n’est remplacé.</div>`;
+    q('#imp-b').innerHTML = html; bindSel(); sum();
+  };
+  const sum = () => {
+    const nN = plan.filter(x => x.on && x.st !== 'ex').length, nE = plan.filter(x => x.on && x.st === 'ex').length, nO = plan.filter(x => !x.on).length;
+    q('#imp-sum').textContent = `${nN} nouveau${nN > 1 ? 'x' : ''} · ${nE} existant${nE > 1 ? 's' : ''} · ${nO} ignoré${nO > 1 ? 's' : ''}`;
+    q('#imp-go').disabled = !(nN + nE); q('#imp-go').textContent = 'Importer ' + (nN + nE) + ' dossier' + (nN + nE > 1 ? 's' : '');
+  };
+  const bindSel = () => {
+    m.el.querySelectorAll('[data-imap]').forEach(s => s.onchange = () => { const v = s.value; if (v === '') delete map[s.dataset.imap]; else map[s.dataset.imap] = +v; mothers = {}; onMap = new Map(); draw(); });
+    m.el.querySelectorAll('[data-irow]').forEach(c => c.onchange = () => { onMap.set(+c.dataset.irow, c.checked); draw(); });
+    m.el.querySelectorAll('[data-imother]').forEach(s => s.onchange = () => { mothers[s.dataset.imother] = s.value; });
+  };
+  q('#imp-go').addEventListener('click', () => { doImportClients(plan, groupsOf(), mothers); m.close(); });
+  draw();
+}
+function doImportClients(plan, groups, mothers) {
+  const before = JSON.stringify(S.meta);
+  const gid = {}; let nG = 0, nN = 0, nE = 0;
+  for (const G of groups) {
+    if (G.exg) { gid[G.key] = G.exg.id; continue; }
+    const used = S.meta.groups.map(g => g.color); let color = GROUP_COLORS.findIndex((_, i) => !used.includes(i)); if (color < 0) color = S.meta.groups.length % GROUP_COLORS.length;
+    const g = { id: 'g' + newId(), name: G.name, color }; S.meta.groups.push(g); gid[G.key] = g.id; nG++;
+  }
+  const keyOfGroup = name => { const exg = S.meta.groups.find(x => norm(x.name) === norm(name)); return exg ? exg.id : null; };
+  const rowId = {};
+  const ccnFor = i => { const r = ccnOf(+i); return r ? [{ i: +i, t: r[1] }] : null; };
+  for (const it of plan) {
+    if (!it.on) continue;
+    if (it.st === 'ex') {
+      const c = it.ex;
+      if (!c.code && it.code) c.code = it.code;
+      if (!c.siret && it.siret) c.siret = it.siret;
+      if (!groupOf(c.group) && it.group) c.group = keyOfGroup(it.group) || c.group;
+      if (it.idcc && !(c.cb && c.cb.ccn && c.cb.ccn.length)) { const k = ccnFor(it.idcc); if (k) c.cb = { ...(c.cb || {}), ccn: k }; }
+      if (c.deletedAt || c.archived) { c.archived = false; delete c.deletedAt; }
+      nE++; rowId['r' + it.i] = c.id;
+    } else {
+      let name = it.name; if (S.meta.clients.some(c => norm(c.name) === norm(name))) name += ' (' + (it.code || 'ligne ' + (it.i + 1)) + ')';
+      const c = { id: 'c' + newId(), name, code: it.code || '', billing: '', archived: false, mine: true };
+      if (it.siret) c.siret = it.siret;
+      if (it.group) c.group = keyOfGroup(it.group) || undefined; if (!c.group) delete c.group;
+      if (it.idcc) { const k = ccnFor(it.idcc); if (k) c.cb = { ccn: k }; }
+      S.meta.clients.push(c); nN++; rowId['r' + it.i] = c.id;
+    }
+  }
+  for (const [k, v] of Object.entries(mothers || {})) {
+    if (!v) continue; const g = groupOf(gid[k]); const cid = rowId[v] || v;
+    if (g && !g.mother && clientOf(cid) && clientOf(cid).group === g.id) g.mother = cid;
+  }
+  touchMeta();
+  toast(`${nN} dossier${nN > 1 ? 's' : ''} ajouté${nN > 1 ? 's' : ''}, ${nE} complété${nE > 1 ? 's' : ''}${nG ? ', ' + nG + ' groupe' + (nG > 1 ? 's' : '') + ' créé' + (nG > 1 ? 's' : '') : ''}`, 'Annuler', () => { S.meta = normalizeMeta(JSON.parse(before)); touchMeta(); });
+}
+function exportJSON() {
+  const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running }, null, 1);
+  downloadText('antevorta_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
+}
+function openReset() {
+  const nE = allEntries().length + Object.values(S.days).reduce((a, d) => a + Object.values(d.entries || {}).filter(e => e.client === ABS_ID).length, 0);
+  const nC = S.meta.clients.length, nG = S.meta.groups.length, nCy = Object.keys(S.cycles).length;
+  const opt = (k, l, d) => `<label class="chk tl-pick"><input type="checkbox" data-rz="${k}" checked><span><b>${l}</b><span class="muted small" style="display:block">${d}</span></span></label>`;
+  const m = modal(`<div class="modal-h"><h3>⚠ Remise à zéro</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px">
+      <div class="small">Choisissez ce qui sera <b>définitivement effacé</b> :</div>
+      ${opt('entries', 'Saisies de temps et absences', nE + ' saisie' + (nE > 1 ? 's' : '') + ', chrono en cours compris')}
+      ${opt('clients', 'Clients, groupes et carnets de bord', nC + ' client' + (nC > 1 ? 's' : '') + ' (corbeille comprise), ' + nG + ' groupe' + (nG > 1 ? 's' : '') + ', carnets, alertes salariés, remarques, conventions, favoris')}
+      ${opt('cycles', 'Suivi du cycle de paie', nCy + ' mois de suivi (réceptions, envois, DSN…)')}
+      ${opt('refs', 'Personnes et tâches', S.meta.persons.length + ' personne' + (S.meta.persons.length > 1 ? 's' : '') + ', ' + S.meta.tasks.length + ' tâche' + (S.meta.tasks.length > 1 ? 's' : ''))}
+      <div class="rz-keep small">Conservés : réglages et planning habituel, préférences de cet appareil (blocs, onglets…), accès Firebase.<br>Ensuite, <b>le cycle de paie en cours et tous les précédents sont clôturés</b> : aucun rappel ni retard ancien.</div>
+      <div class="rz-step"><b>1.</b> Sauvegarde complète obligatoire <button class="btn sm" id="rz-exp">${ICON.down} Télécharger la sauvegarde</button> <span id="rz-ok" class="small" hidden>✓ téléchargée</span></div>
+      <div class="rz-step"><b>2.</b> Pour confirmer, tapez <b>EFFACER</b> : <input id="rz-txt" autocomplete="off" style="width:140px" disabled placeholder="d’abord l’étape 1"></div>
+      <div class="muted small">En cas d’erreur : Réglages › Données › Importer, avec le fichier téléchargé, restaure les données.</div>
+    </div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn danger" id="rz-go" disabled>Effacer définitivement</button></div>`);
+  const q = x => m.el.querySelector(x);
+  let exported = false;
+  const upd = () => { const any = [...m.el.querySelectorAll('[data-rz]')].some(c => c.checked); q('#rz-go').disabled = !(exported && any && q('#rz-txt').value.trim().toUpperCase() === 'EFFACER'); };
+  q('#rz-exp').addEventListener('click', () => { exportJSON(); exported = true; q('#rz-ok').hidden = false; q('#rz-txt').disabled = false; q('#rz-txt').placeholder = 'EFFACER'; q('#rz-txt').focus(); upd(); });
+  m.el.addEventListener('input', upd); m.el.addEventListener('change', upd);
+  q('#rz-go').addEventListener('click', () => {
+    const w = k => q(`[data-rz=${k}]`).checked;
+    doReset({ entries: w('entries'), clients: w('clients'), cycles: w('cycles'), refs: w('refs') });
+    m.close();
+  });
+}
+function doReset(o) {
+  Journal.mute++;
+  try {
+    if (o.entries) {
+      if (S.running) { S.running = null; Store.put('running'); }
+      for (const k of Object.keys(S.days)) { S.days[k].entries = {}; Store.put('d-' + k); }
+      try { localStorage.removeItem('chronocab:call'); } catch (e) {}
+    }
+    if (o.clients) { S.meta.clients = []; S.meta.groups = []; S.meta.favorites = []; }
+    if (o.refs) { S.meta.persons = []; S.meta.tasks = []; }
+    if (o.clients || o.refs) Store.put('meta');
+    if (o.cycles) for (const k of Object.keys(S.cycles)) { S.cycles[k] = { rows: {} }; Store.put('cy-' + k); }
+    // Clôture du cycle en cours et des précédents (24 mois)
+    const today = isoDay(Date.now()); let mk = defaultCycleMonth();
+    for (let i = 0; i < 24; i++) { const cy = (S.cycles[mk] ||= { rows: {} }); if (!cy.closed) { cy.closed = today; cy.manual = true; Store.put('cy-' + mk); } mk = prevMk(mk); }
+  } finally { Journal.mute--; }
+  Journal.list = []; Journal.save();
+  UI.cbId = null; UI.cbG = null; UI.chOpen && UI.chOpen.clear();
+  S.rev++; callUI(); syncTimerBar(); scheduleRender();
+  toast('Remise à zéro effectuée. La sauvegarde téléchargée permet de tout restaurer (Importer).');
+}
 function renderSettings() {
   const st = S.meta.settings;
   const html = `<i data-b="reglages" data-half="1"></i><h2>Réglages</h2><div class="card settings">
@@ -4773,6 +5061,8 @@ function renderSettings() {
       ${Store.mode === 'firebase' ? `<div class="setting"><div>Application sur cet appareil<div class="d">${Install.standalone() ? 'Antevorta est ouvert en tant qu’application installée.' : 'Installez Antevorta pour l’ouvrir depuis une icône, en plein écran (téléphone ou ordinateur).'}</div></div>${Install.standalone() ? '' : '<button class="btn sm primary" data-act="install">Installer</button>'}</div>` : ''}
       <div class="setting"><div>Version de l’application<div class="d">Antevorta v${APP_VERSION} du ${APP_DATE}</div></div></div>
       <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.persons.length} personnes · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
+      <div class="setting"><div>Importer des dossiers<div class="d">Liste de clients extraite de Silae (XML Excel 2003), d’Excel (.xlsx) ou en CSV : n° de dossier, raison sociale, groupe, SIRET. Aperçu avant tout ajout.</div></div><label class="btn sm" style="cursor:pointer">Choisir un fichier…<input type="file" accept=".xml,.xlsx,.csv,.txt" id="imp-cli-file" hidden></label></div>
+      <div class="setting"><div>Remise à zéro<div class="d">Efface les saisies, les dossiers, le suivi du cycle de paie, les personnes et les tâches (au choix), puis clôture le cycle en cours et les précédents. Sauvegarde téléchargée avant.</div></div><button class="btn sm danger" data-act="reset">Remise à zéro…</button></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
     </div>
     ${schedHTML()}
@@ -4856,6 +5146,7 @@ function bindRefsOn(body) {
     else if (act === 'trash-restore' && obj) { delete obj.deletedAt; obj.archived = false; touchMeta(); toast('« ' + obj.name + ' » restauré'); }
     else if (act === 'trash-purge' && row) confirmPurge([{ kind: row.dataset.kind, id: row.dataset.id }]);
     else if (act === 'trash-empty') confirmPurge([...S.meta.clients.filter(c => c.deletedAt).map(c => ({ kind: 'client', id: c.id })), ...S.meta.persons.filter(x => x.deletedAt).map(x => ({ kind: 'person', id: x.id })), ...S.meta.tasks.filter(t => t.deletedAt).map(t => ({ kind: 'task', id: t.id }))]);
+    else if (act === 'reset') openReset();
     else if (act === 'export') {
       const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running }, null, 1);
       downloadText('antevorta_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
@@ -4864,6 +5155,7 @@ function bindRefsOn(body) {
   body.addEventListener('change', ev => {
     const i = ev.target;
     if (i.id === 'import-file') { importFile(i.files[0]); i.value = ''; return; }
+    if (i.id === 'imp-cli-file') { importClientsFile(i.files[0]); i.value = ''; return; }
     if (i.id === 'new-client-owner') { UI.newClientOwner = i.value; return; }
     if (i.id === 'new-person-role') { UI.newPersonRole = i.value; return; }
     if (i.dataset.tab) { const h = new Set(tabsHidden()); i.checked ? h.delete(i.dataset.tab) : h.add(i.dataset.tab); setTabs([...h]); return; }
