@@ -401,6 +401,13 @@ h2:first-child{margin-top:0}
 .set-tabs{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .wk-grid th.today{color:var(--accent)}.wk-day{all:unset;cursor:pointer;font-weight:600}.wk-day:hover{text-decoration:underline}.wk-grid td.has{cursor:pointer}.wk-grid td.has:hover{background:var(--accent-soft)}.wk-who{white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}.wk-t.inc{color:#b5650d;background:#fcefdd}.wk-t.ok{color:#2f7d55}.wk-plan td{color:var(--muted);font-size:12px}
 .sugg-list{display:grid;gap:6px;margin-top:10px}.sugg{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 12px;border-radius:9px;background:var(--surface-2);font-size:13.5px;color:var(--ink-2)}.sugg span{flex:1}
+.ref-head{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 12px 2px;font-weight:600}
+.amt-e{display:block;font-size:12px;font-weight:500;color:var(--ink-2);text-align:right}
+.ref-hint{padding:10px 14px}.ref-row .tag.pk{margin:0 6px;width:auto;white-space:nowrap}
+.pers-nm{all:unset;cursor:pointer;font-weight:600;min-width:140px}.pers-nm:hover{text-decoration:underline}.pers-role{min-width:120px}
+.cb-ppl{display:grid;gap:2px}.cb-pp{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}.cb-pp:last-child{border:0}.cb-pp .nm2{all:unset;cursor:pointer;font-weight:600}.cb-pp .nm2:hover{text-decoration:underline}
+.rate-in{display:inline-flex;gap:3px}.rate-in input{width:72px;text-align:right}.rate-in select{width:auto}
+.cat-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:6px;white-space:nowrap}.cat-cyc{background:#e3edf7;color:#2c5c8f}.cat-evt{background:#f5ebdf;color:#8a5212}.cat-exc{background:#efe6f6;color:#6a3d92}.cat-int{background:var(--surface-2);color:var(--ink-2)}
 .cy-upc{padding:6px 12px}.cy-upc-i{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}.cy-upc-i:last-child{border:0}.cy-upc-i .d{min-width:74px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 #chrono-body .cy-todo-i .icon.xs{margin-left:auto}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
@@ -464,7 +471,7 @@ h2:first-child{margin-top:0}
 .cy-table tr.is-mother td.cy-name{font-weight:650}
 .cb-tile.is-mother{background:color-mix(in srgb,var(--g) 10%,var(--surface));border-color:color-mix(in srgb,var(--g) 45%,var(--surface))}
 .ref-row.is-mother{background:color-mix(in srgb,var(--g) 9%,var(--surface))}
-.cb-tw{display:grid;gap:4px}
+.cb-tw{display:grid;gap:4px;grid-template-columns:auto auto;justify-content:start}.cb-tw > .cb-tile{grid-column:1 / -1}
 .cb-mbtn{justify-self:start;font-size:12px}
 .cb-mbtn.on{color:var(--ink);font-weight:600}
 .grp-row .what{gap:6px}
@@ -1048,7 +1055,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.39.0';
+const APP_VERSION = '1.40.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1897,6 +1904,34 @@ function addPerson(name, role) {
   const x = { id: 'p' + newId(), name, role: role || 'paie', archived: false };
   S.meta.persons.push(x); touchMeta(); return x.id;
 }
+/* ---------- Catégories de tâches et tarifs (v1.40.0) ----------
+   task.cat = 'cyc' | 'evt' | 'exc' | 'int' (sinon classement automatique d'après le nom) ;
+   task.rate = { mode: 'h' | 'acte', amount } ; tarif particulier d'un dossier : client.rates = { idTâche: { mode, amount } }. */
+const TASK_CATS = [['cyc', 'Cyclique'], ['evt', 'Événementiel'], ['exc', 'Exceptionnel'], ['int', 'Interne']];
+const CAT_L = Object.fromEntries(TASK_CATS);
+const CAT_KW = { evt: ['maladie', 'entree', 'sortie', 'stc', 'solde de tout compte', 'contrat', 'avenant', 'due', 'maj salarie', 'accident', 'arret', 'rupture', 'licenciement', 'attestation', 'conge', 'embauche', 'demission', 'mutation', 'maternite', 'paternite'],
+  cyc: ['bulletin', 'bs', 'dsn', 'paie', 'virement', 'depot', 'variable', 'production', 'envoi', 'validation', 'cloture', 'declaration', 'charges sociales', 'od de paie'],
+  exc: ['analyse', 'audit', 'conseil', 'parametrage', 'montage', 'simulation', 'desk', 'question', 'etude', 'controle', 'urssaf', 'support', 'reprise', 'regularisation', 'formation client', 'mysilae', 'silae'] };
+function autoCat(name) {
+  const n = norm(name); if (!n) return '';
+  if (INTERNAL_TASKS.some(x => norm(x) === n)) return 'int';
+  for (const k of ['evt', 'cyc', 'exc']) if (CAT_KW[k].some(w => new RegExp('(^|[^a-z])' + w.replace(/ /g, '\\s') + '([^a-z]|$)').test(n) || (w.length > 5 && n.includes(w)))) return k;
+  return '';
+}
+const taskCat = t => (t = typeof t === 'string' ? taskOf(t) : t) ? (t.cat || autoCat(t.name)) : '';
+const catTag = c => c ? `<span class="cat-tag cat-${c}">${CAT_L[c]}</span>` : '';
+const rateTxt = r => r && +r.amount > 0 ? (+r.amount).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + (r.mode === 'acte' ? ' € / acte' : ' € / h') : '';
+function rateOf(cid, tid) { const c = clientOf(cid), o = c && c.rates && c.rates[tid]; if (o && +o.amount > 0) return { ...o, own: true }; const t = taskOf(tid); return t && t.rate && +t.rate.amount > 0 ? t.rate : null; }
+function amountOf(e) { if (!e.billable) return 0; const r = rateOf(e.client, e.task); if (!r) return 0; return r.mode === 'acte' ? +r.amount : dur(e) / 3600000 * +r.amount; }
+const hasRates = () => S.meta.tasks.some(t => t.rate && +t.rate.amount > 0) || S.meta.clients.some(c => c.rates && Object.keys(c.rates).length);
+const sumAmt = l => l.reduce((a, e) => a + amountOf(e), 0);
+const eurS = n => (n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+function taskOptsGrouped(ts) { // <optgroup> par catégorie pour un <select> de tâches
+  return [...TASK_CATS, ['', 'Non classées']].map(([k, l]) => { const g = ts.filter(t => (taskCat(t) || '') === k); return g.length ? `<optgroup label="${esc(l)}">${g.map(t => `<option value="${t.id}">${esc(t.name)}${t.rate && +t.rate.amount ? ' (' + esc(rateTxt(t.rate)) + ')' : ''}</option>`).join('')}</optgroup>` : ''; }).join('');
+}
+function catGrouped(items, ofItem) { // insère des intertitres de catégorie dans une liste d'options
+  const out = []; for (const [k, l] of [...TASK_CATS, ['', 'Non classées']]) { const g = items.filter(x => (ofItem(x) || '') === k); if (g.length) out.push({ head: true, label: l }, ...g); } return out;
+}
 function addTask(name) {
   name = name.trim(); if (!name) return null;
   const ex = S.meta.tasks.find(t => norm(t.name) === norm(name)); if (ex) { if (ex.archived || ex.deletedAt) { ex.archived = false; delete ex.deletedAt; touchMeta(); } return ex.id; }
@@ -2006,10 +2041,10 @@ function clientOptions(q) {
   const u = usageStats();
   let cs = S.meta.clients.filter(c => !c.archived && !c.deletedAt);
   let ps = S.meta.persons.filter(x => !x.archived && !x.deletedAt);
-  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n) || norm(groupOf(c.group)?.name).includes(n)); ps = ps.filter(x => norm(x.name).includes(n) || norm(roleLabel(x.role)).includes(n)); }
+  if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n) || norm(groupOf(c.group)?.name).includes(n)); ps = ps.filter(x => norm(x.name + ' ' + (x.first || '') + ' ' + (x.last || '')).includes(n) || norm(pRoleTxt(x)).includes(n)); }
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
   const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), cli: c.id, grp: c.group });
-  const mapP = x => ({ id: x.id, label: x.name, sub: roleLabel(x.role), person: true });
+  const mapP = x => ({ id: x.id, label: x.name, sub: [P_KIND_L[pKind(x)], pRoleTxt(x)].filter(Boolean).join(' · '), person: true });
   const intOpt = { id: INTERNAL_ID, label: INTERNAL_NAME, sub: 'formation, trajet, organisation… · non facturable', internal: true };
   const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : mapC(o);
   const out = [];
@@ -2030,7 +2065,7 @@ function taskOptions(q, clientId) {
   const score = t => (clientId ? (u.ctCount[clientId + '|' + t.id] || 0) * 1000 : 0) + (u.tCount[t.id] || 0);
   ts.sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name, 'fr'));
   const used = clientId && !q ? ts.filter(t => u.ctCount[clientId + '|' + t.id]) : [];
-  const map = t => ({ id: t.id, label: t.name, sub: t.billing === 'nobill' ? 'non facturable' : '' });
+  const map = t => ({ id: t.id, label: t.name, cat: taskCat(t), sub: [CAT_L[taskCat(t)] || '', t.billing === 'nobill' ? 'non facturable' : '', rateTxt(rateOf(clientId, t.id))].filter(Boolean).join(' · ') });
   let std = missingStandard().filter(n => !S.meta.tasks.some(t => t.archived && norm(t.name) === norm(n)));
   if (q) { const n = norm(q); std = std.filter(s => norm(s).includes(n)); }
   if (isInternalId(clientId)) {
@@ -2041,9 +2076,9 @@ function taskOptions(q, clientId) {
     return [...(used.length ? [{ head: true, label: 'Habituelles en interne' }, ...used.map(map)] : []), ...(intItems.length ? [{ head: true, label: 'Tâches internes' }, ...intItems] : []), ...(others.length ? [{ head: true, label: 'Autres tâches' }, ...others.map(map)] : [])];
   }
   const stdItems = std.length ? [{ head: true, label: 'Tâches standards (créées au choix)' }, ...std.map(n => ({ create: true, text: n, label: n, sub: 'standard' }))] : [];
-  if (!used.length) return [...(ts.length && stdItems.length ? [{ head: true, label: 'Mes tâches' }] : []), ...ts.map(map), ...stdItems];
+  if (!used.length) return [...catGrouped(ts.map(map), x => x.cat), ...stdItems];
   const rest = ts.filter(t => !used.includes(t)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-  return [{ head: true, label: 'Habituelles pour ce client' }, ...used.map(map), { head: true, label: 'Autres tâches' }, ...rest.map(map), ...stdItems];
+  return [{ head: true, label: 'Habituelles pour ce client' }, ...used.map(map), ...catGrouped(rest.map(map), x => x.cat), ...stdItems];
 }
 
 /* =========================================================
@@ -2617,7 +2652,7 @@ function renderCarnet() {
   let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbv" title="Présentation"><button data-v="tiles" class="${cbList ? '' : 'on'}">Tuiles</button><button data-v="list" class="${cbList ? 'on' : ''}">Liste</button></div><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
     <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off">
     ${cbFilterHTML(all.filter(x => f === 'all' || (f === 'mine') === isMine(x)), ff)}
-    ${hasG && !cbList ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}${cbList ? '' : '<button class="btn sm primary" data-cba="newdos" title="Créer un dossier">＋ Nouveau dossier</button>'}</div>`;
+    ${hasG && !cbList ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}${cbList ? '' : '<button class="btn sm" data-cba="newgrp" title="Créer un groupe de dossiers">＋ Nouveau groupe</button><button class="btn sm primary" data-cba="newdos" title="Créer un dossier">＋ Nouveau dossier</button>'}</div>`;
   if (cbList) {
     const u = {}; for (const e of allEntries()) if (e.client) u[e.client] = (u[e.client] || 0) + dur(e);
     const nArch = S.meta.clients.filter(x => x.archived && !x.deletedAt).length, newMine = UI.newClientMine !== false;
@@ -2669,10 +2704,18 @@ function renderCarnetGroupe(body, g) {
   let html = `<div class="card filters cb-head" style="--g:${grpColor(g)}"><a class="btn sm ghost" href="#carnet">‹ Tous les carnets</a>
     <h1>${grpTag(g, 'big')}</h1><span class="muted">Carnet du groupe · ${mem.length} dossier${mem.length > 1 ? 's' : ''}${mem.length && nMine < mem.length ? ' (dont ' + nMine + ' dans mon portefeuille)' : ''}</span>
     <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span></div>`;
+  { const cands = S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group !== g.id).sort((a2, b2) => (a2.group ? 1 : 0) - (b2.group ? 1 : 0) || a2.name.localeCompare(b2.name, 'fr'));
+    html += `<i data-b="gparam" data-half="1"></i><h2>Paramètres du groupe</h2><div class="card cb-sec">
+      <label class="fld"><span>Nom du groupe</span><input id="cbg-name" value="${esc(g.name)}" maxlength="60" autocomplete="off"></label>
+      <div class="small">Couleur <span class="grp-sws" style="margin-left:6px">${GROUP_COLORS.map((col, i) => `<button class="grp-sw ${(g.color || 0) === i ? 'on' : ''}" data-cbgcol="${i}" style="--g:${col}" title="${GROUP_COLOR_NAMES[i]}" aria-label="${GROUP_COLOR_NAMES[i]}"></button>`).join('')}</span></div>
+      <label class="fld"><span>Ajouter un dossier au groupe</span><select id="cbg-add"><option value="">Choisir un dossier…</option>${cands.map(x => `<option value="${x.id}">${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}${x.group && groupOf(x.group) ? ' (groupe ' + esc(groupOf(x.group).name) + ')' : ''}</option>`).join('')}</select></label>
+      <div><button class="btn sm danger" data-cbgdel>Supprimer le groupe</button> <span class="muted small">les dossiers sont conservés, sans groupe</span></div></div>`;
+    const gpl = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).some(id => clientOf(id)?.group === g.id));
+    if (gpl.length) html += `<i data-b="ginterloc" data-half="1"></i><h2>Interlocuteurs du groupe</h2><div class="card cb-sec"><div class="cb-ppl">${gpl.map(x => `<div class="cb-pp"><button class="nm2" data-cbgp="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))} · ${esc((x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', '))}</span><span class="sp" style="flex:1"></span>${pContact(x)}</div>`).join('')}</div></div>`; }
   html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
     <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
     <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
-  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans le Carnet de bord (vue Liste) ou dans ses paramètres de cycle.</div>'}`;
+  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button><button type="button" class="btn sm ghost cb-mbtn" data-cbgrm="${x.id}" title="Retirer ce dossier du groupe">Retirer</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans le Carnet de bord (vue Liste) ou dans ses paramètres de cycle.</div>'}`;
   html += `<i data-b="gsynthese"></i><h2>Synthèse du groupe</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${bs || '—'}</dd><dt>Alertes salariés actives</dt><dd>${als || '—'}</dd>
     <dt>Conventions collectives</dt><dd>${ccnMap.size ? [...ccnMap.values()].map(({ k, ds }) => `<div>${k.i != null ? `<b class="mono">${idccStr(k.i)}</b> ` : ''}${esc(ccnShort(k))} <span class="muted">— ${ds.map(x => esc(x.name)).join(', ')}</span></div>`).join('') : '—'}${noCcn.length && ccnMap.size ? `<div class="muted small">Non renseignée : ${noCcn.map(x => esc(x.name)).join(', ')}</div>` : ''}</dd>
@@ -2719,6 +2762,16 @@ function renderCarnetDossier(body, c) {
   // Alertes salariés
   html += `<i data-b="alertes" data-half="1"></i><div class="toolbar"><h2>Alertes salariés</h2><span class="sp"></span><button class="btn sm" data-cba="alerts">Gérer les alertes</button></div><div class="card cb-sec">
     ${al.length ? `<div class="cb-list">${al.map(a => { const st = alState(mk, c, row, a).st; return `<div class="cb-it"><span class="x"><b>${esc(a.name)}</b>${a.tag ? ' · ' + esc(a.tag) : ''}<span class="ref">${a.mode === 'validate' ? 'À valider : ' + esc(alTrigText(a)) + (st === 'ok' ? ' · ✓ validée pour ce cycle' : st === 'due' ? ' · à valider maintenant' : '') : 'Neutre (pour information)'}${a.until ? ' · jusqu’au cycle de ' + esc(mkLabel(a.until)) : ''}</span></span></div>`; }).join('')}</div>` : '<div class="cb-hint">Aucune alerte active pour le cycle de ' + esc(mkLabel(mk)) + '.</div>'}</div>`;
+  // Interlocuteurs (v1.40.0)
+  { const own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && (x.clients || []).some(id => clientOf(id)?.group === g.id)) : [];
+    const pp = x => `<div class="cb-pp"><button class="nm2" data-cba="pfiche" data-pid="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))}</span><span class="sp" style="flex:1"></span>${x.phone ? `<a class="small" href="${esc(telHref(x.phone))}">${esc(x.phone)}</a>` : ''}${pContact(x)}</div>`;
+    html += `<i data-b="interloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs</h2><span class="sp"></span><button class="btn sm" data-cba="pnew">＋ Ajouter</button></div><div class="card cb-sec"><div class="cb-ppl">${own.map(pp).join('') || '<div class="cb-hint">Aucun interlocuteur pour ce dossier.</div>'}</div>${gp.length ? `<div class="cb-hint" style="margin-top:6px">Autres interlocuteurs du groupe</div><div class="cb-ppl">${gp.map(pp).join('')}</div>` : ''}
+      ${(() => { const others = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pKind(x) === 'cli' && !own.includes(x)); return others.length ? `<div style="margin-top:6px;display:flex;gap:6px"><select id="cb-plink" style="flex:1"><option value="">Rattacher un interlocuteur existant…</option>${others.sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr')).map(x => `<option value="${x.id}">${esc(x.name)}${x.role ? ' · ' + esc(x.role) : ''}</option>`).join('')}</select></div>` : ''; })()}</div>`; }
+  // Tarifs particuliers (v1.40.0)
+  { const rs = Object.entries(c.rates || {}).filter(([tid]) => taskOf(tid)), ts2 = S.meta.tasks.filter(t => !t.deletedAt && !t.archived && !(c.rates || {})[t.id]).sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr'));
+    html += `<i data-b="tarifs" data-half="1"></i><h2>Tarifs de facturation</h2><div class="card cb-sec"><div class="cb-hint">Par défaut : tarif de chaque tâche (Références › Tâches). Ici, les tarifs propres à ce dossier.</div>
+      ${rs.map(([tid, r]) => `<div class="cb-it"><span class="x">${esc(taskName(tid))} ${catTag(taskCat(tid))}<span class="ref">${taskOf(tid).rate && +taskOf(tid).rate.amount ? 'par défaut : ' + esc(rateTxt(taskOf(tid).rate)) : 'pas de tarif par défaut'}</span></span><b>${esc(rateTxt(r))}</b><button class="icon xs" data-cba="ratedel" data-tid="${tid}" title="Revenir au tarif par défaut">${ICON.trash}</button></div>`).join('')}
+      <div class="cb-add" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><select id="rt-t" style="flex:1;min-width:160px"><option value="">Tâche…</option>${taskOptsGrouped(ts2)}</select><input id="rt-a" inputmode="decimal" placeholder="Montant" style="width:90px;text-align:right"><select id="rt-m"><option value="h">€ / h</option><option value="acte">€ / acte</option></select><button class="btn sm" data-cba="rateadd">Ajouter</button></div></div>`; }
   // Pratiques et particularités
   html += `<i data-b="pratiques"></i><h2>Pratiques et particularités</h2><div class="card cb-sec">
     <label class="fld"><span>Pratiques du client (circuit des variables, interlocuteurs, validation, habitudes…)</span><textarea data-cbf="prat" placeholder="ex. Variables envoyées par Mme X (RH) par mail vers le 25 · validation par le gérant · préfère le téléphone">${esc(b.prat || '')}</textarea></label>
@@ -2804,6 +2857,9 @@ function bindCarnet() {
     const t = ev.target;
     if (t.id === 'cb-grp') { lsSet('cbGroup', t.checked ? '1' : '0'); renderCarnet(); return; }
     if (t.id === 'cb-ff') { UI.cb.ff = t.value; renderCarnet(); return; }
+    if (t.id === 'cb-plink' && t.value) { const x = personOf(t.value), c0 = cur(); if (x && c0) { x.clients = [...new Set([...(x.clients || []), c0.id])]; touchMeta(); toast(x.name + ' rattaché au dossier'); } return; }
+    if (t.id === 'cbg-name' && UI.cbG) { const g = groupOf(UI.cbG), v = t.value.trim().replace(/\s+/g, ' '); if (!v) { t.value = g.name; return; } if (S.meta.groups.some(x => x !== g && norm(x.name) === norm(v))) { toast('Un groupe porte déjà ce nom'); t.value = g.name; return; } g.name = v; touchMeta(); return; }
+    if (t.id === 'cbg-add' && t.value && UI.cbG) { const x = clientOf(t.value), g = groupOf(UI.cbG), old = x.group; const og = groupOf(old); if (og && og.mother === x.id) delete og.mother; x.group = g.id; touchMeta(); toast(x.name + ' ajouté au groupe' + (og ? ' (retiré de « ' + og.name + ' »)' : ''), 'Annuler', () => { if (old) x.group = old; else delete x.group; touchMeta(); }); return; }
     const c = cur(); if (!c) return;
     if (t.dataset.cbf) {
       const v = t.value.replace(/\s+$/, ''), b = cbOf(c);
@@ -2821,6 +2877,11 @@ function bindCarnet() {
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     if (ev.target.closest('[data-cba=newdos]')) { openNewDossier(); return; }
+    if (ev.target.closest('[data-cba=newgrp]')) { askGroupName(id => { if (id) location.hash = 'carnet/groupe/' + encodeURIComponent(id); }); return; }
+    const gc = ev.target.closest('[data-cbgcol]'); if (gc && UI.cbG) { const g = groupOf(UI.cbG); g.color = +gc.dataset.cbgcol; touchMeta(); return; }
+    const gr = ev.target.closest('[data-cbgrm]'); if (gr && UI.cbG) { const x = clientOf(gr.dataset.cbgrm), g = groupOf(UI.cbG); if (!x) return; const wasM = g.mother === x.id; delete x.group; if (wasM) delete g.mother; touchMeta(); toast(x.name + ' retiré du groupe', 'Annuler', () => { x.group = g.id; if (wasM) g.mother = x.id; touchMeta(); }); return; }
+    if (ev.target.closest('[data-cbgdel]') && UI.cbG) { const obj = groupOf(UI.cbG), ids = S.meta.clients.filter(c2 => c2.group === obj.id).map(c2 => c2.id); S.meta.groups = S.meta.groups.filter(g2 => g2 !== obj); S.meta.clients.forEach(c2 => { if (c2.group === obj.id) delete c2.group; }); touchMeta(); location.hash = 'carnet'; toast('Groupe « ' + obj.name + ' » supprimé' + (ids.length ? ' (' + ids.length + ' dossier' + (ids.length > 1 ? 's' : '') + ' sans groupe)' : ''), 'Annuler', () => { S.meta.groups.push(obj); ids.forEach(id => { const c2 = clientOf(id); if (c2) c2.group = obj.id; }); touchMeta(); }); return; }
+    const gp2 = ev.target.closest('[data-cbgp]'); if (gp2) { openPersonFiche(gp2.dataset.cbgp); return; }
     const tile = ev.target.closest('[data-cb]'); if (tile) { location.hash = 'carnet/' + encodeURIComponent(tile.dataset.cb); window.scrollTo(0, 0); return; }
     const sg = ev.target.closest('.seg[data-seg=cbf] button'); if (sg) { UI.cb.f = sg.dataset.v; renderCarnet(); return; }
     const sv = ev.target.closest('.seg[data-seg=cbv] button'); if (sv) { lsSet('cbView', sv.dataset.v); renderCarnet(); return; }
@@ -2832,6 +2893,10 @@ function bindCarnet() {
     else if (act === 'ccnnone') { addCcn(c, { i: CCN_NONE, t: ccnOf(CCN_NONE)[1] }); }
     else if (act === 'params') openCyParams(c.id);
     else if (act === 'alerts') openAlertEditor(a, defaultCycleMonth(), c.id);
+    else if (act === 'pnew') openPersonFiche(null, { kind: 'cli', clients: [c.id] });
+    else if (act === 'pfiche') openPersonFiche(a.dataset.pid);
+    else if (act === 'rateadd') { const tid = $('#rt-t').value, n = numIn($('#rt-a').value); if (!tid || !(n > 0)) { toast('Choisissez une tâche et un montant'); return; } c.rates = { ...(c.rates || {}), [tid]: { mode: $('#rt-m').value, amount: n } }; touchMeta(); }
+    else if (act === 'ratedel') { const tid = a.dataset.tid, old = (c.rates || {})[tid]; delete c.rates[tid]; if (!Object.keys(c.rates).length) delete c.rates; touchMeta(); toast('Tarif particulier retiré', 'Annuler', () => { c.rates = { ...(c.rates || {}), [tid]: old }; touchMeta(); }); }
     else if (act === 'ccnrepl') { const i = +a.closest('[data-ccn]').dataset.ccn, old = b.ccn[i], r = ccnOf(old.i), nx = r && ccnOf(r[6]); if (!nx) return; b.ccn.splice(i, 1, { i: nx[0], t: nx[1] }); touchMeta(); toast('Convention remplacée par l’IDCC ' + idccStr(nx[0]), 'Annuler', () => { cbOf(c).ccn.splice(i, 1, old); touchMeta(); }); }
     else if (act === 'ccndel') { const i = +a.closest('[data-ccn]').dataset.ccn, old = b.ccn[i]; b.ccn.splice(i, 1); touchMeta(); toast('Convention retirée', 'Annuler', () => { cbOf(c).ccn.splice(i, 0, old); touchMeta(); }); }
     else if (act === 'ptadd') { const tx = $('#pt-t').value.trim(); if (!tx) { $('#pt-t').focus(); return; } b.points.push({ id: newId(), t: tx, open: isoDay(Date.now()), due: $('#pt-due').value || null }); touchMeta(); setTimeout(() => $('#pt-t')?.focus(), 30); }
@@ -4927,6 +4992,7 @@ function filtered() {
     if (r.client && e.client !== r.client) return false;
     if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none' || k === 'internal') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
     if (r.task && e.task !== r.task) return false;
+    if (r.cat && (taskCat(e.task) || 'none') !== r.cat) return false;
     if (r.grp) { const g = groupOfClient(e.client); if (r.grp === 'none' ? g : (!g || g.id !== r.grp)) return false; }
     const st = statusOf(e);
     if (r.bill === 'bill' && !e.billable) return false;
@@ -4957,6 +5023,7 @@ function renderReports() {
     ${hasGroups() || r.grp ? `<label>Groupe<select data-r="grp"><option value="">Tous</option>${groupsAll().map(g => `<option value="${g.id}" ${r.grp === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}<option value="none" ${r.grp === 'none' ? 'selected' : ''}>Sans groupe</option></select></label>` : ''}
     <label>Client / personne<select data-r="client">${targetOpts(r.client, 'Tous')}</select></label>
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
+    <label>Catégorie<select data-r="cat"><option value="">Toutes</option>${[...TASK_CATS, ['none', 'Non classées']].map(([k, l]) => `<option value="${k}" ${r.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Report logiciel<select data-r="logged">${[['all', 'Tout'], ['no', 'Non reporté'], ['yes', 'Reporté']].map(([v, l]) => `<option value="${v}" ${r.logged === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     ${lissOn() ? `<label>Temps<select data-r="liss"><option value="liss" ${r.liss !== 'real' ? 'selected' : ''}>Lissés</option><option value="real" ${r.liss === 'real' ? 'selected' : ''}>Réels</option></select></label>` : ''}
@@ -4964,7 +5031,7 @@ function renderReports() {
   </div>`;
   html += `<i data-b="synthese"></i><h2>Synthèse</h2><div class="stats">
     <div class="card stat"><div class="k">Temps total</div><div class="v">${fmtDur(t.all)}</div><div class="s">${list.length} saisie${list.length > 1 ? 's' : ''}</div></div>
-    <div class="card stat"><div class="k">Facturable</div><div class="v">${fmtDur(t.bill)}</div><div class="s">${pct} % du temps</div></div>
+    <div class="card stat"><div class="k">Facturable</div><div class="v">${fmtDur(t.bill)}</div><div class="s">${pct} % du temps${hasRates() ? ' · ' + eurS(sumAmt(list)) : ''}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-inv)"></span>Déjà facturé</div><div class="v">${fmtDur(t.inv)}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(t.todo)}</div></div>
     <div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-nobill)"></span>Non facturable</div><div class="v">${fmtDur(t.no)}</div></div>
@@ -4987,8 +5054,8 @@ function renderReports() {
   // tableau croisé
   const multiMonth = months.length > 1;
   const cols = multiMonth && r.cols === 'month' ? 'month' : 'status';
-  html += `<i data-b="tableau"></i><div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : r.group === 'grp' ? 'groupe puis client' : 'tâche puis client'}</h2><span class="sp"></span>
-    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button><button data-v="pf" class="${r.group === 'pf' ? 'on' : ''}">Portefeuille › Client</button>${hasGroups() || r.group === 'grp' ? `<button data-v="grp" class="${r.group === 'grp' ? 'on' : ''}">Groupe › Client</button>` : ''}</div>
+  html += `<i data-b="tableau"></i><div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : r.group === 'grp' ? 'groupe puis client' : r.group === 'cat' ? 'catégorie puis tâche' : 'tâche puis client'}</h2><span class="sp"></span>
+    <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button><button data-v="cat" class="${r.group === 'cat' ? 'on' : ''}">Catégorie › Tâche</button><button data-v="pf" class="${r.group === 'pf' ? 'on' : ''}">Portefeuille › Client</button>${hasGroups() || r.group === 'grp' ? `<button data-v="grp" class="${r.group === 'grp' ? 'on' : ''}">Groupe › Client</button>` : ''}</div>
     ${multiMonth ? `<div class="seg" data-seg="cols"><button data-v="status" class="${cols === 'status' ? 'on' : ''}">Colonnes : statuts</button><button data-v="month" class="${cols === 'month' ? 'on' : ''}">Colonnes : mois</button></div>` : ''}
     <button class="btn sm" data-act="copy-pivot">${ICON.copy} Copier</button></div>`;
   const pv = pivot(list, r.group, cols, months);
@@ -5017,10 +5084,10 @@ function renderReports() {
 }
 function pivot(list, group, cols, months) {
   const tgt = id => isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) || 'Sans client';
-  const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : group === 'grp' ? e => groupOfClient(e.client)?.id || '' : e => e.task || '';
-  const k2 = group === 'client' ? e => e.task || '' : e => e.client || '';
-  const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : group === 'grp' ? id => groupOf(id)?.name || 'Sans groupe' : id => taskName(id) || 'Sans tâche';
-  const n2 = group === 'client' ? id => taskName(id) || 'Sans tâche' : tgt;
+  const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : group === 'grp' ? e => groupOfClient(e.client)?.id || '' : group === 'cat' ? e => taskCat(e.task) || '' : e => e.task || '';
+  const k2 = group === 'client' || group === 'cat' ? e => e.task || '' : e => e.client || '';
+  const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : group === 'grp' ? id => groupOf(id)?.name || 'Sans groupe' : group === 'cat' ? id => CAT_L[id] || 'Non classées' : id => taskName(id) || 'Sans tâche';
+  const n2 = group === 'client' || group === 'cat' ? id => taskName(id) || 'Sans tâche' : tgt;
   const g = new Map();
   for (const e of list) {
     const a = k1(e), b = k2(e);
@@ -5029,29 +5096,33 @@ function pivot(list, group, cols, months) {
     if (!G.subs.has(b)) G.subs.set(b, []); G.subs.get(b).push(e);
   }
   const statusCols = [['all', 'Total'], ['bill', 'Facturable'], ['inv', 'Facturé'], ['todo', 'Reste à fact.'], ['no', 'Non fact.']];
-  const colDefs = cols === 'month' ? [...months.map(mk => [mk, fmtMonth(mk)]), ['all', 'Total']] : statusCols;
+  const withAmt = hasRates();
+  const colDefs = [...(cols === 'month' ? [...months.map(mk => [mk, fmtMonth(mk)]), ['all', 'Total']] : statusCols), ...(withAmt ? [['amt', 'Montant']] : [])];
   const vals = l => {
-    if (cols === 'month') { const o = { all: 0 }; months.forEach(m => o[m] = 0); l.forEach(e => { const d = dur(e); o.all += d; const mk = monthKey(e.start); if (mk in o) o[mk] += d; }); return o; }
-    return totals(l);
+    let o; if (cols === 'month') { o = { all: 0 }; months.forEach(m => o[m] = 0); l.forEach(e => { const d = dur(e); o.all += d; const mk = monthKey(e.start); if (mk in o) o[mk] += d; }); }
+    else o = totals(l);
+    if (withAmt) o.amt = sumAmt(l);
+    return o;
   };
-  const cell = v => v ? fmtDur(v) : '<span class="zero">–</span>';
-  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : group === 'pf' ? 'Portefeuille / Client' : group === 'grp' ? 'Groupe / Client' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
-  const tsvRows = [[group === 'client' ? 'Client' : group === 'pf' ? 'Portefeuille' : group === 'grp' ? 'Groupe' : 'Tâche', group === 'client' ? 'Tâche' : 'Client', ...colDefs.map(c => c[1] + ' (h)')].join('\t')];
+  const cellK = (k, v) => k === 'amt' ? (v ? eurS(v) : '<span class="zero">–</span>') : v ? fmtDur(v) : '<span class="zero">–</span>';
+  const head = `<tr><th>${group === 'client' ? 'Client / Tâche' : group === 'pf' ? 'Portefeuille / Client' : group === 'grp' ? 'Groupe / Client' : group === 'cat' ? 'Catégorie / Tâche' : 'Tâche / Client'}</th>${colDefs.map(c => `<th class="n">${c[1]}</th>`).join('')}</tr>`;
+  const tsvRows = [[group === 'client' ? 'Client' : group === 'pf' ? 'Portefeuille' : group === 'grp' ? 'Groupe' : group === 'cat' ? 'Catégorie' : 'Tâche', group === 'client' || group === 'cat' ? 'Tâche' : 'Client', ...colDefs.map(c => c[0] === 'amt' ? 'Montant (€)' : c[1] + ' (h)')].join('\t')];
   let rows = '';
   const pfRank = k => k === 'mine' ? 0 : k === 'none' ? 3 : k === 'others' ? 2 : 1;
-  const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : group === 'grp' ? (a[0] ? 0 : 1) - (b[0] ? 0 : 1) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
+  const catRank = k => k ? TASK_CATS.findIndex(c => c[0] === k) : 9;
+  const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : group === 'grp' ? (a[0] ? 0 : 1) - (b[0] ? 0 : 1) : group === 'cat' ? catRank(a[0]) - catRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
-    rows += `<tr class="grp"><td>${group === 'grp' ? (groupOf(a) ? grpDot(groupOf(a)) + ' ' : '') : group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `${cliIc(a)} `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cell(v[c[0]])}</td>`).join('')}</tr>`;
+    rows += `<tr class="grp"><td>${group === 'grp' ? (groupOf(a) ? grpDot(groupOf(a)) + ' ' : '') : group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `${cliIc(a)} `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cellK(c[0], v[c[0]])}</td>`).join('')}</tr>`;
     const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
     for (const [b, l] of subs) {
       const sv = vals(l);
-      rows += `<tr class="sub"><td>${esc(n2(b))}</td>${colDefs.map(c => `<td class="n">${cell(sv[c[0]])}</td>`).join('')}</tr>`;
-      tsvRows.push([n1(a), n2(b), ...colDefs.map(c => hoursDec(sv[c[0]] || 0))].join('\t'));
+      rows += `<tr class="sub"><td>${esc(n2(b))}${group === 'client' && b ? ' ' + catTag(taskCat(b)) : ''}</td>${colDefs.map(c => `<td class="n">${cellK(c[0], sv[c[0]])}</td>`).join('')}</tr>`;
+      tsvRows.push([n1(a), n2(b), ...colDefs.map(c => c[0] === 'amt' ? (sv.amt || 0).toFixed(2).replace('.', ',') : hoursDec(sv[c[0]] || 0))].join('\t'));
     }
   }
   const tv = vals(list);
-  rows += `<tr class="tot"><td>Total</td>${colDefs.map(c => `<td class="n">${cell(tv[c[0]])}</td>`).join('')}</tr>`;
+  rows += `<tr class="tot"><td>Total</td>${colDefs.map(c => `<td class="n">${cellK(c[0], tv[c[0]])}</td>`).join('')}</tr>`;
   return { html: list.length ? `<table class="t"><thead>${head}</thead><tbody>${rows}</tbody></table>` : `<div class="empty">Aucune saisie sur cette période.</div>`, tsv: tsvRows.join('\n') };
 }
 function chartSVG(b) {
@@ -5159,7 +5230,7 @@ function renderBilling() {
     <label>Temps jusqu’au<input type="date" data-f="until" value="${esc(f.until)}"></label>
     <label>&nbsp;<span style="display:flex;gap:6px"><button class="btn sm" data-act="until-lm">Fin du mois dernier</button><button class="btn sm" data-act="until-clear">Tout</button></span></label>
     ${hasGroups() ? `<label>Présentation<div class="seg" data-seg="fby"><button data-v="client" class="${byGrp ? '' : 'on'}">Par client</button><button data-v="grp" class="${byGrp ? 'on' : ''}">Par groupe</button></div></label>` : ''}</div>`;
-  html += `<i data-b="fsynthese" data-t="Synthèse"></i><div class="stats"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${(() => { const n = new Set(list.map(e => e.client || '')).size; return n + ' client' + (n > 1 ? 's' : ''); })()} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div></div>`;
+  html += `<i data-b="fsynthese" data-t="Synthèse"></i><div class="stats"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${(() => { const n = new Set(list.map(e => e.client || '')).size; return n + ' client' + (n > 1 ? 's' : ''); })()} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div>${(() => { const x = list.filter(e => taskCat(e.task) === 'exc'); return x.length ? `<div class="card stat"><div class="k"><span class="cat-tag cat-exc">Exceptionnel</span></div><div class="v">${fmtDur(x.reduce((a, e) => a + dur(e), 0))}</div><div class="s">${new Set(x.map(e => e.client || '')).size} client(s) · souvent facturé en plus du forfait</div></div>` : ''; })()}${hasRates() ? `<div class="card stat"><div class="k">Montant estimé</div><div class="v">${eurS(sumAmt(list))}</div><div class="s">d’après les tarifs des tâches et des dossiers</div></div>` : ''}</div>`;
   html += `<i data-b="fliste" data-t="${byGrp ? 'Groupes' : 'Clients'} à facturer"></i>`;
   if (!groups.length) html += `<div class="card empty" style="margin-top:14px">Rien à facturer${f.until ? ' jusqu’à cette date' : ''}. 🎉</div>`;
   for (const g of groups) {
@@ -5167,8 +5238,8 @@ function renderBilling() {
     const first = Math.min(...g.l.map(e => e.start)), last = Math.max(...g.l.map(e => e.start));
     html += `<div class="card bclient" data-c="${esc(g.c)}"><div class="bclient-h">
       <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span>${g.isG ? (g.g ? grpTag(g.g, 'lg') : '<span class="grp-none">Sans groupe</span>') : cliIc(g.c) + esc(g.title) + ' ' + grpTag(groupOfClient(g.c))}</button>
-      <span class="meta">${g.isG ? (() => { const n = new Set(g.l.map(e => e.client || '')).size; return n + ' dossier' + (n > 1 ? 's' : '') + ' · '; })() : ''}${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}</span>
-      <span class="amt">${fmtDur(g.ms)}</span>
+      <span class="meta">${g.isG ? (() => { const n = new Set(g.l.map(e => e.client || '')).size; return n + ' dossier' + (n > 1 ? 's' : '') + ' · '; })() : ''}${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}${(() => { const x = g.l.filter(e => taskCat(e.task) === 'exc').reduce((a, e) => a + dur(e), 0); return x ? ` · <span class="cat-tag cat-exc">dont exceptionnel ${fmtDur(x)}</span>` : ''; })()}</span>
+      <span class="amt">${fmtDur(g.ms)}${hasRates() && sumAmt(g.l) ? `<span class="amt-e">${eurS(sumAmt(g.l))}</span>` : ''}</span>
       <button class="btn sm" data-act="copy-client">${ICON.copy} Copier le détail</button>
       <button class="btn sm primary" data-act="inv-client">Marquer facturé</button></div>`;
     if (open && g.isG) {
@@ -5179,8 +5250,9 @@ function renderBilling() {
         </tbody></table></div>`;
     } else if (open) {
       const byT = aggregate(g.l);
-      html += `<div class="bclient-body tbl-wrap"><table class="t"><thead><tr><th>Tâche</th><th>Libellés</th><th class="n">Saisies</th><th class="n">Durée</th><th class="n">Heures</th><th></th></tr></thead><tbody>
-        ${byT.map((x, i) => `<tr><td>${esc(taskName(x.task) || '—')}</td><td class="lab" title="${esc(x.labels.join(' ; '))}">${esc(x.labels.join(' ; '))}</td><td class="n">${x.ids.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td><td><button class="btn sm" data-act="inv-task" data-i="${i}">Facturé</button></td></tr>`).join('')}
+      const wa = hasRates(); byT.forEach(x => { x.amt = sumAmt(g.l.filter(e => x.ids.includes(e.id))); });
+      html += `<div class="bclient-body tbl-wrap"><table class="t"><thead><tr><th>Tâche</th><th>Libellés</th><th class="n">Saisies</th><th class="n">Durée</th><th class="n">Heures</th>${wa ? '<th class="n">Montant</th>' : ''}<th></th></tr></thead><tbody>
+        ${byT.map((x, i) => `<tr><td>${esc(taskName(x.task) || '—')} ${catTag(taskCat(x.task))}</td><td class="lab" title="${esc(x.labels.join(' ; '))}">${esc(x.labels.join(' ; '))}</td><td class="n">${x.ids.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td>${wa ? `<td class="n">${x.amt ? eurS(x.amt) : '<span class="zero">–</span>'}</td>` : ''}<td><button class="btn sm" data-act="inv-task" data-i="${i}">Facturé</button></td></tr>`).join('')}
         </tbody></table></div>`;
     }
     html += `</div>`;
@@ -5256,8 +5328,55 @@ document.addEventListener('change', ev => {
   const obs = new MutationObserver(() => { if (!document.body.contains(m.el)) { obs.disconnect(); if (!done) s.value = prev || Object.keys(ROLES)[0]; } });
   obs.observe(document.body, { childList: true, subtree: true });
 }, true);
+/* ---------- Personnes (v1.40.0) : fiche complète ----------
+   person = { id, name (affiché « Prénom NOM »), civ, first, last, kind: 'col' | 'cli' | 'org' | 'autre', role, email, phone, note, clients: [ids] }
+   Anciennes personnes (prénom seul, fonction au cabinet) : collègues. Jamais d'identifiants ni de mots de passe. */
+const P_KINDS = [['col', 'Collègue'], ['cli', 'Interlocuteur client'], ['org', 'Organisme / partenaire'], ['autre', 'Autre']];
+const P_KIND_L = Object.fromEntries(P_KINDS);
+const pKind = x => (x && x.kind) || 'col';
+const pRoleTxt = x => pKind(x) === 'col' ? roleLabel(x.role) : (x.role || '');
+const P_ROLE_SUG = { cli: ['Dirigeant(e)', 'Gérant(e)', 'Responsable RH', 'Assistant(e) RH', 'Comptable', 'Assistant(e) de direction', 'Responsable administratif'], org: ['URSSAF', 'OPCO', 'Mutuelle', 'Prévoyance', 'Caisse de retraite', 'Médecine du travail', 'Inspection du travail', 'France Travail', 'Avocat', 'Expert-comptable'], autre: [] };
+const telHref = v => 'tel:' + String(v || '').replace(/[^\d+]/g, '');
+const pContact = x => `${x.email ? `<a class="icon xs" href="mailto:${esc(x.email)}" title="${esc(x.email)}">✉</a>` : ''}${x.phone ? `<a class="icon xs" href="${esc(telHref(x.phone))}" title="${esc(x.phone)}">☎</a>` : ''}`;
+function openPersonFiche(id, preset = {}) {
+  const x = id ? personOf(id) : null, d = { kind: 'cli', ...preset, ...(x || {}) };
+  if (x && !x.first && !x.last) { d.first = x.name; }
+  const kind = pKind(d), sel = new Set(d.clients || []);
+  const cl = S.meta.clients.filter(c => !c.deletedAt).sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || a.name.localeCompare(b.name, 'fr'));
+  const m = modal(`<div class="modal-h"><h3>${x ? 'Fiche de ' + esc(x.name) : 'Nouvelle personne'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px">
+      <div class="seg" id="pf-kind" role="radiogroup">${P_KINDS.map(([k, l]) => `<button type="button" data-v="${k}" class="${kind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="fld-row"><label class="fld" style="flex:0 0 90px"><span>Civilité</span><select id="pf-civ"><option value=""></option>${['M.', 'Mme'].map(v => `<option ${d.civ === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label><label class="fld"><span>Prénom</span><input id="pf-first" value="${esc(d.first || '')}" autocomplete="off"></label><label class="fld"><span>Nom</span><input id="pf-last" value="${esc(d.last || '')}" autocomplete="off"></label></div>
+      <div class="fld-row"><label class="fld" id="pf-role-w"></label></div>
+      <div class="fld-row"><label class="fld"><span>E-mail</span><input id="pf-mail" type="email" value="${esc(d.email || '')}" autocomplete="off"></label><label class="fld"><span id="pf-tel-l">${kind === 'col' ? 'Ligne directe' : 'Téléphone'}</span><input id="pf-tel" inputmode="tel" value="${esc(d.phone || '')}" autocomplete="off"></label></div>
+      <div id="pf-cl-w" ${kind === 'cli' ? '' : 'hidden'}><div class="small" style="margin-bottom:4px">Dossiers de cet interlocuteur</div><input id="pf-clq" placeholder="Filtrer les dossiers…" style="width:100%;margin-bottom:4px"><div class="cc-list" style="max-height:160px">${cl.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '')))}"><input type="checkbox" value="${c.id}" ${sel.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">' + esc(c.code) + '</span>' : ''}</label>`).join('')}</div></div>
+      <label class="fld"><span>Note</span><textarea id="pf-note" rows="2" placeholder="ex. joignable le matin, préfère l’e-mail…">${esc(d.note || '')}</textarea></label>
+      <div class="muted small">🔒 Ne notez jamais d’identifiants ni de mots de passe ici.</div></div>
+    <div class="modal-f">${x ? `<button class="btn ghost" id="pf-arch">${x.archived ? 'Restaurer' : 'Archiver'}</button>` : ''}<span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="pf-ok">${x ? 'Enregistrer' : 'Créer'}</button></div>`);
+  const q = s2 => m.el.querySelector(s2); let k = kind;
+  const roleUI = () => { const w = q('#pf-role-w'), cur = d.kind === k ? d.role : '';
+    w.innerHTML = k === 'col' ? `<span>Fonction au cabinet</span><select id="pf-role">${roleOpts(cur || 'paie')}</select>` : `<span>${k === 'org' ? 'Organisme / rôle' : 'Fonction'}</span><input id="pf-role" list="pf-role-dl" value="${esc(cur || '')}" autocomplete="off"><datalist id="pf-role-dl">${(P_ROLE_SUG[k] || []).map(v => `<option value="${esc(v)}">`).join('')}</datalist>`;
+    q('#pf-tel-l').textContent = k === 'col' ? 'Ligne directe' : 'Téléphone'; q('#pf-cl-w').hidden = k !== 'cli'; };
+  roleUI();
+  q('#pf-kind').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; k = b.dataset.v; q('#pf-kind').querySelectorAll('button').forEach(x2 => x2.classList.toggle('on', x2 === b)); roleUI(); });
+  q('#pf-clq').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('#pf-cl-w label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
+  m.el.addEventListener('change', ev => { if (ev.target.id === 'pf-role' && ev.target.value === '__custom') { const v = prompt('Fonction :'); const sl = ev.target; if (v && v.trim()) { sl.insertAdjacentHTML('afterbegin', `<option value="${esc(v.trim())}" selected>${esc(v.trim())}</option>`); } else sl.value = 'paie'; } });
+  q('#pf-ok').addEventListener('click', () => {
+    const first = q('#pf-first').value.trim(), last = q('#pf-last').value.trim();
+    if (!first && !last) { toast('Indiquez au moins un prénom ou un nom'); q('#pf-first').focus(); return; }
+    const mail = q('#pf-mail').value.trim(); if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { toast('Adresse e-mail non valide'); return; }
+    const o = x || { id: 'p' + newId(), archived: false };
+    Object.assign(o, { kind: k, civ: q('#pf-civ').value || '', first, last, name: [first, last.toUpperCase()].filter(Boolean).join(' '), role: q('#pf-role').value.trim(), email: mail, phone: q('#pf-tel').value.trim(), note: q('#pf-note').value.trim() });
+    o.clients = k === 'cli' ? [...m.el.querySelectorAll('#pf-cl-w input:checked')].map(c => c.value) : [];
+    for (const f of ['civ', 'email', 'phone', 'note', 'role']) if (!o[f]) delete o[f]; if (!o.clients.length) delete o.clients;
+    if (!x) S.meta.persons.push(o);
+    touchMeta(); m.close(); toast(x ? 'Fiche enregistrée' : 'Personne ajoutée : ' + o.name);
+  });
+  q('#pf-arch')?.addEventListener('click', () => { x.archived = !x.archived; touchMeta(); m.close(); });
+  setTimeout(() => q(x ? '#pf-first' : '#pf-first').focus(), 30);
+}
 function ownerOpts(cur) {
-  const ps = S.meta.persons.filter(x => !x.deletedAt && (!x.archived || x.id === cur)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  const ps = S.meta.persons.filter(x => !x.deletedAt && (pKind(x) === 'col' || x.id === cur) && (!x.archived || x.id === cur)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   return `<option value="">Portefeuille de… (non attribué)</option>` + ps.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} · ${esc(roleLabel(x.role))}</option>`).join('');
 }
 function clientRowHTML(c, u) { return `<div class="ref-row ${c.archived ? 'arch' : ''} ${isMother(c) ? 'is-mother' : ''}" data-kind="client" data-id="${c.id}" ${isMother(c) ? `style="--g:${grpColor(groupOf(c.group))}"` : ''}>${cliIc(c.id)}${motherMark(c)}
@@ -5297,22 +5416,27 @@ function renderRefs() {
       <span class="use">${gCount[g.id] ? gCount[g.id] + ' dossier' + (gCount[g.id] > 1 ? 's' : '') : 'aucun dossier'}</span>
       ${gCount[g.id] ? `<select data-k="mother" title="Société mère du groupe" class="grp-sel"><option value="">Société mère : aucune</option>${grpMembers(g).map(x => `<option value="${x.id}" ${g.mother === x.id ? 'selected' : ''}>Société mère : ${esc(x.name)}</option>`).join('')}</select>` : ''}
       <button class="icon" data-act="del-group" title="Supprimer le groupe (les dossiers sont conservés)">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun groupe. Créez-en un ici, puis choisissez le groupe de chaque dossier dans la liste des clients (ou dans les paramètres du dossier, depuis Mon cycle).</div>`}</div></div>
-  <i data-b="taches" data-half="1"></i><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
-      <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
+  <i data-b="taches"></i><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
+      <div class="ref-list">${catGrouped(ts, t => taskCat(t)).map(t => t.head ? `<div class="ref-head">${esc(t.label)}</div>` : `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
         <input class="nm" data-k="name" value="${esc(t.name)}">
+        <select data-k="cat" title="Catégorie"><option value="" ${!t.cat ? 'selected' : ''}>Auto${autoCat(t.name) ? ' : ' + CAT_L[autoCat(t.name)] : ' : non classée'}</option>${TASK_CATS.map(([k, l]) => `<option value="${k}" ${t.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <span class="rate-in" title="Tarif de facturation par défaut (modifiable pour un dossier dans son carnet)"><input data-k="ramt" inputmode="decimal" placeholder="Tarif" value="${t.rate && +t.rate.amount ? esc(String(t.rate.amount).replace('.', ',')) : ''}"><select data-k="rmode"><option value="h" ${(t.rate?.mode || 'h') === 'h' ? 'selected' : ''}>€ / h</option><option value="acte" ${t.rate?.mode === 'acte' ? 'selected' : ''}>€ / acte</option></select></span>
         <select data-k="billing" title="Facturation par défaut"><option value="auto" ${!t.billing || t.billing === 'auto' ? 'selected' : ''}>Selon le client</option><option value="bill" ${t.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${t.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
         <span class="use">${ut[t.id] ? fmtDur(ut[t.id], 'hm') : ''}</span>
         <button class="btn sm ghost" data-act="toggle-arch">${t.archived ? 'Restaurer' : 'Archiver'}</button>
         <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches standards</button></div>`}</div>
       ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Ajouter toutes les tâches standards</button></div>` : ''}</div>
-    <i data-b="personnes" data-half="1"></i><h2>Personnes</h2><div class="card"><div class="ref-add"><input id="new-person" placeholder="Prénom (ex. Sandra)"><select id="new-person-role">${roleOpts(UI.newPersonRole || 'paie')}</select><button class="btn primary" data-act="add-person">Ajouter</button></div>
-      <div class="ref-list">${ps.map(x => `<div class="ref-row ${x.archived ? 'arch' : ''}" data-kind="person" data-id="${x.id}"><span class="pers-ic">${ICON.person}</span>
-        <input class="nm" data-k="name" value="${esc(x.name)}">
-        <select data-k="role">${roleOpts(x.role)}</select>
+    <i data-b="personnes"></i><div class="toolbar"><h2>Personnes</h2><span class="sp"></span><button class="btn sm primary" data-act="pnew">＋ Nouvelle personne</button></div><div class="card">
+      <div class="ref-tools"><div class="seg" data-seg="pkind">${[['', 'Toutes'], ...P_KINDS].map(([k, l]) => `<button data-v="${k}" class="${(UI.pk || '') === k ? 'on' : ''}">${l} (${ps.filter(x => !k || pKind(x) === k).length})</button>`).join('')}</div></div>
+      <div class="ref-list">${ps.filter(x => !UI.pk || pKind(x) === UI.pk).map(x => `<div class="ref-row ${x.archived ? 'arch' : ''}" data-kind="person" data-id="${x.id}"><span class="pers-ic">${ICON.person}</span>
+        <button class="pers-nm" data-act="pfiche" title="Ouvrir la fiche">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button>
+        <span class="tag pk">${P_KIND_L[pKind(x)]}</span><span class="muted small pers-role">${esc(pRoleTxt(x))}</span>
+        <span class="muted small">${(x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).slice(0, 2).map(esc).join(', ')}${(x.clients || []).length > 2 ? ' +' + ((x.clients || []).length - 2) : ''}</span>
+        <span class="sp" style="flex:1"></span>${pContact(x)}
         <span class="use" title="Clients de son portefeuille">${owned[x.id] ? owned[x.id] + ' client' + (owned[x.id] > 1 ? 's' : '') : ''}</span>
         <span class="use" title="Temps passé avec cette personne">${u[x.id] ? fmtDur(u[x.id], 'hm') : ''}</span>
-        <button class="btn sm ghost" data-act="toggle-arch">${x.archived ? 'Restaurer' : 'Archiver'}</button>
-        <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Ajoutez vos collègues (prénom et fonction) pour saisir le temps passé avec eux et rattacher à leur portefeuille les clients qui ne sont pas à vous.</div>`}</div></div>
+        <button class="btn sm ghost" data-act="pfiche">Fiche</button>
+        <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Ajoutez vos collègues, les interlocuteurs de vos clients et les organismes (URSSAF, OPCO, mutuelle…) : fiche avec e-mail et téléphone, temps passé avec eux.</div>`}</div></div>
   ${trash.length ? `<i data-b="corbeille"></i><div class="toolbar"><h2>Corbeille (${trash.length})</h2><span class="muted small">Les éléments supprimés restent ici tant que vous ne les supprimez pas définitivement. Les temps déjà saisis sont conservés.</span><span class="sp"></span><button class="btn sm danger" data-act="trash-empty">Vider la corbeille</button></div>
   <div class="card ref-list trash-list">${trash.map(x => `<div class="ref-row" data-kind="${x.kind}" data-id="${x.o.id}">
       <span class="tag">${kindLabel[x.kind]}</span>${x.kind === 'client' ? `${cliIc(x.o.id)}` : x.kind === 'person' ? `<span class="pers-ic">${ICON.person}</span>` : ''}
@@ -5786,6 +5910,7 @@ function bindRefsOn(body) {
     qT = setTimeout(() => { const pos = ev.target.selectionStart; renderRefs(); const inp = $('#ref-q'); if (inp) { inp.focus(); inp.setSelectionRange(pos, pos); } }, 200);
   });
   body.addEventListener('click', ev => {
+    const pks = ev.target.closest('.seg[data-seg=pkind] button'); if (pks) { UI.pk = pks.dataset.v; renderRefs(); return; }
     const stb = ev.target.closest('.seg[data-seg=settab] button'); if (stb) { lsSet('setTab', stb.dataset.v); renderSettings(); window.scrollTo(0, 0); return; }
     const tp = ev.target.closest('[data-tabp]'); if (tp) { const l = TAB_PROFILES.find(x => x[0] === tp.dataset.tabp)[2]; setTabs(TABS.map(t => t[0]).filter(v => !l.includes(v))); return; }
     const sm = ev.target.closest('[data-schmode]'); if (sm) { schSave(n => { n.mode = sm.dataset.schmode; }); return; }
@@ -5807,6 +5932,8 @@ function bindRefsOn(body) {
       S.meta.groups = S.meta.groups.filter(g => g !== obj); S.meta.clients.forEach(c => { if (c.group === obj.id) delete c.group; }); touchMeta();
       toast('Groupe « ' + obj.name + ' » supprimé' + (ids.length ? ' (' + ids.length + ' dossier' + (ids.length > 1 ? 's' : '') + ' sans groupe)' : ''), 'Annuler', () => { S.meta.groups.push(obj); ids.forEach(id => { const c = clientOf(id); if (c) c.group = obj.id; }); touchMeta(); });
     }
+    else if (act === 'pnew') openPersonFiche(null, { kind: UI.pk || 'col' });
+    else if (act === 'pfiche' && obj) openPersonFiche(obj.id);
     else if (act === 'new-mine') { UI.newClientMine = UI.newClientMine === false; const kn = $('#new-client').value, kc = $('#new-client-code').value; rerenderRefs(); $('#new-client').value = kn; $('#new-client-code').value = kc; }
     else if (act === 'preset') addPresetTasks();
     else if (act === 'install') Install.run();
@@ -5866,6 +5993,12 @@ function bindRefsOn(body) {
       if (i.value === '__newgrp') { askGroupName(id => { if (id) { o.group = id; touchMeta(); } else rerenderRefs(); }); return; }
       if (i.value) o.group = i.value; else delete o.group; touchMeta(); return;
     }
+    if (i.dataset.k === 'ramt' || i.dataset.k === 'rmode') {
+      const r = { mode: 'h', amount: 0, ...(o.rate || {}) };
+      if (i.dataset.k === 'rmode') r.mode = i.value; else { const n = numIn(i.value); if (i.value.trim() && (n == null || n < 0)) { toast('Montant non compris (ex. 45 ou 37,50)'); return; } r.amount = n || 0; }
+      if (+r.amount > 0 || r.mode === 'acte') o.rate = r; else delete o.rate; touchMeta(); return;
+    }
+    if (i.dataset.k === 'cat') { if (i.value) o.cat = i.value; else delete o.cat; touchMeta(); return; }
     const v = i.value.trim(); if (i.dataset.k === 'name' && !v) { i.value = o.name; return; }
     if ((i.dataset.k === 'owner' || i.dataset.k === 'mother') && !v) delete o[i.dataset.k]; else o[i.dataset.k] = v;
     touchMeta(); syncTimerBar();
