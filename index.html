@@ -582,6 +582,10 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-pals{display:grid;gap:6px}
 .tl-pal{display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap}
 .tl-pal input{width:60px;text-align:center}
+.tl-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tl-m{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.tl-mh{font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
+@media (max-width:900px){.tl-two{grid-template-columns:1fr}}
 .tl-pick{align-items:flex-start;white-space:normal;font-size:13.5px;color:var(--ink);padding:6px 4px}
 .tl-card{min-width:0;overflow:hidden}
 .tl-card input,.tl-card select{min-width:0;max-width:100%;box-sizing:border-box}
@@ -969,7 +973,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.22.0';
+const APP_VERSION = '1.23.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2653,9 +2657,15 @@ function bindCarnet() {
 /* ---------- Onglet Outils (v1.21.0) ----------
    Petits calculateurs du quotidien. Chaque outil est un bloc déplaçable / repliable ; le choix des outils affichés est
    enregistré dans settings.tools (liste d'identifiants, synchronisée). Les saisies restent en mémoire pendant la session. */
-const isOuvrable = ms => new Date(ms).getDay() !== 0 && !holidayOn(dayKey(ms));          // lundi → samedi, hors fériés
-const isOuvre = ms => { const w = new Date(ms).getDay(); return w >= 1 && w <= 5 && !holidayOn(dayKey(ms)); }; // lundi → vendredi, hors fériés
-const isProrog = ms => { const w = new Date(ms).getDay(); return w === 0 || w === 6 || !!holidayOn(dayKey(ms)); }; // samedi, dimanche ou férié : délai prorogé (R1231-1)
+// Jours fériés des outils : métropole, plus Vendredi saint et 26 décembre si la case Alsace-Moselle est cochée dans l'outil
+let TLAM = false;
+function amHolidays(y) { const E = easterMs(y), o = {}; o[dayKey(addDays(E, -2))] = 'Vendredi saint'; o[dayKey(new Date(y, 11, 26).getTime())] = 'Saint-Étienne (26 décembre)'; return o; }
+const tlHol = k => holidayOn(k) || (TLAM ? amHolidays(+k.slice(0, 4))[k] || null : null);
+const amBox = st => `<label class="chk"><input type="checkbox" data-k="am" ${st.am ? 'checked' : ''}> Jours fériés d’Alsace-Moselle (Vendredi saint, 26 décembre)</label>`;
+const ferNote = () => TLAM ? 'Jours fériés d’Alsace-Moselle inclus (Vendredi saint, 26 décembre).' : 'Jours fériés de France métropolitaine (cochez Alsace-Moselle si besoin).';
+const isOuvrable = ms => new Date(ms).getDay() !== 0 && !tlHol(dayKey(ms));          // lundi → samedi, hors fériés
+const isOuvre = ms => { const w = new Date(ms).getDay(); return w >= 1 && w <= 5 && !tlHol(dayKey(ms)); }; // lundi → vendredi, hors fériés
+const isProrog = ms => { const w = new Date(ms).getDay(); return w === 0 || w === 6 || !!tlHol(dayKey(ms)); }; // samedi, dimanche ou férié : délai prorogé (R1231-1)
 const dLong = ms => WD[new Date(ms).getDay()] + ' ' + fmtDate(ms);
 const dIn = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? parseDay(v) : null;
 const numIn = v => { const n = parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : null; };
@@ -2667,7 +2677,7 @@ function ymdDiff(a, b) { // années, mois, jours entre a et b (b ≥ a)
   return { y: Math.floor(k / 12), m: k % 12, d: Math.round((b - addMonthsClamp(a, k)) / DAY) };
 }
 const ymdTxt = o => [o.y ? plur(o.y, 'an') : '', o.m ? o.m + ' mois' : '', o.d || (!o.y && !o.m) ? plur(o.d, 'jour') : ''].filter(Boolean).join(', ');
-function countDays(a, b) { const o = { cal: 0, ouvrable: 0, ouvre: 0, fer: [], we: 0 }; for (let d = a; d <= b; d = addDays(d, 1)) { o.cal++; if (isOuvrable(d)) o.ouvrable++; if (isOuvre(d)) o.ouvre++; const h = holidayOn(dayKey(d)); if (h) o.fer.push([d, h]); const w = new Date(d).getDay(); if (w === 0 || w === 6) o.we++; } return o; }
+function countDays(a, b) { const o = { cal: 0, ouvrable: 0, ouvre: 0, fer: [], we: 0 }; for (let d = a; d <= b; d = addDays(d, 1)) { o.cal++; if (isOuvrable(d)) o.ouvrable++; if (isOuvre(d)) o.ouvre++; const h = tlHol(dayKey(d)); if (h) o.fer.push([d, h]); const w = new Date(d).getDay(); if (w === 0 || w === 6) o.we++; } return o; }
 function addTyped(d0, n, type) { // ajoute (ou retire) n jours calendaires / ouvrables / ouvrés
   if (type === 'cal') return addDays(d0, n);
   const ok = type === 'ouvrable' ? isOuvrable : isOuvre, step = n < 0 ? -1 : 1; let d = d0, k = 0;
@@ -2705,7 +2715,7 @@ const TOOLS = [
         <div class="tl-opts"><label class="chk"><input type="checkbox" data-k="depOuvre" ${st.depOuvre ? 'checked' : ''}> Dépôt de la demande un jour ouvré (lundi → vendredi, hors fériés)</label>
           <label class="tl-inl">Marge avant le dépôt <input data-k="mDep" inputmode="numeric" value="${esc(st.mDep ?? '0')}"> j</label>
           <label class="tl-inl">Réception de la demande <input data-k="post" inputmode="numeric" value="${esc(st.post ?? '0')}"> j après l’envoi <span class="muted small">(0 avec TéléRC)</span></label>
-          <label class="tl-inl">Marge avant la rupture <input data-k="mRup" inputmode="numeric" value="${esc(st.mRup ?? '0')}"> j</label></div>`;
+          <label class="tl-inl">Marge avant la rupture <input data-k="mRup" inputmode="numeric" value="${esc(st.mRup ?? '0')}"> j</label>${amBox(st)}</div>`;
     },
     calc: st => {
       const mode = st.mode || 'sig', o = { depOuvre: !!st.depOuvre, mDep: Math.max(0, parseInt(st.mDep, 10) || 0), post: Math.max(0, parseInt(st.post, 10) || 0), mRup: Math.max(0, parseInt(st.mRup, 10) || 0) };
@@ -2718,10 +2728,10 @@ const TOOLS = [
         p = rcPlan(addDays(r, -15), o); // même calendrier en aval
         p = { ...p, sig: null, retStart: null, retRaw: r, retEnd: r }; let dep = addDays(r, 1 + o.mDep); p.dep0 = dep; if (o.depOuvre) while (!isOuvre(dep)) dep = addDays(dep, 1); p.dep = dep; p.rec = addDays(dep, o.post);
         let k = 0, iEnd = p.rec; while (k < 15) { iEnd = addDays(iEnd, 1); if (isOuvrable(iEnd)) k++; } p.iStart = addDays(p.rec, 1); p.iRaw = iEnd; while (isProrog(iEnd)) iEnd = addDays(iEnd, 1); p.iEnd = iEnd; p.rup = addDays(iEnd, 1 + o.mRup);
-        if (isProrog(r)) note = 'Attention : la fin de rétractation saisie tombe un ' + (holidayOn(dayKey(r)) ? 'jour férié' : WD[new Date(r).getDay()]) + ' ; un délai qui expire ce jour-là est prorogé au premier jour ouvrable suivant.';
+        if (isProrog(r)) note = 'Attention : la fin de rétractation saisie tombe un ' + (tlHol(dayKey(r)) ? 'jour férié' : WD[new Date(r).getDay()]) + ' ; un délai qui expire ce jour-là est prorogé au premier jour ouvrable suivant.';
       } else { if (sig == null) return `<div class="tl-empty">${mode === 'rup' ? 'Saisissez la date de rupture souhaitée.' : 'Saisissez la date.'}</div>`; p = rcPlan(sig, o); }
       const li = (lbl, d, sub, strong) => `<li class="${strong ? 'key' : ''}"><span class="tl-lb">${lbl}</span><span class="tl-dt">${d != null ? dLong(d) : '—'}</span>${sub ? `<span class="tl-sb">${sub}</span>` : ''}</li>`;
-      const fer = (a, b) => { const l = []; for (let d = a; d <= b; d = addDays(d, 1)) { const h = holidayOn(dayKey(d)); if (h) l.push(h + ' ' + fmtDate(d).slice(0, 5)); } return l; };
+      const fer = (a, b) => { const l = []; for (let d = a; d <= b; d = addDays(d, 1)) { const h = tlHol(dayKey(d)); if (h) l.push(h + ' ' + fmtDate(d).slice(0, 5)); } return l; };
       const fi = p.iStart ? fer(p.iStart, p.iEnd) : [];
       return `${note ? `<div class="tl-note">${note}</div>` : ''}<ol class="tl-steps">
         ${ent != null ? li('Entretien', ent, '') : ''}
@@ -2732,7 +2742,7 @@ const TOOLS = [
         ${o.post ? li('Réception par l’administration', p.rec, plur(o.post, 'jour') + ' après l’envoi') : ''}
         ${li('Fin de l’instruction (homologation tacite)', p.iEnd, '15 jours ouvrables à partir du ' + fmtDate(p.iStart).slice(0, 5) + (fi.length ? ' · férié(s) non compté(s) : ' + fi.join(', ') : '') + (p.iEnd !== p.iRaw ? ' · 15e jour le ' + dLong(p.iRaw) + ', prorogé' : ''), true)}
         ${li('Date de rupture au plus tôt', p.rup, o.mRup ? 'avec ' + plur(o.mRup, 'jour') + ' de marge' : 'lendemain de l’homologation', true)}</ol>
-        <div class="tl-note">Règles : rétractation de 15 jours calendaires à partir du lendemain de la signature (art. L1237-13) ; instruction de 15 jours ouvrables à partir du lendemain de la réception (art. L1237-14) ; un délai qui expire un samedi, un dimanche ou un jour férié est prorogé au premier jour ouvrable suivant (art. R1231-1). Jours fériés de France métropolitaine (hors Alsace-Moselle). Calendrier indicatif : <a href="https://www.telerc.travail.gouv.fr/simulateur/calendrier" target="_blank" rel="noopener">contrôler avec le simulateur TéléRC ↗</a></div>`;
+        <div class="tl-note">Règles : rétractation de 15 jours calendaires à partir du lendemain de la signature (art. L1237-13) ; instruction de 15 jours ouvrables à partir du lendemain de la réception (art. L1237-14) ; un délai qui expire un samedi, un dimanche ou un jour férié est prorogé au premier jour ouvrable suivant (art. R1231-1). ${ferNote()} Calendrier indicatif : <a href="https://www.telerc.travail.gouv.fr/simulateur/calendrier" target="_blank" rel="noopener">contrôler avec le simulateur TéléRC ↗</a></div>`;
     } },
   { id: 'hm', t: 'Heures : sexagésimal ⇄ décimal', d: 'Convertir 7h45 en 7,75 h et inversement',
     html: st => `<div class="tl-row"><label class="fld"><span>Heures et minutes</span><input data-k="hm" value="${esc(st.hm || '')}" placeholder="ex. 7h45, 7:45, 151h40" autocomplete="off"></label><span class="tl-eq">⇄</span><label class="fld"><span>Heures décimales</span><input data-k="dec" value="${esc(st.dec || '')}" placeholder="ex. 7,75" inputmode="decimal" autocomplete="off"></label></div>`,
@@ -2775,38 +2785,69 @@ const TOOLS = [
       pal.forEach((x, i) => { const use = Math.max(0, x.n - deja); deja = Math.max(0, deja - x.n); if (!use) { rows.push(`<li><span class="tl-lb">Palier ${i + 1} (${esc(x.l)})</span><span class="tl-dt">déjà épuisé</span></li>`); return; } const e = addDays(cur, use - 1); rows.push(`<li class="key"><span class="tl-lb">Palier ${i + 1} (${esc(x.l)})</span><span class="tl-dt">du ${fmtDate(cur)} au ${dLong(e)}</span><span class="tl-sb">${plur(use, 'jour')}${use < x.n ? ' (sur ' + x.n + ', compte tenu des jours déjà maintenus)' : ''}</span></li>`); cur = addDays(e, 1); last = e; });
       return `<div class="tl-big">${last != null ? 'Fin de subrogation : ' + dLong(last) : 'Aucun jour de maintien restant'}</div><ol class="tl-steps">${rows.join('')}</ol>`;
     } },
-  { id: 'fj', t: 'Forfait jours : jours de repos', d: 'Jours non travaillés (JNT) d’un forfait annuel, année complète ou entrée en cours d’année',
-    html: st => { const y = new Date().getFullYear(); return `<div class="tl-row"><label class="fld"><span>Jours du forfait (année complète)</span><input data-k="n" inputmode="numeric" value="${esc(st.n ?? '218')}"></label><label class="fld"><span>Congés payés (jours ouvrés)</span><input data-k="cp" inputmode="decimal" value="${esc(st.cp ?? '25')}"></label></div>
-      <div class="tl-row"><label class="fld"><span>Début de période (entrée en cours d’année : modifier)</span><input type="date" data-k="a" value="${esc(st.a || y + '-01-01')}"></label><label class="fld"><span>Fin de période</span><input type="date" data-k="b" value="${esc(st.b || y + '-12-31')}"></label></div>`; },
+  { id: 'fj', t: 'Forfait jours : jours de repos', d: 'Jours non travaillés (JNT) d’un forfait annuel, année complète ou entrée / sortie en cours d’année',
+    html: st => { const y = new Date().getFullYear(); return `<div class="tl-row"><label class="fld"><span>Jours du forfait (année complète)</span><input data-k="n" inputmode="numeric" value="${esc(st.n ?? '218')}"></label><label class="fld"><span>Congés payés d’une année complète (jours ouvrés)</span><input data-k="cpf" inputmode="decimal" value="${esc(st.cpf ?? '25')}"></label><label class="fld"><span>Congés payés pris sur la période</span><input data-k="cp" inputmode="decimal" value="${esc(st.cp ?? '')}"></label></div>
+      <div class="tl-row"><label class="fld"><span>Début de période (entrée en cours d’année : modifier)</span><input type="date" data-k="a" value="${esc(st.a || y + '-01-01')}"></label><label class="fld"><span>Fin de période (sortie : modifier)</span><input type="date" data-k="b" value="${esc(st.b || y + '-12-31')}"></label></div>
+      <label class="chk"><input type="checkbox" data-k="sol" ${st.sol ? 'checked' : ''}> Journée de solidarité à effectuer sur la période (+1 jour à travailler ; déjà incluse dans les 218 jours d’une année complète)</label>${amBox(st)}`; },
+    sync: (root, st) => { // CP pris par défaut : 25 pour une année complète, 0 pour une entrée en cours d’année
+      if (st.cpSet) return;
+      const y0 = new Date().getFullYear(), a = dIn(st.a || y0 + '-01-01'), b = dIn(st.b || y0 + '-12-31'); if (a == null || b == null) return;
+      const yd = countDays(parseDay(new Date(a).getFullYear() + '-01-01'), parseDay(new Date(a).getFullYear() + '-12-31')).cal, full = countDays(a, b).cal === yd;
+      st.cp = full ? (st.cpf ?? '25') : '0'; const i = root.querySelector('[data-k=cp]'); if (i && document.activeElement !== i) i.value = st.cp;
+    },
     calc: st => {
-      const y0 = new Date().getFullYear(), a = dIn(st.a || y0 + '-01-01'), b = dIn(st.b || y0 + '-12-31'), n = numIn(st.n ?? '218'), cp = numIn(st.cp ?? '25');
-      if (a == null || b == null || n == null || cp == null) return '<div class="tl-empty">Renseignez le forfait, les congés payés et la période.</div>';
+      const y0 = new Date().getFullYear(), a = dIn(st.a || y0 + '-01-01'), b = dIn(st.b || y0 + '-12-31'), n = numIn(st.n ?? '218'), cpf = numIn(st.cpf ?? '25'), cp = numIn(st.cp ?? '0'), sol = st.sol ? 1 : 0;
+      if (a == null || b == null || n == null || cpf == null || cp == null) return '<div class="tl-empty">Renseignez le forfait, les congés payés et la période.</div>';
       if (b < a) return '<div class="tl-empty">La fin de période est avant le début.</div>';
       if (new Date(a).getFullYear() !== new Date(b).getFullYear()) return '<div class="tl-empty">La période doit rester dans une même année civile.</div>';
-      const y = new Date(a).getFullYear(), yd = countDays(parseDay(y + '-01-01'), parseDay(y + '-12-31')).cal, o = countDays(a, b), full = o.cal === yd;
-      const ferOuvres = o.fer.filter(([d]) => { const w = new Date(d).getDay(); return w >= 1 && w <= 5; }), ferWe = o.fer.length - ferOuvres.length;
-      const ouvres = o.cal - o.we - ferOuvres.length, fp = full ? n : n * o.cal / yd, jnt = ouvres - cp - fp, up = Math.ceil(jnt * 2) / 2;
-      const line = (l, v, sub, op = '') => `<li><span class="tl-lb">${op}${l}</span><span class="tl-dt"><b>${v}</b></span>${sub ? `<span class="tl-sb">${sub}</span>` : ''}</li>`;
-      return `<div class="tl-big">${jnt < 0 ? 'Forfait supérieur aux jours ouvrés disponibles' : nf(jnt, 2) + ' jour' + (jnt > 1 ? 's' : '') + ' de repos'}${jnt >= 0 && up !== jnt ? ` <span class="muted" style="font-size:14px;font-weight:500">(arrondi au demi-jour supérieur : ${nf(up, 1)})</span>` : ''}</div>
-        <ol class="tl-steps">
-        ${line('Jours calendaires de la période', o.cal, full ? 'Année ' + y + (yd === 366 ? ' (bissextile)' : '') : 'du ' + fmtDate(a) + ' au ' + fmtDate(b) + ' (année : ' + yd + ' jours)')}
-        ${line('Samedis et dimanches', o.we, '', '− ')}
-        ${line('Jours fériés tombant un jour ouvré', ferOuvres.length, ferOuvres.length ? ferOuvres.map(([d, h]) => esc(h) + ' ' + WD_S[new Date(d).getDay()] + ' ' + fmtDate(d).slice(0, 5)).join(' · ') + (ferWe ? ' · ' + ferWe + ' férié(s) tombant un week-end, déjà déduit(s)' : '') : (ferWe ? ferWe + ' férié(s) tombant un week-end, déjà déduit(s)' : ''), '− ')}
-        <li class="key"><span class="tl-lb">= Jours ouvrés de la période</span><span class="tl-dt"><b>${ouvres}</b></span></li>
-        ${line('Congés payés', nf(cp, 2), full ? '' : 'Congés payés pris ou à prendre sur la période (à ajuster pour une entrée en cours d’année)', '− ')}
-        ${line('Jours du forfait' + (full ? '' : ' proratisés'), nf(fp, 2), full ? '' : nf(n, 2) + ' × ' + o.cal + ' / ' + yd + ' jours calendaires', '− ')}
-        <li class="key"><span class="tl-lb">= Jours non travaillés (repos)</span><span class="tl-dt"><b>${nf(jnt, 2)}</b></span></li></ol>
-        <div class="tl-note">Méthode habituelle de calcul ; l’accord collectif ou la convention peut prévoir d’autres règles (jours d’ancienneté, de fractionnement, ponts, arrondi). Le forfait de 218 jours inclut la journée de solidarité. Jours fériés de France métropolitaine (hors Alsace-Moselle).</div>`;
+      const y = new Date(a).getFullYear(), yr = countDays(parseDay(y + '-01-01'), parseDay(y + '-12-31')), yd = yr.cal, o = countDays(a, b), full = o.cal === yd, k = o.cal / yd;
+      const fo = x => x.fer.filter(([d]) => { const w = new Date(d).getDay(); return w >= 1 && w <= 5; });
+      const ferO = fo(o), ferWe = o.fer.length - ferO.length, ferYear = fo(yr).length, ouvres = o.cal - o.we - ferO.length;
+      // Méthode A : forfait proratisé + congés payés non acquis (circulaire DRT n° 2000-7 : plafond « augmenté à due concurrence »)
+      const fpA = n * k, cpTheo = cpf * k, cpNon = Math.max(0, cpTheo - cp), workA = fpA + cpNon + sol, jntA = ouvres - cp - workA;
+      // Méthode B : base annuelle reconstituée (forfait + CP + fériés ouvrés de l'année), proratisée, moins les fériés ouvrés de la période
+      const baseB = n + cpf + ferYear, workB = baseB * k - ferO.length + sol - cp, jntB = ouvres - cp - workB;
+      const line = (l, v, sub, cls = '') => `<li class="${cls}"><span class="tl-lb">${l}</span><span class="tl-dt"><b>${v}</b></span>${sub ? `<span class="tl-sb">${sub}</span>` : ''}</li>`;
+      const rnd = x => { const u = Math.ceil(x * 2 - 1e-9) / 2; return Math.abs(u - x) > 1e-9 ? ` <span class="muted" style="font-size:13px;font-weight:500">(arrondi au demi-jour supérieur : ${nf(u, 1)})</span>` : ''; };
+      const res = x => x < 0 ? '<span style="color:#c0392b">' + nf(x, 2) + ' (à vérifier)</span>' : nf(x, 2);
+      const head = `<ol class="tl-steps">
+        ${line('Jours calendaires de la période', o.cal, full ? 'Année ' + y + (yd === 366 ? ' (bissextile)' : '') : 'du ' + fmtDate(a) + ' au ' + fmtDate(b) + ' · prorata ' + o.cal + ' / ' + yd)}
+        ${line('− Samedis et dimanches', o.we)}
+        ${line('− Jours fériés tombant un jour ouvré', ferO.length, ferO.length ? ferO.map(([d, h]) => esc(h) + ' ' + WD_S[new Date(d).getDay()] + ' ' + fmtDate(d).slice(0, 5)).join(' · ') + (ferWe ? ' · ' + ferWe + ' férié(s) un week-end, déjà déduit(s)' : '') : (ferWe ? ferWe + ' férié(s) un week-end, déjà déduit(s)' : ''))}
+        ${line('= Jours ouvrés de la période', ouvres, '', 'key')}
+        ${line('− Congés payés pris sur la période', nf(cp, 2))}</ol>`;
+      if (full && !sol) {
+        const work = n + Math.max(0, cpf - cp), jnt = ouvres - cp - work;
+        return `<div class="tl-big">${res(jnt)} jour${jnt > 1 ? 's' : ''} de repos${rnd(jnt)}</div>${head}<ol class="tl-steps">
+          ${line('Jours de travail du forfait', n)}${cp < cpf ? line('+ Congés payés non acquis', nf(cpf - cp, 2), cpf + ' − ' + nf(cp, 2) + ' : ajoutés aux jours à travailler (circulaire DRT n° 2000-7)') : ''}
+          ${line('= Jours à travailler', nf(work, 2), '', 'key')}${line('= Jours non travaillés (repos)', nf(jnt, 2), 'jours ouvrés − CP pris − jours à travailler', 'key')}</ol>
+          <div class="tl-note">Le forfait de 218 jours suppose un droit complet aux congés payés et inclut la journée de solidarité. ${ferNote()} Une convention ou un accord collectif peut prévoir d’autres règles (jours d’ancienneté, de fractionnement, ponts, arrondi).</div>`;
+      }
+      return `<div class="tl-two"><div class="tl-m"><div class="tl-mh">Méthode A · forfait proratisé + CP non acquis</div><div class="tl-big">${res(jntA)} j de repos${rnd(jntA)}</div></div><div class="tl-m"><div class="tl-mh">Méthode B · base annuelle reconstituée</div><div class="tl-big">${res(jntB)} j de repos${rnd(jntB)}</div></div></div>
+        ${head}
+        <div class="tl-two"><div><div class="tl-mh">Méthode A</div><ol class="tl-steps">
+          ${line('Forfait proratisé', nf(fpA, 2), nf(n, 2) + ' × ' + o.cal + ' / ' + yd)}
+          ${line('+ Congés payés non acquis', nf(cpNon, 2), 'droit théorique ' + nf(cpf, 2) + ' × ' + o.cal + ' / ' + yd + ' = ' + nf(cpTheo, 2) + ' − CP pris ' + nf(cp, 2))}
+          ${sol ? line('+ Journée de solidarité', 1) : ''}
+          ${line('= Jours à travailler', nf(workA, 2), '', 'key')}
+          ${line('= Jours non travaillés (repos)', nf(jntA, 2), 'jours ouvrés ' + ouvres + ' − CP pris ' + nf(cp, 2) + ' − jours à travailler', 'key')}</ol></div>
+        <div><div class="tl-mh">Méthode B</div><ol class="tl-steps">
+          ${line('Base annuelle', nf(baseB, 2), nf(n, 2) + ' (forfait) + ' + nf(cpf, 2) + ' (CP) + ' + ferYear + ' (fériés ouvrés de ' + y + ')')}
+          ${line('× prorata − fériés de la période', nf(baseB * k - ferO.length, 2), nf(baseB, 2) + ' × ' + o.cal + ' / ' + yd + ' − ' + ferO.length)}
+          ${sol ? line('+ Journée de solidarité', 1) : ''}${cp ? line('− Congés payés pris', nf(cp, 2)) : ''}
+          ${line('= Jours à travailler', nf(workB, 2), '', 'key')}
+          ${line('= Jours non travaillés (repos)', nf(jntB, 2), 'jours ouvrés ' + ouvres + ' − CP pris ' + nf(cp, 2) + ' − jours à travailler', 'key')}</ol></div></div>
+        <div class="tl-note">Règle : pour un salarié qui n’a pas un droit complet aux congés payés (entrée en cours d’année), le plafond de jours est « augmenté à due concurrence » des congés non acquis (circulaire DRT n° 2000-7 du 6 décembre 2000, sauf accord collectif contraire ; plafond de 218 jours, art. L3121-64). La loi ne fixe pas la méthode de proratisation : A et B sont deux pratiques courantes, à choisir selon l’accord collectif. ${ferNote()}</div>`;
     } },
   { id: 'add', t: 'Ajouter ou retirer des jours', d: 'Date ± N jours calendaires, ouvrables ou ouvrés',
-    html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>`,
+    html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>${amBox(st)}`,
     calc: st => {
       const d = dIn(st.d), n = parseInt(st.n, 10); if (d == null || isNaN(n)) return '<div class="tl-empty">Saisissez une date et un nombre de jours.</div>';
       const r = addTyped(d, n, st.type || 'cal'), lb = { cal: 'calendaire', ouvrable: 'ouvrable', ouvre: 'ouvré' }[st.type || 'cal'];
-      return `<div class="tl-big">${dLong(r)}</div><div class="tl-res"><div>${dLong(d)} ${n >= 0 ? '+' : '−'} ${plur(Math.abs(n), 'jour')} ${lb}${Math.abs(n) > 1 ? 's' : ''}${st.type && st.type !== 'cal' ? ' (dimanches' + (st.type === 'ouvre' ? ', samedis' : '') + ' et jours fériés non comptés)' : ''}</div>${holidayOn(dayKey(r)) ? `<div class="tl-note">Ce jour est férié : ${esc(holidayOn(dayKey(r)))}.</div>` : ''}</div>`;
+      return `<div class="tl-big">${dLong(r)}</div><div class="tl-res"><div>${dLong(d)} ${n >= 0 ? '+' : '−'} ${plur(Math.abs(n), 'jour')} ${lb}${Math.abs(n) > 1 ? 's' : ''}${st.type && st.type !== 'cal' ? ' (dimanches' + (st.type === 'ouvre' ? ', samedis' : '') + ' et jours fériés non comptés)' : ''}</div>${tlHol(dayKey(r)) ? `<div class="tl-note">Ce jour est férié : ${esc(tlHol(dayKey(r)))}.</div>` : ''}</div>`;
     } },
   { id: 'count', t: 'Compter les jours', d: 'Jours calendaires, ouvrables, ouvrés et fériés entre deux dates',
-    html: st => `<div class="tl-row"><label class="fld"><span>Mois entier</span><input type="month" data-k="mo" value="${esc(st.mo || '')}"></label><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>`,
+    html: st => `<div class="tl-row"><label class="fld"><span>Mois entier</span><input type="month" data-k="mo" value="${esc(st.mo || '')}"></label><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>${amBox(st)}`,
     calc: st => {
       let a = dIn(st.a), b = dIn(st.b); if (a == null || b == null) return '<div class="tl-empty">Choisissez un mois entier ou saisissez les deux dates.</div>'; if (b < a) [a, b] = [b, a];
       if ((b - a) / DAY > 3700) return '<div class="tl-empty">Période trop longue (10 ans maximum).</div>';
@@ -2815,7 +2856,7 @@ const TOOLS = [
     } },
   { id: 'prorata', t: 'Prorata d’un montant', d: 'Entrée ou sortie en cours de mois, absence, temps partiel',
     html: st => { const m = st.mode || 'cal'; return `<div class="tl-row"><label class="fld"><span>Montant (mois complet)</span><input data-k="amt" inputmode="decimal" value="${esc(st.amt || '')}" placeholder="ex. 2 500,00"></label><label class="fld"><span>Base de calcul</span><select data-k="mode">${[['cal', 'Jours calendaires du mois'], ['ouvre', 'Jours ouvrés du mois'], ['ouvrable', 'Jours ouvrables du mois'], ['free', 'Saisie libre (heures, jours…)']].map(([v, l]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
-      <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>`; },
+      <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>${m === 'free' ? '' : amBox(st)}`; },
     calc: st => {
       const m = st.mode || 'cal', amt = numIn(st.amt); if (amt == null) return '<div class="tl-empty">Saisissez le montant.</div>';
       let num, den, txt;
@@ -2836,8 +2877,10 @@ UI.tl = {};
 function toolCalc(sec) {
   const tool = TOOLS.find(x => x.id === sec.dataset.tool); if (!tool) return;
   const st = (UI.tl[tool.id] ||= {});
+  TLAM = !!st.am;
   if (tool.sync) tool.sync(sec, st);
   const out = sec.querySelector('.tl-out'); if (out) out.innerHTML = tool.calc(st);
+  TLAM = false;
 }
 function renderOutils() {
   const body = $('#outils-body'), on = toolsOn();
@@ -2863,6 +2906,7 @@ function bindOutils() {
     const st = (UI.tl[sec.dataset.tool] ||= {});
     if (el.dataset.k === 'mo' && sec.dataset.tool === 'count') { st.mo = el.value; if (/^\d{4}-\d{2}$/.test(el.value)) { st.a = el.value + '-01'; st.b = dayKey(addDays(addMonths(parseDay(st.a), 1), -1)); sec.querySelector('[data-k=a]').value = st.a; sec.querySelector('[data-k=b]').value = st.b; } toolCalc(sec); return; }
     if ((el.dataset.k === 'a' || el.dataset.k === 'b') && sec.dataset.tool === 'count') { st.mo = ''; const m = sec.querySelector('[data-k=mo]'); if (m) m.value = ''; }
+    if (el.dataset.k === 'cp' && sec.dataset.tool === 'fj') st.cpSet = el.value.trim() !== '';
     if (el.dataset.k) { st[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; if (sec.dataset.tool === 'hm' && (el.dataset.k === 'hm' || el.dataset.k === 'dec')) st.last = el.dataset.k; }
     if (el.dataset.pal) { const [i, k] = el.dataset.pal.split(':'); st.pal ||= [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]; st.pal[+i][k] = el.value; }
     toolCalc(sec);
