@@ -622,6 +622,7 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-pal{display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap}
 .tl-pal input{width:60px;text-align:center}
 .tl-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tl-acts{display:flex;justify-content:flex-end;gap:6px;border-top:1px dashed var(--line);padding-top:8px;margin-top:-4px}
 .aev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.aev-in{display:flex;gap:4px}.aev-in input{flex:1 1 auto;min-width:0;width:auto}.aev-in select{flex:0 0 96px;width:96px;min-width:0}
 .aev-best{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}.aev-tag{color:var(--accent);font-weight:600}
 .tl-m{background:var(--surface-2);border-radius:10px;padding:10px 12px}
@@ -1023,7 +1024,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.31.1';
+const APP_VERSION = '1.32.1';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -3041,11 +3042,125 @@ function toolCalc(sec) {
   const out = sec.querySelector('.tl-out'); if (out) out.innerHTML = tool.calc(st);
   TLAM = false;
 }
+/* ---------- Export d'un calcul (v1.32.0) : image (presse-papiers) ou texte ----------
+   Le contenu est relu dans le bloc : données saisies (valeurs, sans les champs), résultat, détail, règles. */
+const tlTxt = el => (el?.textContent || '').replace(/\s*↗/g, '').replace(/\s+/g, ' ').trim();
+function tlValOf(el) { // texte d'un élément où les champs sont remplacés par leur valeur
+  const c = el.cloneNode(true), src = el.querySelectorAll('input,select'), dst = c.querySelectorAll('input,select');
+  dst.forEach((x, i) => { const o = src[i]; let v = o.tagName === 'SELECT' ? (o.selectedOptions[0]?.text || '') : o.type === 'checkbox' ? '' : o.type === 'date' && o.value ? fmtDate(parseDay(o.value)) : o.value; x.replaceWith(document.createTextNode(v ? ' ' + v + ' ' : ' — ')); });
+  c.querySelectorAll('button').forEach(b => b.remove());
+  return tlTxt(c);
+}
+function tlExtract(sec) {
+  const data = [], out = [];
+  sec.querySelectorAll('.tl-in .seg, .tl-in label.fld, .tl-in label.chk, .tl-in label.tl-inl').forEach(el => {
+    if (el.closest('[hidden]') || (el.matches('label.chk, label.tl-inl') && el.parentElement.closest('label.tl-inl'))) return;
+    if (el.matches('.seg')) { const on = el.querySelector('button.on'); if (on && !el.closest('.tl-head')) data.push({ v: tlTxt(on) }); return; }
+    if (el.matches('label.fld')) {
+      const l = tlTxt(el.querySelector('span')), ins = [...el.querySelectorAll('input,select')];
+      const vals = ins.map(i => i.tagName === 'SELECT' ? i.selectedOptions[0]?.text || '' : i.type === 'date' ? (i.value ? fmtDate(parseDay(i.value)) : '') : (/^-?[\d\s]+([.,]\d+)?$/.test(i.value.trim()) ? nf(numIn(i.value), 2) : i.value.trim()));
+      if (!vals[0]) return; data.push({ l, v: vals.filter(Boolean).join(' ') }); return;
+    }
+    if (el.matches('label.chk')) { const c = el.querySelector('input[type=checkbox]'); if (c && c.checked) { const inner = el.querySelector('label.tl-inl'); data.push({ v: '✓ ' + tlTxt(el.cloneNode(true)).replace(inner ? tlTxt(inner) : '\u0000', '').trim() }); } return; }
+    if (el.matches('label.tl-inl')) { if (el.querySelector('input[type=checkbox]')) { const c = el.querySelector('input[type=checkbox]'); if (c.checked) data.push({ v: '✓ ' + tlTxt(el) }); return; } data.push({ v: tlValOf(el) }); }
+  });
+  const walk = node => {
+    for (const el of node.children) {
+      if (el.matches('.tl-mh')) out.push({ t: 'h', s: tlTxt(el) });
+      else if (el.matches('.tl-big')) out.push({ t: 'big', s: tlTxt(el) });
+      else if (el.matches('.tl-steps')) el.querySelectorAll('li').forEach(li => out.push({ t: 'step', l: tlTxt(li.querySelector('.tl-lb')), v: tlTxt(li.querySelector('.tl-dt')), sub: tlTxt(li.querySelector('.tl-sb')), key: li.classList.contains('key') }));
+      else if (el.matches('.tl-grid')) [...el.children].forEach(d => out.push({ t: 'step', l: tlTxt(d.querySelector('span')), v: tlTxt(d.querySelector('b')) }));
+      else if (el.matches('.tl-note')) out.push({ t: 'note', s: tlTxt(el) });
+      else if (el.matches('.tl-empty')) out.push({ t: 'p', s: tlTxt(el) });
+      else if (el.matches('table')) el.querySelectorAll('tr').forEach(tr => out.push({ t: 'row', cells: [...tr.children].map(tlTxt) }));
+      else if (el.children.length && !el.matches('.small, .tl-res > div')) walk(el);
+      else if (tlTxt(el)) out.push({ t: el.matches('.small') ? 'small' : 'p', s: tlTxt(el) });
+    }
+  };
+  walk(sec.querySelector('.tl-out'));
+  return { data, out };
+}
+function tlToText(title, who, x) {
+  const L = [title.toUpperCase(), 'Calcul du ' + fmtDate(Date.now()) + (who ? ' · ' + who : ''), ''];
+  if (x.data.length) { L.push('Données'); x.data.forEach(d => L.push('  ' + (d.l ? d.l + ' : ' : '') + d.v)); L.push(''); }
+  L.push('Résultat');
+  for (const b of x.out) {
+    if (b.t === 'h') L.push('', b.s.toUpperCase());
+    else if (b.t === 'big') L.push('  ' + b.s);
+    else if (b.t === 'step') L.push('  ' + b.l + (b.v ? ' : ' + b.v : '') + (b.sub ? ' (' + b.sub + ')' : ''));
+    else if (b.t === 'row') L.push('  ' + b.cells.filter(Boolean).join(' · '));
+    else if (b.t === 'note') L.push('', b.s);
+    else L.push('  ' + b.s);
+  }
+  return L.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+function tlToCanvas(title, who, x) {
+  const W = 760, P = 28, S = 2, F = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  const css = getComputedStyle(document.documentElement), acc = '#0d6656', ink = '#1f2a27', ink2 = '#4a5653', mute = '#7a8582', line = '#dfe4e2';
+  const cv = document.createElement('canvas'), c = cv.getContext('2d');
+  const wrap = (t, font, w) => { c.font = font; const words = String(t).split(' '), out = []; let cur = ''; for (const wd of words) { const tt = cur ? cur + ' ' + wd : wd; if (c.measureText(tt).width > w && cur) { out.push(cur); cur = wd; } else cur = tt; } if (cur) out.push(cur); return out.length ? out : ['']; };
+  const ops = []; let y = P;
+  const text = (t, font, color, x0, w, lh) => { const ls = wrap(t, font, w); ls.forEach((s, i) => ops.push(['t', s, font, color, x0, y + i * lh])); y += ls.length * lh; };
+  // En-tête
+  ops.push(['r', 0, 0, W, 4, acc]);
+  text('ANTEVORTA', '600 11px ' + F, acc, P, W - 2 * P, 16);
+  text(title, '650 20px ' + F, ink, P, W - 2 * P, 26);
+  text('Calcul du ' + fmtDate(Date.now()) + (who ? '  ·  ' + who : ''), '13px ' + F, ink2, P, W - 2 * P, 18);
+  y += 10; ops.push(['l', P, y, W - P, y, line]); y += 14;
+  if (x.data.length) {
+    text('DONNÉES', '600 11px ' + F, mute, P, W - 2 * P, 18); y += 2;
+    for (const d of x.data) { if (d.l) { const y0 = y; text(d.l, '13px ' + F, ink2, P, 300, 18); const y1 = y; y = y0; text(d.v, '600 13px ' + F, ink, P + 310, W - 2 * P - 310, 18); y = Math.max(y, y1) + 3; } else { text(d.v, '13px ' + F, ink, P, W - 2 * P, 18); y += 3; } }
+    y += 8; ops.push(['l', P, y, W - P, y, line]); y += 14;
+  }
+  text('RÉSULTAT', '600 11px ' + F, mute, P, W - 2 * P, 18); y += 2;
+  for (const b of x.out) {
+    if (b.t === 'h') { y += 8; text(b.s.toUpperCase(), '600 11px ' + F, ink2, P, W - 2 * P, 17); }
+    else if (b.t === 'big') { text(b.s, '650 22px ' + F, acc, P, W - 2 * P, 29); y += 2; }
+    else if (b.t === 'step') { const y0 = y; if (b.key) ops.push(['c', P + 4, y0 + 7, acc]); else ops.push(['c', P + 4, y0 + 7, line]); text(b.l, (b.key ? '600 ' : '') + '13px ' + F, ink, P + 16, 380, 18); const y1 = y; y = y0; if (b.v) text(b.v, '650 13px ' + F, ink, P + 410, W - 2 * P - 410, 18); y = Math.max(y, y1); if (b.sub) text(b.sub, '11.5px ' + F, mute, P + 16, W - 2 * P - 16, 15); y += 5; }
+    else if (b.t === 'row') { text(b.cells.filter(Boolean).join('   ·   '), '12.5px ' + F, ink, P, W - 2 * P, 17); y += 2; }
+    else if (b.t === 'note') { y += 6; text(b.s, '11.5px ' + F, mute, P, W - 2 * P, 16); y += 4; }
+    else text(b.s, (b.t === 'small' ? '12.5px ' : '13px ') + F, ink2, P, W - 2 * P, 18);
+  }
+  y += 6;
+  const H = y + P - 8; cv.width = W * S; cv.height = H * S; c.scale(S, S);
+  c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H); c.textBaseline = 'top';
+  for (const o of ops) {
+    if (o[0] === 't') { c.font = o[2]; c.fillStyle = o[3]; c.fillText(o[1], o[4], o[5]); }
+    else if (o[0] === 'r') { c.fillStyle = o[5]; c.fillRect(o[1], o[2], o[3], o[4]); }
+    else if (o[0] === 'l') { c.strokeStyle = o[5]; c.lineWidth = 1; c.beginPath(); c.moveTo(o[1], o[2] + .5); c.lineTo(o[3], o[4] + .5); c.stroke(); }
+    else if (o[0] === 'c') { c.fillStyle = o[3]; c.beginPath(); c.arc(o[1], o[2], 4, 0, 7); c.fill(); }
+  }
+  return cv;
+}
+function openToolExport(sec, fmt) {
+  const tool = TOOLS.find(t => t.id === sec.dataset.tool); if (!tool) return;
+  const names = [...S.meta.clients.filter(c => !c.deletedAt && !c.archived).map(c => c.name), ...S.meta.persons.filter(p => !p.deletedAt && !p.archived).map(p => p.name)].sort((a, b) => a.localeCompare(b, 'fr'));
+  const m = modal(`<div class="modal-h"><h3>${fmt === 'img' ? 'Copier en image' : 'Copier en texte'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px"><div class="small muted">${esc(tool.t)} · calcul du ${fmtDate(Date.now())}</div>
+      <label class="fld"><span>Dossier ou salarié (facultatif)</span><input id="tx-who" list="tx-names" autocomplete="off" maxlength="80" placeholder="ex. Dupont SAS · M. Martin"><datalist id="tx-names">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist></label>
+      <div class="small muted">Le calcul (données saisies, résultat, détail et règles) est copié dans le presse-papiers : collez-le dans un mail, une note ou Teams.</div></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tx-go">${ICON.copy} Copier</button></div>`);
+  const inp = m.el.querySelector('#tx-who'); setTimeout(() => inp.focus(), 30);
+  const go = () => {
+    const who = inp.value.trim(), x = tlExtract(sec);
+    if (fmt === 'txt') {
+      const t = tlToText(tool.t, who, x);
+      (navigator.clipboard?.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Calcul copié en texte'), () => { downloadText('calcul_' + tool.id + '_' + dayKey(Date.now()) + '.txt', t, 'text/plain'); toast('Copie impossible dans ce navigateur : fichier texte téléchargé'); });
+    } else {
+      const cv = tlToCanvas(tool.t, who, x), blob = new Promise(res => cv.toBlob(res, 'image/png'));
+      const fallback = () => blob.then(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'calcul_' + tool.id + '_' + dayKey(Date.now()) + '.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast('Copie d’image impossible dans ce navigateur : image téléchargée'); });
+      try { navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => toast('Calcul copié en image : collez-le dans votre mail'), fallback); } catch (e) { fallback(); }
+    }
+    m.close();
+  };
+  m.el.querySelector('#tx-go').addEventListener('click', go);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !(e.target.list && e.isComposing)) { e.preventDefault(); go(); } });
+}
 function renderOutils() {
   const body = $('#outils-body'), on = toolsOn();
   let html = `<div class="card filters tl-head"><div><b>Outils du gestionnaire de paie</b><div class="muted small">Calculs indicatifs : vérifiez toujours les règles de votre convention collective.</div></div><span class="sp" style="flex:1"></span>${S.meta.settings.toolsAMShow ? `<div class="seg" role="radiogroup" aria-label="Jours fériés utilisés par les outils" title="S’applique à tous les outils"><button type="button" data-tla="am" data-v="0" class="${toolsAM() ? '' : 'on'}">Fériés métropole</button><button type="button" data-tla="am" data-v="1" class="${toolsAM() ? 'on' : ''}">Fériés Alsace-Moselle</button></div>` : ''}<button class="btn sm" data-tla="choose">⚙ Choisir mes outils (${on.length}/${TOOLS.length})</button></div>`;
   if (!on.length) html += `<div class="card empty">Aucun outil affiché. <button class="btn sm" data-tla="choose">Choisir mes outils</button></div>`;
-  for (const id of on) { const t = TOOLS.find(x => x.id === id), st = (UI.tl[id] ||= {}); html += `<i data-b="tool-${id}" data-half="${['hm', 'pct', 'add', 'count', 'dates', 'prorata'].includes(id) ? '1' : ''}" data-t="${esc(t.t)}"></i><h2>${esc(t.t)}</h2><div class="card tl-card" data-tool="${id}"><div class="tl-in">${t.html(st)}</div><div class="tl-out"></div></div>`; }
+  for (const id of on) { const t = TOOLS.find(x => x.id === id), st = (UI.tl[id] ||= {}); html += `<i data-b="tool-${id}" data-half="${['hm', 'pct', 'add', 'count', 'dates', 'prorata'].includes(id) ? '1' : ''}" data-t="${esc(t.t)}"></i><h2>${esc(t.t)}</h2><div class="card tl-card" data-tool="${id}"><div class="tl-in">${t.html(st)}</div><div class="tl-out"></div><div class="tl-acts"><button type="button" class="btn sm ghost" data-tla="export" data-fmt="img" title="Copier le calcul (données, résultat, détail) en image, à coller dans un mail">${ICON.copy} Copier en image</button><button type="button" class="btn sm ghost" data-tla="export" data-fmt="txt" title="Copier le calcul en texte">${ICON.copy} Copier en texte</button></div></div>`; }
   body.innerHTML = html.replace(/data-half=""/g, '');
   blkify(body, 'outils');
   body.querySelectorAll('[data-tool]').forEach(toolCalc);
@@ -3075,6 +3190,7 @@ function bindOutils() {
     const sg = ev.target.closest('[data-kseg] button'); if (sg) { const sec = sg.closest('[data-tool]'), st = (UI.tl[sec.dataset.tool] ||= {}); st[sg.parentElement.dataset.kseg] = sg.dataset.v; renderOutils(); return; }
     const a = ev.target.closest('[data-tla]'); if (!a) return;
     if (a.dataset.tla === 'choose') { openToolChooser(); return; }
+    if (a.dataset.tla === 'export') { openToolExport(a.closest('[data-tool]'), a.dataset.fmt); return; }
     if (a.dataset.tla === 'am') { S.meta.settings.toolsAM = a.dataset.v === '1'; touchMeta(); return; }
     if (a.dataset.tla === 'mo') { // mois entier : du 1er au dernier jour
       const st = (UI.tl.count ||= {}), d = a.dataset.d, base = d === 'cur' ? startOfMonth(Date.now()) : addMonths(startOfMonth(dIn(st.a) ?? Date.now()), +d);
