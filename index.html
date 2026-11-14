@@ -552,6 +552,43 @@ a.btn:not(.primary){color:var(--ink)}
 .cb-rel button.on[data-v=difficile]{border-color:#c0392b;background:color-mix(in srgb,#c0392b 12%,var(--surface))}
 .cb-al{display:flex;gap:6px;flex-wrap:wrap}
 .cb-hint{font-size:12px;color:var(--muted)}
+/* Outils */
+.tl-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tl-card{padding:14px 16px;display:grid;gap:12px}
+.tl-in{display:grid;gap:10px}
+.tl-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.tl-row .fld{flex:1;min-width:150px}
+.tl-eq{font-size:20px;color:var(--muted);padding-bottom:6px}
+.tl-opts{display:grid;gap:7px}
+.tl-inl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);flex-wrap:wrap}
+.tl-inl input{width:56px;text-align:center}
+.tl-out{border-top:1px dashed var(--line-2);padding-top:12px;display:grid;gap:6px}
+.tl-big{font-size:22px;font-weight:650;color:var(--accent);line-height:1.25}
+.tl-res{display:grid;gap:3px;font-size:13.5px;color:var(--ink-2)}
+.tl-empty{font-size:13px;color:var(--muted)}
+.tl-note{font-size:12px;color:var(--muted);line-height:1.45}
+.tl-steps{list-style:none;margin:0;padding:0;display:grid;gap:0;border-left:2px solid var(--line-2);margin-left:6px}
+.tl-steps li{display:grid;grid-template-columns:minmax(200px,1.1fr) minmax(170px,1fr);gap:2px 12px;padding:7px 0 7px 16px;position:relative;font-size:13.5px}
+.tl-steps li::before{content:'';position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--line-2)}
+.tl-steps li.key::before{background:var(--accent);border-color:var(--accent)}
+.tl-steps li.key .tl-dt{font-weight:650;color:var(--ink)}
+.tl-lb{color:var(--ink-2)}
+.tl-dt{color:var(--ink)}
+.tl-sb{grid-column:1 / -1;font-size:12px;color:var(--muted)}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.tl-grid div{background:var(--surface-2);border-radius:9px;padding:9px 11px;display:grid;gap:2px}
+.tl-grid span{font-size:12px;color:var(--muted)}
+.tl-grid b{font-size:20px}
+.tl-pals{display:grid;gap:6px}
+.tl-pal{display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap}
+.tl-pal input{width:60px;text-align:center}
+.tl-pick{align-items:flex-start;white-space:normal;font-size:13.5px;color:var(--ink);padding:6px 4px}
+.tl-card{min-width:0;overflow:hidden}
+.tl-card input,.tl-card select{min-width:0;max-width:100%;box-sizing:border-box}
+.tl-row .fld input,.tl-row .fld select{width:100%}
+.tl-card .chk{white-space:normal;align-items:flex-start}
+.tl-card .seg{flex-wrap:wrap}
+@media (max-width:700px){.tl-steps li{grid-template-columns:1fr}.tl-row .fld{min-width:100%}.tl-card .seg button{flex:1 1 45%}}
 .sch .seg{flex-wrap:wrap}
 .sch-grid{display:grid;gap:0;padding:4px 14px}
 .sch-row{display:grid;grid-template-columns:92px 1fr 64px;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
@@ -849,6 +886,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
     <a href="#rapports" data-view="rapports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Rapports</span></a>
     <a href="#facturation" data-view="facturation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h5"/></svg><span>À facturer</span><span class="count" id="todo-count" hidden></span></a>
     <a href="#referentiel" data-view="referentiel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-1a6 6 0 0 1 12 0v1M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17 11h4M19 9v4"/></svg><span class="lg">Clients & tâches</span><span class="sm">Clients</span></a>
+    <a href="#outils" data-view="outils"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span class="lg">Outils</span><span class="sm">Outils</span></a>
     <a href="#reglages" data-view="reglages" id="nav-reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="lg">Réglages</span><span class="sm">Réglages</span><span class="count" id="acc-count" hidden></span></a>
   </nav>
   <div class="top-right">
@@ -908,6 +946,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   <section class="view" id="v-referentiel"><div id="referentiel-body" data-guard></div></section>
 
   <!-- ===== RÉGLAGES (réglages, données, accès administrateur) ===== -->
+  <section class="view" id="v-outils"><div id="outils-body" data-guard></div></section>
   <section class="view" id="v-reglages"><div id="reglages-body" data-guard></div><div id="acces-body"></div></section>
 </main>
 
@@ -930,7 +969,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.20.1';
+const APP_VERSION = '1.21.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1513,7 +1552,7 @@ function applyDoc(key, body) {
 const J_MAX = 10;
 const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
 const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
-const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés' };
 const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
 const Journal = {
   snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
@@ -2032,6 +2071,7 @@ function render() {
   else if (UI.view === 'facturation') renderBilling();
   else if (UI.view === 'referentiel') renderRefs();
   else if (UI.view === 'reglages') renderSettings();
+  else if (UI.view === 'outils') renderOutils();
 }
 function renderHeader() {
   $$('.nav a').forEach(a => a.classList.toggle('on', a.dataset.view === UI.view));
@@ -2046,7 +2086,7 @@ function route() {
   if (h === 'acces') { location.replace('#reglages'); return; }
   if (h.startsWith('carnet/groupe/')) { UI.cbG = decodeURIComponent(h.slice(14)); UI.cbId = null; UI.view = 'carnet'; }
   else if (h.startsWith('carnet/')) { UI.cbId = decodeURIComponent(h.slice(7)); UI.cbG = null; UI.view = 'carnet'; }
-  else { if (h === 'carnet') { UI.cbId = null; UI.cbG = null; } UI.view = ['chrono', 'portefeuille', 'carnet', 'rapports', 'facturation', 'referentiel', 'reglages'].includes(h) ? h : 'chrono'; }
+  else { if (h === 'carnet') { UI.cbId = null; UI.cbG = null; } UI.view = ['chrono', 'portefeuille', 'carnet', 'rapports', 'facturation', 'referentiel', 'outils', 'reglages'].includes(h) ? h : 'chrono'; }
   $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + UI.view));
   render();
 }
@@ -2608,6 +2648,207 @@ function bindCarnet() {
       touchMeta(); toast(n ? n + ' date' + (n > 1 ? 's' : '') + ' de virement ajoutée' + (n > 1 ? 's' : '') + ' (jours fériés évités) : modifiez-les si besoin' : 'Tous les mois sont déjà renseignés');
     }
     else if (act === 'virclear') { const y = UI.cbYear || new Date().getFullYear(), old = { ...b.vir }; Object.keys(b.vir).filter(m => m.startsWith(y + '-')).forEach(m => delete b.vir[m]); touchMeta(); toast('Calendrier ' + y + ' effacé', 'Annuler', () => { cbOf(c).vir = old; touchMeta(); }); }
+  });
+}
+/* ---------- Onglet Outils (v1.21.0) ----------
+   Petits calculateurs du quotidien. Chaque outil est un bloc déplaçable / repliable ; le choix des outils affichés est
+   enregistré dans settings.tools (liste d'identifiants, synchronisée). Les saisies restent en mémoire pendant la session. */
+const isOuvrable = ms => new Date(ms).getDay() !== 0 && !holidayOn(dayKey(ms));          // lundi → samedi, hors fériés
+const isOuvre = ms => { const w = new Date(ms).getDay(); return w >= 1 && w <= 5 && !holidayOn(dayKey(ms)); }; // lundi → vendredi, hors fériés
+const isProrog = ms => { const w = new Date(ms).getDay(); return w === 0 || w === 6 || !!holidayOn(dayKey(ms)); }; // samedi, dimanche ou férié : délai prorogé (R1231-1)
+const dLong = ms => WD[new Date(ms).getDay()] + ' ' + fmtDate(ms);
+const dIn = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? parseDay(v) : null;
+const numIn = v => { const n = parseFloat(String(v ?? '').replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : null; };
+const nf = (n, d = 2) => n == null || !isFinite(n) ? '—' : n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: d });
+const plur = (n, w) => n + ' ' + w + (n > 1 && !/s$/.test(w) ? 's' : '');
+function addMonthsClamp(a, k) { const d = new Date(a), y = d.getFullYear(), m = d.getMonth() + k, last = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(d.getDate(), last)).getTime(); }
+function ymdDiff(a, b) { // années, mois, jours entre a et b (b ≥ a)
+  let k = 0; while (addMonthsClamp(a, k + 1) <= b) k++;
+  return { y: Math.floor(k / 12), m: k % 12, d: Math.round((b - addMonthsClamp(a, k)) / DAY) };
+}
+const ymdTxt = o => [o.y ? plur(o.y, 'an') : '', o.m ? o.m + ' mois' : '', o.d || (!o.y && !o.m) ? plur(o.d, 'jour') : ''].filter(Boolean).join(', ');
+function countDays(a, b) { const o = { cal: 0, ouvrable: 0, ouvre: 0, fer: [], we: 0 }; for (let d = a; d <= b; d = addDays(d, 1)) { o.cal++; if (isOuvrable(d)) o.ouvrable++; if (isOuvre(d)) o.ouvre++; const h = holidayOn(dayKey(d)); if (h) o.fer.push([d, h]); const w = new Date(d).getDay(); if (w === 0 || w === 6) o.we++; } return o; }
+function addTyped(d0, n, type) { // ajoute (ou retire) n jours calendaires / ouvrables / ouvrés
+  if (type === 'cal') return addDays(d0, n);
+  const ok = type === 'ouvrable' ? isOuvrable : isOuvre, step = n < 0 ? -1 : 1; let d = d0, k = 0;
+  while (k < Math.abs(n)) { d = addDays(d, step); if (ok(d)) k++; }
+  return d;
+}
+// Rupture conventionnelle : calendrier à partir de la signature
+function rcPlan(sig, o) {
+  const st = [];
+  let retEnd = addDays(sig, 15); const retRaw = retEnd; while (isProrog(retEnd)) retEnd = addDays(retEnd, 1);
+  let dep = addDays(retEnd, 1 + (o.mDep || 0)); const dep0 = dep; if (o.depOuvre) while (!isOuvre(dep)) dep = addDays(dep, 1);
+  const rec = addDays(dep, o.post || 0);
+  let k = 0, iEnd = rec; while (k < 15) { iEnd = addDays(iEnd, 1); if (isOuvrable(iEnd)) k++; } const iRaw = iEnd; while (isProrog(iEnd)) iEnd = addDays(iEnd, 1);
+  const rup = addDays(iEnd, 1 + (o.mRup || 0));
+  return { sig, retStart: addDays(sig, 1), retRaw, retEnd, dep0, dep, rec, iStart: addDays(rec, 1), iRaw, iEnd, rup };
+}
+function rcLatestSig(target, o) { // signature au plus tard pour une rupture au plus tard à la date voulue
+  for (let s = target; s > addDays(target, -120); s = addDays(s, -1)) if (rcPlan(s, o).rup <= target) return s;
+  return null;
+}
+const TOOLS = [
+  { id: 'dates', t: 'Écart entre deux dates', d: 'Nombre de jours, mois et années entre deux dates',
+    html: st => `<div class="tl-row"><label class="fld"><span>Date de début</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Date de fin</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>
+      <label class="chk"><input type="checkbox" data-k="inc" ${st.inc !== false ? 'checked' : ''}> Compter le jour de fin (ex. durée d’un contrat du 1er au 31 = 31 jours)</label>`,
+    calc: st => {
+      const a = dIn(st.a), b0 = dIn(st.b); if (a == null || b0 == null) return '<div class="tl-empty">Saisissez les deux dates.</div>';
+      const neg = b0 < a, [x, y] = neg ? [b0, a] : [a, b0], b = st.inc !== false ? addDays(y, 1) : y, n = Math.round((b - x) / DAY), o = ymdDiff(x, b);
+      return `<div class="tl-big">${plur(n, 'jour')}</div><div class="tl-res"><div>soit <b>${plur(Math.floor(n / 7), 'semaine')}${n % 7 ? ' et ' + plur(n % 7, 'jour') : ''}</b></div>${o.m || o.y ? `<div>soit <b>${o.y ? ymdTxt({ y: 0, m: o.y * 12 + o.m, d: o.d }) : ymdTxt(o)}</b></div>` : ''}${o.y ? `<div>soit <b>${ymdTxt(o)}</b></div>` : ''}${neg ? '<div class="tl-note">La date de fin est avant la date de début : écart calculé dans l’autre sens.</div>' : ''}</div>`;
+    } },
+  { id: 'rc', t: 'Rupture conventionnelle', d: 'Calendrier : rétractation, dépôt, homologation, date de rupture',
+    html: st => {
+      const mode = st.mode || 'sig';
+      return `<div class="seg" data-kseg="mode">${[['sig', 'Date de signature'], ['ent', 'Date d’entretien'], ['ret', 'Fin de rétractation'], ['rup', 'Date de rupture souhaitée']].map(([v, l]) => `<button type="button" data-v="${v}" class="${mode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+        <div class="tl-row">${mode === 'ent' ? `<label class="fld"><span>Date de l’entretien</span><input type="date" data-k="ent" value="${esc(st.ent || '')}"></label><label class="fld"><span>Délai jusqu’à la signature (jours)</span><input data-k="dEnt" inputmode="numeric" value="${esc(st.dEnt ?? '0')}"></label>` : `<label class="fld"><span>${{ sig: 'Date de signature de la convention', ret: 'Date de fin du délai de rétractation', rup: 'Date de rupture souhaitée (au plus tard)' }[mode]}</span><input type="date" data-k="d_${mode}" value="${esc(st['d_' + mode] || '')}"></label>`}</div>
+        <div class="tl-opts"><label class="chk"><input type="checkbox" data-k="depOuvre" ${st.depOuvre ? 'checked' : ''}> Dépôt de la demande un jour ouvré (lundi → vendredi, hors fériés)</label>
+          <label class="tl-inl">Marge avant le dépôt <input data-k="mDep" inputmode="numeric" value="${esc(st.mDep ?? '0')}"> j</label>
+          <label class="tl-inl">Réception de la demande <input data-k="post" inputmode="numeric" value="${esc(st.post ?? '0')}"> j après l’envoi <span class="muted small">(0 avec TéléRC)</span></label>
+          <label class="tl-inl">Marge avant la rupture <input data-k="mRup" inputmode="numeric" value="${esc(st.mRup ?? '0')}"> j</label></div>`;
+    },
+    calc: st => {
+      const mode = st.mode || 'sig', o = { depOuvre: !!st.depOuvre, mDep: Math.max(0, parseInt(st.mDep, 10) || 0), post: Math.max(0, parseInt(st.post, 10) || 0), mRup: Math.max(0, parseInt(st.mRup, 10) || 0) };
+      let sig = null, ent = null, p, note = '';
+      if (mode === 'sig') sig = dIn(st.d_sig);
+      else if (mode === 'ent') { ent = dIn(st.ent); if (ent != null) sig = addDays(ent, Math.max(0, parseInt(st.dEnt, 10) || 0)); }
+      else if (mode === 'rup') { const t = dIn(st.d_rup); if (t != null) { sig = rcLatestSig(t, o); note = sig == null ? '' : `Pour une rupture au plus tard le <b>${dLong(t)}</b>, la convention doit être signée au plus tard le <b>${dLong(sig)}</b>.`; } }
+      if (mode === 'ret') {
+        const r = dIn(st.d_ret); if (r == null) return '<div class="tl-empty">Saisissez la date de fin du délai de rétractation.</div>';
+        p = rcPlan(addDays(r, -15), o); // même calendrier en aval
+        p = { ...p, sig: null, retStart: null, retRaw: r, retEnd: r }; let dep = addDays(r, 1 + o.mDep); p.dep0 = dep; if (o.depOuvre) while (!isOuvre(dep)) dep = addDays(dep, 1); p.dep = dep; p.rec = addDays(dep, o.post);
+        let k = 0, iEnd = p.rec; while (k < 15) { iEnd = addDays(iEnd, 1); if (isOuvrable(iEnd)) k++; } p.iStart = addDays(p.rec, 1); p.iRaw = iEnd; while (isProrog(iEnd)) iEnd = addDays(iEnd, 1); p.iEnd = iEnd; p.rup = addDays(iEnd, 1 + o.mRup);
+        if (isProrog(r)) note = 'Attention : la fin de rétractation saisie tombe un ' + (holidayOn(dayKey(r)) ? 'jour férié' : WD[new Date(r).getDay()]) + ' ; un délai qui expire ce jour-là est prorogé au premier jour ouvrable suivant.';
+      } else { if (sig == null) return `<div class="tl-empty">${mode === 'rup' ? 'Saisissez la date de rupture souhaitée.' : 'Saisissez la date.'}</div>`; p = rcPlan(sig, o); }
+      const li = (lbl, d, sub, strong) => `<li class="${strong ? 'key' : ''}"><span class="tl-lb">${lbl}</span><span class="tl-dt">${d != null ? dLong(d) : '—'}</span>${sub ? `<span class="tl-sb">${sub}</span>` : ''}</li>`;
+      const fer = (a, b) => { const l = []; for (let d = a; d <= b; d = addDays(d, 1)) { const h = holidayOn(dayKey(d)); if (h) l.push(h + ' ' + fmtDate(d).slice(0, 5)); } return l; };
+      const fi = p.iStart ? fer(p.iStart, p.iEnd) : [];
+      return `${note ? `<div class="tl-note">${note}</div>` : ''}<ol class="tl-steps">
+        ${ent != null ? li('Entretien', ent, '') : ''}
+        ${p.sig != null ? li('Signature de la convention', p.sig, '', true) : ''}
+        ${p.retStart != null ? li('Délai de rétractation', p.retStart, '15 jours calendaires, du ' + fmtDate(p.retStart).slice(0, 5) + ' au ' + fmtDate(p.retEnd) + (p.retEnd !== p.retRaw ? ' (15e jour le ' + dLong(p.retRaw) + ' : prorogé au jour ouvrable suivant)' : '')) : ''}
+        ${li('Fin de la rétractation (minuit)', p.retEnd, '', true)}
+        ${li('Envoi de la demande d’homologation, au plus tôt', p.dep, (o.mDep ? 'avec ' + plur(o.mDep, 'jour') + ' de marge' : 'lendemain de la fin de rétractation') + (p.dep !== p.dep0 ? ' · décalé au jour ouvré suivant' : ''))}
+        ${o.post ? li('Réception par l’administration', p.rec, plur(o.post, 'jour') + ' après l’envoi') : ''}
+        ${li('Fin de l’instruction (homologation tacite)', p.iEnd, '15 jours ouvrables à partir du ' + fmtDate(p.iStart).slice(0, 5) + (fi.length ? ' · férié(s) non compté(s) : ' + fi.join(', ') : '') + (p.iEnd !== p.iRaw ? ' · 15e jour le ' + dLong(p.iRaw) + ', prorogé' : ''), true)}
+        ${li('Date de rupture au plus tôt', p.rup, o.mRup ? 'avec ' + plur(o.mRup, 'jour') + ' de marge' : 'lendemain de l’homologation', true)}</ol>
+        <div class="tl-note">Règles : rétractation de 15 jours calendaires à partir du lendemain de la signature (art. L1237-13) ; instruction de 15 jours ouvrables à partir du lendemain de la réception (art. L1237-14) ; un délai qui expire un samedi, un dimanche ou un jour férié est prorogé au premier jour ouvrable suivant (art. R1231-1). Jours fériés de France métropolitaine (hors Alsace-Moselle). Calendrier indicatif : <a href="https://www.telerc.travail.gouv.fr/simulateur/calendrier" target="_blank" rel="noopener">contrôler avec le simulateur TéléRC ↗</a></div>`;
+    } },
+  { id: 'hm', t: 'Heures : sexagésimal ⇄ décimal', d: 'Convertir 7h45 en 7,75 h et inversement',
+    html: st => `<div class="tl-row"><label class="fld"><span>Heures et minutes</span><input data-k="hm" value="${esc(st.hm || '')}" placeholder="ex. 7h45, 7:45, 151h40" autocomplete="off"></label><span class="tl-eq">⇄</span><label class="fld"><span>Heures décimales</span><input data-k="dec" value="${esc(st.dec || '')}" placeholder="ex. 7,75" inputmode="decimal" autocomplete="off"></label></div>`,
+    calc: st => {
+      let min = null;
+      if (st.last === 'dec') { const n = numIn(st.dec); if (n != null) min = n * 60; }
+      else { const m = /^\s*(-?\d+)\s*(?:h|:)\s*(\d{1,2})?\s*(?:min)?\s*$/i.exec(st.hm || '') || /^\s*(\d+)\s*min\s*$/i.exec(st.hm || ''); if (m) min = m[2] !== undefined || /h|:/i.test(st.hm) ? +m[1] * 60 + (+m[2] || 0) : +m[1]; else { const n = numIn(st.hm); if (n != null && /^\s*\d+\s*$/.test(st.hm)) min = n * 60; } }
+      if (min == null) return '<div class="tl-empty">Tapez une durée dans l’un des deux champs.</div>';
+      const h = Math.floor(Math.abs(min) / 60), mm = Math.round(Math.abs(min) - h * 60), sg = min < 0 ? '-' : '';
+      return `<div class="tl-big">${sg}${h}h${pad(mm === 60 ? 0 : mm)} = ${nf(min / 60, 4)} h</div><div class="tl-res"><div>soit <b>${nf(min, 2)} minutes</b> · en centièmes : <b>${nf(Math.round(min / 60 * 100) / 100, 2)}</b></div></div>`;
+    }, sync: (root, st) => { // remplit l'autre champ
+      const r = TOOLS.find(x => x.id === 'hm');
+      let min = null;
+      if (st.last === 'dec') { const n = numIn(st.dec); if (n != null) { min = n * 60; const i = root.querySelector('[data-k=hm]'); if (i && document.activeElement !== i) { const h = Math.floor(Math.abs(min) / 60), mm = Math.round(Math.abs(min) - h * 60); i.value = (min < 0 ? '-' : '') + h + 'h' + pad(mm); st.hm = i.value; } } }
+      else { const p = /^\s*(-?\d+)\s*(?:h|:)\s*(\d{1,2})?\s*$/i.exec(st.hm || ''); if (p) { min = +p[1] * 60 + (+p[2] || 0); const i = root.querySelector('[data-k=dec]'); if (i && document.activeElement !== i) { i.value = nf(min / 60, 4); st.dec = i.value; } } }
+    } },
+  { id: 'pct', t: 'Pourcentages', d: 'Évolution, augmentation, diminution, valeur de départ',
+    html: st => { const m = st.mode || 'evo'; return `<div class="seg" data-kseg="mode">${[['evo', 'Évolution entre 2 nombres'], ['up', 'Augmenter de x %'], ['down', 'Diminuer de x %'], ['back', 'Retrouver la valeur de départ'], ['part', 'x % d’un nombre']].map(([v, l]) => `<button type="button" data-v="${v}" class="${m === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="tl-row">${m === 'evo' ? `<label class="fld"><span>Valeur de départ</span><input data-k="a" inputmode="decimal" value="${esc(st.a || '')}"></label><label class="fld"><span>Valeur d’arrivée</span><input data-k="b" inputmode="decimal" value="${esc(st.b || '')}"></label>` : m === 'back' ? `<label class="fld"><span>Valeur finale</span><input data-k="b" inputmode="decimal" value="${esc(st.b || '')}"></label><label class="fld"><span>Taux appliqué (%)</span><input data-k="x" inputmode="decimal" value="${esc(st.x || '')}" placeholder="ex. 3 ou -10"></label>` : `<label class="fld"><span>${m === 'part' ? 'Nombre' : 'Valeur de départ'}</span><input data-k="a" inputmode="decimal" value="${esc(st.a || '')}"></label><label class="fld"><span>Pourcentage (%)</span><input data-k="x" inputmode="decimal" value="${esc(st.x || '')}"></label>`}</div>`; },
+    calc: st => {
+      const m = st.mode || 'evo', a = numIn(st.a), b = numIn(st.b), x = numIn(st.x);
+      if (m === 'evo') { if (a == null || b == null) return '<div class="tl-empty">Saisissez les deux valeurs.</div>'; if (!a) return '<div class="tl-empty">La valeur de départ ne peut pas être 0.</div>'; const e = (b - a) / a * 100; return `<div class="tl-big">${e >= 0 ? '+' : ''}${nf(e, 2)} %</div><div class="tl-res"><div>écart : <b>${b - a >= 0 ? '+' : ''}${nf(b - a, 2)}</b> · coefficient : <b>${nf(b / a, 4)}</b></div></div>`; }
+      if (m === 'back') { if (b == null || x == null) return '<div class="tl-empty">Saisissez la valeur finale et le taux.</div>'; if (x === -100) return '<div class="tl-empty">Taux impossible.</div>'; const v = b / (1 + x / 100); return `<div class="tl-big">${nf(v, 2)}</div><div class="tl-res"><div>${nf(v, 2)} ${x >= 0 ? '+' : '−'} ${nf(Math.abs(x), 2)} % = ${nf(b, 2)} (écart ${nf(b - v, 2)})</div></div>`; }
+      if (a == null || x == null) return '<div class="tl-empty">Saisissez le nombre et le pourcentage.</div>';
+      if (m === 'part') return `<div class="tl-big">${nf(a * x / 100, 2)}</div><div class="tl-res"><div>${nf(x, 2)} % de ${nf(a, 2)}</div></div>`;
+      const v = m === 'up' ? a * (1 + x / 100) : a * (1 - x / 100);
+      return `<div class="tl-big">${nf(v, 2)}</div><div class="tl-res"><div>${nf(a, 2)} ${m === 'up' ? '+' : '−'} ${nf(x, 2)} % (${m === 'up' ? '+' : '−'}${nf(Math.abs(v - a), 2)})</div><div class="tl-note">Pour revenir à ${nf(a, 2)} depuis ${nf(v, 2)}, il faut ${m === 'up' ? 'diminuer' : 'augmenter'} de ${nf(Math.abs((a - v) / v * 100), 2)} %, et non de ${nf(x, 2)} %.</div></div>`;
+    } },
+  { id: 'subro', t: 'Fin de subrogation', d: 'Carence et paliers de maintien de salaire en jours calendaires',
+    html: st => { const pal = st.pal || [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]; return `<div class="tl-row"><label class="fld"><span>Premier jour d’arrêt</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Carence (jours calendaires)</span><input data-k="car" inputmode="numeric" value="${esc(st.car ?? '7')}"></label><label class="fld"><span>Jours déjà maintenus (12 derniers mois)</span><input data-k="deja" inputmode="numeric" value="${esc(st.deja ?? '0')}"></label></div>
+      <div class="tl-pals">${pal.map((x, i) => `<div class="tl-pal"><span class="muted small">Palier ${i + 1}</span><input data-pal="${i}:n" inputmode="numeric" value="${esc(x.n)}" aria-label="Nombre de jours du palier ${i + 1}"> jours à <input data-pal="${i}:l" value="${esc(x.l)}" style="width:90px" aria-label="Taux du palier ${i + 1}">${pal.length > 1 ? `<button type="button" class="icon xs" data-tla="paldel" data-i="${i}" title="Retirer">×</button>` : ''}</div>`).join('')}<button type="button" class="btn sm ghost" data-tla="paladd">+ palier</button></div>
+      <div class="tl-note">Carence et durées selon votre convention collective ou le Code du travail (art. L1226-1 et D1226-1 à D1226-8 : maintien légal après 7 jours de carence, 0 en cas d’accident du travail ou de maladie professionnelle, durées selon l’ancienneté).</div>`; },
+    calc: st => {
+      const d = dIn(st.d); if (d == null) return '<div class="tl-empty">Saisissez le premier jour d’arrêt.</div>';
+      const car = Math.max(0, parseInt(st.car, 10) || 0); let deja = Math.max(0, parseInt(st.deja, 10) || 0);
+      const pal = (st.pal || [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]).map(x => ({ n: Math.max(0, parseInt(x.n, 10) || 0), l: x.l }));
+      let cur = addDays(d, car); const rows = [];
+      if (car) rows.push(`<li><span class="tl-lb">Carence</span><span class="tl-dt">du ${fmtDate(d)} au ${fmtDate(addDays(d, car - 1))}</span><span class="tl-sb">${plur(car, 'jour')} non indemnisé${car > 1 ? 's' : ''} par l’employeur</span></li>`);
+      let last = null;
+      pal.forEach((x, i) => { const use = Math.max(0, x.n - deja); deja = Math.max(0, deja - x.n); if (!use) { rows.push(`<li><span class="tl-lb">Palier ${i + 1} (${esc(x.l)})</span><span class="tl-dt">déjà épuisé</span></li>`); return; } const e = addDays(cur, use - 1); rows.push(`<li class="key"><span class="tl-lb">Palier ${i + 1} (${esc(x.l)})</span><span class="tl-dt">du ${fmtDate(cur)} au ${dLong(e)}</span><span class="tl-sb">${plur(use, 'jour')}${use < x.n ? ' (sur ' + x.n + ', compte tenu des jours déjà maintenus)' : ''}</span></li>`); cur = addDays(e, 1); last = e; });
+      return `<div class="tl-big">${last != null ? 'Fin de subrogation : ' + dLong(last) : 'Aucun jour de maintien restant'}</div><ol class="tl-steps">${rows.join('')}</ol>`;
+    } },
+  { id: 'add', t: 'Ajouter ou retirer des jours', d: 'Date ± N jours calendaires, ouvrables ou ouvrés',
+    html: st => `<div class="tl-row"><label class="fld"><span>Date de départ</span><input type="date" data-k="d" value="${esc(st.d || '')}"></label><label class="fld"><span>Nombre de jours (négatif pour retirer)</span><input data-k="n" inputmode="numeric" value="${esc(st.n || '')}" placeholder="ex. 15 ou -5"></label><label class="fld"><span>Type de jours</span><select data-k="type">${[['cal', 'Calendaires'], ['ouvrable', 'Ouvrables (lun. → sam.)'], ['ouvre', 'Ouvrés (lun. → ven.)']].map(([v, l]) => `<option value="${v}" ${(st.type || 'cal') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>`,
+    calc: st => {
+      const d = dIn(st.d), n = parseInt(st.n, 10); if (d == null || isNaN(n)) return '<div class="tl-empty">Saisissez une date et un nombre de jours.</div>';
+      const r = addTyped(d, n, st.type || 'cal'), lb = { cal: 'calendaire', ouvrable: 'ouvrable', ouvre: 'ouvré' }[st.type || 'cal'];
+      return `<div class="tl-big">${dLong(r)}</div><div class="tl-res"><div>${dLong(d)} ${n >= 0 ? '+' : '−'} ${plur(Math.abs(n), 'jour')} ${lb}${Math.abs(n) > 1 ? 's' : ''}${st.type && st.type !== 'cal' ? ' (dimanches' + (st.type === 'ouvre' ? ', samedis' : '') + ' et jours fériés non comptés)' : ''}</div>${holidayOn(dayKey(r)) ? `<div class="tl-note">Ce jour est férié : ${esc(holidayOn(dayKey(r)))}.</div>` : ''}</div>`;
+    } },
+  { id: 'count', t: 'Compter les jours', d: 'Jours calendaires, ouvrables, ouvrés et fériés entre deux dates',
+    html: st => `<div class="tl-row"><label class="fld"><span>Du (inclus)</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>`,
+    calc: st => {
+      let a = dIn(st.a), b = dIn(st.b); if (a == null || b == null) return '<div class="tl-empty">Saisissez les deux dates.</div>'; if (b < a) [a, b] = [b, a];
+      if ((b - a) / DAY > 3700) return '<div class="tl-empty">Période trop longue (10 ans maximum).</div>';
+      const o = countDays(a, b);
+      return `<div class="tl-grid"><div><span>Calendaires</span><b>${o.cal}</b></div><div><span>Ouvrables</span><b>${o.ouvrable}</b></div><div><span>Ouvrés</span><b>${o.ouvre}</b></div><div><span>Samedis et dimanches</span><b>${o.we}</b></div></div>${o.fer.length ? `<div class="tl-note">Jours fériés dans la période (${o.fer.length}) : ${o.fer.map(([d, h]) => esc(h) + ' ' + WD_S[new Date(d).getDay()] + ' ' + fmtDate(d).slice(0, 5)).join(' · ')}</div>` : '<div class="tl-note">Aucun jour férié dans la période.</div>'}`;
+    } },
+  { id: 'prorata', t: 'Prorata d’un montant', d: 'Entrée ou sortie en cours de mois, absence, temps partiel',
+    html: st => { const m = st.mode || 'cal'; return `<div class="tl-row"><label class="fld"><span>Montant (mois complet)</span><input data-k="amt" inputmode="decimal" value="${esc(st.amt || '')}" placeholder="ex. 2 500,00"></label><label class="fld"><span>Base de calcul</span><select data-k="mode">${[['cal', 'Jours calendaires du mois'], ['ouvre', 'Jours ouvrés du mois'], ['ouvrable', 'Jours ouvrables du mois'], ['free', 'Saisie libre (heures, jours…)']].map(([v, l]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+      <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>`; },
+    calc: st => {
+      const m = st.mode || 'cal', amt = numIn(st.amt); if (amt == null) return '<div class="tl-empty">Saisissez le montant.</div>';
+      let num, den, txt;
+      if (m === 'free') { num = numIn(st.num); den = numIn(st.den); if (num == null || !den) return '<div class="tl-empty">Saisissez la part retenue et le total.</div>'; txt = nf(num, 2) + ' / ' + nf(den, 2); }
+      else {
+        let a = dIn(st.a), b = dIn(st.b); if (a == null || b == null) return '<div class="tl-empty">Saisissez les dates de présence (dans un même mois).</div>'; if (b < a) [a, b] = [b, a];
+        if (monthKey(a) !== monthKey(b)) return '<div class="tl-empty">Les deux dates doivent être dans le même mois.</div>';
+        const mo = countDays(startOfMonth(a), addDays(addMonths(startOfMonth(a), 1), -1)), pr = countDays(a, b), k = m === 'cal' ? 'cal' : m;
+        num = pr[k]; den = mo[k]; txt = num + ' / ' + den + ' jours ' + { cal: 'calendaires', ouvre: 'ouvrés', ouvrable: 'ouvrables' }[m] + ' de ' + MONTHS_L[new Date(a).getMonth()];
+      }
+      return `<div class="tl-big">${nf(amt * num / den, 2)}</div><div class="tl-res"><div>${nf(amt, 2)} × ${txt}</div><div class="tl-note">Méthode à vérifier selon votre convention collective et la jurisprudence (ex. entrée / sortie en cours de mois : jours calendaires ou jours ouvrés réels).</div></div>`;
+    } },
+];
+const toolsOn = () => { const t = S.meta.settings.tools; return Array.isArray(t) ? t.filter(id => TOOLS.some(x => x.id === id)) : TOOLS.map(x => x.id); };
+UI.tl = {};
+function toolCalc(sec) {
+  const tool = TOOLS.find(x => x.id === sec.dataset.tool); if (!tool) return;
+  const st = (UI.tl[tool.id] ||= {});
+  if (tool.sync) tool.sync(sec, st);
+  const out = sec.querySelector('.tl-out'); if (out) out.innerHTML = tool.calc(st);
+}
+function renderOutils() {
+  const body = $('#outils-body'), on = toolsOn();
+  let html = `<div class="card filters tl-head"><div><b>Outils du gestionnaire de paie</b><div class="muted small">Calculs indicatifs : vérifiez toujours les règles de votre convention collective.</div></div><span class="sp" style="flex:1"></span><button class="btn sm" data-tla="choose">⚙ Choisir mes outils (${on.length}/${TOOLS.length})</button></div>`;
+  if (!on.length) html += `<div class="card empty">Aucun outil affiché. <button class="btn sm" data-tla="choose">Choisir mes outils</button></div>`;
+  for (const id of on) { const t = TOOLS.find(x => x.id === id), st = (UI.tl[id] ||= {}); html += `<i data-b="tool-${id}" data-half="${['hm', 'pct', 'add', 'count', 'dates', 'prorata'].includes(id) ? '1' : ''}" data-t="${esc(t.t)}"></i><h2>${esc(t.t)}</h2><div class="card tl-card" data-tool="${id}"><div class="tl-in">${t.html(st)}</div><div class="tl-out"></div></div>`; }
+  body.innerHTML = html.replace(/data-half=""/g, '');
+  blkify(body, 'outils');
+  body.querySelectorAll('[data-tool]').forEach(toolCalc);
+}
+function openToolChooser() {
+  const on = new Set(toolsOn());
+  const m = modal(`<div class="modal-h"><h3>Choisir mes outils</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:8px">${TOOLS.map(t => `<label class="chk tl-pick"><input type="checkbox" value="${t.id}" ${on.has(t.id) ? 'checked' : ''}><span><b>${esc(t.t)}</b><span class="muted small" style="display:block">${esc(t.d)}</span></span></label>`).join('')}</div>
+    <div class="modal-f"><button class="btn ghost" id="tl-all">Tout cocher</button><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tl-ok">Enregistrer</button></div>`);
+  m.el.querySelector('#tl-all').addEventListener('click', () => m.el.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = true; }));
+  m.el.querySelector('#tl-ok').addEventListener('click', () => { S.meta.settings.tools = [...m.el.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value); touchMeta(); m.close(); });
+}
+function bindOutils() {
+  const body = $('#outils-body');
+  const read = (el) => {
+    const sec = el.closest('[data-tool]'); if (!sec) return;
+    const st = (UI.tl[sec.dataset.tool] ||= {});
+    if (el.dataset.k) { st[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; if (sec.dataset.tool === 'hm' && (el.dataset.k === 'hm' || el.dataset.k === 'dec')) st.last = el.dataset.k; }
+    if (el.dataset.pal) { const [i, k] = el.dataset.pal.split(':'); st.pal ||= [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }]; st.pal[+i][k] = el.value; }
+    toolCalc(sec);
+  };
+  body.addEventListener('input', ev => read(ev.target));
+  body.addEventListener('change', ev => { read(ev.target); if (ev.target.dataset.k === 'mode' && ev.target.tagName === 'SELECT') renderOutils(); });
+  body.addEventListener('click', ev => {
+    const sg = ev.target.closest('[data-kseg] button'); if (sg) { const sec = sg.closest('[data-tool]'), st = (UI.tl[sec.dataset.tool] ||= {}); st[sg.parentElement.dataset.kseg] = sg.dataset.v; renderOutils(); return; }
+    const a = ev.target.closest('[data-tla]'); if (!a) return;
+    if (a.dataset.tla === 'choose') { openToolChooser(); return; }
+    const st = (UI.tl.subro ||= {}); st.pal ||= [{ n: '30', l: '90 %' }, { n: '30', l: '66,66 %' }];
+    if (a.dataset.tla === 'paladd') { st.pal.push({ n: '30', l: '' }); renderOutils(); }
+    else if (a.dataset.tla === 'paldel') { st.pal.splice(+a.dataset.i, 1); renderOutils(); }
   });
 }
 function renderChrono() {
@@ -5041,7 +5282,7 @@ async function boot() {
   initTimerBar();
   $('#install-btn').onclick = () => Install.run();
   $('#ver').textContent = 'v' + APP_VERSION; $('#ver').title = 'Antevorta version ' + APP_VERSION + ' du ' + APP_DATE;
-  bindChrono(); bindPortfolio(); bindCycle(); bindCarnet(); bindReports(); bindBilling(); bindRefs();
+  bindChrono(); bindPortfolio(); bindCycle(); bindCarnet(); bindOutils(); bindReports(); bindBilling(); bindRefs();
   // Le runtime de l'artifact peut s'installer juste après le chargement
   if (!FIREBASE_CONFIG.apiKey && !(window.claude && window.claude.use)) await new Promise(r => setTimeout(r, 400));
   await Store.init();
