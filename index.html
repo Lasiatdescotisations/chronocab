@@ -442,7 +442,7 @@ h2:first-child{margin-top:0}
 .day-h .d{font-weight:600}
 .day-h .t{margin-left:auto;font-family:var(--mono);font-weight:600}
 .day-h .tb{color:var(--muted);font-size:12px}
-.g-mere{color:var(--g, #8a6d12);font-size:14px;margin-left:5px;line-height:1;filter:saturate(1.2)}
+.g-mere{color:var(--g, #8a6d12);margin-left:6px;display:inline-flex;vertical-align:-1px;flex:none}.g-mere svg{width:14px;height:11px;display:block}
 .cy-table tr.is-mother > td{background:color-mix(in srgb,var(--g) 11%,var(--surface))}
 .cy-table tr.is-mother td.cy-name{font-weight:650}
 .cb-tile.is-mother{background:color-mix(in srgb,var(--g) 10%,var(--surface));border-color:color-mix(in srgb,var(--g) 45%,var(--surface))}
@@ -622,6 +622,8 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-pal{display:flex;align-items:center;gap:7px;font-size:13px;flex-wrap:wrap}
 .tl-pal input{width:60px;text-align:center}
 .tl-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.aev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.aev-in{display:flex;gap:4px}.aev-in input{flex:1 1 auto;min-width:0;width:auto}.aev-in select{flex:0 0 96px;width:96px;min-width:0}
+.aev-best{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}.aev-tag{color:var(--accent);font-weight:600}
 .tl-m{background:var(--surface-2);border-radius:10px;padding:10px 12px}
 .tl-mh{font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
 @media (max-width:900px){.tl-two{grid-template-columns:1fr}}
@@ -1021,7 +1023,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.30.0';
+const APP_VERSION = '1.31.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2493,7 +2495,8 @@ function cbTileHTML(x, mk, today) {
 const grpTitle = g => /^groupe\b/i.test(g.name.trim()) ? g.name : 'Groupe ' + g.name;
 // Société mère d'un groupe (v1.28.0) : group.mother = id du dossier ; affichée en premier, ligne teintée, couronne ♛
 const isMother = c => { const g = c && groupOf(c.group); return !!g && g.mother === c.id; };
-const motherMark = c => isMother(c) ? '<span class="g-mere" title="Société mère du groupe">♛</span>' : '';
+const CROWN = '<svg viewBox="0 0 15 12" aria-hidden="true"><path d="M1.5 9.5 1 3l3.5 3 3-4.5 3 4.5L14 3l-.5 6.5z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M2 11h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+const motherMark = c => isMother(c) ? `<span class="g-mere" title="Société mère du groupe" aria-label="Société mère">${CROWN}</span>` : '';
 function setMother(gid, cid) { const g = groupOf(gid); if (!g) return; if (cid) g.mother = cid; else delete g.mother; touchMeta(); }
 const grpMembers = g => S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group === g.id).sort((a, b) => (isMother(b) - isMother(a)) || (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
 const cbFold = () => { try { return new Set(JSON.parse(lsGet('cbFold', '[]'))); } catch (e) { return new Set(); } };
@@ -2557,7 +2560,7 @@ function renderCarnetGroupe(body, g) {
   html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
     <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
     <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
-  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}">♛ ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans Clients & tâches ou dans ses paramètres de cycle.</div>'}`;
+  html += `<i data-b="gdossiers"></i><h2>Dossiers du groupe (${mem.length})</h2>${mem.length ? `<div class="cb-tiles">${mem.map(x => `<div class="cb-tw">${cbTileHTML(x, mk, today)}<button type="button" class="btn sm ghost cb-mbtn ${isMother(x) ? 'on' : ''}" data-cbmother="${x.id}" title="${isMother(x) ? 'Retirer la désignation de société mère' : 'Désigner ce dossier comme société mère du groupe'}"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> ${isMother(x) ? 'Société mère' : 'Définir comme société mère'}</button></div>`).join('')}</div>` : '<div class="card empty">Aucun dossier dans ce groupe : choisissez le groupe d’un dossier dans Clients & tâches ou dans ses paramètres de cycle.</div>'}`;
   html += `<i data-b="gsynthese"></i><h2>Synthèse du groupe</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${bs || '—'}</dd><dt>Alertes salariés actives</dt><dd>${als || '—'}</dd>
     <dt>Conventions collectives</dt><dd>${ccnMap.size ? [...ccnMap.values()].map(({ k, ds }) => `<div>${k.i != null ? `<b class="mono">${idccStr(k.i)}</b> ` : ''}${esc(ccnShort(k))} <span class="muted">— ${ds.map(x => esc(x.name)).join(', ')}</span></div>`).join('') : '—'}${noCcn.length && ccnMap.size ? `<div class="muted small">Non renseignée : ${noCcn.map(x => esc(x.name)).join(', ')}</div>` : ''}</dd>
@@ -2773,6 +2776,60 @@ function rcLatestSig(target, o) { // signature au plus tard pour une rupture au 
   for (let s = target; s > addDays(target, -120); s = addDays(s, -1)) if (rcPlan(s, o).rup <= target) return s;
   return null;
 }
+/* Avantage en nature véhicule (v1.31.0) — véhicules mis à disposition à compter du 1er février 2025
+   Arrêté du 10/12/2002 modifié par l'arrêté du 25/02/2025 ; BOSS Avantages en nature. */
+const AEV_PLAF = { 2025: { f: 4582, r: 2000.30 }, 2026: { f: 4641.60, r: 2026.30 } }; // abattement véhicule électrique : plafonds annuels (forfait 70 %, réel 50 %)
+const eur = n => n == null || !isFinite(n) ? '—' : n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+const aevAmt = (st, k, l, ph, per = true) => `<label class="fld aev-f"><span>${l}</span><span class="aev-in"><input data-k="${k}" inputmode="decimal" value="${esc(st[k] || '')}" placeholder="${ph || '0,00'}">${per ? `<select data-k="u_${k}" title="Montant mensuel ou annuel"><option value="a" ${(st['u_' + k] || 'a') === 'a' ? 'selected' : ''}>par an</option><option value="m" ${st['u_' + k] === 'm' ? 'selected' : ''}>par mois</option></select>` : ''}</span></label>`;
+const aevYear = (st, k) => { const v = numIn(st[k]); return v == null ? 0 : st['u_' + k] === 'm' ? v * 12 : v; };
+function aevCalc(st) {
+  const own = st.own || 'achat', old = st.age === 'old', elec = !!st.elec, fuel = !elec && st.fuel === 'oui';
+  const yr = +(st.yr || Math.min(Math.max(new Date().getFullYear(), 2025), 2026)), pl = AEV_PLAF[yr] || AEV_PLAF[2026];
+  const months = st.pp ? Math.min(12, Math.max(1, parseInt(st.mois, 10) || 12)) : 12, k = months / 12;
+  const prix = numIn(st.prix), loc = aevYear(st, 'loc'), ass = aevYear(st, 'ass'), ent = aevYear(st, 'ent'), carb = fuel ? aevYear(st, 'carb') : 0, part = aevYear(st, 'part');
+  const kmP = numIn(st.kmP), kmT = numIn(st.kmT), pub = numIn(st.pub);
+  if (own === 'achat' && !prix) return { err: 'Saisissez le coût d’achat TTC du véhicule.' };
+  if (own === 'loc' && !loc) return { err: 'Saisissez le coût de la location.' };
+  const steps = { f: [], r: [] }; const L = (m, l, v, sub, cls = '') => steps[m].push(`<li class="${cls}"><span class="tl-lb">${l}</span><span class="tl-dt"><b>${eur(v)}</b></span>${sub ? `<span class="tl-sb">${sub}</span>` : ''}</li>`);
+  // ----- Forfait -----
+  let f, fAlt = null, fNote = '';
+  if (own === 'achat') {
+    const t = fuel ? (old ? 15 : 20) : (old ? 10 : 15);
+    f = prix * t / 100; L('f', 'Forfait ' + t + ' % du coût d’achat TTC', f, eur(prix) + ' × ' + t + ' %' + (fuel ? ' (carburant compris)' : ''));
+    if (fuel && carb) { const t2 = old ? 10 : 15; fAlt = prix * t2 / 100 + carb; fNote = `Variante : ${t2} % du coût d’achat (${eur(prix * t2 / 100)}) + carburant réel (${eur(carb)}) = <b>${eur(fAlt)}</b>`; }
+  } else {
+    const glob = loc + ass + ent, t = fuel ? 67 : 50;
+    f = glob * t / 100; L('f', 'Coût global annuel TTC', glob, 'location ' + eur(loc) + (ass ? ' + assurance ' + eur(ass) : '') + (ent ? ' + entretien ' + eur(ent) : ''));
+    L('f', '× ' + t + ' %' + (fuel ? ' (carburant compris)' : ''), f, '', 'key');
+    if (fuel && carb) { fAlt = glob * 0.5 + carb; fNote = `Variante : 50 % du coût global (${eur(glob * 0.5)}) + carburant réel (${eur(carb)}) = <b>${eur(fAlt)}</b>`; }
+    if (pub) { const cap = pub * (fuel ? 20 : 15) / 100, capA = fAlt != null ? pub * 15 / 100 + carb : null;
+      if (f > cap) { L('f', 'Plafonné au forfait « achat »', cap, eur(pub) + ' (prix public TTC) × ' + (fuel ? 20 : 15) + ' %', 'key'); f = cap; }
+      if (fAlt != null && fAlt > capA) { fAlt = capA; fNote += ` → plafonnée à ${eur(capA)}`; } }
+  }
+  if (fAlt != null && fAlt < f) { L('f', 'Variante carburant réel retenue (plus favorable)', fAlt, fNote.replace(/<\/?b>/g, ''), 'key'); f = fAlt; }
+  else if (fAlt != null) steps.f.push(`<li><span class="tl-lb muted">${fNote} : moins favorable</span></li>`);
+  // ----- Réel -----
+  let r = null, rErr = '';
+  if (!kmT || kmP == null) rErr = 'Saisissez les kilométrages personnel et total de l’année.';
+  else if (kmP > kmT) rErr = 'Le kilométrage personnel dépasse le kilométrage total.';
+  else {
+    const base = own === 'achat' ? prix * (old ? 10 : 20) / 100 : loc, tot = base + ass + ent;
+    L('r', own === 'achat' ? 'Amortissement ' + (old ? 10 : 20) + ' % du coût d’achat TTC' : 'Coût de la location TTC', base, own === 'achat' ? eur(prix) + ' × ' + (old ? 10 : 20) + ' %' : '');
+    if (ass || ent) L('r', '+ Assurance et entretien', ass + ent, '');
+    r = tot * kmP / kmT; L('r', '× km personnels / km totaux', r, eur(tot) + ' × ' + nf(kmP, 0) + ' / ' + nf(kmT, 0) + ' km (' + nf(kmP / kmT * 100, 1) + ' %)', 'key');
+    if (carb) { r += carb; L('r', '+ Carburant des trajets personnels', r, eur(carb) + ' pris en charge par l’employeur'); }
+  }
+  // ----- Électrique, prorata, participation -----
+  const fin = (m, v) => {
+    if (v == null) return null;
+    if (elec) { const a = Math.min(v * (m === 'f' ? 0.7 : 0.5), m === 'f' ? pl.f : pl.r); v -= a; L(m, '− Abattement véhicule électrique ' + (m === 'f' ? '70 %' : '50 %'), v, 'abattement ' + eur(a) + ' (plafond ' + yr + ' : ' + eur(m === 'f' ? pl.f : pl.r) + ' par an)'); }
+    if (months < 12) { v = v * k; L(m, '× ' + months + ' / 12 (mise à disposition sur ' + plur(months, 'mois') + ')', v, ''); }
+    if (part) { const p = part * k; v = Math.max(0, v - p); L(m, '− Participation du salarié', v, eur(p) + (months < 12 ? ' sur ' + months + ' mois' : ' par an')); }
+    return v;
+  };
+  f = fin('f', f); r = fin('r', r);
+  return { f, r, rErr, months, steps, elec, yr };
+}
 const TOOLS = [
   { id: 'dates', t: 'Écart entre deux dates', d: 'Nombre de jours, mois et années entre deux dates',
     html: st => `<div class="tl-row"><label class="fld"><span>Date de début</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Date de fin</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>
@@ -2931,6 +2988,26 @@ const TOOLS = [
       const o = countDays(a, b);
       return `<div class="tl-grid"><div><span>Calendaires</span><b>${o.cal}</b></div><div><span>Ouvrables</span><b>${o.ouvrable}</b></div><div><span>Ouvrés</span><b>${o.ouvre}</b></div><div><span>Samedis et dimanches</span><b>${o.we}</b></div></div>${o.fer.length ? `<div class="tl-note">Jours fériés dans la période (${o.fer.length}) : ${o.fer.map(([d, h]) => esc(h) + ' ' + WD_S[new Date(d).getDay()] + ' ' + fmtDate(d).slice(0, 5)).join(' · ')}</div>` : '<div class="tl-note">Aucun jour férié dans la période.</div>'}`;
     } },
+  { id: 'aev', t: 'Avantage en nature véhicule', d: 'Véhicule mis à disposition depuis le 1er février 2025 : forfait et réel comparés, électrique, participation',
+    html: st => {
+      const own = st.own || 'achat', elec = !!st.elec, fuel = !elec && st.fuel === 'oui', seg = (k, def, opts) => `<div class="seg" data-kseg="${k}">${opts.map(([v, l]) => `<button type="button" data-v="${v}" class="${(st[k] || def) === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+      return `<div class="tl-row" style="gap:10px">${seg('own', 'achat', [['achat', 'Véhicule acheté'], ['loc', 'Véhicule loué (LLD, LOA)']])}${own === 'achat' ? seg('age', 'new', [['new', '5 ans au plus'], ['old', 'Plus de 5 ans']]) : ''}${elec ? '' : seg('fuel', 'non', [['non', 'Carburant non pris en charge'], ['oui', 'Carburant personnel payé par l’employeur']])}</div>
+        <label class="chk"><input type="checkbox" data-k="elec" data-rr="1" ${elec ? 'checked' : ''}> Véhicule 100 % électrique ayant le score environnemental minimal (liste éco-score) — frais de recharge non comptés</label>
+        ${elec ? `<label class="tl-inl">Année de calcul (plafond de l’abattement) <select data-k="yr">${Object.keys(AEV_PLAF).map(y => `<option ${String(st.yr || Math.min(Math.max(new Date().getFullYear(), 2025), 2026)) === y ? 'selected' : ''}>${y}</option>`).join('')}</select></label>` : ''}
+        <div class="tl-row aev-grid">${own === 'achat' ? aevAmt(st, 'prix', 'Coût d’achat TTC (remises déduites)', 'ex. 35 000', false) : aevAmt(st, 'loc', 'Location TTC', 'ex. 600') + aevAmt(st, 'pub', 'Prix public TTC du véhicule (facultatif, plafond)', 'ex. 40 000', false)}
+          ${aevAmt(st, 'ass', 'Assurance TTC')}${aevAmt(st, 'ent', 'Entretien TTC')}${fuel ? aevAmt(st, 'carb', 'Carburant des trajets personnels payé (réel)') : ''}${aevAmt(st, 'part', 'Participation du salarié')}</div>
+        <div class="tl-row aev-grid"><label class="fld"><span>Km personnels de l’année (réel)</span><input data-k="kmP" inputmode="numeric" value="${esc(st.kmP || '')}" placeholder="ex. 6 000"></label><label class="fld"><span>Km totaux de l’année (réel)</span><input data-k="kmT" inputmode="numeric" value="${esc(st.kmT || '')}" placeholder="ex. 25 000"></label></div>
+        <div class="tl-inl"><label class="chk" style="margin:0"><input type="checkbox" data-k="pp" data-rr="1" ${st.pp ? 'checked' : ''}> Mise à disposition sur une partie de l’année</label>${st.pp ? `<label class="tl-inl">nombre de mois <input data-k="mois" inputmode="numeric" value="${esc(st.mois || '')}" placeholder="ex. 5" style="width:60px"></label>` : ''}</div>`;
+    },
+    calc: st => {
+      const o = aevCalc(st); if (o.err) return `<div class="tl-empty">${esc(o.err)}</div>`;
+      const box = (h, v, best) => `<div class="tl-m ${best ? 'aev-best' : ''}"><div class="tl-mh">${h}${best ? ' · <span class="aev-tag">le plus favorable</span>' : ''}</div>${v == null ? `<div class="tl-empty">${esc(o.rErr)}</div>` : `<div class="tl-big">${eur(v / (o.months / 12) / 12)} <span class="muted" style="font-size:14px;font-weight:500">par mois</span></div><div class="small">${eur(v)} ${o.months < 12 ? 'sur ' + plur(o.months, 'mois') : 'par an'}</div>`}</div>`;
+      const both = o.r != null, bf = both && o.f <= o.r, br = both && o.r < o.f;
+      return `<div class="tl-two">${box('Forfait', o.f, bf)}${box('Dépenses réelles', o.r, br)}</div>
+        <div class="tl-two"><div><div class="tl-mh">Forfait</div><ol class="tl-steps">${o.steps.f.join('')}</ol></div><div><div class="tl-mh">Dépenses réelles</div>${o.r == null ? '<div class="tl-empty">—</div>' : `<ol class="tl-steps">${o.steps.r.join('')}</ol>`}</div></div>
+        <div class="tl-note">Règles applicables aux véhicules mis à disposition <b>à compter du 1er février 2025</b> (arrêté du 10 décembre 2002 modifié par l’arrêté du 25 février 2025). Forfait annuel : véhicule acheté 15 % du coût d’achat TTC (10 % au-delà de 5 ans), 20 % / 15 % avec le carburant, ou 15 % / 10 % + carburant réel ; véhicule loué 50 % du coût global annuel (location, entretien, assurance), 67 % avec le carburant, ou 50 % + carburant réel, sans dépasser le forfait « achat » calculé sur le prix public TTC. Réel : amortissement 20 % (10 %) ou location + assurance + entretien, au prorata des km personnels (justificatifs nécessaires, sinon l’Urssaf applique le forfait), + carburant des trajets personnels. Véhicule 100 % électrique éco-scoré (jusqu’au 31/12/2027) : abattement de 70 % au forfait (plafond 4 582 € en 2025, 4 641,60 € en 2026) ou 50 % au réel (2 000,30 € / 2 026,30 €), recharge non comptée. La participation du salarié vient en déduction. Montant mensuel = annuel ÷ 12.
+          <br>Sources : <a href="https://boss.gouv.fr/portail/accueil/avantages-en-nature/avantages-en-nature.html" target="_blank" rel="noopener">BOSS — Avantages en nature ↗</a> · <a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000250212" target="_blank" rel="noopener">Arrêté du 10 décembre 2002 modifié ↗</a> · <a href="https://www.urssaf.fr/accueil/employeur/beneficier-exonerations/avantages-en-nature/vehicule.html" target="_blank" rel="noopener">Urssaf ↗</a></div>`;
+    } },
   { id: 'prorata', t: 'Prorata d’un montant', d: 'Entrée ou sortie en cours de mois, absence, temps partiel',
     html: st => { const m = st.mode || 'cal'; return `<div class="tl-row"><label class="fld"><span>Montant (mois complet)</span><input data-k="amt" inputmode="decimal" value="${esc(st.amt || '')}" placeholder="ex. 2 500,00"></label><label class="fld"><span>Base de calcul</span><select data-k="mode">${[['cal', 'Jours calendaires du mois'], ['ouvre', 'Jours ouvrés du mois'], ['ouvrable', 'Jours ouvrables du mois'], ['free', 'Saisie libre (heures, jours…)']].map(([v, l]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
       <div class="tl-row">${m === 'free' ? `<label class="fld"><span>Part retenue</span><input data-k="num" inputmode="decimal" value="${esc(st.num || '')}" placeholder="ex. 120 (heures)"></label><label class="fld"><span>Total de référence</span><input data-k="den" inputmode="decimal" value="${esc(st.den || '')}" placeholder="ex. 151,67"></label>` : `<label class="fld"><span>Présent du</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>au (inclus)</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label>`}</div>`; },
@@ -2989,7 +3066,7 @@ function bindOutils() {
     toolCalc(sec);
   };
   body.addEventListener('input', ev => read(ev.target));
-  body.addEventListener('change', ev => { read(ev.target); if (ev.target.dataset.k === 'mode' && ev.target.tagName === 'SELECT') renderOutils(); });
+  body.addEventListener('change', ev => { read(ev.target); if ((ev.target.dataset.k === 'mode' && ev.target.tagName === 'SELECT') || ev.target.dataset.rr) renderOutils(); });
   body.addEventListener('click', ev => {
     const sg = ev.target.closest('[data-kseg] button'); if (sg) { const sec = sg.closest('[data-tool]'), st = (UI.tl[sec.dataset.tool] ||= {}); st[sg.parentElement.dataset.kseg] = sg.dataset.v; renderOutils(); return; }
     const a = ev.target.closest('[data-tla]'); if (!a) return;
@@ -3794,7 +3871,7 @@ function openCyParams(cid) {
   const m = modal(`<div class="modal-h"><h3>Cycle de paie — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
       <label class="fld"><span>Groupe de dossiers</span><select id="cp-grp">${groupSelOpts(c.group)}</select></label>
-      <label class="chk" id="cp-mother-w" ${c.group ? '' : 'hidden'}><input type="checkbox" id="cp-mother" ${isMother(c) ? 'checked' : ''}> ♛ Société mère du groupe</label>
+      <label class="chk" id="cp-mother-w" ${c.group ? '' : 'hidden'}><input type="checkbox" id="cp-mother" ${isMother(c) ? 'checked' : ''}> <span class="g-mere" style="margin:0">${CROWN}</span> Société mère du groupe</label>
       <div class="fld-row"><label class="fld"><span>Réception des variables</span><select id="cp-rec">${opt('var', 'Avec variables', p.rec)}${opt('auto', 'Automatique (sans variables)', p.rec)}${opt('robot', 'Automate Silae', p.rec)}</select></label>
       <label class="fld"><span>Jour d’envoi prévu (auto)</span><select id="cp-recday">${opt('', '—', p.recDay || '')}${[16, 19, 20, 25, 30].map(d => opt(d, 'vers le ' + d, p.recDay || '')).join('')}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Réception habituelle des variables</span><select id="cp-varday">${opt('', '— (relance le ' + CY_REL_DEF + ')', p.varDay || '')}${Array.from({ length: 21 }, (_, i) => i + 10).map(d => opt('m' + d, 'Vers le ' + d, p.varDay || '')).join('')}${opt('m31', 'Fin de mois', p.varDay || '')}${Array.from({ length: 10 }, (_, i) => i + 1).map(d => opt('n' + d, 'Le ' + (d === 1 ? '1er' : d) + ' du mois suivant', p.varDay || '')).join('')}</select></label>
@@ -4695,7 +4772,7 @@ function renderRefs() {
       <input class="nm" data-k="name" value="${esc(g.name)}">
       <span class="grp-sws" role="radiogroup" aria-label="Couleur du groupe">${GROUP_COLORS.map((col, i) => `<button class="grp-sw ${(g.color || 0) === i ? 'on' : ''}" data-act="grp-color" data-i="${i}" style="--g:${col}" title="${GROUP_COLOR_NAMES[i]}" aria-label="${GROUP_COLOR_NAMES[i]}"></button>`).join('')}</span>
       <span class="use">${gCount[g.id] ? gCount[g.id] + ' dossier' + (gCount[g.id] > 1 ? 's' : '') : 'aucun dossier'}</span>
-      ${gCount[g.id] ? `<select data-k="mother" title="Société mère du groupe" class="grp-sel"><option value="">♛ Société mère : aucune</option>${grpMembers(g).map(x => `<option value="${x.id}" ${g.mother === x.id ? 'selected' : ''}>♛ ${esc(x.name)}</option>`).join('')}</select>` : ''}
+      ${gCount[g.id] ? `<select data-k="mother" title="Société mère du groupe" class="grp-sel"><option value="">Société mère : aucune</option>${grpMembers(g).map(x => `<option value="${x.id}" ${g.mother === x.id ? 'selected' : ''}>Société mère : ${esc(x.name)}</option>`).join('')}</select>` : ''}
       <button class="icon" data-act="del-group" title="Supprimer le groupe (les dossiers sont conservés)">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun groupe. Créez-en un ici, puis choisissez le groupe de chaque dossier dans la liste des clients (ou dans les paramètres du dossier, depuis Mon cycle).</div>`}</div></div>
   <i data-b="taches" data-half="1"></i><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
       <div class="ref-list">${ts.map(t => `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
@@ -4933,7 +5010,7 @@ function openImportClients(fname, rows, hi, map) {
         const hasM = G.exg && G.exg.mother && clientOf(G.exg.mother);
         if (!(G.key in mothers)) { const cand = hasM ? '' : (members.find(x => /^(groupe|holding)\b/.test(norm(x.n))) || members.find(x => norm(x.n) === norm(G.name))); mothers[G.key] = cand ? cand.v : ''; }
         return `<div class="imp-g"><b>${esc(G.name)}</b> <span class="muted small">${G.exg ? 'groupe existant' : 'nouveau groupe'} · ${G.items.length} dossier${G.items.length > 1 ? 's' : ''}</span>
-          ${hasM ? `<span class="small">♛ ${esc(clientOf(G.exg.mother).name)} (inchangée)</span>` : `<label class="small">♛ Société mère <select data-imother="${esc(G.key)}"><option value="">aucune pour l’instant</option>${members.map(x => `<option value="${esc(x.v)}" ${mothers[G.key] === x.v ? 'selected' : ''}>${esc(x.n)}</option>`).join('')}</select></label>`}</div>`;
+          ${hasM ? `<span class="small"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> ${esc(clientOf(G.exg.mother).name)} (inchangée)</span>` : `<label class="small"><span class="g-mere" style="margin:0 2px 0 0">${CROWN}</span> Société mère <select data-imother="${esc(G.key)}"><option value="">aucune pour l’instant</option>${members.map(x => `<option value="${esc(x.v)}" ${mothers[G.key] === x.v ? 'selected' : ''}>${esc(x.n)}</option>`).join('')}</select></label>`}</div>`;
       }).join('')}</div>`;
     }
     const stTxt = it => it.st === 'new' ? '<span class="imp-st new">Nouveau</span>' : it.st === 'ex' ? (() => { const f = impFill(it); return `<span class="imp-st ex">Existant</span> <span class="muted small">${f.length ? 'complète : ' + f.join(', ') : 'rien à compléter'}</span>`; })() : it.st === 'dup' ? `<span class="imp-st dup">Doublon ?</span> <span class="muted small">${esc(it.why)}</span>` : `<span class="muted small">${esc(it.why)}</span>`;
