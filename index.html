@@ -398,6 +398,9 @@ h2:first-child{margin-top:0}
 .blk-flash{animation:blkflash 1.4s ease}@keyframes blkflash{0%,60%{box-shadow:0 0 0 3px var(--accent-soft)}100%{box-shadow:none}}
 @media (max-width:700px){.cmd-ov{padding-top:8px}.cmd-f{display:none}}
 .cy-upc details summary{cursor:pointer}.cy-upc details div{margin-top:3px}
+.set-tabs{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.wk-grid th.today{color:var(--accent)}.wk-day{all:unset;cursor:pointer;font-weight:600}.wk-day:hover{text-decoration:underline}.wk-grid td.has{cursor:pointer}.wk-grid td.has:hover{background:var(--accent-soft)}.wk-who{white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}.wk-t.inc{color:#b5650d;background:#fcefdd}.wk-t.ok{color:#2f7d55}.wk-plan td{color:var(--muted);font-size:12px}
+.sugg-list{display:grid;gap:6px;margin-top:10px}.sugg{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 12px;border-radius:9px;background:var(--surface-2);font-size:13.5px;color:var(--ink-2)}.sugg span{flex:1}
 .cy-upc{padding:6px 12px}.cy-upc-i{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}.cy-upc-i:last-child{border:0}.cy-upc-i .d{min-width:74px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 #chrono-body .cy-todo-i .icon.xs{margin-left:auto}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
@@ -1045,7 +1048,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.38.0';
+const APP_VERSION = '1.39.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -1245,13 +1248,17 @@ const WD_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const SCHED_DEF = { mode: 'none', week: { 1: [['08:00', '12:00'], ['13:30', '17:00']], 2: [['08:00', '12:00'], ['13:30', '17:00']], 3: [['08:00', '12:00'], ['13:30', '17:00']], 4: [['08:00', '12:00'], ['13:30', '17:00']], 5: [['08:00', '12:00'], ['13:30', '17:00']] }, forfait: { hours: 450, start: '08:30', end: '18:30', days: [1, 2, 3, 4, 5], total: 218 } };
 // Firestore refuse les tableaux imbriqués : les plages sont enregistrées sous forme de texte « 08:00-12:00 » et relues en [début, fin]
 const rngOf = x => Array.isArray(x) ? [x[0] || '', x[1] || ''] : typeof x === 'string' ? [x.split('-')[0] || '', x.split('-')[1] || ''] : x && typeof x === 'object' ? [x.s || '', x.e || ''] : ['', ''];
-const schedCfg = () => { const c = S.meta.settings.sched || {}, w = c.week || SCHED_DEF.week; return { mode: c.mode || 'none', week: Object.fromEntries(Object.entries(w).map(([k, v]) => [k, (Array.isArray(v) ? v : []).map(rngOf)])), forfait: { ...SCHED_DEF.forfait, ...(c.forfait || {}) } }; };
+const schedCfg = () => { const c = S.meta.settings.sched || {}, w = c.week || SCHED_DEF.week, st = S.meta.settings;
+  // v1.39.0 : plus de mode « non renseigné » : journée type pré-remplie avec les anciens réglages simples ; l'ancien mode « forfait » = journée type + forfait jours
+  const mode = c.mode === 'fixed' ? 'fixed' : 'forfait', legacy = !c.mode || c.mode === 'none';
+  const fz = legacy ? { hours: +st.absDay || 420, start: st.dayStart || '08:30', end: st.dayEnd || '18:00', days: [1, 2, 3, 4, 5], total: null, jf: false } : {};
+  return { mode, week: Object.fromEntries(Object.entries(w).map(([k, v]) => [k, (Array.isArray(v) ? v : []).map(rngOf)])), forfait: (() => { const f = { ...SCHED_DEF.forfait, ...(c.forfait || {}), ...fz }; if (f.jf == null) f.jf = c.mode === 'forfait'; return f; })() }; };
 const hmMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
 const okRange = x => x && hmMin(x[0]) != null && hmMin(x[1]) != null && hmMin(x[1]) > hmMin(x[0]);
 function schedOf(ms) {
   const c = schedCfg(), wd = new Date(ms).getDay(), st = S.meta.settings;
   if (c.mode === 'fixed') { const r = (c.week[wd] || []).filter(okRange).sort((a, b) => hmMin(a[0]) - hmMin(b[0])); return { mode: 'fixed', work: r.length > 0, ranges: r, start: r.length ? r[0][0] : null, end: r.length ? r[r.length - 1][1] : null, min: r.reduce((a, x) => a + hmMin(x[1]) - hmMin(x[0]), 0) }; }
-  if (c.mode === 'forfait') { const f = c.forfait, w = (f.days || []).includes(wd); return { mode: 'forfait', work: w, ranges: w ? [[f.start, f.end]] : [], start: f.start, end: f.end, min: w ? +f.hours || 0 : 0 }; }
+  if (c.mode === 'forfait') { const f = c.forfait, w = (f.days || []).includes(wd); return { mode: f.jf ? 'forfait' : 'day', work: w, ranges: w ? [[f.start, f.end]] : [], start: f.start, end: f.end, min: w ? +f.hours || 0 : 0 }; }
   const w = wd >= 1 && wd <= 5; return { mode: 'none', work: w, ranges: [[st.dayStart || '07:30', st.dayEnd || '18:00']], start: st.dayStart || '07:30', end: st.dayEnd || '18:00', min: w ? (+st.absDay || 420) : 0 };
 }
 function schedEndOf(ms) { // heure de fin de journée applicable au jour de « ms » (repli : la plus tardive de la semaine, puis le réglage simple)
@@ -1267,7 +1274,7 @@ function absSlot(k, h) { // créneau d'une journée / demi-journée d'absence se
     if (r.length === 1) { const half = mins(r[0]) / 2; return h === 'am' ? { st: timeOn(d, r[0][0]), len: half } : { st: timeOn(d, r[0][0]) + half, len: half }; }
     return h === 'am' ? { st: timeOn(d, r[0][0]), len: mins(r[0]) } : { st: timeOn(d, r[1][0]), len: r.slice(1).reduce((a, x) => a + mins(x), 0) };
   }
-  const len = s.mode === 'forfait' && s.work ? s.min * 60000 : L, st0 = timeOn(d, s.mode === 'forfait' ? s.start : '09:00');
+  const tj = s.mode === 'forfait' || s.mode === 'day', len = tj && s.work ? s.min * 60000 : L, st0 = timeOn(d, tj ? s.start : '09:00');
   return h === 'j' ? { st: st0, len } : h === 'am' ? { st: st0, len: len / 2 } : { st: timeOn(d, '14:00'), len: len / 2 };
 }
 function plannedOn(k) { // temps prévu un jour donné : planning, moins fériés et absences notées
@@ -1643,7 +1650,7 @@ function applyDoc(key, body) {
 const J_MAX = 10;
 const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', val: 'validation client', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
 const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
-const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils', liss: 'lissage des temps' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils', liss: 'lissage des temps', sugg: 'suggestions', suggHide: 'suggestion masquée' };
 const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
 const Journal = {
   snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
@@ -1913,8 +1920,17 @@ function stopTimer(silent) {
   const end = Date.now();
   S.running = null; S.rev++; Store.put('running');
   if (end - r.start < 3000) { if (!silent) toast('Chrono annulé (moins de 3 secondes)'); }
-  else saveEntry({ ...r, end });
+  else { saveEntry({ ...r, end }); if (!silent) setTimeout(() => cyOfferStep(r.client, r.task), 300); }
   syncTimerBar(); scheduleRender();
+}
+// Lien cycle ↔ temps (v1.39.0) : tâche ↔ étape du cycle de paie
+const STEP_TASK = { rec: ['variable'], env: ['envoi', 'bulletin', 'production'], val: ['validation'], vir: ['virement'], dep: ['depot', 'dépôt', 'mise en ligne'], dsn: ['dsn'] };
+function stepOfTask(tid) { const n = norm(taskName(tid)); if (!n) return null; for (const f of ['dsn', 'vir', 'dep', 'val', 'env', 'rec']) if (STEP_TASK[f].some(w => n.includes(norm(w)))) return f; return null; }
+function taskOfStep(f) { const ws = STEP_TASK[f === 'rel' ? 'rec' : f] || []; const ts = S.meta.tasks.filter(t => !t.deletedAt && !t.archived); for (const w of ws) { const t = ts.find(t => norm(t.name).includes(norm(w))); if (t) return t.id; } return null; }
+function cyOfferStep(cid, tid) { // chrono arrêté sur une tâche qui correspond à une étape non faite : proposer de la noter
+  const c = clientOf(cid), f = stepOfTask(tid); if (!c || !f || !isMine(c) || typeof cyRow !== 'function') return;
+  const mk = defaultCycleMonth(), row = cyRow(mk, cid); if (row[f] || ['na', 'auto'].includes(cyState(mk, c, row, f).st)) return;
+  toast(c.name + ' : noter « ' + CY_STEP_L[f] + ' » fait aujourd’hui ?', 'Noter', () => { cySet(mk, cid, { [f]: isoDay(Date.now()) }); toast('« ' + CY_STEP_L[f] + ' » noté pour ' + c.name, 'Annuler', () => cySet(mk, cid, { [f]: null })); });
 }
 let _runT = null;
 function updateRunning(patch) {
@@ -2558,6 +2574,23 @@ function cbFilterHTML(base, ff) { // filtre des tuiles (v1.37.0) : points en cou
   const o = (v, l) => `<option value="${esc(v)}" ${ff === v ? 'selected' : ''}>${esc(l)}</option>`;
   return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
 }
+function openNewDossier() {
+  const m = modal(`<div class="modal-h"><h3>Nouveau dossier</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px"><label class="fld"><span>Raison sociale</span><input id="nd-name" maxlength="120" placeholder="ex. Alpha SARL" autocomplete="off"></label>
+      <div class="fld-row"><label class="fld"><span>N° de dossier</span><input id="nd-code" maxlength="30" autocomplete="off"></label><label class="fld"><span>Groupe</span><select id="nd-grp">${groupSelOpts('')}</select></label></div>
+      <label class="chk"><input type="checkbox" id="nd-mine" checked> ★ Dans mon portefeuille</label>
+      <div class="muted small">Le carnet du dossier s’ouvre ensuite : convention collective, paramètres du cycle, pratiques…</div></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="nd-ok">Créer</button></div>`);
+  const q = x => m.el.querySelector(x); setTimeout(() => q('#nd-name').focus(), 30);
+  q('#nd-grp').addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || ''); }); });
+  const go = () => {
+    const nm = q('#nd-name').value.trim(); if (!nm) { q('#nd-name').focus(); return; }
+    if (S.meta.clients.some(c => !c.deletedAt && norm(c.name) === norm(nm))) { toast('Un dossier porte déjà ce nom'); return; }
+    const id = addClient(nm), c = clientOf(id); c.code = q('#nd-code').value.trim(); c.mine = q('#nd-mine').checked; const g = q('#nd-grp').value; if (g && g !== '__newgrp') c.group = g;
+    touchMeta(); m.close(); location.hash = 'carnet/' + encodeURIComponent(id); toast('Dossier créé : ' + nm);
+  };
+  q('#nd-ok').addEventListener('click', go); m.el.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.tagName === 'INPUT') { ev.preventDefault(); go(); } });
+}
 function renderCarnet() {
   const body = $('#carnet-body');
   if (UI.cbG) { const g = groupOf(UI.cbG); if (!g) { UI.cbG = null; location.replace('#carnet'); return; } renderCarnetGroupe(body, g); return; }
@@ -2584,7 +2617,7 @@ function renderCarnet() {
   let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbv" title="Présentation"><button data-v="tiles" class="${cbList ? '' : 'on'}">Tuiles</button><button data-v="list" class="${cbList ? 'on' : ''}">Liste</button></div><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
     <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off">
     ${cbFilterHTML(all.filter(x => f === 'all' || (f === 'mine') === isMine(x)), ff)}
-    ${hasG ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}</div>`;
+    ${hasG && !cbList ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}${cbList ? '' : '<button class="btn sm primary" data-cba="newdos" title="Créer un dossier">＋ Nouveau dossier</button>'}</div>`;
   if (cbList) {
     const u = {}; for (const e of allEntries()) if (e.client) u[e.client] = (u[e.client] || 0) + dur(e);
     const nArch = S.meta.clients.filter(x => x.archived && !x.deletedAt).length, newMine = UI.newClientMine !== false;
@@ -2681,6 +2714,7 @@ function renderCarnetDossier(body, c) {
   // Cycle de paie (mêmes données que Mon cycle)
   html += `<i data-b="cycle" data-half="1"></i><div class="toolbar"><h2>Cycle de paie</h2><span class="sp"></span><button class="btn sm" data-cba="params">Modifier les paramètres</button></div><div class="card cb-sec">
     <dl class="cb-kv"><dt>Réception des variables</dt><dd>${esc(recTxt)}</dd><dt>Alerte 1er envoi</dt><dd>${p.envDelay === 0 ? 'Pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception'}</dd><dt>Validation client</dt><dd>${p.valid ? 'Demandée' + (cyValDelay(c) ? ' · relance ' + cyValDelay(c) + ' jours ouvrés après l’envoi' : ' · pas de relance') : 'Non demandée'}</dd><dt>Virements</dt><dd>${esc(CY_LBL.vir[p.vir] || p.vir)}${Object.keys(b.vir).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier ci-dessous' : ''}</dd><dt>Dépôt des bulletins</dt><dd>${esc(CY_LBL.dep[p.dep] || p.dep)}${p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : ''}</dd><dt>Échéance DSN</dt><dd>${dsnTxt}</dd></dl>
+    ${(() => { const a = cliAvg(c.id); return a ? `<div class="cb-hint">⏱ Temps moyen : <b>${fmtDur(a.avg)}</b> par mois (3 derniers mois) · ce mois-ci : <b>${fmtDur(a.cur)}</b></div>` : ''; })()}
     <label class="fld"><span>Remarque permanente (colonne Remarques de Mon cycle)</span><textarea data-cbf="notes" rows="3" placeholder="ex. Paies sur quel RIB ? · MySilae uniquement">${esc(p.notes || '')}</textarea></label></div>`;
   // Alertes salariés
   html += `<i data-b="alertes" data-half="1"></i><div class="toolbar"><h2>Alertes salariés</h2><span class="sp"></span><button class="btn sm" data-cba="alerts">Gérer les alertes</button></div><div class="card cb-sec">
@@ -2786,6 +2820,7 @@ function bindCarnet() {
     const mb = ev.target.closest('[data-cbmother]'); if (mb && UI.cbG) { const g = groupOf(UI.cbG), id = mb.dataset.cbmother; setMother(g.id, g.mother === id ? null : id); return; }
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
+    if (ev.target.closest('[data-cba=newdos]')) { openNewDossier(); return; }
     const tile = ev.target.closest('[data-cb]'); if (tile) { location.hash = 'carnet/' + encodeURIComponent(tile.dataset.cb); window.scrollTo(0, 0); return; }
     const sg = ev.target.closest('.seg[data-seg=cbf] button'); if (sg) { UI.cb.f = sg.dataset.v; renderCarnet(); return; }
     const sv = ev.target.closest('.seg[data-seg=cbv] button'); if (sv) { lsSet('cbView', sv.dataset.v); renderCarnet(); return; }
@@ -3288,6 +3323,61 @@ function bindOutils() {
     else if (a.dataset.tla === 'paldel') { st.pal.splice(+a.dataset.i, 1); renderOutils(); }
   });
 }
+/* ---------- Ma semaine (v1.39.0) : grille dossiers × jours, consultation ; clic → récap du jour ---------- */
+/* ---------- Suggestions discrètes (v1.39.0) ----------
+   Fondées sur au moins 3 mois de saisies : date habituelle des variables (médiane), temps du mois nettement au-dessus de la moyenne
+   (+25 % et au moins 30 min), tâche récurrente à la même période du mois (3 mois consécutifs). Deux au plus par jour ; masquables. */
+const suggOn = () => S.meta.settings.sugg !== false;
+const suggHidden = () => Array.isArray(S.meta.settings.suggHide) ? S.meta.settings.suggHide : [];
+let _sgC = { k: '', list: [] };
+function monthlyBy(keyFn) { // { clé: { 'AAAA-MM': ms } }
+  const m = {}; for (const e of allEntries()) { const k = keyFn(e); if (!k) continue; const mk = monthKey(e.start); (m[k] ||= {})[mk] = (m[k][mk] || 0) + dur(e); } return m;
+}
+function cliAvg(cid) { // moyenne des 3 mois complets précédents (tous saisis), sinon null
+  const by = monthlyBy(e => e.client)[cid] || {}, cur = monthKey(Date.now()); let mk = cur; const v = [];
+  for (let i = 0; i < 3; i++) { mk = prevMk(mk); if (!by[mk]) return null; v.push(by[mk]); }
+  return { avg: v.reduce((a, b) => a + b, 0) / 3, cur: by[cur] || 0 };
+}
+function suggestions() {
+  if (!suggOn()) return [];
+  const today = dayKey(Date.now()), key = today + '|' + S.rev; if (_sgC.k === key) return _sgC.list;
+  const cur = monthKey(Date.now()), hid = new Set(suggHidden()), out = [], dom = new Date().getDate();
+  const cs = typeof cyClients === 'function' ? cyClients() : [];
+  // 1. date habituelle des variables non renseignée
+  for (const c of cs) { const p = cyOf(c); if (p.rec !== 'var' || p.varDay) continue; const sg = cyVarSuggest(c.id); if (sg) out.push({ k: 'var:' + c.id, t: c.name + ' : les variables arrivent habituellement ' + cyVarLabel(sg.code) + ' (d’après ' + sg.n + ' mois).', a: 'Enregistrer cette date', run: () => { c.cy = { ...cyOf(c), varDay: sg.code }; touchMeta(); toast('Date habituelle enregistrée : relance proposée le lendemain'); } }); }
+  // 2. temps du mois nettement au-dessus de la moyenne
+  const byC = monthlyBy(e => e.client);
+  for (const c of cs) { const by = byC[c.id] || {}; let mk = cur; const v = []; for (let i = 0; i < 3; i++) { mk = prevMk(mk); v.push(by[mk] || 0); } if (v.some(x => !x)) continue; const avg = v.reduce((a, b) => a + b, 0) / 3, now = by[cur] || 0; if (now > avg * 1.25 && now - avg >= 30 * 60000) out.push({ k: 'tm:' + c.id + ':' + cur, t: c.name + ' : ' + fmtDur(now) + ' ce mois-ci, pour ' + fmtDur(avg) + ' en moyenne sur 3 mois (+' + fmtDur(now - avg) + ').', a: 'Voir le carnet', run: () => { location.hash = 'carnet/' + encodeURIComponent(c.id); } }); }
+  // 3. tâche récurrente à la même période du mois
+  const firstDay = {}; for (const e of allEntries()) { if (!e.client || !e.task) continue; const k = e.client + '|' + e.task, mk = monthKey(e.start), d = new Date(e.start).getDate(); const o = ((firstDay[k] ||= {})[mk]); if (o == null || d < o) firstDay[k][mk] = d; }
+  for (const [k, by] of Object.entries(firstDay)) {
+    let mk = cur; const ds = []; for (let i = 0; i < 3; i++) { mk = prevMk(mk); if (by[mk] == null) break; ds.push(by[mk]); }
+    if (ds.length < 3 || by[cur] != null) continue;
+    const med = ds.slice().sort((a, b) => a - b)[1]; if (dom < med - 1 || dom > med + 3) continue;
+    const [cid, tid] = k.split('|'), c = clientOf(cid); if (!c || c.deletedAt || c.archived || !taskOf(tid)) continue;
+    out.push({ k: 'rt:' + k + ':' + cur, t: 'Habituellement vers le ' + med + ' : ' + c.name + ' · ' + taskName(tid) + ' (pas encore fait ce mois-ci).', a: '▶ Lancer', run: () => startTimer({ client: cid, task: tid, label: '' }) });
+  }
+  _sgC = { k: key, list: out.filter(x => !hid.has(x.k)).slice(0, 2) };
+  return _sgC.list;
+}
+function suggHide(k) { const h = suggHidden().filter(x => x !== k); h.push(k); S.meta.settings.suggHide = h.slice(-200); touchMeta(); }
+function weekGridHTML() {
+  const off = UI.wkOff || 0, ws = addDays(startOfWeek(Date.now()), off * 7), today = dayKey(Date.now());
+  const days = Array.from({ length: 7 }, (_, i) => addDays(ws, i)).map(d => ({ d, k: dayKey(d) }));
+  const rows = new Map(), tot = {};
+  for (const e of allEntries()) { const k = dayKey(e.start); if (k < days[0].k || k > days[6].k) continue; const id = e.client || ''; if (!rows.has(id)) rows.set(id, {}); const r = rows.get(id); r[k] = (r[k] || 0) + dur(e); tot[k] = (tot[k] || 0) + dur(e); }
+  if (S.running) { const k = dayKey(S.running.start); if (k >= days[0].k && k <= days[6].k) { const id = S.running.client || ''; if (!rows.has(id)) rows.set(id, {}); rows.get(id)[k] = (rows.get(id)[k] || 0) + dur(S.running); tot[k] = (tot[k] || 0) + dur(S.running); } }
+  const shown = days.filter((x, i) => i < 5 || tot[x.k] || plannedOn(x.k));
+  const list = [...rows.entries()].map(([id, r]) => [id, r, Object.values(r).reduce((a, b) => a + b, 0)]).sort((a, b) => b[2] - a[2]);
+  const f = ms => ms ? fmtDur(ms) : '';
+  const lbl = off === 0 ? 'Cette semaine' : off === -1 ? 'Semaine dernière' : 'Semaine du ' + fmtDate(ws).slice(0, 5);
+  const plan = shown.map(x => plannedOn(x.k)), wTot = shown.reduce((a, x) => a + (tot[x.k] || 0), 0), wPlan = plan.reduce((a, b) => a + b, 0);
+  return `<i data-b="semaine" data-t="Ma semaine"></i><div class="toolbar"><h2>Ma semaine</h2><span class="sp"></span><button class="icon" data-act="wk" data-d="-1" title="Semaine précédente">‹</button><span class="small" style="min-width:120px;text-align:center">${esc(lbl)}</span><button class="icon" data-act="wk" data-d="1" title="Semaine suivante" ${off >= 0 ? 'disabled' : ''}>›</button>${off ? '<button class="btn sm ghost" data-act="wk" data-d="0">Cette semaine</button>' : ''}</div>
+  <div class="card tbl-wrap"><table class="t wk-grid"><thead><tr><th>Dossier</th>${shown.map(x => `<th class="n ${x.k === today ? 'today' : ''}"><button class="wk-day" data-act="wkday" data-k="${x.k}" title="Récap à reporter de ce jour">${WD_S[new Date(x.d).getDay()]} ${new Date(x.d).getDate()}</button></th>`).join('')}<th class="n">Total</th></tr></thead><tbody>
+  ${list.map(([id, r, t]) => `<tr><td class="wk-who">${id ? (isInternalId(id) ? `<span class="int-ic">${ICON.building}</span> ` : cliIc(id) + ' ') + esc(clientName(id)) : '<span class="muted">Sans dossier</span>'}</td>${shown.map(x => `<td class="n ${r[x.k] ? 'has' : ''}" ${r[x.k] ? `data-act="wkday" data-k="${x.k}"` : ''}>${f(r[x.k])}</td>`).join('')}<td class="n"><b>${f(t)}</b></td></tr>`).join('') || `<tr><td colspan="${shown.length + 2}" class="empty">Aucun temps saisi cette semaine.</td></tr>`}
+  <tr class="tot"><td>Total</td>${shown.map((x, i) => { const st = x.k > today || !plan[i] ? '' : (tot[x.k] || 0) >= plan[i] ? 'ok' : 'inc'; return `<td class="n wk-t ${st}" title="${plan[i] ? 'Prévu : ' + fmtDur(plan[i]) : 'Pas de temps prévu'}">${f(tot[x.k]) || (plan[i] && x.k <= today ? '0h00' : '')}</td>`; }).join('')}<td class="n">${f(wTot)}</td></tr>
+  <tr class="wk-plan"><td>Prévu</td>${plan.map(p => `<td class="n">${p ? fmtDur(p) : '—'}</td>`).join('')}<td class="n">${fmtDur(wPlan)}</td></tr></tbody></table></div>`;
+}
 function renderChrono() {
   const body = $('#chrono-body');
   const entries = allEntries();
@@ -3299,6 +3389,8 @@ function renderChrono() {
   let html = '';
   const cyt = tabOn('portefeuille') ? cyTodo() : [];
   if (cyt.length) html += `<i data-b="afaire"></i><div class="toolbar"><h2>📌 À faire aujourd’hui (${cyt.length})</h2><span class="sp"></span><a class="btn sm ghost" href="#portefeuille" data-act="cyview">Mon cycle</a></div><div class="card cy-todo"><div class="cy-todo-list">${cyt.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.cid ? `<button class="icon xs" data-act="cystart" title="Démarrer le chrono sur ce dossier">${ICON.play}</button>` : ''}${t.campaign ? '<a class="btn sm" href="#portefeuille">Voir</a>' : `<button class="btn sm" data-act="cytodo">${cyTodoLbl(t)}</button>`}</div>`).join('')}</div></div>`;
+  const sgs = suggestions(); body._sugg = sgs;
+  if (sgs.length) html += `<div class="sugg-list">${sgs.map((x, i) => `<div class="sugg" data-i="${i}"><span>💡 ${esc(x.t)}</span><button class="btn sm ghost" data-act="sgrun">${esc(x.a)}</button><button class="icon xs" data-act="sghide" title="Ne plus proposer">${ICON.close}</button></div>`).join('')}</div>`;
   const upc7 = tabOn('portefeuille') ? cyUpcoming(7) : [];
   if (upc7.length) { // regroupées par date et par étape (« DSN — 12 dossiers », dépliable)
     const gs = []; for (const u of upc7) { const g = gs.find(x => x.d === u.d && x.k === u.k); if (g) g.n.push(u.nm); else gs.push({ d: u.d, k: u.k, n: [u.nm] }); }
@@ -3319,7 +3411,7 @@ function renderChrono() {
   html += `<i data-b="resume"></i><h2>Résumé</h2><div class="stats">
     <div class="card stat"><div class="k">Aujourd’hui</div><div class="v">${fmtDur(sum(today))}</div>${schedCfg().mode !== 'none' ? `<div class="s">${plannedOn(dayKey(now)) ? 'prévu : ' + fmtDur(plannedOn(dayKey(now))) : 'pas de temps prévu aujourd’hui'}</div>` : ''}${plannedOn(dayKey(now)) ? `<div class="cy-pg-track" style="margin-top:6px" title="${Math.min(100, Math.round(sum(today) * 100 / plannedOn(dayKey(now))))} % de la journée prévue"><div class="cy-pg-fill ${sum(today) >= plannedOn(dayKey(now)) ? 'full' : ''}" style="width:${Math.min(100, Math.round(sum(today) * 100 / plannedOn(dayKey(now))))}%"></div></div>` : ''}</div>
     <div class="card stat"><div class="k">Cette semaine</div><div class="v">${fmtDur(sum(wk))}</div><div class="s">dont ${fmtDur(sum(wk, e => e.billable))} à facturer${schedCfg().mode !== 'none' ? ' · prévu : ' + fmtDur(Array.from({ length: 7 }, (_, i) => plannedOn(dayKey(addDays(wk, i)))).reduce((a, b) => a + b, 0)) : ''}</div></div>
-    ${schedCfg().mode === 'forfait' && +schedCfg().forfait.total ? (() => { const y = new Date(now).getFullYear(), n = forfaitCount(y), t = +schedCfg().forfait.total; return `<div class="card stat"><div class="k">Forfait jours ${y}</div><div class="v">${fmtDays(n)}</div><div class="s">sur ${t} j · ${fmtDays(Math.max(0, t - n))} restant${t - n > 1 ? 's' : ''}</div></div>`; })() : ''}
+    ${schedCfg().mode === 'forfait' && schedCfg().forfait.jf && +schedCfg().forfait.total ? (() => { const y = new Date(now).getFullYear(), n = forfaitCount(y), t = +schedCfg().forfait.total; return `<div class="card stat"><div class="k">Forfait jours ${y}</div><div class="v">${fmtDays(n)}</div><div class="s">sur ${t} j · ${fmtDays(Math.max(0, t - n))} restant${t - n > 1 ? 's' : ''}</div></div>`; })() : ''}
     <div class="card stat"><div class="k">Ce mois-ci</div><div class="v">${fmtDur(sum(mo))}</div><div class="s">dont ${fmtDur(sum(mo, e => e.billable))} à facturer</div></div>
     <div class="card stat"><div class="k">Hors portefeuille · ce mois</div><div class="v">${fmtDur(sum(mo, e => { const k = pfKey(e.client); return k !== 'mine' && k !== 'none' && k !== 'internal'; }))}</div><div class="s">autres clients et temps avec des personnes${(() => { const ti = sum(mo, e => isInternalId(e.client)); return ti ? ` · <b>${fmtDur(ti)}</b> en interne` : ''; })()}</div></div>
     <div class="card stat" data-k="todo"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${todoN}</div><div class="s">saisie${todoN > 1 ? 's' : ''} à facturer · <a href="#facturation">voir le détail</a></div></div>
@@ -3330,6 +3422,7 @@ function renderChrono() {
   const keys = Object.keys(S.days).filter(k => Object.keys(S.days[k].entries || {}).length && !(k > todayK && Object.values(S.days[k].entries).every(e => e.allday))).sort().reverse();
   if (S.running && !keys.includes(dayKey(S.running.start))) { keys.push(dayKey(S.running.start)); keys.sort().reverse(); }
   const hs = holSuggest(todayK), upc = absUpcoming(todayK);
+  html += weekGridHTML();
   if (hs || upc.length) html += `<i data-b="avenir"></i><h2>Absences et fériés à venir</h2>`;
   if (hs) html += `<div class="card hol-sugg" data-k="${hs.k}"><span class="abs-ic">${ICON.cal}</span><span>${hs.k === todayK ? '<b>Aujourd’hui</b> est' : 'Le <b>' + esc(fmtDayLong(hs.k)) + '</b> est'} un jour férié : <b>${esc(hs.name)}</b>.</span><span class="sp" style="flex:1"></span><button class="btn sm primary" data-act="hol-note">Noter « Jour férié »</button><button class="icon xs" data-act="hol-hide" title="Ne plus proposer pour ce jour">${ICON.close}</button></div>`;
   if (upc.length) html += `<div class="card abs-upc">${upc.map((u, i) => `<div class="abs-up" data-i="${i}"><span class="abs-ic ${u.t === 'form' ? 'is-form' : ''}">${ICON.cal}</span><b>${esc(absLabel(u.t))}</b><span>${u.from === u.to ? 'le ' + esc(fmtDayLong(dayKey(u.from))) + (u.half !== 'j' ? ' (' + HALF[u.half].toLowerCase() + ')' : '') : 'du ' + WD_S[new Date(u.from).getDay()] + ' ' + fmtDate(u.from).slice(0, 5) + ' au ' + WD_S[new Date(u.to).getDay()] + ' ' + fmtDate(u.to).slice(0, 5)}</span><span class="muted">${fmtDays(u.n)}</span><span class="sp" style="flex:1"></span>${u.ids.length === 1 ? '<button class="btn sm ghost" data-act="upc-edit">Modifier</button>' : ''}<button class="btn sm ghost" data-act="upc-del">Supprimer</button></div>`).join('')}</div>`;
@@ -3462,7 +3555,10 @@ function bindChrono() {
   body.addEventListener('click', ev => {
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act;
-    if (act === 'cytodo' || act === 'cystart') { const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return; if (act === 'cytodo') cyTodoDo(t); else if (t.cid) startTimer({ client: t.cid, task: null, label: '' }); return; }
+    if (act === 'sgrun' || act === 'sghide') { const x = (body._sugg || [])[+b.closest('[data-i]').dataset.i]; if (!x) return; if (act === 'sghide') { suggHide(x.k); toast('Suggestion masquée', 'Annuler', () => { S.meta.settings.suggHide = suggHidden().filter(k => k !== x.k); touchMeta(); }); } else { suggHide(x.k); x.run(); } return; }
+    if (act === 'wk') { const d = +b.dataset.d; UI.wkOff = d === 0 ? 0 : Math.min(0, (UI.wkOff || 0) + d); renderChrono(); return; }
+    if (act === 'wkday') { openRecap(b.dataset.k); return; }
+    if (act === 'cytodo' || act === 'cystart') { const t = (body._cyTodo || [])[+b.closest('[data-i]').dataset.i]; if (!t) return; if (act === 'cytodo') cyTodoDo(t); else if (t.cid) startTimer({ client: t.cid, task: taskOfStep(t.f), label: '' }); return; }
     const chip = b.closest('.chip');
     if (chip) {
       const c = chip.dataset.c || null, t = chip.dataset.t || null;
@@ -3753,7 +3849,7 @@ function cmdItems(q) {
   });
   // Navigation
   const nav = [...TABS.filter(t => tabOn(t[0])).map(([v, l]) => ({ ic: '→', t: l, s: 'Onglet', k: l, run: () => { location.hash = v; } })), { ic: '⚙', t: 'Réglages', s: 'Onglet', k: 'reglages parametres options', run: () => { location.hash = 'reglages'; } },
-    ...[['planning', 'Planning habituel', 'horaires forfait'], ['lissage', 'Lissage des temps', ''], ['onglets', 'Onglets affichés', ''], ['donnees', 'Données', 'sauvegarde export import conventions remise a zero']].map(([b, l, k]) => ({ ic: '⚙', t: 'Réglages › ' + l, s: 'Section', k: l + ' ' + k, run: () => cmdGoBlk('reglages', b) })),
+    ...[['planning', 'Planning habituel', 'horaires forfait journee type', 'travail'], ['reglages', 'Saisie des temps', 'arrondi facturation fin de journee format', 'travail'], ['lissage', 'Lissage des temps', '', 'travail'], ['affichage', 'Couleur et citations', 'theme couleur', 'appareil'], ['onglets', 'Onglets affichés', '', 'appareil'], ['donnees', 'Données', 'sauvegarde export import conventions remise a zero', 'donnees']].map(([b, l, k, tb]) => ({ ic: '⚙', t: 'Réglages › ' + l, s: 'Section', k: l + ' ' + k, run: () => { lsSet('setTab', tb); if (UI.view === 'reglages') renderSettings(); cmdGoBlk('reglages', b); } })),
     ...(tabOn('outils') ? TOOLS.map(t => ({ ic: '🧮', t: 'Outil : ' + t.t, s: t.d, k: t.t + ' ' + t.d, run: () => cmdGoBlk('outils', 'tool-' + t.id) })) : []),
     ...groupsAll().map(g => ({ ic: '📖', t: 'Carnet du groupe ' + g.name, s: 'Groupe', k: 'groupe ' + g.name, run: () => { location.hash = 'carnet/groupe/' + encodeURIComponent(g.id); } }))];
   const navF = n ? nav.filter(x => n.split(/\s+/).every(w => norm(x.t + ' ' + x.k).includes(w))).slice(0, 8) : nav.filter(x => x.s === 'Onglet');
@@ -3862,6 +3958,8 @@ function cySet(mk, cid, patch) {
   for (const k in patch) { if (patch[k] === null || patch[k] === '' || (Array.isArray(patch[k]) && !patch[k].length)) delete row[k]; else row[k] = patch[k]; }
   if (!Object.keys(row).length) delete doc.rows[cid];
   S.rev++; Store.put('cy-' + mk); scheduleRender();
+  // étape notée aujourd'hui alors que le chrono tourne sur ce dossier : proposer de l'arrêter
+  if (S.running && S.running.client === cid && ['rec', 'env', 'val', 'vir', 'dep', 'dsn'].some(k => patch[k] === isoDay(Date.now()))) { clearTimeout(cySet._t); cySet._t = setTimeout(() => { if (S.running && S.running.client === cid) toast('Le chrono tourne encore sur ' + (clientOf(cid)?.name || 'ce dossier') + '.', 'Arrêter le chrono', () => stopTimer(true)); }, 350); }
 }
 const monthStart = mk => parseDay(mk + '-01');
 const monthEnd = mk => addMonths(monthStart(mk), 1) - DAY; // dernier jour du mois (00:00)
@@ -4122,6 +4220,18 @@ function cyCellHTML(mk, c, row, f) {
   return `<td class="cy-cell st-${s.st}" data-cell="${f}" title="${esc(title || 'Cliquer pour poser la date du jour')}">${txt}</td>`;
 }
 const CY_TRI = { '': '', ok: 'OK', nc: 'NC', exo: 'Exo' };
+// Colonnes de Mon cycle affichées, propres à chaque appareil (v1.39.0) ; Réception, 1er envoi et DSN toujours affichées
+const CY_COLS_OPT = [['prep', 'Prépa'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['al', 'Alerte salarié'], ['note', 'Remarques']];
+const cyColsHidden = () => { try { const h = JSON.parse(lsGet('cyColsHid', '["prep"]')); return Array.isArray(h) ? h : ['prep']; } catch (e) { return ['prep']; } };
+function openCyCols(anchor) {
+  closeCyPop();
+  const hid = cyColsHidden(), pop = document.createElement('div'); pop.id = 'cy-pop'; pop.className = 'cy-pop';
+  pop.innerHTML = `<div class="cy-pop-h">Colonnes affichées (cet appareil)</div><div style="display:grid;gap:4px;padding:4px 6px">${CY_COLS_OPT.map(([k, l]) => `<label class="chk"><input type="checkbox" value="${k}" ${hid.includes(k) ? '' : 'checked'}> ${l}</label>`).join('')}</div><div class="cy-pop-sec">Réception, 1er envoi et DSN restent toujours affichées.</div>`;
+  document.body.appendChild(pop);
+  const r = anchor.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - pop.offsetWidth - 8)) + 'px'; pop.style.top = (r.bottom + window.scrollY + 4) + 'px';
+  pop.addEventListener('change', () => { lsSet('cyColsHid', JSON.stringify([...pop.querySelectorAll('input:not(:checked)')].map(i => i.value))); renderPortfolio(); const a = document.querySelector('[data-cy=cols]'); if (a) { const rr = a.getBoundingClientRect(); pop.style.top = (rr.bottom + window.scrollY + 4) + 'px'; } document.body.appendChild(pop); });
+  setTimeout(() => { document.addEventListener('mousedown', cyPopOutside, true); document.addEventListener('keydown', cyPopKey, true); }, 0);
+}
 function renderCycle(P) {
   cyMigrateLegacy();
   const mk = P.cmonth, cs = cyClients(), [yy, mm] = mk.split('-').map(Number);
@@ -4139,13 +4249,13 @@ function renderCycle(P) {
   if (grouped) { const order = Object.fromEntries(groupsAll().map((g, i) => [g.id, i])); const gi = r => groupOf(r.c.group) ? order[r.c.group] : 1e9; rows = rows.map((r, i) => [r, i]).sort((a, b) => gi(a[0]) - gi(b[0]) || (isMother(b[0].c) - isMother(a[0].c)) || a[1] - b[1]).map(x => x[0]); }
   const closed = nAll && done.length === nAll ? Math.max(...rows.concat([]).map(r => Math.max(dOf(r.row.dsn) || 0, dOf(r.row.dep) || 0, dOf(r.row.vir) || 0))) : 0;
   const todo = mk === cur || mk === prevMk(cur) ? cyTodo() : [];
-  const showPrep = !!P.showPrep;
-  const cols = [['rec', 'Réception'], ...(showPrep ? [['prep', 'Prépa']] : []), ['env', '1er envoi'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['al', 'Alerte salarié'], ['note', 'Remarques']];
+  const hid = cyColsHidden();
+  const cols = [['rec', 'Réception'], ['prep', 'Prépa'], ['env', '1er envoi'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['al', 'Alerte salarié'], ['note', 'Remarques']].filter(([k]) => !hid.includes(k));
   let html = `<div class="card filters pf-head">${pfSwitch(P)}
     <div class="month-nav"><button class="icon" data-cy="prev" title="Cycle précédent">‹</button><b>Cycle de ${esc(monthLabel)}</b><button class="icon" data-cy="next" title="Cycle suivant">›</button>${mk === cur ? '' : '<button class="btn sm ghost" data-cy="today">Cycle du mois</button>'}</div>
     <span class="sp" style="flex:1"></span>
     <input id="cy-q" placeholder="Rechercher un dossier…" value="${esc(P.cq || '')}" autocomplete="off" style="min-width:200px">
-    <label class="chk"><input type="checkbox" data-cy="prep" ${showPrep ? 'checked' : ''}> Colonne Prépa</label>
+    <button class="btn sm" data-cy="cols" title="Colonnes affichées sur cet appareil">Colonnes ▾</button>
     <button class="btn sm" data-cy="copy">${ICON.copy} Copier pour Excel</button></div>`;
   if (todo.length) html += `<i data-b="afaire"></i><h2>📌 À faire aujourd’hui (${todo.length})</h2><div class="card cy-todo"><div class="cy-todo-list">${todo.map((t, i) => `<div class="cy-todo-i ${t.late ? 'late' : ''} ${t.campaign ? 'camp' : ''}" data-i="${i}"><span>${esc(t.txt)}</span>${t.campaign ? `<button class="btn sm" data-cy="goapril">Voir le cycle d’avril</button>` : `<button class="btn sm" data-cy="tododone">${t.f === 'rel' ? 'Relance faite' : t.f === 'val' ? 'Validée aujourd’hui' : t.f === 'al' ? 'Traité' : t.f === 'pt' ? 'Point clos' : 'Fait aujourd’hui'}</button>`}</div>`).join('')}</div></div>`;
   if (isApril) html += `<div class="warn" style="margin-top:12px">Cycle d’avril : la DSN doit déclarer la <b>DOETH</b> et la <b>taxe d’apprentissage libératoire</b>. Cochez les deux colonnes dédiées pour chaque dossier (OK, NC ou Exo).</div>`;
@@ -4393,6 +4503,7 @@ function bindCycle() {
     const a = b.dataset.cy, cid = b.closest('tr[data-id]')?.dataset.id;
     if (a === 'prev' || a === 'next') { P.cmonth = a === 'prev' ? prevMk(P.cmonth) : nextMk(P.cmonth); renderPortfolio(); }
     else if (a === 'today') { P.cmonth = monthKey(Date.now()); renderPortfolio(); }
+    else if (a === 'cols') { openCyCols(b); }
     else if (a === 'progmin') { lsSet('cyProgMin', lsGet('cyProgMin', '') === '1' ? '' : '1'); renderPortfolio(); }
     else if (a === 'goto') { P.cmonth = b.dataset.mk; renderPortfolio(); }
     else if (a === 'close') {
@@ -5226,10 +5337,9 @@ function tabsHTML() {
 function setTabs(hid) { lsSet('tabsHidden', JSON.stringify(hid)); applyTabs(); renderSettings(); renderHeader(); }
 function schedHTML() {
   const c = schedCfg(), f = c.forfait, y = new Date().getFullYear();
-  const seg = `<div class="seg" role="radiogroup">${[['none', 'Non renseigné'], ['fixed', 'Horaires fixes'], ['forfait', 'Forfait (sans horaire fixe)']].map(([v, l]) => `<button type="button" data-schmode="${v}" class="${c.mode === v ? 'on' : ''}" role="radio" aria-checked="${c.mode === v}">${l}</button>`).join('')}</div>`;
+  const seg = `<div class="seg" role="radiogroup">${[['forfait', 'Journée type'], ['fixed', 'Horaires fixes']].map(([v, l]) => `<button type="button" data-schmode="${v}" class="${c.mode === v ? 'on' : ''}" role="radio" aria-checked="${c.mode === v}">${l}</button>`).join('')}</div>`;
   let inner = '';
-  if (c.mode === 'none') inner = `<div class="sch-hint">Sans planning, Antevorta utilise l’heure de début et de fin de journée et la durée d’une journée d’absence du bloc Réglages, du lundi au vendredi.</div>`;
-  else if (c.mode === 'fixed') {
+  if (c.mode === 'fixed') {
     let wkTot = 0;
     const rows = WD_ORDER.map(wd => {
       const r = c.week[wd] || [], tot = r.filter(okRange).reduce((a, x) => a + hmMin(x[1]) - hmMin(x[0]), 0); wkTot += tot;
@@ -5243,9 +5353,10 @@ function schedHTML() {
       <div class="setting"><div>Heure de départ habituelle</div><input data-schf="start" value="${esc(f.start)}" style="width:80px;text-align:center" autocomplete="off"></div>
       <div class="setting"><div>Heure de fin habituelle<div class="d">Sert à la fin de journée du chrono et aux rappels</div></div><input data-schf="end" value="${esc(f.end)}" style="width:80px;text-align:center" autocomplete="off"></div>
       <div class="setting"><div>Jours travaillés</div><span class="sch-days">${WD_ORDER.map(wd => `<label class="chk"><input type="checkbox" data-schday="${wd}" ${(f.days || []).includes(wd) ? 'checked' : ''}>${WD_L[wd].slice(0, 3)}.</label>`).join('')}</span></div>
-      <div class="setting"><div>Forfait annuel (jours)<div class="d">Ex. 218 jours ; laisser vide si sans objet</div></div><input data-schf="total" value="${esc(f.total || '')}" inputmode="numeric" style="width:80px;text-align:center" autocomplete="off"></div>
+      <div class="setting"><div>Forfait jours<div class="d">Cochez si vous êtes au forfait jours : compteur de jours travaillés, pas de rappel sur les 10 h par jour et 48 h par semaine</div></div><label class="chk"><input type="checkbox" data-schjf ${f.jf ? 'checked' : ''}> Je suis au forfait jours</label></div>
+      ${f.jf ? `<div class="setting"><div>Forfait annuel (jours)<div class="d">Ex. 218 jours</div></div><input data-schf="total" value="${esc(f.total || '')}" inputmode="numeric" style="width:80px;text-align:center" autocomplete="off"></div>
       ${+f.total ? `<div class="sch-hint">${y} : <b>${fmtDays(n)}</b> travaillés au ${fmtDate(Date.now())} sur ${+f.total} (${fmtDays(Math.max(0, +f.total - n))} restants). Un jour compte entier dès la moitié de la durée habituelle saisie, une demi-journée en dessous.</div>` : ''}
-      <div class="sch-hint">Au forfait jours, les rappels sur les durées maximales (10 h par jour, 48 h par semaine) ne s’affichent pas ; ceux sur le repos quotidien et hebdomadaire restent.</div>`;
+      <div class="sch-hint">Au forfait jours, les rappels sur les durées maximales (10 h par jour, 48 h par semaine) ne s’affichent pas ; ceux sur le repos quotidien et hebdomadaire restent.</div>` : ''}`;
   }
   return `<i data-b="planning"></i><h2>Planning habituel</h2><div class="card settings sch" id="sch-card"><div class="setting"><div>Type d’organisation<div class="d">Définit vos heures de début et de fin jour par jour, la durée des absences, le temps prévu dans le Résumé et la pause du déjeuner</div></div>${seg}</div>${inner}</div>`;
 }
@@ -5599,19 +5710,23 @@ function applyTheme() {
 applyTheme();
 const themeHTML = () => `<span class="th-sws" role="radiogroup" aria-label="Couleur de l’application">${Object.entries(THEMES).map(([k, t]) => `<button type="button" class="th-sw ${themeKey() === k ? 'on' : ''}" data-act="theme" data-v="${k}" style="--c:${t.a}" title="${esc(t.l)}" aria-label="${esc(t.l)}" role="radio" aria-checked="${themeKey() === k}"></button>`).join('')}</span>`;
 function renderSettings() {
-  const st = S.meta.settings;
-  const html = `<i data-b="reglages" data-half="1"></i><h2>Réglages</h2><div class="card settings">
+  const st = S.meta.settings, tab = ['travail', 'appareil', 'donnees'].includes(lsGet('setTab', 'travail')) ? lsGet('setTab', 'travail') : 'travail';
+  let html = `<div class="card filters set-tabs"><div class="seg" data-seg="settab" role="tablist">${[['travail', 'Mon travail'], ['appareil', 'Cet appareil'], ['donnees', 'Données']].map(([v, l]) => `<button data-v="${v}" role="tab" aria-selected="${tab === v}" class="${tab === v ? 'on' : ''}">${l}</button>`).join('')}</div><span class="muted small">${tab === 'travail' ? 'Planning, saisie des temps, lissage : enregistrés avec vos données (tous vos appareils).' : tab === 'appareil' ? 'Préférences propres à cet appareil (navigateur ou téléphone).' : 'Sauvegarde, imports, listes de référence et accès.'}</span></div>`;
+  if (tab === 'travail') html += `${schedHTML()}
+    <i data-b="reglages" data-half="1"></i><h2>Saisie des temps</h2><div class="card settings">
       <div class="setting"><div>Affichage des durées<div class="d">1h30 ou 1,50 h</div></div><select data-s="durFormat"><option value="hm" ${st.durFormat === 'hm' ? 'selected' : ''}>Heures et minutes</option><option value="dec" ${st.durFormat === 'dec' ? 'selected' : ''}>Heures décimales</option></select></div>
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
-      ${schedCfg().mode === 'none' ? `      <div class="setting"><div>Heure habituelle de début de journée<div class="d">Avant cette heure (ou après la fin de journée), un rappel sur le temps de travail peut s’afficher parmi les citations</div></div><input data-s="dayStart" value="${esc(st.dayStart || '07:30')}" style="width:80px;text-align:center" autocomplete="off"></div>
-      <div class="setting"><div>Heure habituelle de fin de journée<div class="d">Proposée comme heure d’arrêt si vous oubliez le chrono</div></div><input data-s="dayEnd" value="${esc(st.dayEnd)}" style="width:80px;text-align:center" class="mono" inputmode="numeric"></div>` : `<div class="setting"><div>Heures de début et de fin de journée<div class="d">Définies jour par jour par votre planning habituel (bloc Planning habituel)</div></div><a class="btn sm ghost" href="#reglages" data-act="go-planning">Voir</a></div>`}
-      <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à ${schedCfg().mode === 'none' ? esc(st.dayEnd) : 'l’heure de fin de la journée prévue au planning'} (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
-      ${schedCfg().mode === 'none' ? `      <div class="setting"><div>Durée d’une journée d’absence<div class="d">Congé, maladie, férié, formation saisis en journée entière (la demi-journée compte la moitié). Ex. 7h ou 7h48.</div></div><input data-s="absDay" value="${esc(fmtDur((+st.absDay || 420) * 60000, 'hm'))}" style="width:80px;text-align:center" class="mono"></div>` : ''}
+      <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à l’heure de fin prévue par votre planning (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
+      <div class="setting"><div>Suggestions discrètes<div class="d">Dans Ma journée (deux au plus par jour, masquables) : date habituelle des variables, temps du mois nettement au-dessus de la moyenne, tâche habituelle à cette période du mois. Il faut au moins 3 mois de saisies.</div></div><select data-s="sugg"><option value="1" ${st.sugg !== false ? 'selected' : ''}>Oui</option><option value="0" ${st.sugg === false ? 'selected' : ''}>Non</option></select></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
+    </div>
+    ${lissHTML()}`;
+  else if (tab === 'appareil') html += `<i data-b="affichage" data-half="1"></i><h2>Affichage</h2><div class="card settings">
       <div class="setting"><div>Couleur de l’application<div class="d">${esc(THEMES[themeKey()].l)} · sur cet appareil (l’icône de l’application installée reste verte)</div></div>${themeHTML()}</div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div>
-    <i data-b="donnees" data-half="1"></i><h2>Données</h2><div class="card settings">
+    ${tabsHTML()}`;
+  else html += `    <i data-b="donnees" data-half="1"></i><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
       ${Store.mode === 'firebase' ? `<div class="setting"><div>Application sur cet appareil<div class="d">${Install.standalone() ? 'Antevorta est ouvert en tant qu’application installée.' : 'Installez Antevorta pour l’ouvrir depuis une icône, en plein écran (téléphone ou ordinateur).'}</div></div>${Install.standalone() ? '' : '<button class="btn sm primary" data-act="install">Installer</button>'}</div>` : ''}
       <div class="setting"><div>Version de l’application<div class="d">Antevorta v${APP_VERSION} du ${APP_DATE}</div></div></div>
@@ -5620,14 +5735,11 @@ function renderSettings() {
       <div class="setting"><div>Liste des conventions collectives<div class="d">Liste du ministère du Travail utilisée par le carnet de bord : ${ccnDateTxt(CCN_DATE)}${CCN_DATE !== CCN_BASE_DATE ? ' (mise à jour sur cet appareil)' : ' (intégrée)'}. Pour la mettre à jour : téléchargez le « Fichier de suivi historique des conventions collectives » (XLSX) sur <a href="https://travail-emploi.gouv.fr/conventions-collectives-nomenclatures" target="_blank" rel="noopener">travail-emploi.gouv.fr ↗</a>, puis choisissez-le ici.</div></div><span style="display:flex;gap:6px;flex-wrap:wrap">${CCN_DATE !== CCN_BASE_DATE ? '<button class="btn sm ghost" data-act="ccn-reset">Revenir à la liste intégrée</button>' : ''}<label class="btn sm" style="cursor:pointer">Mettre à jour…<input type="file" accept=".xlsx" id="ccn-file" hidden></label></span></div>
       <div class="setting"><div>Remise à zéro<div class="d">Efface les saisies, les dossiers, le suivi du cycle de paie, les personnes et les tâches (au choix), puis clôture le cycle en cours et les précédents. Sauvegarde téléchargée avant.</div></div><button class="btn sm danger" data-act="reset">Remise à zéro…</button></div>
       <textarea class="copy" id="export-ta" hidden readonly></textarea>
-    </div>
-    ${schedHTML()}
-    ${lissHTML()}
-    ${tabsHTML()}`;
+    </div>`;
   $('#reglages-body').innerHTML = html;
-  blkify($('#reglages-body'), 'reglages');
+  blkify($('#reglages-body'), 'reglages-' + tab);
   const ab = $('#acces-body');
-  if (Store.access === 'admin') { ab.hidden = false; Access.render(); } else { ab.hidden = true; ab.innerHTML = ''; }
+  if (Store.access === 'admin' && tab === 'donnees') { ab.hidden = false; Access.render(); } else { ab.hidden = true; ab.innerHTML = ''; }
 }
 function goAccess() { location.hash = 'reglages'; setTimeout(() => $('#acces-body')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120); }
 function openToPerson(cid) {
@@ -5674,6 +5786,7 @@ function bindRefsOn(body) {
     qT = setTimeout(() => { const pos = ev.target.selectionStart; renderRefs(); const inp = $('#ref-q'); if (inp) { inp.focus(); inp.setSelectionRange(pos, pos); } }, 200);
   });
   body.addEventListener('click', ev => {
+    const stb = ev.target.closest('.seg[data-seg=settab] button'); if (stb) { lsSet('setTab', stb.dataset.v); renderSettings(); window.scrollTo(0, 0); return; }
     const tp = ev.target.closest('[data-tabp]'); if (tp) { const l = TAB_PROFILES.find(x => x[0] === tp.dataset.tabp)[2]; setTabs(TABS.map(t => t[0]).filter(v => !l.includes(v))); return; }
     const sm = ev.target.closest('[data-schmode]'); if (sm) { schSave(n => { n.mode = sm.dataset.schmode; }); return; }
     const sa = ev.target.closest('[data-schadd]'); if (sa) { const wd = sa.dataset.schadd; schSave(n => { const r = (n.week[wd] ||= []); const last = r[r.length - 1]; r.push(last && okRange(last) ? [pad(Math.min(23, Math.floor(hmMin(last[1]) / 60) + 1)) + ':00', '18:00'] : ['09:00', '12:00']); }); setTimeout(() => { const ins = body.querySelectorAll(`[data-schr^="${wd}:"]`); ins[ins.length - 2]?.focus(); }, 40); return; }
@@ -5683,7 +5796,7 @@ function bindRefsOn(body) {
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const act = b.dataset.act, row = b.closest('.ref-row');
     const obj = row ? objOf(row.dataset.kind, row.dataset.id) : null;
-    if (b.dataset.act === 'go-planning') { ev.preventDefault(); $('#sch-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (b.dataset.act === 'go-planning') { ev.preventDefault(); if (lsGet('setTab', 'travail') !== 'travail') { lsSet('setTab', 'travail'); renderSettings(); } $('#sch-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if (act === 'add-client') addC();
     else if (act === 'add-task') addT();
     else if (act === 'add-person') addP();
@@ -5733,6 +5846,7 @@ function bindRefsOn(body) {
       const hm = parseHM(i.value); if (!hm) { toast('Heure non comprise (ex. 8h30)'); renderSettings(); return; }
       schSave(n => { n.forfait[k] = pad(hm[0]) + ':' + pad(hm[1]); }); return;
     }
+    if (i.matches('[data-schjf]')) { schSave(n => { n.forfait.jf = i.checked; }); return; }
     if (i.dataset.schday) { const wd = +i.dataset.schday; schSave(n => { const d = new Set(n.forfait.days); i.checked ? d.add(wd) : d.delete(wd); n.forfait.days = [...d].sort(); }); return; }
     if (i.id === 'liss-mode' || i.id === 'liss-task') {
       const L = lissCfg(); let v = i.value;
@@ -5745,7 +5859,7 @@ function bindRefsOn(body) {
     if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
     if (i.dataset.s === 'dayStart') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayStart; toast('Heure non comprise (ex. 07:30)'); return; } S.meta.settings.dayStart = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
     if (i.dataset.s === 'dayEnd') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayEnd; toast('Heure non comprise (ex. 18:00)'); return; } S.meta.settings.dayEnd = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
-    if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : k === 'defaultBillable' ? i.value === '1' : i.value; touchMeta(); return; }
+    if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : (k === 'defaultBillable' || k === 'sugg') ? i.value === '1' : i.value; touchMeta(); return; }
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
     const o = objOf(row.dataset.kind, row.dataset.id); if (!o) return;
     if (i.dataset.k === 'group') {
