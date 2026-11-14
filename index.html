@@ -404,6 +404,10 @@ h2:first-child{margin-top:0}
 .ref-head{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 12px 2px;font-weight:600}
 .amt-e{display:block;font-size:12px;font-weight:500;color:var(--ink-2);text-align:right}
 .ref-hint{padding:10px 14px}.ref-row .tag.pk{margin:0 6px;width:auto;white-space:nowrap}
+#print-area{display:none}
+@media print{body.printing > *:not(#print-area){display:none!important}body.printing{background:#fff}body.printing #print-area{display:block;font:11pt/1.45 Georgia,'Times New Roman',serif;color:#111;padding:0 4mm}
+#print-area h1{font-size:18pt;margin:0 0 2pt}#print-area .pa-sub{color:#555;font-size:10pt;margin-bottom:12pt}#print-area h2{font-size:12.5pt;margin:14pt 0 4pt;border-bottom:1px solid #999;padding-bottom:2pt;break-after:avoid}
+#print-area table{border-collapse:collapse;width:100%}#print-area th{text-align:left;font-weight:600;width:34%;vertical-align:top;padding:2pt 8pt 2pt 0}#print-area td{padding:2pt 0;vertical-align:top}#print-area ul{margin:0;padding-left:16pt}#print-area li{margin:1pt 0}#print-area tr,#print-area li{break-inside:avoid}}
 .pers-nm{all:unset;cursor:pointer;font-weight:600;min-width:140px}.pers-nm:hover{text-decoration:underline}.pers-role{min-width:120px}
 .cb-ppl{display:grid;gap:2px}.cb-pp{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}.cb-pp:last-child{border:0}.cb-pp .nm2{all:unset;cursor:pointer;font-weight:600}.cb-pp .nm2:hover{text-decoration:underline}
 .rate-in{display:inline-flex;gap:3px}.rate-in input{width:72px;text-align:right}.rate-in select{width:auto}
@@ -1055,7 +1059,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.40.0';
+const APP_VERSION = '1.41.0';
 const APP_DATE = '14/11/2026';
 /* =========================================================
    Utilitaires
@@ -2626,6 +2630,76 @@ function openNewDossier() {
   };
   q('#nd-ok').addEventListener('click', go); m.el.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.tagName === 'INPUT') { ev.preventDefault(); go(); } });
 }
+/* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
+   Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
+const CBX = {
+  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Notes du groupe']],
+  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal']]
+};
+function cbxSel(kind) { try { const v = JSON.parse(lsGet('cbx-' + kind, 'null')); if (Array.isArray(v)) return new Set(v); } catch (e) {} return new Set(CBX[kind].filter(x => !x[2]).map(x => x[0])); }
+const ccnTxt = k => ccnIsNone(k) ? 'Sans convention collective (Code du travail, IDCC 9999)' : (k.i != null ? 'IDCC ' + idccStr(k.i) + ' — ' : '') + k.t + (k.i != null && ccnOld(ccnOf(k.i)) ? ' (' + ccnOldTxt(ccnOf(k.i)) + ')' : '');
+const ptTxt = x => x.t + (x.due ? ' (échéance le ' + fmtDate(parseDay(x.due)) + ')' : '') + ' — ouvert le ' + fmtDate(parseDay(x.open));
+const jrTxt = x => fmtDate(parseDay(x.d)) + ' : ' + x.t + (x.ref ? ' [réf. ' + x.ref + ']' : '');
+const pplTxt = x => [(x.civ ? x.civ + ' ' : '') + x.name, pRoleTxt(x), x.email, x.phone].filter(Boolean).join(' · ');
+function cbxModel(obj, isG, sel) {
+  const S2 = [], add = (k, t, items) => { if (sel.has(k) && items && items.length) S2.push({ t, items }); }, today = dayKey(Date.now()), mk = defaultCycleMonth();
+  if (!isG) {
+    const c = obj, b = cbPeek(c), p = cyOf(c), g = groupOf(c.group), owner = !isMine(c) && c.owner ? personOf(c.owner) : null;
+    add('ident', 'Identité et convention collective', [['Raison sociale', c.name], ['N° de dossier', c.code], ['SIRET', c.siret ? fmtSiret(c.siret) : ''], ['Groupe', g ? g.name + (isMother(c) ? ' (société mère)' : '') : ''], ['Portefeuille', isMine(c) ? 'Mon portefeuille' : owner ? 'Portefeuille de ' + owner.name : 'Hors de mon portefeuille'], ...((b.ccn || []).length ? b.ccn.map((k, i) => [i ? '' : 'Convention collective', ccnTxt(k)]) : [['Convention collective', 'non renseignée']])].filter(x => x[1]));
+    const a = cliAvg(c.id);
+    add('cycle', 'Cycle de paie', [['Réception des variables', (CY_LBL.rec[p.rec] || p.rec) + (p.rec !== 'var' && p.recDay ? ', envoi vers le ' + p.recDay : '') + (p.rec === 'var' && p.varDay ? ', habituellement ' + cyVarLabel(p.varDay) : '')], ['Validation client', p.valid ? 'demandée' : 'non demandée'], ['Virements', CY_LBL.vir[p.vir] || p.vir], ['Dépôt des bulletins', (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : '')], ['Échéance DSN', 'le ' + (p.dsn || 15) + ' du mois suivant'], ['Bulletins (cycle de ' + mkLabel(mk) + ')', effBs(mk, c.id).n ?? ''], ['Remarque permanente', p.notes], ['Temps moyen', a ? fmtDur(a.avg) + ' par mois (3 derniers mois)' : '']].filter(x => x[1] !== '' && x[1] != null));
+    add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + (x.until ? ' — jusqu’au cycle de ' + mkLabel(x.until) : '')]));
+    add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x)]));
+    add('tarifs', 'Tarifs de facturation', S.meta.tasks.filter(t => !t.deletedAt && rateOf(c.id, t.id)).map(t => [t.name, rateTxt(rateOf(c.id, t.id)) + (rateOf(c.id, t.id).own ? ' (propre au dossier)' : '')]));
+    add('pratiques', 'Pratiques et particularités', [['Pratiques du client', b.prat], ['Particularités du cycle et des salariés', b.part]].filter(x => x[1]));
+    add('points', 'Points en cours', (b.points || []).filter(x => !x.done).sort((x, y) => (x.due || '9').localeCompare(y.due || '9')).map(x => ['', ptTxt(x)]));
+    add('journal', 'Journal', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]));
+    const y = new Date().getFullYear(); add('vir', 'Calendrier des virements ' + y, Object.entries(b.vir || {}).filter(([m]) => m.startsWith(String(y))).sort().map(([m, d]) => [MONTHS_L[+m.slice(5) - 1], fmtDate(parseDay(d))]));
+    const rel = b.rel || {}; if (rel.lvl && rel.lvl !== 'neutre' || rel.note) add('relation', 'Relation client', [['Niveau', (CB_REL.find(r => r[0] === (rel.lvl || 'neutre')) || [, 'Neutre'])[1]], ['Commentaire', rel.note], ['Mise à jour', rel.d ? fmtDate(parseDay(rel.d)) : '']].filter(x => x[1]));
+    if (g) add('gnotes', 'Notes du groupe ' + g.name, cbPeek(g).notes ? [['', cbPeek(g).notes]] : []);
+    return { title: c.name, sub: [c.code ? 'Dossier n° ' + c.code : '', g ? 'Groupe ' + g.name : ''].filter(Boolean).join(' · '), sections: S2 };
+  }
+  const g = obj, b = cbPeek(g), mem = grpMembers(g);
+  add('ident', 'Le groupe', [['Nom', g.name], ['Société mère', g.mother && clientOf(g.mother) ? clientOf(g.mother).name : ''], ['Nombre de dossiers', String(mem.length)]].filter(x => x[1]));
+  add('notes', 'Notes du groupe', b.notes ? [['', b.notes]] : []);
+  add('dossiers', 'Dossiers et conventions collectives', mem.map(x => [x.name + (x.code ? ' (n° ' + x.code + ')' : ''), (cbPeek(x).ccn || []).map(ccnTxt).join(' ; ') || 'convention non renseignée']));
+  add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).some(id => clientOf(id)?.group === g.id)).map(x => ['', pplTxt(x) + ' — ' + (x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', ')]));
+  add('points', 'Points en cours', [...(b.points || []).filter(x => !x.done).map(x => ['Groupe', ptTxt(x)]), ...mem.flatMap(x => (cbPeek(x).points || []).filter(p2 => !p2.done).map(p2 => [x.name, ptTxt(p2)]))]);
+  add('journal', 'Journal du groupe', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]));
+  return { title: 'Groupe ' + g.name, sub: mem.length + ' dossier' + (mem.length > 1 ? 's' : ''), sections: S2 };
+}
+function cbxText(M) {
+  const L = [M.title.toUpperCase(), ...(M.sub ? [M.sub] : []), 'Carnet de bord au ' + fmtDate(Date.now()), ''];
+  for (const s2 of M.sections) { L.push(s2.t, '-'.repeat(Math.min(60, s2.t.length))); for (const [l, v] of s2.items) L.push(l ? l + ' : ' + v : '• ' + v); L.push(''); }
+  return L.join('\n').trim() + '\n';
+}
+function cbxPrint(M) {
+  document.getElementById('print-area')?.remove();
+  const el = document.createElement('div'); el.id = 'print-area';
+  el.innerHTML = `<h1>${esc(M.title)}</h1><div class="pa-sub">${esc([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '))}</div>${M.sections.map(s2 => `<h2>${esc(s2.t)}</h2>${s2.items.some(x => x[0]) ? `<table>${s2.items.map(([l, v]) => `<tr><th>${esc(l)}</th><td>${esc(v).replace(/\n/g, '<br>')}</td></tr>`).join('')}</table>` : `<ul>${s2.items.map(([, v]) => `<li>${esc(v).replace(/\n/g, '<br>')}</li>`).join('')}</ul>`}`).join('')}`;
+  document.body.appendChild(el); document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); el.remove(); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(() => { try { window.print(); } catch (e) { toast('Impression impossible ici : utilisez « Copier le texte »'); } setTimeout(() => { if (document.body.classList.contains('printing')) done(); }, 60000); }, 50);
+}
+function openCbExport() {
+  const isG = !!UI.cbG, obj = isG ? groupOf(UI.cbG) : clientOf(UI.cbId); if (!obj) return;
+  const kind = isG ? 'groupe' : 'dossier', sel = cbxSel(kind);
+  const m = modal(`<div class="modal-h"><h3>Exporter le carnet — ${esc(isG ? 'groupe ' + obj.name : obj.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:6px"><div class="small muted">Rubriques à inclure (les rubriques vides sont ignorées) :</div>
+      ${CBX[kind].map(([k, l, sens]) => `<label class="chk"><input type="checkbox" value="${k}" ${sel.has(k) ? 'checked' : ''}> ${esc(l)}${sens ? ' <span class="muted small">— sensible, à cocher si besoin</span>' : ''}</label>`).join('')}</div>
+    <div class="modal-f"><button class="btn" data-x="txt">${ICON.copy} Copier le texte</button><button class="btn" data-x="file">${ICON.down} Fichier .txt</button><span class="sp"></span><button class="btn primary" data-x="pdf">PDF (imprimer)</button></div>`);
+  m.el.querySelector('.modal-f').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-x]'); if (!b) return;
+    const ks = [...m.el.querySelectorAll('.modal-b input:checked')].map(i => i.value); lsSet('cbx-' + kind, JSON.stringify(ks));
+    const M = cbxModel(obj, isG, new Set(ks)); if (!M.sections.length) { toast('Aucune rubrique renseignée parmi celles cochées'); return; }
+    const fn = 'carnet_' + norm(isG ? 'groupe ' + obj.name : obj.name).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '_' + dayKey(Date.now());
+    if (b.dataset.x === 'txt') copyText(cbxText(M));
+    else if (b.dataset.x === 'file') downloadText(fn + '.txt', cbxText(M), 'text/plain');
+    else { m.close(); cbxPrint(M); return; }
+    m.close();
+  });
+}
 function renderCarnet() {
   const body = $('#carnet-body');
   if (UI.cbG) { const g = groupOf(UI.cbG); if (!g) { UI.cbG = null; location.replace('#carnet'); return; } renderCarnetGroupe(body, g); return; }
@@ -2703,7 +2777,7 @@ function renderCarnetGroupe(body, g) {
   const als = mem.reduce((a, x) => a + alActive(x, mk).length, 0), rels = mem.filter(x => { const l = cbPeek(x).rel?.lvl; return l && l !== 'neutre'; });
   let html = `<div class="card filters cb-head" style="--g:${grpColor(g)}"><a class="btn sm ghost" href="#carnet">‹ Tous les carnets</a>
     <h1>${grpTag(g, 'big')}</h1><span class="muted">Carnet du groupe · ${mem.length} dossier${mem.length > 1 ? 's' : ''}${mem.length && nMine < mem.length ? ' (dont ' + nMine + ' dans mon portefeuille)' : ''}</span>
-    <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span></div>`;
+    <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span><button class="btn sm ghost" data-cbexp title="Exporter ce carnet (PDF ou texte)">${ICON.down} Exporter</button></div>`;
   { const cands = S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group !== g.id).sort((a2, b2) => (a2.group ? 1 : 0) - (b2.group ? 1 : 0) || a2.name.localeCompare(b2.name, 'fr'));
     html += `<i data-b="gparam" data-half="1"></i><h2>Paramètres du groupe</h2><div class="card cb-sec">
       <label class="fld"><span>Nom du groupe</span><input id="cbg-name" value="${esc(g.name)}" maxlength="60" autocomplete="off"></label>
@@ -2740,7 +2814,7 @@ function renderCarnetDossier(body, c) {
     <h1>${cliIc(c.id)}${esc(c.name)}</h1>${c.code ? `<span class="mono muted">n° ${esc(c.code)}</span>` : ''}${g ? `<a href="#carnet/groupe/${encodeURIComponent(g.id)}" title="Ouvrir le carnet du groupe" style="text-decoration:none">${grpTag(g, 'big')}</a>` : ''}
     <span class="cb-pf ${mine ? '' : 'other'}">${mine ? '★ Mon portefeuille' : owner ? 'Portefeuille de ' + esc(owner.name) : 'Hors de mon portefeuille'}</span>
     <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span>
-    <button class="btn sm" data-cba="start" title="Démarrer le chrono sur ce dossier">${ICON.play} Chrono</button></div>`;
+    <button class="btn sm ghost" data-cbexp title="Exporter ce carnet (PDF ou texte)">${ICON.down} Exporter</button><button class="btn sm" data-cba="start" title="Démarrer le chrono sur ce dossier">${ICON.play} Chrono</button></div>`;
   // Identité et conventions collectives
   html += `<i data-b="ident"></i><h2>Identité et convention collective</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Raison sociale</dt><dd>${esc(c.name)}</dd><dt>N° de dossier</dt><dd>${esc(c.code || '—')}</dd>${c.siret ? `<dt>SIRET</dt><dd class="mono">${esc(fmtSiret(c.siret))}</dd>` : ''}<dt>Groupe</dt><dd>${g ? grpTag(g) : '—'}</dd><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${effBs(mk, c.id).n ?? '—'}</dd></dl>
@@ -2876,6 +2950,7 @@ function bindCarnet() {
     const mb = ev.target.closest('[data-cbmother]'); if (mb && UI.cbG) { const g = groupOf(UI.cbG), id = mb.dataset.cbmother; setMother(g.id, g.mother === id ? null : id); return; }
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
+    if (ev.target.closest('[data-cbexp]')) { openCbExport(); return; }
     if (ev.target.closest('[data-cba=newdos]')) { openNewDossier(); return; }
     if (ev.target.closest('[data-cba=newgrp]')) { askGroupName(id => { if (id) location.hash = 'carnet/groupe/' + encodeURIComponent(id); }); return; }
     const gc = ev.target.closest('[data-cbgcol]'); if (gc && UI.cbG) { const g = groupOf(UI.cbG); g.color = +gc.dataset.cbgcol; touchMeta(); return; }
