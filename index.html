@@ -161,7 +161,7 @@ h2:first-child{margin-top:0}
 .cy-table th:nth-child(2){position:sticky;left:62px;z-index:3}
 body.stick #carnet-body .cb-head{position:sticky;top:64px;z-index:16;box-shadow:0 -9px 0 var(--bg),0 6px 14px -8px rgba(0,0,0,.25)}
 @media (min-width:701px){
-  body.stick #portefeuille-body .pf-head,body.stick #carnet-body .cb-tools,body.stick #rapports-body > .card.filters{position:sticky;top:64px;z-index:16;box-shadow:0 -9px 0 var(--bg),0 6px 14px -8px rgba(0,0,0,.25)}
+  body.stick #portefeuille-body .pf-head,body.stick #carnet-body .cb-tools,body.stick #rapports-body > .card.filters,body.stick #outils-body > .tl-head{position:sticky;top:64px;z-index:16;box-shadow:0 -9px 0 var(--bg),0 6px 14px -8px rgba(0,0,0,.25)}
   body.stick #portefeuille-body .cy-tw{overflow:visible}body.stick #portefeuille-body .cy-table th{top:var(--pfh,126px);z-index:4}body.stick #portefeuille-body .cy-table th:first-child,body.stick #portefeuille-body .cy-table th:nth-child(2){z-index:5}
 }
 @media (max-width:700px){body.stick #carnet-body .cb-head{top:56px;padding:6px 10px;gap:6px}body.stick #carnet-body .cb-head h1{font-size:16px}}
@@ -721,6 +721,7 @@ a.btn:not(.primary){color:var(--ink)}
 .cb-saved.on{opacity:1}
 @media (max-width:700px){.cb-kv{grid-template-columns:1fr}.cb-kv dt{margin-top:4px}.cb-head h1{font-size:18px}}
 /* Blocs déplaçables et repliables */
+.cm-list{display:grid;gap:6px}.cm-row{display:flex;align-items:center;gap:6px}.cm-row input[data-f=l]{flex:1 1 150px;min-width:110px}.cm-row input[data-f=kw]{flex:1.4 1 180px;min-width:120px}.cm-row select{flex:0 0 205px}@media (max-width:700px){.cm-row{flex-wrap:wrap}.cm-row select{flex:1 1 100%}}.cbcp-list .chk input{flex:none}.cm-row>:last-child{flex:0 0 40px;display:inline-flex;justify-content:center}.cm-row .col-pill{padding:4px 6px}.cm-n{min-width:22px;text-align:right}.cm-base{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 5px}.cbcp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 12px;margin-top:6px}
 .blk-wrap{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
 .blk-wrap>*{width:100%;min-width:0}
 .blk-wrap>.blk.half{width:calc(50% - 8px)}
@@ -1072,7 +1073,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.43.0';
+const APP_VERSION = '1.44.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -1510,6 +1511,7 @@ function defaultBillable(clientId, taskId) {
   const t = taskOf(taskId);
   if (t && t.billing && t.billing !== 'auto') return t.billing === 'bill';
   if (isPersonId(clientId)) return false; // temps passé avec une personne : non facturable par défaut
+  const cb = t ? catBill(taskCat(t)) : ''; if (cb) return cb === 'bill'; // facturation par défaut de la catégorie (v1.44.0)
   const c = clientOf(clientId);
   if (c && c.billing) return c.billing === 'bill';
   return !!S.meta.settings.defaultBillable;
@@ -1926,13 +1928,28 @@ function addPerson(name, role) {
 /* ---------- Catégories de tâches et tarifs (v1.40.0) ----------
    task.cat = 'cyc' | 'evt' | 'exc' | 'int' (sinon classement automatique d'après le nom) ;
    task.rate = { mode: 'h' | 'acte', amount } ; tarif particulier d'un dossier : client.rates = { idTâche: { mode, amount } }. */
-const TASK_CATS = [['cyc', 'Cyclique'], ['evt', 'Événementiel'], ['exc', 'Exceptionnel'], ['int', 'Interne']];
-const CAT_L = Object.fromEntries(TASK_CATS);
+/* Catégories modifiables (v1.44.0) : settings.cats = { t: [{ k, l, kw, bill }], p: [{ k, l }] } dans l'ordre d'affichage.
+   Catégories de base renommables, non supprimables ; catégories ajoutées (k = 'u…') supprimables. kw : mots-clés séparés par des virgules. */
+const TASK_CATS_BASE = [['cyc', 'Cyclique'], ['evt', 'Événementiel'], ['exc', 'Exceptionnel'], ['int', 'Interne']];
+const P_KINDS_BASE = [['col', 'Collègue'], ['cli', 'Interlocuteur client'], ['org', 'Organisme / partenaire'], ['autre', 'Autre']];
+const CAT_BASE_K = { t: TASK_CATS_BASE.map(c => c[0]), p: P_KINDS_BASE.map(c => c[0]) };
+function catList(grp) { // [{ k, l, kw, bill }] complété des catégories de base manquantes
+  const base = grp === 't' ? TASK_CATS_BASE : P_KINDS_BASE, st = ((S.meta && S.meta.settings && S.meta.settings.cats) || {})[grp];
+  const out = Array.isArray(st) ? st.filter(x => x && x.k && x.l).map(x => ({ ...x })) : [];
+  for (const [k, l] of base) if (!out.some(x => x.k === k)) out.push({ k, l });
+  return out;
+}
+const TCATS = () => catList('t').map(x => [x.k, x.l]);
+const PKINDS = () => catList('p').map(x => [x.k, x.l]);
+const CAT_L = new Proxy({}, { get: (_, k) => (catList('t').find(x => x.k === k) || {}).l });
+const catBill = k => k ? ((catList('t').find(x => x.k === k) || {}).bill || '') : '';
+const kwList = v => String(v || '').split(/[,;\n]/).map(w => norm(w)).filter(Boolean);
 const CAT_KW = { evt: ['maladie', 'entree', 'sortie', 'stc', 'solde de tout compte', 'contrat', 'avenant', 'due', 'maj salarie', 'accident', 'arret', 'rupture', 'licenciement', 'attestation', 'conge', 'embauche', 'demission', 'mutation', 'maternite', 'paternite'],
   cyc: ['bulletin', 'bs', 'dsn', 'paie', 'virement', 'depot', 'variable', 'production', 'envoi', 'validation', 'cloture', 'declaration', 'charges sociales', 'od de paie'],
   exc: ['analyse', 'audit', 'conseil', 'parametrage', 'montage', 'simulation', 'desk', 'question', 'etude', 'controle', 'urssaf', 'support', 'reprise', 'regularisation', 'formation client', 'mysilae', 'silae'] };
 function autoCat(name) {
   const n = norm(name); if (!n) return '';
+  for (const c of catList('t')) if (kwList(c.kw).some(w => new RegExp('(^|[^a-z0-9])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s') + '([^a-z0-9]|$)').test(n) || (w.length > 5 && n.includes(w)))) return c.k;
   if (INTERNAL_TASKS.some(x => norm(x) === n)) return 'int';
   for (const k of ['evt', 'cyc', 'exc']) if (CAT_KW[k].some(w => new RegExp('(^|[^a-z])' + w.replace(/ /g, '\\s') + '([^a-z]|$)').test(n) || (w.length > 5 && n.includes(w)))) return k;
   return '';
@@ -1946,10 +1963,10 @@ const hasRates = () => S.meta.tasks.some(t => t.rate && +t.rate.amount > 0) || S
 const sumAmt = l => l.reduce((a, e) => a + amountOf(e), 0);
 const eurS = n => (n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 function taskOptsGrouped(ts) { // <optgroup> par catégorie pour un <select> de tâches
-  return [...TASK_CATS, ['', 'Non classées']].map(([k, l]) => { const g = ts.filter(t => (taskCat(t) || '') === k); return g.length ? `<optgroup label="${esc(l)}">${g.map(t => `<option value="${t.id}">${esc(t.name)}${t.rate && +t.rate.amount ? ' (' + esc(rateTxt(t.rate)) + ')' : ''}</option>`).join('')}</optgroup>` : ''; }).join('');
+  return [...TCATS(), ['', 'Non classées']].map(([k, l]) => { const g = ts.filter(t => (taskCat(t) || '') === k); return g.length ? `<optgroup label="${esc(l)}">${g.map(t => `<option value="${t.id}">${esc(t.name)}${t.rate && +t.rate.amount ? ' (' + esc(rateTxt(t.rate)) + ')' : ''}</option>`).join('')}</optgroup>` : ''; }).join('');
 }
 function catGrouped(items, ofItem) { // insère des intertitres de catégorie dans une liste d'options
-  const out = []; for (const [k, l] of [...TASK_CATS, ['', 'Non classées']]) { const g = items.filter(x => (ofItem(x) || '') === k); if (g.length) out.push({ head: true, label: l }, ...g); } return out;
+  const out = []; for (const [k, l] of [...TCATS(), ['', 'Non classées']]) { const g = items.filter(x => (ofItem(x) || '') === k); if (g.length) out.push({ head: true, label: l }, ...g); } return out;
 }
 function addTask(name) {
   name = name.trim(); if (!name) return null;
@@ -2634,17 +2651,67 @@ function openNewDossier() {
     <div class="modal-b" style="display:grid;gap:10px"><label class="fld"><span>Raison sociale</span><input id="nd-name" maxlength="120" placeholder="ex. Alpha SARL" autocomplete="off"></label>
       <div class="fld-row"><label class="fld"><span>N° de dossier</span><input id="nd-code" maxlength="30" autocomplete="off"></label><label class="fld"><span>Groupe</span><select id="nd-grp">${groupSelOpts('')}</select></label></div>
       <label class="chk"><input type="checkbox" id="nd-mine" checked> ★ Dans mon portefeuille</label>
+      ${cbCopyFields(null)}
       <div class="muted small">Le carnet du dossier s’ouvre ensuite : convention collective, paramètres du cycle, pratiques…</div></div>
     <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="nd-ok">Créer</button></div>`);
   const q = x => m.el.querySelector(x); setTimeout(() => q('#nd-name').focus(), 30);
   q('#nd-grp').addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || ''); }); });
+  cbCopyBind(m.el);
   const go = () => {
     const nm = q('#nd-name').value.trim(); if (!nm) { q('#nd-name').focus(); return; }
     if (S.meta.clients.some(c => !c.deletedAt && norm(c.name) === norm(nm))) { toast('Un dossier porte déjà ce nom'); return; }
     const id = addClient(nm), c = clientOf(id); c.code = q('#nd-code').value.trim(); c.mine = q('#nd-mine').checked; const g = q('#nd-grp').value; if (g && g !== '__newgrp') c.group = g;
-    touchMeta(); m.close(); location.hash = 'carnet/' + encodeURIComponent(id); toast('Dossier créé : ' + nm);
+    const cp = cbCopyRead(m.el), src = cp.src && clientOf(cp.src); let n = 0; if (src && cp.keys.length) n = cbCopy(c, src, cp.keys);
+    touchMeta(); m.close(); location.hash = 'carnet/' + encodeURIComponent(id); toast('Dossier créé : ' + nm + (src && cp.keys.length ? ' · carnet copié depuis ' + src.name : ''));
   };
   q('#nd-ok').addEventListener('click', go); m.el.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.tagName === 'INPUT') { ev.preventDefault(); go(); } });
+}
+/* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
+   Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
+const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
+  ['notes', 'Remarque permanente', 0], ['interloc', 'Interlocuteurs (rattachés aux deux dossiers)', 0], ['points', 'Points en cours', 0], ['journal', 'Journal', 0], ['rel', 'Relation client', 0], ['alertes', 'Alertes salariés', 0]];
+function cbCopyFields(dstId) {
+  const cs = S.meta.clients.filter(c => !c.deletedAt && c.id !== dstId).sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
+  return `<div class="cbcp"><label class="fld"><span>Copier le carnet d’un dossier${dstId ? '' : ' (facultatif)'}</span><input id="cbcp-q" list="cbcp-dl" placeholder="Rechercher un dossier…" autocomplete="off"><datalist id="cbcp-dl">${cs.map(c => `<option value="${esc(c.name + (c.code ? ' — n° ' + c.code : ''))}">`).join('')}</datalist></label>
+    <div id="cbcp-w" hidden><div class="muted small" id="cbcp-src"></div><div class="cbcp-list">${CBCP.map(([k, l, d]) => `<label class="chk"><input type="checkbox" data-cbcp="${k}" ${d ? 'checked' : ''}> ${esc(l)}</label>`).join('')}</div>
+    <div style="margin-top:4px"><button type="button" class="btn sm ghost" data-cbcpall="1">Tout cocher</button><button type="button" class="btn sm ghost" data-cbcpall="0">Tout décocher</button></div></div></div>`;
+}
+function cbCopyBind(root, dstId) {
+  const q = x => root.querySelector(x), find = v => { v = norm(v); if (!v) return null; return S.meta.clients.find(c => !c.deletedAt && c.id !== dstId && (norm(c.name + (c.code ? ' — n° ' + c.code : '')) === v || norm(c.name) === v || (c.code && norm(c.code) === v))) || null; };
+  const upd = () => { const c = find(q('#cbcp-q').value); root.dataset.cbcpSrc = c ? c.id : ''; q('#cbcp-w').hidden = !c; if (c) q('#cbcp-src').textContent = 'Éléments à copier depuis « ' + c.name + ' » :'; };
+  q('#cbcp-q').addEventListener('input', upd); q('#cbcp-q').addEventListener('change', upd);
+  root.addEventListener('click', ev => { const b = ev.target.closest('[data-cbcpall]'); if (b) root.querySelectorAll('[data-cbcp]').forEach(x => { x.checked = b.dataset.cbcpall === '1'; }); });
+}
+const cbCopyRead = root => ({ src: root.dataset.cbcpSrc || '', keys: [...root.querySelectorAll('[data-cbcp]:checked')].map(x => x.dataset.cbcp) });
+function cbCopy(dst, src, keys) { // retourne le nombre d'éléments copiés
+  const K = new Set(keys), sb = cbPeek(src), clone = v => JSON.parse(JSON.stringify(v)); let n = 0; const db = () => cbOf(dst), today = dayKey(Date.now());
+  if (K.has('grp') && !dst.group && src.group && groupOf(src.group)) { dst.group = src.group; n++; }
+  if (K.has('ccn') && (sb.ccn || []).length && !db().ccn.length) { db().ccn = clone(sb.ccn); n++; }
+  if (K.has('cycle') && src.cy) { const sp = cyOf(src), cy = { ...(dst.cy || {}) }; let k2 = 0; for (const k of CY_COPY_KEYS) if (cy[k] == null || cy[k] === '') { if (sp[k] != null && sp[k] !== '') { cy[k] = sp[k]; k2++; } } if (k2) { dst.cy = cy; n++; } }
+  if (K.has('notes') && src.cy && src.cy.notes && !(dst.cy && dst.cy.notes)) { dst.cy = { ...(dst.cy || {}), notes: src.cy.notes }; n++; }
+  if (K.has('prat')) for (const f of ['prat', 'part']) if (sb[f] && !db()[f]) { db()[f] = sb[f]; n++; }
+  if (K.has('tarifs')) { if (src.rates) { const r = { ...(dst.rates || {}) }; let k2 = 0; for (const [t, v] of Object.entries(src.rates)) if (!r[t]) { r[t] = clone(v); k2++; } if (k2) { dst.rates = r; n++; } } if (src.billing && !dst.billing) { dst.billing = src.billing; n++; } }
+  if (K.has('vir') && sb.vir) { const v = db().vir; let k2 = 0; for (const [mk, d] of Object.entries(sb.vir)) if (!v[mk]) { v[mk] = d; k2++; } if (k2) n++; }
+  if (K.has('interloc')) for (const x of S.meta.persons) if (!x.deletedAt && (x.clients || []).includes(src.id) && !x.clients.includes(dst.id)) { x.clients = [...x.clients, dst.id]; n++; }
+  if (K.has('points')) for (const x of (sb.points || []).filter(x => !x.done)) { db().points.push({ ...clone(x), id: newId(), open: today }); n++; }
+  if (K.has('journal')) for (const x of (sb.journal || [])) { db().journal.push({ ...clone(x), id: newId() }); n++; }
+  if (K.has('rel') && sb.rel && sb.rel.lvl && sb.rel.lvl !== 'neutre' && (!dst.cb || !dst.cb.rel || dst.cb.rel.lvl === 'neutre')) { db().rel = clone(sb.rel); n++; }
+  if (K.has('alertes') && (src.alerts || []).length) { dst.alerts = [...(dst.alerts || []), ...src.alerts.filter(a => !(dst.alerts || []).some(b => norm(b.name) === norm(a.name))).map(a => ({ ...clone(a), id: newId() }))]; n++; }
+  return n;
+}
+function openCbCopy(dstId) {
+  const dst = clientOf(dstId); if (!dst) return;
+  const m = modal(`<div class="modal-h"><h3>Copier dans « ${esc(dst.name)} »</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">${cbCopyFields(dstId)}<div class="muted small" style="margin-top:8px">Seuls les éléments encore vides de ce carnet sont complétés ; rien n’est remplacé. Points en cours et journal sont ajoutés.</div></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cbcp-ok">Copier</button></div>`);
+  cbCopyBind(m.el, dstId); setTimeout(() => m.el.querySelector('#cbcp-q').focus(), 30);
+  m.el.querySelector('#cbcp-ok').addEventListener('click', () => {
+    const cp = cbCopyRead(m.el), src = cp.src && clientOf(cp.src); if (!src) { toast('Choisissez le dossier à copier'); return; } if (!cp.keys.length) { toast('Cochez au moins un élément'); return; }
+    const snap = JSON.parse(JSON.stringify(dst)), pSnap = S.meta.persons.map(x => [x, x.clients ? [...x.clients] : null]);
+    const n = cbCopy(dst, src, cp.keys); m.close();
+    if (!n) { toast('Rien à copier : ces éléments sont déjà renseignés ou vides dans « ' + src.name + ' »'); return; }
+    touchMeta(); toast('Carnet complété depuis « ' + src.name + ' »', 'Annuler', () => { for (const k of Object.keys(dst)) delete dst[k]; Object.assign(dst, snap); pSnap.forEach(([x, c]) => { if (c) x.clients = c; else delete x.clients; }); touchMeta(); });
+  });
 }
 /* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
@@ -2906,7 +2973,7 @@ function renderCarnetDossier(body, c) {
     <h1>${cliIc(c.id)}${esc(c.name)}</h1>${c.code ? `<span class="mono muted">n° ${esc(c.code)}</span>` : ''}${g ? `<a href="#carnet/groupe/${encodeURIComponent(g.id)}" title="Ouvrir le carnet du groupe" style="text-decoration:none">${grpTag(g, 'big')}</a>` : ''}
     <span class="cb-pf ${mine ? '' : 'other'}">${mine ? '★ Mon portefeuille' : owner ? 'Portefeuille de ' + esc(owner.name) : 'Hors de mon portefeuille'}</span>
     <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span>
-    <button class="btn sm ghost" data-cbexp title="Exporter ce carnet (PDF ou texte)">${ICON.down} Exporter</button><button class="btn sm" data-cba="start" title="Démarrer le chrono sur ce dossier">${ICON.play} Chrono</button></div>`;
+    <button class="btn sm ghost" data-cbcopy title="Copier des éléments du carnet d’un autre dossier">⧉ Copier depuis…</button><button class="btn sm ghost" data-cbexp title="Exporter ce carnet (PDF ou texte)">${ICON.down} Exporter</button><button class="btn sm" data-cba="start" title="Démarrer le chrono sur ce dossier">${ICON.play} Chrono</button></div>`;
   // Identité et conventions collectives
   html += `<i data-b="ident"></i><h2>Identité et convention collective</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Raison sociale</dt><dd>${esc(c.name)}</dd><dt>N° de dossier</dt><dd>${esc(c.code || '—')}</dd>${c.siret ? `<dt>SIRET</dt><dd class="mono">${esc(fmtSiret(c.siret))}</dd>` : ''}<dt>Groupe</dt><dd>${g ? grpTag(g) : '—'}</dd><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${effBs(mk, c.id).n ?? '—'}</dd></dl>
@@ -2932,7 +2999,7 @@ function renderCarnetDossier(body, c) {
   { const own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && (x.clients || []).some(id => clientOf(id)?.group === g.id)) : [];
     const pp = x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cba="pfiche" data-pid="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))}</span><span class="sp" style="flex:1"></span>${x.phone ? `<a class="small" href="${esc(telHref(x.phone))}">${esc(x.phone)}</a>` : ''}${pContact(x)}</div>`;
     html += `<i data-b="interloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs</h2><span class="sp"></span><button class="btn sm" data-cba="pnew">＋ Ajouter</button></div><div class="card cb-sec"><div class="cb-ppl">${own.map(pp).join('') || '<div class="cb-hint">Aucun interlocuteur pour ce dossier.</div>'}</div>${gp.length ? `<div class="cb-hint" style="margin-top:6px">Autres interlocuteurs du groupe</div><div class="cb-ppl">${gp.map(pp).join('')}</div>` : ''}
-      ${(() => { const others = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pKind(x) === 'cli' && !own.includes(x)); return others.length ? `<div style="margin-top:6px;display:flex;gap:6px"><select id="cb-plink" style="flex:1"><option value="">Rattacher un interlocuteur existant…</option>${others.sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr')).map(x => `<option value="${x.id}">${esc(x.name)}${x.role ? ' · ' + esc(x.role) : ''}</option>`).join('')}</select></div>` : ''; })()}</div>`; }
+      ${(() => { const others = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pLinked(pKind(x)) && !own.includes(x)); return others.length ? `<div style="margin-top:6px;display:flex;gap:6px"><select id="cb-plink" style="flex:1"><option value="">Rattacher un interlocuteur existant…</option>${others.sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr')).map(x => `<option value="${x.id}">${esc(x.name)}${x.role ? ' · ' + esc(x.role) : ''}</option>`).join('')}</select></div>` : ''; })()}</div>`; }
   // Tarifs particuliers (v1.40.0)
   { const rs = Object.entries(c.rates || {}).filter(([tid]) => taskOf(tid)), ts2 = S.meta.tasks.filter(t => !t.deletedAt && !t.archived && !(c.rates || {})[t.id]).sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr'));
     html += `<i data-b="tarifs" data-half="1"></i><h2>Tarifs de facturation</h2><div class="card cb-sec"><div class="cb-hint">Par défaut : tarif de chaque tâche (Références › Tâches). Ici, les tarifs propres à ce dossier.</div>
@@ -3043,6 +3110,7 @@ function bindCarnet() {
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     if (ev.target.closest('[data-cbexp]')) { openCbExport(); return; }
+    if (ev.target.closest('[data-cbcopy]') && UI.cbId) { openCbCopy(UI.cbId); return; }
     if (ev.target.closest('[data-cba=newdos]')) { openNewDossier(); return; }
     if (ev.target.closest('[data-cba=newgrp]')) { askGroupName(id => { if (id) location.hash = 'carnet/groupe/' + encodeURIComponent(id); }); return; }
     const gc = ev.target.closest('[data-cbgcol]'); if (gc && UI.cbG) { const g = groupOf(UI.cbG); g.color = +gc.dataset.cbgcol; touchMeta(); return; }
@@ -3611,7 +3679,7 @@ function weekGridHTML() {
   <tr class="wk-plan"><td>Prévu</td>${plan.map(p => `<td class="n">${p ? fmtDur(p) : '—'}</td>`).join('')}<td class="n">${fmtDur(wPlan)}</td></tr></tbody></table>${(() => {
     const byCat = {}; for (const e of allEntries()) { const k = dayKey(e.start); if (k < days[0].k || k > days[6].k) continue; const c = (isInternalId(e.client) ? 'int' : taskCat(e.task)) || ''; byCat[c] = (byCat[c] || 0) + dur(e); }
     const tt = Object.values(byCat).reduce((a, b) => a + b, 0); if (!tt) return '';
-    const ks = [...TASK_CATS.map(c => c[0]), ''].filter(k => byCat[k]);
+    const ks = [...TCATS().map(c => c[0]), ''].filter(k => byCat[k]);
     return `<div class="wk-cats" title="Répartition du temps de la semaine par catégorie de tâche">${ks.map(k => `<i style="width:${(byCat[k] * 100 / tt).toFixed(1)}%;background:${k ? catCol('t', k) : 'var(--line-2)'}"></i>`).join('')}</div><div class="wk-leg">${ks.map(k => `<span>${k ? catDot(k) : '<span class="cat-dot" style="--cc:var(--line-2)"></span>'}${esc(CAT_L[k] || 'Non classées')} ${fmtDur(byCat[k])} (${Math.round(byCat[k] * 100 / tt)} %)</span>`).join('')}</div>`;
   })()}</div>`;
 }
@@ -5196,7 +5264,7 @@ function renderReports() {
     ${hasGroups() || r.grp ? `<label>Groupe<select data-r="grp"><option value="">Tous</option>${groupsAll().map(g => `<option value="${g.id}" ${r.grp === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}<option value="none" ${r.grp === 'none' ? 'selected' : ''}>Sans groupe</option></select></label>` : ''}
     <label>Client / personne<select data-r="client">${targetOpts(r.client, 'Tous')}</select></label>
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
-    <label>Catégorie<select data-r="cat"><option value="">Toutes</option>${[...TASK_CATS, ['none', 'Non classées']].map(([k, l]) => `<option value="${k}" ${r.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label>Catégorie<select data-r="cat"><option value="">Toutes</option>${[...TCATS(), ['none', 'Non classées']].map(([k, l]) => `<option value="${k}" ${r.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Report logiciel<select data-r="logged">${[['all', 'Tout'], ['no', 'Non reporté'], ['yes', 'Reporté']].map(([v, l]) => `<option value="${v}" ${r.logged === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     ${lissOn() ? `<label>Temps<select data-r="liss"><option value="liss" ${r.liss !== 'real' ? 'selected' : ''}>Lissés</option><option value="real" ${r.liss === 'real' ? 'selected' : ''}>Réels</option></select></label>` : ''}
@@ -5282,7 +5350,7 @@ function pivot(list, group, cols, months) {
   const tsvRows = [[group === 'client' ? 'Client' : group === 'pf' ? 'Portefeuille' : group === 'grp' ? 'Groupe' : group === 'cat' ? 'Catégorie' : 'Tâche', group === 'client' || group === 'cat' ? 'Tâche' : 'Client', ...colDefs.map(c => c[0] === 'amt' ? 'Montant (€)' : c[1] + ' (h)')].join('\t')];
   let rows = '';
   const pfRank = k => k === 'mine' ? 0 : k === 'none' ? 3 : k === 'others' ? 2 : 1;
-  const catRank = k => k ? TASK_CATS.findIndex(c => c[0] === k) : 9;
+  const catRank = k => k ? TCATS().findIndex(c => c[0] === k) : 999;
   const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : group === 'grp' ? (a[0] ? 0 : 1) - (b[0] ? 0 : 1) : group === 'cat' ? catRank(a[0]) - catRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
@@ -5510,18 +5578,52 @@ const catCol = (grp, k) => { const c = (S.meta.settings.colors || {})[grp] || {}
 const pIcon = x => (x && x.civ === 'Mme') ? ICON.woman : (x && x.civ === 'M.') ? ICON.man : ICON.person;
 const persIc = (x, cls = '') => { x = typeof x === 'string' ? personOf(x) : x; return `<span class="pers-ic ${cls}" style="--pc:${x ? catCol('p', pKind(x)) : 'var(--muted)'}" title="${x ? esc(P_KIND_L[pKind(x)] + (x.civ ? ' · ' + x.civ : '')) : ''}">${pIcon(x)}</span>`; };
 const catDot = k => k ? `<span class="cat-dot" style="--cc:${catCol('t', k)}" title="${esc(CAT_L[k] || '')}"></span>` : '';
-function openCatColor(grp, k, label) {
+function openCatColor(grp, k, label, cb) {
   const cur = ((S.meta.settings.colors || {})[grp] || {})[k] ?? COL_DEF[grp][k];
   const m = modal(`<div class="modal-h"><h3>Couleur « ${esc(label)} »</h3><button class="icon" data-close>${ICON.close}</button></div><div class="modal-b"><div class="grp-sws" style="gap:10px">${GROUP_COLORS.map((col, i) => `<button class="grp-sw ${cur === i ? 'on' : ''}" data-i="${i}" style="--g:${col};width:30px;height:30px" title="${GROUP_COLOR_NAMES[i]}" aria-label="${GROUP_COLOR_NAMES[i]}"></button>`).join('')}</div><div class="muted small" style="margin-top:8px">Enregistrée avec vos réglages (tous vos appareils).</div></div><div class="modal-f"><button class="btn ghost" data-def>Couleur par défaut</button><span class="sp"></span><button class="btn" data-close>Fermer</button></div>`);
-  const set = i => { const c = JSON.parse(JSON.stringify(S.meta.settings.colors || {})); c[grp] = { ...(c[grp] || {}) }; if (i == null) delete c[grp][k]; else c[grp][k] = i; S.meta.settings.colors = c; touchMeta(); m.close(); };
+  const set = i => { const c = JSON.parse(JSON.stringify(S.meta.settings.colors || {})); c[grp] = { ...(c[grp] || {}) }; if (i == null) delete c[grp][k]; else c[grp][k] = i; S.meta.settings.colors = c; touchMeta(); m.close(); if (cb) cb(); };
   m.el.querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => set(+b.dataset.i)));
   m.el.querySelector('[data-def]').addEventListener('click', () => set(null));
 }
-const colPills = (grp, list) => `<div class="col-pills">${list.map(([k, l]) => `<button type="button" class="col-pill" data-colgrp="${grp}" data-colk="${k}" data-coll="${esc(l)}" style="--cc:${catCol(grp, k)}" title="Changer la couleur"><i></i>${esc(l)}</button>`).join('')}</div>`;
+const colPills = (grp, list) => `<div class="col-pills">${list.map(([k, l]) => `<button type="button" class="col-pill" data-colgrp="${grp}" data-colk="${k}" data-coll="${esc(l)}" style="--cc:${catCol(grp, k)}" title="Changer la couleur"><i></i>${esc(l)}</button>`).join('')}<button type="button" class="btn sm ghost" data-catmgr="${grp}" title="Ajouter, renommer, ordonner les catégories">＋ Gérer les catégories</button></div>`;
+document.addEventListener('click', ev => { const b = ev.target.closest('[data-catmgr]'); if (b) openCatMgr(b.dataset.catmgr); });
+function openCatMgr(grp) { // v1.44.0 : catégories de tâches (grp 't') ou de personnes ('p')
+  const T = grp === 't'; let L = catList(grp); const del = new Set();
+  const used = k => T ? S.meta.tasks.filter(t => !t.deletedAt && taskCat(t) === k).length : S.meta.persons.filter(x => !x.deletedAt && pKind(x) === k).length;
+  const m = modal(`<div class="modal-h"><h3>Catégories de ${T ? 'tâches' : 'personnes'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b"><div class="muted small" style="margin-bottom:8px">Les catégories de base se renomment mais ne se suppriment pas.${T ? ' Mots-clés : une tâche dont le nom contient l’un d’eux (séparés par des virgules) est classée automatiquement dans la catégorie, sauf si vous lui en avez choisi une.' : ' Une catégorie ajoutée se rattache à des dossiers, comme les interlocuteurs client.'}</div><div id="cm-list" class="cm-list"></div>
+      <button type="button" class="btn sm" id="cm-add" style="margin-top:8px">＋ Ajouter une catégorie</button></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cm-ok">Enregistrer</button></div>`, T ? 'wide' : '');
+  const q = x => m.el.querySelector(x);
+  const sync = () => m.el.querySelectorAll('[data-cmi]').forEach(r => { const x = L[+r.dataset.cmi]; x.l = r.querySelector('[data-f="l"]').value; if (T) { x.kw = r.querySelector('[data-f="kw"]').value; x.bill = r.querySelector('[data-f="bill"]').value; } });
+  const draw = () => { q('#cm-list').innerHTML = L.map((x, i) => { const base = CAT_BASE_K[grp].includes(x.k), n = used(x.k);
+    return `<div class="cm-row" data-cmi="${i}"><button type="button" class="col-pill" data-cmcol="${i}" style="--cc:${catCol(grp, x.k)}" title="Couleur"><i></i></button>
+      <input data-f="l" value="${esc(x.l)}" maxlength="40" aria-label="Nom de la catégorie">${T ? `<input data-f="kw" value="${esc(x.kw || '')}" placeholder="Mots-clés (ex. audit, bilan)" aria-label="Mots-clés"><select data-f="bill" title="Facturation par défaut des saisies"><option value="" ${!x.bill ? 'selected' : ''}>Facturation : selon le client</option><option value="bill" ${x.bill === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${x.bill === 'nobill' ? 'selected' : ''}>Non facturable</option></select>` : ''}
+      <span class="muted small cm-n" title="${T ? 'Tâches' : 'Personnes'} dans cette catégorie">${n}</span>
+      <button type="button" class="icon xs" data-cmmv="-1" ${i ? '' : 'disabled'} title="Monter">↑</button><button type="button" class="icon xs" data-cmmv="1" ${i < L.length - 1 ? '' : 'disabled'} title="Descendre">↓</button>
+      ${base ? '<span class="cm-base" title="Catégorie de base">base</span>' : `<button type="button" class="icon xs" data-cmdel title="Supprimer la catégorie">✕</button>`}</div>`; }).join(''); };
+  draw();
+  q('#cm-list').addEventListener('click', ev => { const r = ev.target.closest('[data-cmi]'); if (!r) return; const i = +r.dataset.cmi; sync();
+    if (ev.target.closest('[data-cmcol]')) { openCatColor(grp, L[i].k, L[i].l || 'Nouvelle catégorie', draw); return; }
+    const mv = ev.target.closest('[data-cmmv]'); if (mv) { const j = i + +mv.dataset.cmmv; if (j < 0 || j >= L.length) return; [L[i], L[j]] = [L[j], L[i]]; draw(); return; }
+    if (ev.target.closest('[data-cmdel]')) { const n = used(L[i].k); if (n && !confirm(`${n} ${T ? 'tâche(s)' : 'personne(s)'} dans « ${L[i].l} » : ${T ? 'elles seront classées automatiquement' : 'elles passeront dans « ' + (P_KIND_L.autre) + ' »'}. Supprimer la catégorie ?`)) return; del.add(L[i].k); L.splice(i, 1); draw(); } });
+  q('#cm-add').addEventListener('click', () => { sync(); const k = 'u' + newId(); const usedCol = new Set(L.map(x => ((S.meta.settings.colors || {})[grp] || {})[x.k] ?? COL_DEF[grp][x.k]));
+    const ci = [...GROUP_COLORS.keys()].find(i => !usedCol.has(i)) ?? L.length % GROUP_COLORS.length;
+    const c = JSON.parse(JSON.stringify(S.meta.settings.colors || {})); c[grp] = { ...(c[grp] || {}), [k]: ci }; S.meta.settings.colors = c;
+    L.push(T ? { k, l: '', kw: '', bill: '' } : { k, l: '' }); draw(); const ins = m.el.querySelectorAll('[data-f="l"]'); ins[ins.length - 1].focus(); });
+  q('#cm-ok').addEventListener('click', () => { sync();
+    if (L.some(x => !x.l.trim())) { toast('Donnez un nom à chaque catégorie'); return; }
+    const names = L.map(x => norm(x.l)); if (names.some((n, i) => names.indexOf(n) !== i)) { toast('Deux catégories portent le même nom'); return; }
+    const clean = L.map(x => { const o = { k: x.k, l: x.l.trim() }; if (T) { if ((x.kw || '').trim()) o.kw = x.kw.trim(); if (x.bill) o.bill = x.bill; } return o; });
+    const prev = JSON.parse(JSON.stringify(S.meta.settings.cats || {})), prevT = S.meta.tasks.map(t => [t, t.cat]), prevP = S.meta.persons.map(x => [x, x.kind]);
+    for (const k of del) { if (T) S.meta.tasks.forEach(t => { if (t.cat === k) delete t.cat; }); else S.meta.persons.forEach(x => { if (x.kind === k) x.kind = 'autre'; }); }
+    S.meta.settings.cats = { ...(S.meta.settings.cats || {}), [grp]: clean }; touchMeta(); m.close();
+    toast('Catégories enregistrées', 'Annuler', () => { S.meta.settings.cats = prev; prevT.forEach(([t, c]) => { if (c) t.cat = c; else delete t.cat; }); prevP.forEach(([x, k]) => { if (k) x.kind = k; else delete x.kind; }); touchMeta(); }); });
+}
 document.addEventListener('click', ev => { const b = ev.target.closest('[data-colgrp]'); if (b) openCatColor(b.dataset.colgrp, b.dataset.colk, b.dataset.coll); });
-const P_KINDS = [['col', 'Collègue'], ['cli', 'Interlocuteur client'], ['org', 'Organisme / partenaire'], ['autre', 'Autre']];
-const P_KIND_L = Object.fromEntries(P_KINDS);
-const pKind = x => (x && x.kind) || 'col';
+const P_KIND_L = new Proxy({}, { get: (_, k) => (catList('p').find(x => x.k === k) || {}).l || 'Autre' });
+const pKind = x => { const k = (x && x.kind) || 'col'; return catList('p').some(c => c.k === k) ? k : 'autre'; };
+const pLinked = k => k !== 'col' && k !== 'org' && k !== 'autre'; // catégorie rattachée à des dossiers (interlocuteurs, catégories ajoutées)
 const pRoleTxt = x => pKind(x) === 'col' ? roleLabel(x.role) : (x.role || '');
 const P_ROLE_SUG = { cli: ['Dirigeant(e)', 'Gérant(e)', 'Responsable RH', 'Assistant(e) RH', 'Comptable', 'Assistant(e) de direction', 'Responsable administratif'], org: ['URSSAF', 'OPCO', 'Mutuelle', 'Prévoyance', 'Caisse de retraite', 'Médecine du travail', 'Inspection du travail', 'France Travail', 'Avocat', 'Expert-comptable'], autre: [] };
 const telHref = v => 'tel:' + String(v || '').replace(/[^\d+]/g, '');
@@ -5533,18 +5635,18 @@ function openPersonFiche(id, preset = {}) {
   const cl = S.meta.clients.filter(c => !c.deletedAt).sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || a.name.localeCompare(b.name, 'fr'));
   const m = modal(`<div class="modal-h"><h3>${x ? 'Fiche de ' + esc(x.name) : 'Nouvelle personne'}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b" style="display:grid;gap:10px">
-      <div class="seg" id="pf-kind" role="radiogroup">${P_KINDS.map(([k, l]) => `<button type="button" data-v="${k}" class="${kind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="seg" id="pf-kind" role="radiogroup">${PKINDS().map(([k, l]) => `<button type="button" data-v="${k}" class="${kind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="fld-row"><label class="fld" style="flex:0 0 90px"><span>Civilité</span><select id="pf-civ"><option value=""></option>${['M.', 'Mme'].map(v => `<option ${d.civ === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label><label class="fld"><span>Prénom</span><input id="pf-first" value="${esc(d.first || '')}" autocomplete="off"></label><label class="fld"><span>Nom</span><input id="pf-last" value="${esc(d.last || '')}" autocomplete="off"></label></div>
       <div class="fld-row"><label class="fld" id="pf-role-w"></label></div>
       <div class="fld-row"><label class="fld"><span>E-mail</span><input id="pf-mail" type="email" value="${esc(d.email || '')}" autocomplete="off"></label><label class="fld"><span id="pf-tel-l">${kind === 'col' ? 'Ligne directe' : 'Téléphone'}</span><input id="pf-tel" inputmode="tel" value="${esc(d.phone || '')}" autocomplete="off"></label></div>
-      <div id="pf-cl-w" ${kind === 'cli' ? '' : 'hidden'}><div class="small" style="margin-bottom:4px">Dossiers de cet interlocuteur</div><input id="pf-clq" placeholder="Filtrer les dossiers…" style="width:100%;margin-bottom:4px"><div class="cc-list" style="max-height:160px">${cl.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '')))}"><input type="checkbox" value="${c.id}" ${sel.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">' + esc(c.code) + '</span>' : ''}</label>`).join('')}</div></div>
+      <div id="pf-cl-w" ${pLinked(kind) ? '' : 'hidden'}><div class="small" style="margin-bottom:4px">Dossiers de cet interlocuteur</div><input id="pf-clq" placeholder="Filtrer les dossiers…" style="width:100%;margin-bottom:4px"><div class="cc-list" style="max-height:160px">${cl.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '')))}"><input type="checkbox" value="${c.id}" ${sel.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">' + esc(c.code) + '</span>' : ''}</label>`).join('')}</div></div>
       <label class="fld"><span>Note</span><textarea id="pf-note" rows="2" placeholder="ex. joignable le matin, préfère l’e-mail…">${esc(d.note || '')}</textarea></label>
       <div class="muted small">🔒 Ne notez jamais d’identifiants ni de mots de passe ici.</div></div>
     <div class="modal-f">${x ? `<button class="btn ghost" id="pf-arch">${x.archived ? 'Restaurer' : 'Archiver'}</button>` : ''}<span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="pf-ok">${x ? 'Enregistrer' : 'Créer'}</button></div>`);
   const q = s2 => m.el.querySelector(s2); let k = kind;
   const roleUI = () => { const w = q('#pf-role-w'), cur = d.kind === k ? d.role : '';
     w.innerHTML = k === 'col' ? `<span>Fonction au cabinet</span><select id="pf-role">${roleOpts(cur || 'paie')}</select>` : `<span>${k === 'org' ? 'Organisme / rôle' : 'Fonction'}</span><input id="pf-role" list="pf-role-dl" value="${esc(cur || '')}" autocomplete="off"><datalist id="pf-role-dl">${(P_ROLE_SUG[k] || []).map(v => `<option value="${esc(v)}">`).join('')}</datalist>`;
-    q('#pf-tel-l').textContent = k === 'col' ? 'Ligne directe' : 'Téléphone'; q('#pf-cl-w').hidden = k !== 'cli'; };
+    q('#pf-tel-l').textContent = k === 'col' ? 'Ligne directe' : 'Téléphone'; q('#pf-cl-w').hidden = !pLinked(k); };
   roleUI();
   q('#pf-kind').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; k = b.dataset.v; q('#pf-kind').querySelectorAll('button').forEach(x2 => x2.classList.toggle('on', x2 === b)); roleUI(); });
   q('#pf-clq').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('#pf-cl-w label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
@@ -5555,7 +5657,7 @@ function openPersonFiche(id, preset = {}) {
     const mail = q('#pf-mail').value.trim(); if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { toast('Adresse e-mail non valide'); return; }
     const o = x || { id: 'p' + newId(), archived: false };
     Object.assign(o, { kind: k, civ: q('#pf-civ').value || '', first, last, name: [first, last.toUpperCase()].filter(Boolean).join(' '), role: q('#pf-role').value.trim(), email: mail, phone: q('#pf-tel').value.trim(), note: q('#pf-note').value.trim() });
-    o.clients = k === 'cli' ? [...m.el.querySelectorAll('#pf-cl-w input:checked')].map(c => c.value) : [];
+    o.clients = pLinked(k) ? [...m.el.querySelectorAll('#pf-cl-w input:checked')].map(c => c.value) : [];
     for (const f of ['civ', 'email', 'phone', 'note', 'role']) if (!o[f]) delete o[f]; if (!o.clients.length) delete o.clients;
     if (!x) S.meta.persons.push(o);
     touchMeta(); m.close(); toast(x ? 'Fiche enregistrée' : 'Personne ajoutée : ' + o.name);
@@ -5605,10 +5707,10 @@ function renderRefs() {
       ${gCount[g.id] ? `<select data-k="mother" title="Société mère du groupe" class="grp-sel"><option value="">Société mère : aucune</option>${grpMembers(g).map(x => `<option value="${x.id}" ${g.mother === x.id ? 'selected' : ''}>Société mère : ${esc(x.name)}</option>`).join('')}</select>` : ''}
       <button class="icon" data-act="del-group" title="Supprimer le groupe (les dossiers sont conservés)">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun groupe. Créez-en un ici, puis choisissez le groupe de chaque dossier dans la liste des clients (ou dans les paramètres du dossier, depuis Mon cycle).</div>`}</div></div>
   <i data-b="taches"></i><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
-      ${colPills('t', TASK_CATS)}
-      <div class="ref-list">${catGrouped(ts, t => taskCat(t)).map(t => t.head ? `<div class="ref-head">${catDot((TASK_CATS.find(c => c[1] === t.label) || [])[0])}${esc(t.label)}</div>` : `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
+      ${colPills('t', TCATS())}
+      <div class="ref-list">${catGrouped(ts, t => taskCat(t)).map(t => t.head ? `<div class="ref-head">${catDot((TCATS().find(c => c[1] === t.label) || [])[0])}${esc(t.label)}</div>` : `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
         <input class="nm" data-k="name" value="${esc(t.name)}">
-        <select data-k="cat" title="Catégorie"><option value="" ${!t.cat ? 'selected' : ''}>Auto${autoCat(t.name) ? ' : ' + CAT_L[autoCat(t.name)] : ' : non classée'}</option>${TASK_CATS.map(([k, l]) => `<option value="${k}" ${t.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <select data-k="cat" title="Catégorie"><option value="" ${!t.cat ? 'selected' : ''}>Auto${autoCat(t.name) ? ' : ' + CAT_L[autoCat(t.name)] : ' : non classée'}</option>${TCATS().map(([k, l]) => `<option value="${k}" ${t.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <span class="rate-in" title="Tarif de facturation par défaut (modifiable pour un dossier dans son carnet)"><input data-k="ramt" inputmode="decimal" placeholder="Tarif" value="${t.rate && +t.rate.amount ? esc(String(t.rate.amount).replace('.', ',')) : ''}"><select data-k="rmode"><option value="h" ${(t.rate?.mode || 'h') === 'h' ? 'selected' : ''}>€ / h</option><option value="acte" ${t.rate?.mode === 'acte' ? 'selected' : ''}>€ / acte</option></select></span>
         <select data-k="billing" title="Facturation par défaut"><option value="auto" ${!t.billing || t.billing === 'auto' ? 'selected' : ''}>Selon le client</option><option value="bill" ${t.billing === 'bill' ? 'selected' : ''}>À facturer</option><option value="nobill" ${t.billing === 'nobill' ? 'selected' : ''}>Non facturable</option></select>
         <span class="use">${ut[t.id] ? fmtDur(ut[t.id], 'hm') : ''}</span>
@@ -5616,8 +5718,8 @@ function renderRefs() {
         <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches standards</button></div>`}</div>
       ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Ajouter toutes les tâches standards</button></div>` : ''}</div>
     <i data-b="personnes"></i><div class="toolbar"><h2>Personnes</h2><span class="sp"></span><button class="btn sm primary" data-act="pnew">＋ Nouvelle personne</button></div><div class="card">
-      ${colPills('p', P_KINDS)}
-      <div class="ref-tools"><div class="seg" data-seg="pkind">${[['', 'Toutes'], ...P_KINDS].map(([k, l]) => `<button data-v="${k}" class="${(UI.pk || '') === k ? 'on' : ''}">${l} (${ps.filter(x => !k || pKind(x) === k).length})</button>`).join('')}</div></div>
+      ${colPills('p', PKINDS())}
+      <div class="ref-tools"><div class="seg" data-seg="pkind">${[['', 'Toutes'], ...PKINDS()].map(([k, l]) => `<button data-v="${k}" class="${(UI.pk || '') === k ? 'on' : ''}">${l} (${ps.filter(x => !k || pKind(x) === k).length})</button>`).join('')}</div></div>
       <div class="ref-list">${ps.filter(x => !UI.pk || pKind(x) === UI.pk).map(x => `<div class="ref-row ${x.archived ? 'arch' : ''}" data-kind="person" data-id="${x.id}">${persIc(x)}
         <button class="pers-nm" data-act="pfiche" title="Ouvrir la fiche">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button>
         <span class="tag pk" style="color:${catCol('p', pKind(x))};background:color-mix(in srgb,${catCol('p', pKind(x))} 12%,var(--surface))">${P_KIND_L[pKind(x)]}</span><span class="muted small pers-role">${esc(pRoleTxt(x))}</span>
