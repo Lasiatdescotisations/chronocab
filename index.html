@@ -76,7 +76,11 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 @media (min-width:701px) and (max-width:1540px){ .nav a .lg{display:none} .nav a .sm{display:inline} .nav a{padding:0 10px} .nav a svg{margin-left:5px} }
 @media (min-width:701px) and (max-width:1180px){ .nav a{padding:0 7px} .nav a svg{display:none} }
 @media (min-width:701px) and (max-width:1340px){ .nav a{padding:0 8px} .top-right{gap:9px} .pill .what{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} }
-@media (min-width:701px) and (max-width:1180px){ .pill .what{display:none} }
+@media (min-width:701px) and (max-width:1180px){ .pill .what{display:none} .top:has(#pill:not([hidden])) .brand .txt{display:none} }
+@media (min-width:701px) and (max-width:1340px){ .nav a svg{display:none} }
+@media (max-width:700px){ #help-btn,#dsc-btn:not(.on){display:none} .top-right .ver{display:none} #account{font-size:0;padding:0!important;width:30px;justify-content:center} #account::after{content:'⏻';font-size:16px;line-height:1} .pill .what{display:none} .top:has(#pill:not([hidden])) .brand .txt{display:none} }
+@media (min-width:701px) and (max-width:1180px){ #help-btn,#dsc-btn:not(.on){display:none} .nav a{padding:0 6px} }
+@media (min-width:701px) and (max-width:1540px){ .top-right{gap:4px} .top-right .hist-btn{width:30px} .nav a{padding:0 7px} .nav a svg{margin-left:4px} #account{font-size:0;padding:0;width:32px;justify-content:center} #account::after{content:'⏻';font-size:16px;line-height:1} .pill .what{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} }
 /* Chrono en cours : icône animée (vert) ; appel en cours : rouge */
 .nav a.run svg{color:var(--accent);opacity:1;animation:navRun 1.6s ease-in-out infinite}
 .nav a.call svg{color:#c0392b;opacity:1;animation:navRun 1.1s ease-in-out infinite}
@@ -721,6 +725,23 @@ a.btn:not(.primary){color:var(--ink)}
 .cb-saved.on{opacity:1}
 @media (max-width:700px){.cb-kv{grid-template-columns:1fr}.cb-kv dt{margin-top:4px}.cb-head h1{font-size:18px}}
 /* Blocs déplaçables et repliables */
+.fc-bars{display:flex;gap:4px;align-items:flex-end;overflow-x:auto;padding-bottom:2px}.fc-day{flex:1 1 0;min-width:34px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;border-radius:8px;padding:4px 2px;cursor:pointer;color:inherit;font:inherit}.fc-day:hover{background:var(--hover,rgba(0,0,0,.05))}.fc-day.wk{margin-left:10px}.fc-day.today .fc-l{font-weight:700;color:var(--accent)}
+.fc-stack{width:18px;display:flex;flex-direction:column-reverse;gap:2px;border-radius:4px 4px 0 0;overflow:hidden}.fc-stack i{display:block;min-height:2px}.fc-n{font-size:12px;font-variant-numeric:tabular-nums;min-height:15px}.fc-l{font-size:11px;color:var(--muted);white-space:nowrap}
+.fc-leg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;color:var(--muted)}.fc-leg i,.fc-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.fc-cal{display:grid;gap:4px;padding:10px}.fc-row{display:grid;grid-template-columns:56px repeat(5,1fr) 70px;gap:4px;align-items:stretch}.fc-hd span{font-size:12px;color:var(--muted);text-align:center}.fc-wl{font-size:12px;color:var(--muted);align-self:center}.fc-wt{align-self:center;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.fc-c{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;gap:2px 6px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;min-height:62px;cursor:pointer;color:inherit;font:inherit}.fc-c:hover{border-color:var(--accent)}.fc-c.out{border:0;background:none;cursor:default}.fc-c.today{box-shadow:inset 0 0 0 2px var(--accent)}.fc-c.hol{background:color-mix(in srgb,var(--muted) 8%,var(--surface))}
+.fc-cd{font-size:11px;color:var(--muted)}.fc-cn{font-size:16px;text-align:right;font-variant-numeric:tabular-nums}.fc-hbar{grid-column:1/3;height:6px;display:block}.fc-hbar .fc-stack{flex-direction:row;height:6px!important;border-radius:3px}.fc-ct{grid-column:1/3;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:700px){.fc-row{grid-template-columns:34px repeat(5,1fr) 30px}.fc-c{padding:4px;min-height:50px}.fc-ct{display:none}}
+.fc-grp{margin:6px 0 10px}.fc-grp ul{margin:4px 0 0;padding-left:18px}.fc-grp li{margin:2px 0}.ab-h{margin:10px 0 4px}
+.cb-found{font-size:11.5px;color:var(--muted);margin:4px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
+.news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
+.dsc-opts{display:grid;gap:2px;margin-top:4px}#ver{cursor:pointer}
+#dsc-btn.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+body.discret.dsc-amt .dsc-a,body.discret.dsc-time .dsc-t{filter:blur(5px);user-select:none}
+body.discret.dsc-notes :is(section.blk[data-blk=relation] > .card,section.blk[data-blk=alertes] > .card,.cy-al,.cb-ppl,.cb-sens,a[href^="mailto:"],a[href^="tel:"]){filter:blur(6px);user-select:none}
+body.discret.dsc-oth .dsc-n{filter:blur(5px);transition:filter .15s}body.discret.dsc-oth .dsc-n:hover,body.discret.dsc-oth :hover > .dsc-n{filter:none}
+body.discret.dsc-oth #carnet-body section.blk[data-blk=groupe]{display:none}
 .cm-list{display:grid;gap:6px}.cm-row{display:flex;align-items:center;gap:6px}.cm-row input[data-f=l]{flex:1 1 150px;min-width:110px}.cm-row input[data-f=kw]{flex:1.4 1 180px;min-width:120px}.cm-row select{flex:0 0 205px}@media (max-width:700px){.cm-row{flex-wrap:wrap}.cm-row select{flex:1 1 100%}}.cbcp-list .chk input{flex:none}.cm-row>:last-child{flex:0 0 40px;display:inline-flex;justify-content:center}.cm-row .col-pill{padding:4px 6px}.cm-n{min-width:22px;text-align:right}.cm-base{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 5px}.cbcp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 12px;margin-top:6px}
 .blk-wrap{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
 .blk-wrap>*{width:100%;min-width:0}
@@ -996,10 +1017,12 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
     <div id="pill" class="pill" hidden></div>
     <button id="cmd-btn" class="icon hist-btn" title="Rechercher et agir (Ctrl+K) : dossier, onglet, outil, saisie rapide" aria-label="Rechercher et agir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <button id="call-btn" class="icon hist-btn call-btn" title="Appel ou interruption : met le chrono en pause et lance un chrono d’appel" aria-label="Appel ou interruption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="call-t mono"></span></button>
+    <button id="dsc-btn" class="icon hist-btn" aria-pressed="false" title="Mode discret (partage d’écran) : masque montants, temps et notes sensibles" aria-label="Mode discret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A10 10 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6C3.7 8.5 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M2 2l20 20"/></svg></button>
+    <button id="help-btn" class="icon hist-btn" title="Aide de cet écran" aria-label="Aide de cet écran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
     <button id="hist-btn" class="icon hist-btn" title="Historique : vos 10 dernières actions, restaurables en un clic" aria-label="Historique des actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
     <div id="sync" class="sync"><i></i><span>Chargement…</span></div>
     <button id="install-btn" class="btn sm primary" hidden title="Installer Antevorta sur cet appareil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
-    <button id="account" class="btn sm ghost" hidden>Déconnexion</button>
+    <button id="account" class="btn sm ghost" hidden title="Se déconnecter" aria-label="Déconnexion">Déconnexion</button>
     <span class="ver" id="ver"></span>
   </div>
 </header>
@@ -1073,7 +1096,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.44.0';
+const APP_VERSION = '1.45.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2293,7 +2316,7 @@ function whatHTML(c, t) {
   if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${tk}`;
   if (isPersonId(c)) { const p = personOf(c); return `${persIc(p)}<span class="cl">${esc(clientName(c))}</span>${p && pRoleTxt(p) ? `<span class="role">${esc(pRoleTxt(p))}</span>` : ''}${tk}`; }
   const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
-  return `${cliIc(c)}${c ? `<span class="cl">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${tk}`;
+  return `${cliIc(c)}${c ? `<span class="cl dsc-n">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${tk}`;
 }
 function recents() {
   const seen = new Set(), out = [];
@@ -2625,10 +2648,10 @@ function cbTileHTML(x, mk, today) {
   const al = alActive(x, mk).length, nv = cbNextVir(x), eb = effBs(mk, x.id).n, rel = b.rel && b.rel.lvl && b.rel.lvl !== 'neutre' ? b.rel.lvl : null;
   const owner = !mine && x.owner && personOf(x.owner) ? personOf(x.owner).name : '';
   return `<button class="cb-tile ${mine ? '' : 'other'} ${isMother(x) ? 'is-mother' : ''}" data-cb="${x.id}" title="Ouvrir le carnet de bord de ${esc(x.name)}" ${g ? `style="--g:${grpColor(g)}"` : ''}>
-    <div class="t1">${cliIc(x.id)}<span class="nm">${esc(x.name)}</span>${motherMark(x)}</div>
+    <div class="t1">${cliIc(x.id)}<span class="nm dsc-n">${esc(x.name)}</span>${motherMark(x)}</div>
     <div class="t2">${x.code ? `<span class="mono">n° ${esc(x.code)}</span>` : ''}${g ? grpTag(g) : ''}${mine ? '' : `<span>${owner ? 'portef. ' + esc(owner) : 'hors portefeuille'}</span>`}</div>
     <div class="ccn ${ccn ? '' : 'none'}" title="${ccn ? esc((ccn.i != null ? 'IDCC ' + idccStr(ccn.i) + ' — ' : '') + ccn.t) : ''}">${ccn ? (ccn.i != null && !ccnIsNone(ccn) ? `<b class="mono">${idccStr(ccn.i)}</b> ` : '') + esc(ccnShort(ccn)) + ((b.ccn || []).some(k => k.i != null && ccnOld(ccnOf(k.i))) ? ' <span class="ccn-oldw" style="display:inline" title="Une convention de ce dossier n’est plus en vigueur">⚠</span>' : '') + (b.ccn.length > 1 ? ` <span class="muted">+${b.ccn.length - 1}</span>` : '') : 'Convention collective non renseignée'}</div>
-    <div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
+    ${UI._cbFound && UI._cbFound.get(x.id) ? `<div class="cb-found" title="Trouvé dans le carnet">🔎 ${esc(UI._cbFound.get(x.id))}</div>` : ''}<div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b cb-sens" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b cb-sens ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
   </button>`;
 }
 const grpTitle = g => /^groupe\b/i.test(g.name.trim()) ? g.name : 'Groupe ' + g.name;
@@ -2665,6 +2688,149 @@ function openNewDossier() {
     touchMeta(); m.close(); location.hash = 'carnet/' + encodeURIComponent(id); toast('Dossier créé : ' + nm + (src && cp.keys.length ? ' · carnet copié depuis ' + src.name : ''));
   };
   q('#nd-ok').addEventListener('click', go); m.el.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.tagName === 'INPUT') { ev.preventDefault(); go(); } });
+}
+/* ---------- Recherche dans le contenu des carnets (v1.45.0) ---------- */
+function cbHayFields(o, isG) {
+  const b = cbPeek(o);
+  return [['Pratiques', b.prat], ['Particularités', b.part], ['Notes du groupe', isG ? b.notes : ''], ['Remarque permanente', !isG && o.cy ? o.cy.notes : ''], ['Relation client', b.rel && b.rel.note],
+    ...(b.points || []).map(x => [x.done ? 'Point clos' : 'Point en cours', x.t]), ...(b.journal || []).map(x => ['Journal', x.t + (x.ref ? ' [réf. ' + x.ref + ']' : '')]),
+    ...(!isG ? (o.alerts || []).map(a => ['Alerte salarié', a.name + (a.tag ? ' (' + a.tag + ')' : '')]) : [])].filter(x => x[1]);
+}
+const snipOf = (t, w) => { t = String(t).replace(/\s+/g, ' '); const i = norm(t).indexOf(w); if (i < 0) return t.slice(0, 80) + (t.length > 80 ? '…' : ''); const a = Math.max(0, i - 35), z = i + w.length + 45; return (a ? '…' : '') + t.slice(a, z) + (z < t.length ? '…' : ''); };
+function cbFieldHit(o, isG, ws) { const fs = cbHayFields(o, isG); if (!ws.every(w => fs.some(f => norm(f[1]).includes(w)))) return null; const h = fs.find(f => ws.every(w => norm(f[1]).includes(w))) || fs.find(f => norm(f[1]).includes(ws[0])); return h ? { where: h[0], snip: snipOf(h[1], ws.find(w => norm(h[1]).includes(w)) || ws[0]) } : null; }
+function cbSearch(q, max = 8) {
+  const ws = norm(q).split(/\s+/).filter(w => w.length > 1); if (!ws.length) return []; const out = [];
+  for (const c of S.meta.clients) if (!c.deletedAt) { const h = cbFieldHit(c, false, ws); if (h) out.push({ o: c, isG: false, ...h }); }
+  for (const g of S.meta.groups) { const h = cbFieldHit(g, true, ws); if (h) out.push({ o: g, isG: true, ...h }); }
+  return out.sort((a, b) => (isMine(b.o) ? 1 : 0) - (isMine(a.o) ? 1 : 0)).slice(0, max);
+}
+function cbFoundSet(x, q) { const h = cbFieldHit(x, false, q.split(/\s+/).filter(Boolean)); if (!h) return false; (UI._cbFound ||= new Map()).set(x.id, h.where + ' : ' + h.snip); return true; }
+/* ---------- Modèles de messages (v1.45.0) : settings.tpl = [{ id, n, s, b }] ; textes copiés, jamais envoyés par l'application ---------- */
+const TPL_Z = [['formule', 'ex. « Madame Durand » selon la civilité'], ['prénom', ''], ['nom', ''], ['fonction', ''], ['dossier', 'raison sociale'], ['n° dossier', ''], ['groupe', ''], ['mois de paie', 'ex. « novembre 2026 »'], ['réception habituelle', 'date des variables'], ['date des virements', ''], ['date de DSN', ''], ['date du jour', '']];
+const tplList = () => (S.meta.settings.tpl || []).filter(t => t && t.id);
+const TPL_EX = [
+  { n: 'Relance des variables', s: '{dossier} – éléments variables de {mois de paie}', b: 'Bonjour {formule},\n\nSauf erreur de ma part, je n’ai pas encore reçu les éléments variables de paie de {mois de paie} pour {dossier}.\nPourriez-vous me les transmettre dès que possible, afin que je puisse établir les bulletins ?\n\nJe vous remercie par avance.\nBien cordialement,' },
+  { n: 'Bulletins à valider', s: '{dossier} – bulletins de {mois de paie} à valider', b: 'Bonjour {formule},\n\nVous trouverez ci-joint les bulletins de paie de {mois de paie} pour {dossier}.\nMerci de me faire part de votre validation ou de vos remarques.\n\nLes virements sont prévus le {date des virements}.\n\nBien cordialement,' },
+  { n: 'Bulletins disponibles', s: '{dossier} – bulletins de {mois de paie} disponibles', b: 'Bonjour {formule},\n\nLes bulletins de paie de {mois de paie} pour {dossier} sont disponibles.\nLa DSN sera déposée au plus tard le {date de DSN}.\n\nBien cordialement,' }];
+const titleCase = v => String(v || '').toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (m0, a, b) => a + b.toUpperCase());
+function tplVals(c, x, mk) {
+  const row = cyRow(mk, c.id), due = cyDue(mk, c, row), r = cyRelDates(mk, c), g = groupOf(c.group);
+  const ln = x ? titleCase(x.last || (x.first ? '' : x.name)) : '', fn = x ? titleCase(x.first || '') : '';
+  const v = { 'formule': x ? (x.civ === 'Mme' ? 'Madame ' + (ln || fn) : x.civ === 'M.' ? 'Monsieur ' + (ln || fn) : [fn, ln].filter(Boolean).join(' ')) : '', 'prénom': fn, 'nom': ln, 'fonction': x ? pRoleTxt(x) : '',
+    'dossier': c.name, 'n° dossier': c.code || '', 'groupe': g ? g.name : '', 'mois de paie': mkLabel(mk), 'réception habituelle': r.usual ? fmtDate(r.usual) : '',
+    'date des virements': row.vir ? fmtDate(dOf(row.vir)) : due.vir ? fmtDate(due.vir) : '', 'date de DSN': due.dsn ? fmtDate(due.dsn) : '', 'date du jour': fmtDate(Date.now()) };
+  return Object.fromEntries(Object.entries(v).map(([k, x2]) => [norm(k), x2]));
+}
+const tplFill = (t, V) => String(t || '').replace(/\{([^{}\n]{1,40})\}/g, (m0, k) => { const kk = norm(k).trim(); return kk in V ? (V[kk] || '[' + k + ']') : m0; });
+function tplRefsHTML() {
+  const L = tplList();
+  return `<i data-b="modeles"></i><div class="toolbar"><h2>Modèles de messages</h2><span class="muted small">À insérer depuis le carnet d’un dossier (bloc Interlocuteurs › ✉ Message), adaptés à l’interlocuteur. Le texte est copié, jamais envoyé.</span><span class="sp"></span><button class="btn sm primary" data-tpl="new">＋ Nouveau modèle</button></div>
+    <div class="card ref-list">${L.map(t => `<div class="ref-row" data-tplid="${esc(t.id)}"><span style="font-weight:500;min-width:180px">✉ ${esc(t.n)}</span><span class="muted small" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.s || '')}</span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun modèle. Créez vos messages types (relance des variables, envoi des bulletins…) avec des zones automatiques : {formule}, {dossier}, {mois de paie}… <br><button class="btn sm" data-tpl="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>`}</div>`;
+}
+function tplAddExamples() { S.meta.settings.tpl = [...tplList(), ...TPL_EX.map(t => ({ id: 'm' + newId(), ...t }))]; touchMeta(); toast('3 modèles ajoutés, à adapter à votre façon d’écrire'); }
+function openTplEdit(id, after) {
+  const t = id ? tplList().find(x => x.id === id) : null;
+  const m = modal(`<div class="modal-h"><h3>${t ? 'Modifier le modèle' : 'Nouveau modèle de message'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px"><label class="fld"><span>Nom du modèle</span><input id="tp-n" maxlength="60" value="${esc(t ? t.n : '')}" placeholder="ex. Relance des variables"></label>
+      <label class="fld"><span>Objet</span><input id="tp-s" maxlength="200" value="${esc(t ? t.s || '' : '')}" placeholder="ex. {dossier} – variables de {mois de paie}"></label>
+      <label class="fld"><span>Texte</span><textarea id="tp-b" rows="11" style="width:100%;resize:vertical">${esc(t ? t.b || '' : '')}</textarea></label>
+      <div><div class="small" style="margin-bottom:4px">Insérer une zone automatique (à l’endroit du curseur) :</div><div class="tpl-z">${TPL_Z.map(([k, d]) => `<button type="button" class="chip-btn" data-z="${esc(k)}" title="${esc(d || k)}">{${esc(k)}}</button>`).join('')}</div>
+      <div class="muted small" style="margin-top:4px">Une zone sans valeur pour le dossier choisi apparaît entre crochets, à compléter. Ne notez jamais d’identifiants ni de mots de passe dans un modèle.</div></div></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tp-ok">Enregistrer</button></div>`, 'wide');
+  const q = x => m.el.querySelector(x); let foc = q('#tp-b');
+  [q('#tp-s'), q('#tp-b')].forEach(f => f.addEventListener('focus', () => { foc = f; }));
+  q('.tpl-z').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; const z = '{' + b.dataset.z + '}', a = foc.selectionStart ?? foc.value.length, e = foc.selectionEnd ?? a; foc.value = foc.value.slice(0, a) + z + foc.value.slice(e); foc.focus(); foc.setSelectionRange(a + z.length, a + z.length); });
+  setTimeout(() => q('#tp-n').focus(), 30);
+  q('#tp-ok').addEventListener('click', () => {
+    const n = q('#tp-n').value.trim(); if (!n) { toast('Donnez un nom au modèle'); q('#tp-n').focus(); return; }
+    const o = { id: t ? t.id : 'm' + newId(), n, s: q('#tp-s').value.trim(), b: q('#tp-b').value.replace(/\s+$/, '') };
+    S.meta.settings.tpl = t ? tplList().map(x => x.id === t.id ? o : x) : [...tplList(), o]; touchMeta(); m.close(); toast(t ? 'Modèle enregistré' : 'Modèle créé : ' + n); if (after) after(o.id);
+  });
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-tpl]'); if (!b) return; const id = b.closest('[data-tplid]')?.dataset.tplid, a = b.dataset.tpl;
+  if (a === 'new') openTplEdit(null); else if (a === 'ex') tplAddExamples(); else if (a === 'edit') openTplEdit(id);
+  else if (a === 'del') { const prev = tplList(), t = prev.find(x => x.id === id); S.meta.settings.tpl = prev.filter(x => x.id !== id); touchMeta(); toast('Modèle supprimé : ' + (t ? t.n : ''), 'Annuler', () => { S.meta.settings.tpl = prev; touchMeta(); }); }
+});
+function openMsg(cid, pid) {
+  const c = clientOf(cid); if (!c) return;
+  const g = groupOf(c.group), own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && (x.clients || []).some(id => clientOf(id)?.group === g.id)) : [];
+  const mk0 = defaultCycleMonth(), mks = [prevMk(mk0), mk0, nextMk(mk0)], last = lsGet('tplLast', '');
+  const L = tplList(), pOpt = x => `<option value="${x.id}" ${x.id === (pid || (own[0] || {}).id) ? 'selected' : ''}>${esc(x.name)}${pRoleTxt(x) ? ' · ' + esc(pRoleTxt(x)) : ''}</option>`;
+  const m = modal(`<div class="modal-h"><h3>✉ Message — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px">${!L.length ? `<div class="card empty" style="margin:0">Aucun modèle de message pour l’instant.<br><button class="btn sm primary" data-msg="new" style="margin-top:8px">＋ Créer un modèle</button> <button class="btn sm" data-msg="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>` : `
+      <div class="fld-row"><label class="fld"><span>Modèle</span><select id="ms-t">${L.map(t => `<option value="${esc(t.id)}" ${t.id === last ? 'selected' : ''}>${esc(t.n)}</option>`).join('')}</select></label>
+        <label class="fld"><span>Interlocuteur</span><select id="ms-p">${own.length ? `<optgroup label="Interlocuteurs du dossier">${own.map(pOpt).join('')}</optgroup>` : ''}${gp.length ? `<optgroup label="Autres interlocuteurs du groupe">${gp.map(pOpt).join('')}</optgroup>` : ''}<option value="" ${!own.length && !pid ? 'selected' : ''}>Sans interlocuteur</option></select></label>
+        <label class="fld" style="max-width:190px"><span>Mois de paie</span><select id="ms-m">${mks.map(k => `<option value="${k}" ${k === mk0 ? 'selected' : ''}>${esc(mkLabel(k))}</option>`).join('')}</select></label></div>
+      <label class="fld"><span>Objet</span><input id="ms-s"></label><label class="fld"><span>Texte (modifiable avant de copier)</span><textarea id="ms-b" rows="12" style="width:100%;resize:vertical"></textarea></label>
+      <div id="ms-warn" class="small" style="color:var(--s-warn,#a66a00)" hidden></div>`}</div>
+    <div class="modal-f">${L.length ? `<button class="btn ghost" data-msg="edit" title="Modifier ce modèle">Modifier le modèle</button><span class="sp"></span><button class="btn" data-msg="cs">${ICON.copy} Copier l’objet</button><button class="btn" data-msg="cb">${ICON.copy} Copier le texte</button><button class="btn primary" data-msg="ca">${ICON.copy} Copier tout</button>` : '<span class="sp"></span><button class="btn" data-close>Fermer</button>'}</div>`, 'wide');
+  const q = x => m.el.querySelector(x);
+  const fill = () => { const t = tplList().find(x => x.id === q('#ms-t').value); if (!t) return; lsSet('tplLast', t.id); const V = tplVals(c, personOf(q('#ms-p').value) || null, q('#ms-m').value); q('#ms-s').value = tplFill(t.s, V); q('#ms-b').value = tplFill(t.b, V);
+    const miss = [...new Set([...(q('#ms-s').value + q('#ms-b').value).matchAll(/\[([^\]\n]{1,40})\]/g)].map(x => x[1]).filter(k => norm(k) in V))]; q('#ms-warn').hidden = !miss.length; q('#ms-warn').textContent = miss.length ? 'À compléter : ' + miss.join(', ') + ' (non renseigné pour ce dossier ou cet interlocuteur).' : ''; };
+  if (L.length) { ['#ms-t', '#ms-p', '#ms-m'].forEach(x => q(x).addEventListener('change', fill)); fill(); }
+  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-msg]'); if (!b) return; const a = b.dataset.msg;
+    if (a === 'new' || a === 'ex') { m.close(); if (a === 'ex') { tplAddExamples(); openMsg(cid, pid); } else openTplEdit(null, () => openMsg(cid, pid)); return; }
+    if (a === 'edit') { const id = q('#ms-t').value; m.close(); openTplEdit(id, () => openMsg(cid, q('#ms-p') ? q('#ms-p').value : pid)); return; }
+    copyText(a === 'cs' ? q('#ms-s').value : a === 'cb' ? q('#ms-b').value : 'Objet : ' + q('#ms-s').value + '\n\n' + q('#ms-b').value); });
+}
+/* ---------- Mode discret pour le partage d'écran (v1.45.0), propre à l'appareil ---------- */
+const DSC_OPTS = [['amt', 'Montants et tarifs'], ['time', 'Temps passés et horaires'], ['notes', 'Notes sensibles : relation client, alertes salariés, coordonnées'], ['oth', 'Autres dossiers : noms floutés (visibles au survol), groupe masqué dans un carnet']];
+const dscOpts = () => { try { const v = JSON.parse(lsGet('dscOpts', 'null')); if (Array.isArray(v)) return v; } catch (e) {} return DSC_OPTS.map(x => x[0]); };
+const dscOn = () => lsGet('dsc', '0') === '1';
+const DSC_RE = /(\d[\d   .]*(?:,\d{1,2})?\s?€(?:\s?\/\s?(?:h|acte))?)|(\b\d{1,4}h\d{2}\b|\b\d{1,4},\d{2}\s?h\b|\b\d{1,2}:\d{2}(?::\d{2})?\b|\b\d+\s?min\b)/g;
+function dscWrap(tn) {
+  const p = tn.parentNode; if (!p || p.nodeType !== 1 || p.closest('script,style,textarea,option,select,title,svg,.dsc-a,.dsc-t')) return;
+  const t = tn.nodeValue; DSC_RE.lastIndex = 0; if (!t || !DSC_RE.test(t)) return; DSC_RE.lastIndex = 0;
+  const fr = document.createDocumentFragment(); let last = 0, m;
+  while ((m = DSC_RE.exec(t))) { if (m.index > last) fr.appendChild(document.createTextNode(t.slice(last, m.index))); const sp = document.createElement('span'); sp.className = m[1] ? 'dsc-a' : 'dsc-t'; sp.textContent = m[0]; fr.appendChild(sp); last = m.index + m[0].length; }
+  if (last < t.length) fr.appendChild(document.createTextNode(t.slice(last))); p.replaceChild(fr, tn);
+}
+function dscScan(root) { if (root.nodeType === 3) { dscWrap(root); return; } if (root.nodeType !== 1) return; const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), l = []; while (w.nextNode()) l.push(w.currentNode); l.forEach(dscWrap); }
+const DSC_OBS = new MutationObserver(ms => { for (const m of ms) { if (m.type === 'characterData') dscWrap(m.target); else m.addedNodes.forEach(dscScan); } });
+function applyDsc() {
+  const on = dscOn(), o = dscOpts(), b = document.body; b.classList.toggle('discret', on); for (const [k] of DSC_OPTS) b.classList.toggle('dsc-' + k, o.includes(k));
+  const btn = $('#dsc-btn'); if (btn) { btn.classList.toggle('on', on); btn.title = on ? 'Mode discret activé : cliquer pour tout afficher' : 'Mode discret (partage d’écran) : masque montants, temps et notes sensibles'; btn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  if (on) { dscScan(document.body); DSC_OBS.observe(document.body, { childList: true, subtree: true, characterData: true }); } else DSC_OBS.disconnect();
+}
+function toggleDsc() { lsSet('dsc', dscOn() ? '0' : '1'); applyDsc(); toast(dscOn() ? 'Mode discret activé' : 'Mode discret désactivé'); }
+document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
+/* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
+const NEWS = [
+  ['1.45.0', '15/11/2026', ['Charge à venir : les échéances des deux prochaines semaines dans Ma journée, et une vue sur deux mois dans Mon cycle (clic sur un jour : le détail).', 'Préparer une absence : ce qui tombera pendant vos congés, par dossier ou par date, en PDF, texte ou impression.', 'Pendant mon absence : au retour, ce qui est arrivé à échéance sans être noté.', 'Recherche dans le contenu des carnets (pratiques, journal, points, notes…) depuis la loupe et la recherche du Carnet.', 'Modèles de messages (Références) à insérer depuis le carnet d’un dossier, adaptés à l’interlocuteur.', 'Mode discret pour le partage d’écran (bouton 👁 en haut à droite), réglable dans Réglages › Cet appareil.', 'Aide de chaque écran (bouton ?) et ces nouveautés après chaque mise à jour.']],
+  ['1.44.0', '15/11/2026', ['Catégories de tâches et de personnes à votre main : ajout, nom, ordre, couleur, mots-clés et facturation par défaut.', 'Copie du carnet d’un autre dossier, à la création ou depuis un carnet.', 'Barre des Outils figée en haut de l’écran.']],
+  ['1.43.0', '15/11/2026', ['Barres principales figées en haut de l’écran (Mon cycle, Carnet, Rapports), désactivables.', 'Export PDF du carnet : pied de page réduit au logo.']],
+  ['1.42.0', '15/11/2026', ['Couleurs des catégories de tâches et de personnes, icône selon la civilité.', 'PDF du carnet aux couleurs de l’application.']]];
+const verCmp = (a, b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
+function openNews(since) {
+  const L = since ? NEWS.filter(n => verCmp(n[0], since) > 0) : NEWS;
+  const m = modal(`<div class="modal-h"><h3>✨ ${since ? 'Nouveautés de la version ' + APP_VERSION : 'Nouveautés d’Antevorta'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b news">${(L.length ? L : NEWS.slice(0, 1)).map(([v, d, items]) => `<h4>Version ${esc(v)} <span class="muted small">· ${esc(d)}</span></h4><ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>
+    <div class="modal-f">${since ? '<button class="btn ghost" data-news="all">Toutes les nouveautés</button>' : ''}<span class="sp"></span><button class="btn primary" data-close>C’est noté</button></div>`);
+  m.el.querySelector('[data-news]')?.addEventListener('click', () => { m.close(); openNews(null); });
+}
+function newsCheck() {
+  const seen = lsGet('seenVer', ''); if (seen === APP_VERSION) return;
+  const old = typeof NEWS_OLD !== 'undefined' && NEWS_OLD;
+  lsSet('seenVer', APP_VERSION);
+  if ((old || seen) && NEWS.some(n => n[0] === APP_VERSION) && !document.querySelector('.overlay')) openNews(seen || '1.44.0');
+}
+const HELP = {
+  chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.']],
+  portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
+  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).']],
+  rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
+  facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
+  referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier.']],
+  outils: ['Outils', ['Calculateurs du quotidien : dates, rupture conventionnelle, forfait jours, avantage véhicule, prorata…', '« Choisir mes outils » règle ceux qui s’affichent ; chaque calcul se copie en image ou en texte.', 'Calculs indicatifs : vérifiez toujours votre convention collective.']],
+  reglages: ['Réglages', ['Mon travail : planning, saisie des temps, suggestions, lissage.', 'Cet appareil : couleur, barres figées, mode discret, citations, onglets affichés.', 'Données : sauvegarde, imports, conventions collectives, remise à zéro.']]
+};
+function openHelp() {
+  const v = (location.hash.slice(1).split('/')[0] || 'chrono').replace('acces', 'reglages'), h = HELP[v] || HELP.chrono;
+  const m = modal(`<div class="modal-h"><h3>? Aide — ${esc(h[0])}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b news"><ul>${h[1].map(x => `<li>${esc(x)}</li>`).join('')}</ul><h4>Partout</h4><ul><li>Ctrl+K (ou la loupe) : chercher un dossier, le contenu des carnets, un onglet, un outil, ou saisir « 1h30 Dupont paie ».</li><li>Bouton horloge : vos 10 dernières actions, restaurables. 👁 : mode discret pour le partage d’écran.</li></ul></div>
+    <div class="modal-f"><button class="btn ghost" data-h="news">Nouveautés de la version</button><span class="sp"></span><button class="btn primary" data-close>Fermer</button></div>`);
+  m.el.querySelector('[data-h]').addEventListener('click', () => { m.close(); openNews(null); });
 }
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
@@ -2762,7 +2928,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
   return { title: 'Groupe ' + g.name, sub: mem.length + ' dossier' + (mem.length > 1 ? 's' : ''), sections: S2 };
 }
 function cbxText(M) {
-  const L = [M.title.toUpperCase(), ...(M.sub ? [M.sub] : []), 'Carnet de bord au ' + fmtDate(Date.now()), ''];
+  const L = [M.title.toUpperCase(), ...(M.sub ? [M.sub] : []), M.stamp || 'Carnet de bord au ' + fmtDate(Date.now()), ''];
   for (const s2 of M.sections) { L.push(s2.t, '-'.repeat(Math.min(60, s2.t.length))); for (const [l, v] of s2.items) L.push(l ? l + ' : ' + v : '• ' + v); L.push(''); }
   return L.join('\n').trim() + '\n';
 }
@@ -2785,11 +2951,11 @@ function cbxPdf(M, styled) {
     const tl = wrap(M.title, 18, cw, true), bh = 30 + tl.length * 20 + 15 + 14;
     ops.push(`${AC} rg 0 ${(H - bh).toFixed(2)} ${W} ${bh} re f`);
     y = H - 22; for (const l of tl) { y -= 20; txt(l, ML, 18, true, false, '1 1 1'); }
-    y -= 15; txt([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, false, '0.92 0.95 0.94');
+    y -= 15; txt([M.sub, M.stamp || 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, false, '0.92 0.95 0.94');
     y = H - bh - 8;
   } else {
     for (const l of wrap(M.title, 18, cw, true)) { need(24); y -= 20; txt(l, ML, 18, true); }
-    y -= 16; txt([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, true); y -= 6;
+    y -= 16; txt([M.sub, M.stamp || 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, true); y -= 6;
   }
   for (const sec of M.sections) {
     need(40); y -= 22; if (styled) ops.push(`${AC} rg ${ML} ${(y - 2).toFixed(2)} 3 12 re f`); txt(sec.t.toUpperCase(), styled ? ML + 8 : ML, 11, true, false, styled ? AC : null); y -= 5; rule(); y -= 2;
@@ -2832,7 +2998,7 @@ function cbxPdfSave(name, u8) {
 function cbxPrint(M, styled) {
   document.getElementById('print-area')?.remove();
   const el = document.createElement('div'); el.id = 'print-area'; if (styled) { el.className = 'pa-styled'; el.style.setProperty('--pa', THEMES[themeKey()].a); }
-  el.innerHTML = `<h1>${esc(M.title)}</h1><div class="pa-sub">${esc([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '))}</div>${M.sections.map(s2 => `<h2>${esc(s2.t)}</h2>${s2.items.some(x => x[0]) ? `<table>${s2.items.map(([l, v]) => `<tr><th>${esc(l)}</th><td>${esc(v).replace(/\n/g, '<br>')}</td></tr>`).join('')}</table>` : `<ul>${s2.items.map(([, v]) => `<li>${esc(v).replace(/\n/g, '<br>')}</li>`).join('')}</ul>`}`).join('')}`;
+  el.innerHTML = `<h1>${esc(M.title)}</h1><div class="pa-sub">${esc([M.sub, M.stamp || 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '))}</div>${M.sections.map(s2 => `<h2>${esc(s2.t)}</h2>${s2.items.some(x => x[0]) ? `<table>${s2.items.map(([l, v]) => `<tr><th>${esc(l)}</th><td>${esc(v).replace(/\n/g, '<br>')}</td></tr>`).join('')}</table>` : `<ul>${s2.items.map(([, v]) => `<li>${esc(v).replace(/\n/g, '<br>')}</li>`).join('')}</ul>`}`).join('')}`;
   document.body.appendChild(el); document.body.classList.add('printing');
   const done = () => { document.body.classList.remove('printing'); el.remove(); window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
@@ -2865,7 +3031,7 @@ function renderCarnet() {
   const c = UI.cbId ? clientOf(UI.cbId) : null;
   if (UI.cbId && (!c || c.deletedAt)) { UI.cbId = null; location.replace('#carnet'); return; }
   if (c) { renderCarnetDossier(body, c); return; }
-  const f = UI.cb.f, q = norm(UI.cb.q || '');
+  const f = UI.cb.f, q = norm(UI.cb.q || '').trim(); UI._cbFound = new Map();
   const cbList = lsGet('cbView', 'tiles') === 'list';
   const all = S.meta.clients.filter(x => !x.deletedAt && (!x.archived || (cbList && UI.refArch)));
   const nMine = all.filter(isMine).length;
@@ -2878,12 +3044,12 @@ function renderCarnet() {
     if (ff === 'oldccn') return cc.some(k => k.i != null && ccnOld(ccnOf(k.i)));
     if (ff.startsWith('ccn:')) return cc.some(k => ccnKey(k) === ff.slice(4));
     return true; };
-  const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && ffOk(x) && (!q || [x.name, x.code, x.siret, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q))))
+  const list = all.filter(x => (f === 'all' || (f === 'mine') === isMine(x)) && ffOk(x) && (!q || [x.name, x.code, x.siret, groupOf(x.group)?.name, ...cbPeek(x).ccn?.flatMap(k => [k.t, k.i != null ? idccStr(k.i) : '', k.b || '', ccnShort(k)]) || []].some(v => norm(v).includes(q)) || cbFoundSet(x, q)))
     .sort((a, b) => (isMine(b) - isMine(a)) || a.name.localeCompare(b.name, 'fr'));
   const mk = defaultCycleMonth(), today = dayKey(Date.now());
   const hasG = hasGroups(), grouped = hasG && lsGet('cbGroup', '1') === '1';
   let html = `<div class="card filters cb-tools"><div class="seg" data-seg="cbv" title="Présentation"><button data-v="tiles" class="${cbList ? '' : 'on'}">Tuiles</button><button data-v="list" class="${cbList ? 'on' : ''}">Liste</button></div><div class="seg" data-seg="cbf"><button data-v="mine" class="${f === 'mine' ? 'on' : ''}">Mon portefeuille (${nMine})</button><button data-v="others" class="${f === 'others' ? 'on' : ''}">Autres (${all.length - nMine})</button><button data-v="all" class="${f === 'all' ? 'on' : ''}">Tous (${all.length})</button></div>
-    <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention collective, IDCC…" value="${esc(UI.cb.q || '')}" autocomplete="off">
+    <input id="cb-q" placeholder="Rechercher : dossier, n°, groupe, convention, IDCC, contenu des carnets…" value="${esc(UI.cb.q || '')}" autocomplete="off">
     ${cbFilterHTML(all.filter(x => f === 'all' || (f === 'mine') === isMine(x)), ff)}
     ${hasG && !cbList ? `<label class="chk"><input type="checkbox" id="cb-grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}${cbList ? '' : '<button class="btn sm" data-cba="newgrp" title="Créer un groupe de dossiers">＋ Nouveau groupe</button><button class="btn sm primary" data-cba="newdos" title="Créer un dossier">＋ Nouveau dossier</button>'}</div>`;
   if (cbList) {
@@ -2998,7 +3164,7 @@ function renderCarnetDossier(body, c) {
   // Interlocuteurs (v1.40.0)
   { const own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && (x.clients || []).some(id => clientOf(id)?.group === g.id)) : [];
     const pp = x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cba="pfiche" data-pid="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))}</span><span class="sp" style="flex:1"></span>${x.phone ? `<a class="small" href="${esc(telHref(x.phone))}">${esc(x.phone)}</a>` : ''}${pContact(x)}</div>`;
-    html += `<i data-b="interloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs</h2><span class="sp"></span><button class="btn sm" data-cba="pnew">＋ Ajouter</button></div><div class="card cb-sec"><div class="cb-ppl">${own.map(pp).join('') || '<div class="cb-hint">Aucun interlocuteur pour ce dossier.</div>'}</div>${gp.length ? `<div class="cb-hint" style="margin-top:6px">Autres interlocuteurs du groupe</div><div class="cb-ppl">${gp.map(pp).join('')}</div>` : ''}
+    html += `<i data-b="interloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs</h2><span class="sp"></span><button class="btn sm ghost" data-cba="msg" title="Préparer un message à partir d’un modèle, adapté à l’interlocuteur">✉ Message</button><button class="btn sm" data-cba="pnew">＋ Ajouter</button></div><div class="card cb-sec"><div class="cb-ppl">${own.map(pp).join('') || '<div class="cb-hint">Aucun interlocuteur pour ce dossier.</div>'}</div>${gp.length ? `<div class="cb-hint" style="margin-top:6px">Autres interlocuteurs du groupe</div><div class="cb-ppl">${gp.map(pp).join('')}</div>` : ''}
       ${(() => { const others = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pLinked(pKind(x)) && !own.includes(x)); return others.length ? `<div style="margin-top:6px;display:flex;gap:6px"><select id="cb-plink" style="flex:1"><option value="">Rattacher un interlocuteur existant…</option>${others.sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr')).map(x => `<option value="${x.id}">${esc(x.name)}${x.role ? ' · ' + esc(x.role) : ''}</option>`).join('')}</select></div>` : ''; })()}</div>`; }
   // Tarifs particuliers (v1.40.0)
   { const rs = Object.entries(c.rates || {}).filter(([tid]) => taskOf(tid)), ts2 = S.meta.tasks.filter(t => !t.deletedAt && !t.archived && !(c.rates || {})[t.id]).sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr'));
@@ -3129,6 +3295,7 @@ function bindCarnet() {
     else if (act === 'params') openCyParams(c.id);
     else if (act === 'alerts') openAlertEditor(a, defaultCycleMonth(), c.id);
     else if (act === 'pnew') openPersonFiche(null, { kind: 'cli', clients: [c.id] });
+    else if (act === 'msg') openMsg(c.id);
     else if (act === 'pfiche') openPersonFiche(a.dataset.pid);
     else if (act === 'rateadd') { const tid = $('#rt-t').value, n = numIn($('#rt-a').value); if (!tid || !(n > 0)) { toast('Choisissez une tâche et un montant'); return; } c.rates = { ...(c.rates || {}), [tid]: { mode: $('#rt-m').value, amount: n } }; touchMeta(); }
     else if (act === 'ratedel') { const tid = a.dataset.tid, old = (c.rates || {})[tid]; delete c.rates[tid]; if (!Object.keys(c.rates).length) delete c.rates; touchMeta(); toast('Tarif particulier retiré', 'Annuler', () => { c.rates = { ...(c.rates || {}), [tid]: old }; touchMeta(); }); }
@@ -3701,6 +3868,7 @@ function renderChrono() {
     const gs = []; for (const u of upc7) { const g = gs.find(x => x.d === u.d && x.k === u.k); if (g) g.n.push(u.nm); else gs.push({ d: u.d, k: u.k, n: [u.nm] }); }
     html += `<i data-b="echeances" data-half="1"></i><h2>Échéances des 7 prochains jours</h2><div class="card cy-upc">${gs.map(g => `<div class="cy-upc-i"><span class="d">${WD_S[new Date(g.d).getDay()]} ${fmtDate(g.d).slice(0, 5)}</span>${g.n.length <= 2 ? `<span>${esc(g.k)} — ${esc(g.n.join(', '))}</span>` : `<details><summary>${esc(g.k)} — <b>${g.n.length} dossiers</b></summary><div class="muted small">${esc(g.n.join(' · '))}</div></details>`}</div>`).join('')}</div>`;
   }
+  if (tabOn('portefeuille') && cyClients().length) html += `<i data-b="charge" data-half="1"></i><div class="toolbar"><h2>Charge à venir · 2 semaines</h2><span class="sp"></span><button class="btn sm ghost" data-absx="prep" title="Ce qui tombera pendant votre absence, dossier par dossier">🧳 Préparer une absence</button><button class="btn sm ghost" data-absx="back" title="Ce qui est arrivé à échéance sans être noté pendant votre absence">Pendant mon absence</button></div><div class="card fc-card">${fcBarsHTML(fcDays(Date.now(), 10))}</div>`;
   body._cyTodo = cyt;
   html += `<div class="warn" id="long-warn" hidden><span>Le chrono tourne depuis très longtemps : un oubli d’arrêt ?</span><button class="btn sm" data-act="forgot">Ajuster l’heure de fin</button></div>`;
   if (!S.meta.clients.length && !entries.length) {
@@ -4148,6 +4316,7 @@ function cmdItems(q) {
       out.push({ ic: '▶', t: 'Lancer le chrono — ' + c.name, sub: true, run: () => { startTimer({ client: c.id, task: null, label: '' }); location.hash = 'chrono'; } });
       if (isMine(c) && tabOn('portefeuille')) {
         out.push({ ic: '🗓', t: 'Voir dans Mon cycle — ' + c.name, sub: true, run: () => { (UI.pfv ||= {}).mode = 'cycle'; UI.pfv.cq = c.name; location.hash = 'portefeuille'; renderPortfolio(); } });
+        if (tplList().length) out.push({ ic: '✉', t: 'Préparer un message — ' + c.name, sub: true, run: () => openMsg(c.id) });
         const ns = cyNextStep(c); if (ns) out.push({ ic: '✓', t: 'Noter « ' + CY_STEP_L[ns.f] + ' » aujourd’hui — ' + c.name, sub: true, s: 'cycle de ' + mkLabel(ns.mk), run: () => { cySet(ns.mk, c.id, { [ns.f]: isoDay(Date.now()) }); toast(c.name + ' : « ' + CY_STEP_L[ns.f] + ' » fait aujourd’hui', 'Annuler', () => cySet(ns.mk, c.id, { [ns.f]: null })); } });
       }
     }
@@ -4157,6 +4326,11 @@ function cmdItems(q) {
     ...[['planning', 'Planning habituel', 'horaires forfait journee type', 'travail'], ['reglages', 'Saisie des temps', 'arrondi facturation fin de journee format', 'travail'], ['lissage', 'Lissage des temps', '', 'travail'], ['affichage', 'Couleur et citations', 'theme couleur', 'appareil'], ['onglets', 'Onglets affichés', '', 'appareil'], ['donnees', 'Données', 'sauvegarde export import conventions remise a zero', 'donnees']].map(([b, l, k, tb]) => ({ ic: '⚙', t: 'Réglages › ' + l, s: 'Section', k: l + ' ' + k, run: () => { lsSet('setTab', tb); if (UI.view === 'reglages') renderSettings(); cmdGoBlk('reglages', b); } })),
     ...(tabOn('outils') ? TOOLS.map(t => ({ ic: '🧮', t: 'Outil : ' + t.t, s: t.d, k: t.t + ' ' + t.d, run: () => cmdGoBlk('outils', 'tool-' + t.id) })) : []),
     ...groupsAll().map(g => ({ ic: '📖', t: 'Carnet du groupe ' + g.name, s: 'Groupe', k: 'groupe ' + g.name, run: () => { location.hash = 'carnet/groupe/' + encodeURIComponent(g.id); } }))];
+  nav.push(...(tabOn('portefeuille') ? [{ ic: '📊', t: 'Charge à venir', s: 'Mon cycle', k: 'charge prevision semaines echeances', run: () => { (UI.pfv ||= {}).mode = 'charge'; location.hash = 'portefeuille'; renderPortfolio(); } },
+    { ic: '🧳', t: 'Préparer une absence', s: 'Congés : ce qui tombera pendant l’absence', k: 'conges absence depart vacances', run: openAbsPrep }, { ic: '↩', t: 'Pendant mon absence', s: 'Retour de congés', k: 'retour conges absence', run: openAbsBack }] : []),
+    { ic: '👁', t: dscOn() ? 'Désactiver le mode discret' : 'Mode discret', s: 'Partage d’écran', k: 'discret partage ecran masquer', run: toggleDsc }, { ic: '✉', t: 'Modèles de messages', s: 'Références', k: 'modeles messages mail courriel', run: () => cmdGoBlk('referentiel', 'modeles') },
+    { ic: '✨', t: 'Nouveautés de la version', s: 'Version ' + APP_VERSION, k: 'nouveautes version mise a jour', run: () => openNews(null) }, { ic: '?', t: 'Aide de cet écran', s: 'Aide', k: 'aide help comment', run: openHelp });
+  if (n.length >= 3) { const hs = cbSearch(q, 6); if (hs.length) out.push({ head: 'Dans les carnets' }, ...hs.map(h => ({ ic: '🔎', t: h.isG ? grpTitle(h.o) : h.o.name, s: h.where + ' : « ' + h.snip + ' »', run: () => { location.hash = 'carnet/' + (h.isG ? 'groupe/' : '') + encodeURIComponent(h.o.id); } }))); }
   const navF = n ? nav.filter(x => n.split(/\s+/).every(w => norm(x.t + ' ' + x.k).includes(w))).slice(0, 8) : nav.filter(x => x.s === 'Onglet');
   if (navF.length) out.push({ head: n ? 'Aller à' : 'Onglets' }, ...navF);
   if (!out.length) out.push({ empty: true, t: 'Aucun résultat. Astuce : « 1h30 Dupont paie octobre » crée une saisie.' });
@@ -4513,6 +4687,148 @@ function cyUpcoming(days = 7) {
   }
   return out.sort((a, b) => a.d - b.d);
 }
+/* ---------- Charge à venir (v1.45.0) : échéances attendues d'après les paramètres et dates habituelles du cycle ----------
+   Étapes non faites : réception des variables (date habituelle, sinon relance par défaut), 1er envoi (réception + délai),
+   validation client, virements, dépôt des bulletins, DSN ; points en cours datés des carnets (dossiers et groupes). */
+const FC_STEPS = [['rec', 'Réception des variables'], ['env', '1er envoi'], ['val', 'Validation client'], ['vir', 'Virements'], ['dep', 'Dépôt des bulletins'], ['dsn', 'DSN'], ['pt', 'Points en cours']];
+const FC_L = Object.fromEntries(FC_STEPS);
+const FC_COL = { rec: 0, env: 5, val: 2, vir: 6, dep: 3, dsn: 7, pt: 1 };
+const fcCol = k => GROUP_COLORS[FC_COL[k] % GROUP_COLORS.length];
+const isOpenDay = d => isWorkday(d) && !holidayOn(dayKey(d));
+function fcDays(from, n) { const out = []; let d = startOfDay(from); for (let i = 0; out.length < n && i < 400; i++) { if (isOpenDay(d)) out.push(d); d = addDays(d, 1); } return out; }
+function cyForecast(from, to) {
+  from = startOfDay(from); to = startOfDay(to); const out = [];
+  const add = (d, k, c, mk, extra) => { if (d) { d = startOfDay(d); for (let i = 0; i < 10 && !isOpenDay(d); i++) d = addDays(d, -1); } if (d && d >= from && d <= to) out.push({ d: startOfDay(d), k, cid: c.id, nm: c.name, mk, ...(extra || {}) }); };
+  const last = monthKey(to);
+  for (let mk = prevMk(prevMk(monthKey(from))); mk <= last; mk = nextMk(mk)) {
+    if (cyClosed(mk)) continue;
+    for (const c of cyClients()) {
+      const p = cyOf(c), row = cyRow(mk, c.id), sim = { ...row };
+      if (p.rec === 'var' && !row.rec) { const r = cyRelDates(mk, c), d = r.usual || r.rel; add(d, 'rec', c, mk, r.usual ? null : { approx: 1 }); if (d) sim.rec = isoDay(d); }
+      if (!row.env) { const d = p.rec !== 'var' ? cyDue(mk, c, sim).env : sim.rec ? addWorkdays(dOf(sim.rec), Math.max(1, cyEnvDelay(c) || 0)) : null; add(d, 'env', c, mk); if (d) sim.env = isoDay(d); }
+      if (p.valid && !row.val) { const ls = cyLastSend(sim), d = ls ? addWorkdays(ls, Math.max(1, cyValDelay(c) || 0)) : null; add(d, 'val', c, mk); if (d) sim.val = isoDay(d); }
+      if (!row.vir && cyState(mk, c, row, 'vir').st !== 'na') { const d = cyDue(mk, c, sim).vir; add(d, 'vir', c, mk); if (d) sim.vir = isoDay(d); }
+      if (!row.dep && p.dep !== 'nc') add(cyDue(mk, c, sim).dep, 'dep', c, mk);
+      if (!row.dsn) add(cyDue(mk, c, sim).dsn, 'dsn', c, mk);
+    }
+  }
+  for (const c of cyClients()) for (const x of (cbPeek(c).points || [])) if (!x.done && x.due) add(parseDay(x.due), 'pt', c, null, { t: x.t });
+  for (const g of groupsAll()) for (const x of (cbPeek(g).points || [])) if (!x.done && x.due) add(parseDay(x.due), 'pt', { id: g.id, name: grpTitle(g) }, null, { t: x.t, grp: 1 });
+  const rk = k => FC_STEPS.findIndex(s2 => s2[0] === k);
+  return out.sort((a, b) => a.d - b.d || rk(a.k) - rk(b.k) || a.nm.localeCompare(b.nm, 'fr'));
+}
+const fcCount = list => { const n = {}; for (const x of list) n[x.k] = (n[x.k] || 0) + 1; return n; };
+const fcTip = (d, list) => { const n = fcCount(list); return fmtDayLong(dayKey(d)) + ' : ' + (list.length ? list.length + ' échéance' + (list.length > 1 ? 's' : '') + ' — ' + FC_STEPS.filter(s2 => n[s2[0]]).map(s2 => s2[1] + ' ' + n[s2[0]]).join(', ') : 'rien de prévu'); };
+function fcStack(list, max, h) { const n = fcCount(list); return `<div class="fc-stack" style="height:${max ? Math.max(list.length ? 4 : 0, Math.round(list.length / max * h)) : 0}px">${FC_STEPS.filter(s2 => n[s2[0]]).map(s2 => `<i style="flex:${n[s2[0]]};background:${fcCol(s2[0])}"></i>`).join('')}</div>`; }
+const fcLegend = list => { const n = fcCount(list); const ks = FC_STEPS.filter(s2 => n[s2[0]]); return ks.length ? `<div class="fc-leg">${ks.map(s2 => `<span><i style="background:${fcCol(s2[0])}"></i>${esc(s2[1])}</span>`).join('')}</div>` : ''; };
+function fcBarsHTML(days) {
+  const all = cyForecast(days[0], days[days.length - 1]), by = d => all.filter(x => x.d === d), max = Math.max(1, ...days.map(d => by(d).length));
+  if (!all.length) return `<div class="muted small">Aucune échéance attendue sur cette période (d’après les paramètres du cycle de vos dossiers).</div>`;
+  return `<div class="fc-bars">${days.map((d, i) => { const l = by(d), wd = new Date(d).getDay(); return `<button type="button" class="fc-day ${i && wd === 1 ? 'wk' : ''} ${d === startOfDay(Date.now()) ? 'today' : ''}" data-fcd="${dayKey(d)}" title="${esc(fcTip(d, l))}"><span class="fc-n">${l.length || ''}</span>${fcStack(l, max, 64)}<span class="fc-l">${WD_S[wd].slice(0, 3)} ${new Date(d).getDate()}</span></button>`; }).join('')}</div>${fcLegend(all)}<div class="muted small" style="margin-top:4px">Étapes non encore notées, d’après les dates habituelles de chaque dossier (une échéance tombant un week-end ou un jour férié est placée le jour ouvré précédent). Cliquez sur un jour pour le détail.</div>`;
+}
+function openFcDay(k) {
+  const d = parseDay(k), list = cyForecast(d, d);
+  const m = modal(`<div class="modal-h"><h3>${esc(fmtDayLong(k))}</h3><button class="icon" data-close>${ICON.close}</button></div><div class="modal-b">${list.length ? fcListHTML(list, false) : '<div class="muted">Rien de prévu ce jour-là.</div>'}</div><div class="modal-f"><span class="sp"></span><button class="btn" data-close>Fermer</button></div>`);
+  m.el.addEventListener('click', ev => { const a = ev.target.closest('a[href^="#carnet"]'); if (a) m.close(); });
+}
+function fcListHTML(list, byCli) { // regroupé par étape (ou par dossier)
+  if (byCli) { const gs = new Map(); for (const x of list) { const g = gs.get(x.cid) || { nm: x.nm, cid: x.cid, grp: x.grp, l: [] }; g.l.push(x); gs.set(x.cid, g); }
+    return [...gs.values()].sort((a, b) => a.nm.localeCompare(b.nm, 'fr')).map(g => `<div class="fc-grp"><a href="#carnet/${g.grp ? 'groupe/' : ''}${encodeURIComponent(g.cid)}"><b>${esc(g.nm)}</b></a><ul>${g.l.map(x => `<li><span class="fc-dot" style="background:${fcCol(x.k)}"></span>${esc(fmtDate(x.d).slice(0, 5))} · ${esc(FC_L[x.k])}${x.t ? ' : ' + esc(x.t) : ''}${x.mk ? ` <span class="muted small">(cycle de ${esc(mkLabel(x.mk))})</span>` : ''}</li>`).join('')}</ul></div>`).join(''); }
+  return FC_STEPS.filter(s2 => list.some(x => x.k === s2[0])).map(([k, l]) => { const xs = list.filter(x => x.k === k); return `<div class="fc-grp"><b><span class="fc-dot" style="background:${fcCol(k)}"></span>${esc(l)} (${xs.length})</b><ul>${xs.map(x => `<li><a href="#carnet/${x.grp ? 'groupe/' : ''}${encodeURIComponent(x.cid)}">${esc(x.nm)}</a>${x.t ? ' : ' + esc(x.t) : ''}${x.approx ? ' <span class="muted small">(date habituelle non renseignée : relance par défaut)</span>' : ''}${x.mk && k !== 'pt' ? ` <span class="muted small">· cycle de ${esc(mkLabel(x.mk))}</span>` : ''}</li>`).join('')}</ul></div>`; }).join('');
+}
+document.addEventListener('click', ev => { const b = ev.target.closest('[data-fcd]'); if (b) { openFcDay(b.dataset.fcd); return; } const a = ev.target.closest('[data-absx]'); if (a) { a.dataset.absx === 'prep' ? openAbsPrep() : openAbsBack(); } });
+function renderCharge(P) {
+  const body = $('#portefeuille-body'), today = startOfDay(Date.now()), end = addDays(addMonthsClamp(today, 2), -1);
+  const all = cyForecast(today, end), byD = new Map(); for (const x of all) { const k = dayKey(x.d); (byD.get(k) || byD.set(k, []).get(k)).push(x); }
+  let wk = startOfWeek(today); const weeks = []; while (wk <= end) { if (addDays(wk, 4) >= today) weeks.push(wk); wk = addDays(wk, 7); }
+  const max = Math.max(1, ...[...byD.values()].map(l => l.length));
+  let html = `<div class="card filters pf-head">${pfSwitch(P)}<b style="margin-left:6px">Charge à venir · du ${fmtDate(today)} au ${fmtDate(end)}</b><span class="sp" style="flex:1"></span><button class="btn sm ghost" data-absx="prep">🧳 Préparer une absence</button><button class="btn sm ghost" data-absx="back">Pendant mon absence</button></div>`;
+  if (!all.length) html += `<div class="card empty">Aucune échéance attendue sur les deux prochains mois pour les dossiers de votre portefeuille.</div>`;
+  else {
+    html += `<div class="card fc-cal"><div class="fc-row fc-hd"><span></span>${['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'].map(x => `<span>${x}</span>`).join('')}<span>Semaine</span></div>`;
+    for (const w of weeks) {
+      const days = [0, 1, 2, 3, 4].map(i => addDays(w, i)); let tot = 0;
+      html += `<div class="fc-row"><span class="fc-wl">${fmtDate(w).slice(0, 5)}</span>${days.map(d => { const k = dayKey(d), l = byD.get(k) || [], out = d < today || d > end, hol = holidayOn(k); tot += out ? 0 : l.length;
+        if (out) return '<span class="fc-c out"></span>';
+        const n = fcCount(l), top = FC_STEPS.filter(s2 => n[s2[0]]).slice(0, 3);
+        return `<button type="button" class="fc-c ${d === today ? 'today' : ''} ${hol ? 'hol' : ''}" data-fcd="${k}" title="${esc(fcTip(d, l))}"><span class="fc-cd">${new Date(d).getDate()}${new Date(d).getDate() === 1 || d === today ? ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][new Date(d).getMonth()] : ''}${hol ? ' · férié' : ''}</span><b class="fc-cn">${l.length || ''}</b>${l.length ? `<span class="fc-hbar">${fcStack(l, max, 100).replace('height:', 'width:').replace(/px/, '%')}</span>` : ''}<span class="fc-ct">${top.map(s2 => esc(s2[1].split(' ')[0]) + ' ' + n[s2[0]]).join(' · ')}</span></button>`; }).join('')}<span class="fc-wt">${tot || ''}</span></div>`;
+    }
+    html += `</div>${fcLegend(all)}<div class="muted small" style="margin-top:6px">Étapes du cycle non encore notées et points en cours datés, d’après les paramètres et dates habituelles de chaque dossier de votre portefeuille. Les dates sont indicatives : elles s’affinent à mesure que vous notez les étapes.</div>`;
+  }
+  body.innerHTML = html;
+}
+/* ---------- Absences (v1.45.0) : préparer un départ, faire le point au retour ---------- */
+function absPeriodNext() { const u = absUpcoming(dayKey(Date.now())).find(x => x.t !== 'form'); return u ? [startOfDay(u.from), startOfDay(u.to)] : null; }
+function absPeriodLast() { // dernière période d'absence passée (jours d'absence notés, coupures de 4 jours au plus)
+  const today = dayKey(Date.now()), ks = Object.keys(S.days).filter(k => k < today && k >= dayKey(addDays(Date.now(), -120)) && dayAllday(k).some(isAbs)).sort();
+  if (!ks.length) return null; let to = ks[ks.length - 1], from = to;
+  for (let i = ks.length - 2; i >= 0; i--) { if ((parseDay(from) - parseDay(ks[i])) / DAY <= 4) from = ks[i]; else break; }
+  return [parseDay(from), parseDay(to)];
+}
+const dInp = (id, v) => `<input type="date" id="${id}" value="${dayKey(v)}">`;
+function openAbsPrep() {
+  const def = absPeriodNext() || [addDays(startOfDay(Date.now()), 1), addDays(startOfDay(Date.now()), 7)], st = lsGet('absPres', 'cli');
+  const m = modal(`<div class="modal-h"><h3>🧳 Préparer une absence</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px"><div class="fld-row"><label class="fld"><span>Du</span>${dInp('ap-from', def[0])}</label><label class="fld"><span>Au (inclus)</span>${dInp('ap-to', def[1])}</label></div>
+      <div class="small" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">Présentation <div class="seg" id="ap-pres"><button type="button" data-v="cli" class="${st === 'cli' ? 'on' : ''}">Par dossier</button><button type="button" data-v="date" class="${st === 'date' ? 'on' : ''}">Par date</button></div></div>
+      <label class="chk"><input type="checkbox" id="ap-late" checked> Ajouter ce qui est déjà en retard au départ</label>
+      <label class="chk"><input type="checkbox" id="ap-prat" checked> Ajouter les pratiques, particularités et la remarque permanente des dossiers concernés</label>
+      <div class="small" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">Présentation du PDF <div class="seg" id="cbx-st"><button type="button" data-v="0" class="${lsGet('cbxStyle', '1') === '1' ? '' : 'on'}">Sobre</button><button type="button" data-v="1" class="${lsGet('cbxStyle', '1') === '1' ? 'on' : ''}">Mise en forme</button></div></div>
+      <div id="ap-sum" class="muted small"></div></div>
+    <div class="modal-f"><button class="btn" data-x="txt">${ICON.copy} Copier le texte</button><button class="btn" data-x="file">${ICON.down} Fichier .txt</button><span class="sp"></span><button class="btn" data-x="print">Imprimer</button><button class="btn primary" data-x="pdf">${ICON.down} Fichier PDF</button></div>`);
+  const q = x => m.el.querySelector(x);
+  const seg = id => q(id).addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; q(id).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); if (id === '#cbx-st') lsSet('cbxStyle', b.dataset.v); else lsSet('absPres', b.dataset.v); });
+  seg('#ap-pres'); seg('#cbx-st');
+  const model = () => { const from = parseDay(q('#ap-from').value), to = parseDay(q('#ap-to').value); if (!from || !to || to < from) return null; return absPrepModel(from, to, q('#ap-pres .on').dataset.v, q('#ap-late').checked, q('#ap-prat').checked); };
+  const sum = () => { const M = model(); q('#ap-sum').textContent = M ? M.sub : 'Vérifiez les dates.'; };
+  m.el.addEventListener('change', sum); sum();
+  q('.modal-f').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-x]'); if (!b) return; const M = model(); if (!M) { toast('Vérifiez les dates de l’absence'); return; }
+    const fn = 'absence_' + dayKey(parseDay(q('#ap-from').value)) + '_' + dayKey(parseDay(q('#ap-to').value)), sty = lsGet('cbxStyle', '1') === '1';
+    if (b.dataset.x === 'txt') copyText(cbxText(M));
+    else if (b.dataset.x === 'file') downloadText(fn + '.txt', cbxText(M), 'text/plain');
+    else if (b.dataset.x === 'print') { m.close(); cbxPrint(M, sty); return; }
+    else { m.close(); try { cbxPdfSave(fn + '.pdf', cbxPdf(M, sty)); } catch (e) { toast('Création du PDF impossible ici : utilisez « Imprimer » ou « Copier le texte »'); } return; }
+  });
+}
+function absPrepModel(from, to, pres, late, prat) {
+  const list = cyForecast(from, to), mk0 = prevMk(defaultCycleMonth()), lt = late ? cyForecast(addDays(startOfDay(Date.now()), -45), addDays(from, -1)).filter(x => !x.mk || x.mk >= mk0) : [];
+  const fd = x => WD_S[new Date(x.d).getDay()] + ' ' + fmtDate(x.d).slice(0, 5), lbl = x => FC_L[x.k] + (x.t ? ' : ' + x.t : '') + (x.mk && x.k !== 'pt' ? ' (cycle de ' + mkLabel(x.mk) + ')' : '');
+  const sections = [], ids = new Set([...list, ...lt].map(x => x.cid));
+  if (lt.length) sections.push({ t: 'Déjà en retard ou à faire avant le départ', items: lt.map(x => [fd(x), x.nm + ' — ' + lbl(x)]) });
+  if (pres === 'date') {
+    const days = [...new Set(list.map(x => x.d))];
+    for (const d of days) { const xs = list.filter(x => x.d === d), ks = FC_STEPS.filter(s2 => xs.some(x => x.k === s2[0]));
+      sections.push({ t: fmtDayLong(dayKey(d)).replace(/^./, c => c.toUpperCase()), items: ks.flatMap(([k, l]) => k === 'pt' ? xs.filter(x => x.k === k).map(x => [l, x.nm + ' : ' + x.t]) : [[l, xs.filter(x => x.k === k).map(x => x.nm).join(', ')]]) }); }
+    if (prat) for (const id of ids) { const c = clientOf(id); if (!c) continue; const b = cbPeek(c), it = [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', (c.cy || {}).notes]].filter(x => x[1]); if (it.length) sections.push({ t: 'Mémo · ' + c.name + (c.code ? ' (n° ' + c.code + ')' : ''), items: it }); }
+  } else {
+    const order = [...ids].map(id => ({ id, d: Math.min(...[...list, ...lt].filter(x => x.cid === id).map(x => x.d)) })).sort((a, b) => a.d - b.d);
+    for (const { id } of order) { const xs = list.filter(x => x.cid === id); if (!xs.length && !prat) continue; const c = clientOf(id), g = !c && groupOf(id), b = cbPeek(c || g || {});
+      const it = xs.map(x => [fd(x), lbl(x)]); if (!it.length) it.push(['', 'Rien d’attendu pendant l’absence (voir les retards ci-dessus)']);
+      if (prat && c) for (const [l, v] of [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', (c.cy || {}).notes]]) if (v) it.push([l, v]);
+      if (prat && c) { const pp = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(id)); if (pp.length) it.push(['Interlocuteurs', pp.map(x => x.name + (pRoleTxt(x) ? ' (' + pRoleTxt(x) + ')' : '')).join(', ')]); }
+      sections.push({ t: (c ? c.name + (c.code ? ' (n° ' + c.code + ')' : '') : g ? grpTitle(g) : '?'), items: it }); }
+  }
+  if (!sections.length) sections.push({ t: 'Pendant l’absence', items: [['', 'Aucune échéance attendue sur la période.']] });
+  const nD = new Set(list.map(x => x.cid)).size;
+  return { title: 'Absence du ' + fmtDate(from) + ' au ' + fmtDate(to), sub: list.length + ' échéance' + (list.length > 1 ? 's' : '') + ' attendue' + (list.length > 1 ? 's' : '') + ' · ' + nD + ' dossier' + (nD > 1 ? 's' : '') + ' concerné' + (nD > 1 ? 's' : '') + (lt.length ? ' · ' + lt.length + ' en retard au départ' : ''), stamp: 'Préparé le ' + fmtDate(Date.now()), sections };
+}
+function openAbsBack() {
+  const def = absPeriodLast() || [addDays(startOfDay(Date.now()), -7), addDays(startOfDay(Date.now()), -1)];
+  const m = modal(`<div class="modal-h"><h3>Pendant mon absence</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px"><div class="fld-row"><label class="fld"><span>Absent(e) du</span>${dInp('ab-from', def[0])}</label><label class="fld"><span>Au (inclus)</span>${dInp('ab-to', def[1])}</label></div>
+      <div class="muted small">${absPeriodLast() ? 'Dates de votre dernière absence notée.' : 'Aucune absence notée récemment : choisissez les dates.'} Sont listées les étapes et points arrivés à échéance depuis votre départ et toujours pas notés.</div><div id="ab-res"></div></div>
+    <div class="modal-f"><button class="btn" id="ab-copy">${ICON.copy} Copier le texte</button><span class="sp"></span><a class="btn" href="#portefeuille" id="ab-cy">Ouvrir Mon cycle</a><button class="btn primary" data-close>Fermer</button></div>`, 'wide');
+  const q = x => m.el.querySelector(x); let cur = [];
+  const draw = () => { const from = parseDay(q('#ab-from').value), to = parseDay(q('#ab-to').value); if (!from || !to || to < from) { q('#ab-res').innerHTML = '<div class="muted">Vérifiez les dates.</div>'; cur = []; return; }
+    cur = cyForecast(from, startOfDay(Date.now()));
+    const pend = cur.filter(x => x.d <= to), since = cur.filter(x => x.d > to);
+    q('#ab-res').innerHTML = !cur.length ? '<div class="card empty" style="margin:0">Tout est à jour : rien n’est arrivé à échéance sans être noté. Bon retour !</div>'
+      : `${pend.length ? `<h4 class="ab-h">Pendant l’absence (${pend.length})</h4>${fcListHTML(pend, true)}` : ''}${since.length ? `<h4 class="ab-h">Depuis votre retour (${since.length})</h4>${fcListHTML(since, true)}` : ''}<div class="muted small" style="margin-top:6px">Les étapes notées (même en retard) disparaissent de cette liste.</div>`; };
+  m.el.addEventListener('change', draw); draw();
+  m.el.addEventListener('click', ev => { if (ev.target.closest('a[href^="#"]')) { if (ev.target.closest('#ab-cy')) (UI.pfv ||= {}).mode = 'cycle'; m.close(); } });
+  q('#ab-copy').addEventListener('click', () => { if (!cur.length) { toast('Rien à copier'); return; } copyText('Pendant mon absence (' + q('#ab-from').value.split('-').reverse().join('/') + ' – ' + q('#ab-to').value.split('-').reverse().join('/') + ')\n\n' + cur.map(x => fmtDate(x.d).slice(0, 5) + ' · ' + x.nm + ' — ' + FC_L[x.k] + (x.t ? ' : ' + x.t : '')).join('\n') + '\n'); });
+}
 function cyCellHTML(mk, c, row, f) {
   const s = cyState(mk, c, row, f);
   let txt = '';
@@ -4600,7 +4916,7 @@ function renderCycle(P) {
   ${cyGroupRows(mk, rows, cols.length + 3, grouped, ({ c, row }) => {
     const p = cyOf(c), fin = cyRowDone(mk, c, row), gg = groupOf(c.group);
     return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''} ${gg ? 'has-grp' : ''} ${isMother(c) ? 'is-mother' : ''}" ${gg ? `style="--g:${grpColor(gg)}"` : ''}><td class="mono small">${esc(c.code || '')}</td>
-      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl">${esc(c.name)}</span>${motherMark(c)}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl dsc-n">${esc(c.name)}</span>${motherMark(c)}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
       ${cols.map(([f]) => {
         if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
         if (f === 'al') return `<td>${alCellHTML(mk, c, row)}</td>`;
@@ -5041,7 +5357,7 @@ function openNoteEditor(inp, mk, cid) {
   ta.addEventListener('blur', () => finish(true));
 }
 function pfSwitch(P) {
-  return `<div class="seg" data-seg="pfmode"><button data-v="cycle" class="${P.mode !== 'temps' ? 'on' : ''}">Cycle de paie</button><button data-v="temps" class="${P.mode === 'temps' ? 'on' : ''}">Temps & facturation</button></div>`;
+  return `<div class="seg" data-seg="pfmode"><button data-v="cycle" class="${P.mode !== 'temps' && P.mode !== 'charge' ? 'on' : ''}">Cycle de paie</button><button data-v="charge" class="${P.mode === 'charge' ? 'on' : ''}" title="Échéances attendues sur les deux prochains mois">Charge à venir</button><button data-v="temps" class="${P.mode === 'temps' ? 'on' : ''}">Temps & facturation</button></div>`;
 }
 function defaultCycleMonth() {
   const now = Date.now(), cur = monthKey(now), pm = prevMk(cur);
@@ -5100,6 +5416,7 @@ function renderPortfolio() {
   P.month ||= monthKey(Date.now()); P.sort ||= 'name'; P.dir ||= 1; P.filter ||= 'all'; if (P.q == null) P.q = ''; P.open ||= new Set();
   P.mode ||= 'cycle'; P.cmonth ||= defaultCycleMonth();
   $('#portefeuille-body').classList.toggle('dense', pfDense()); $('#portefeuille-body').classList.remove('blk-wrap');
+  if (P.mode === 'charge') { renderCharge(P); return; }
   if (P.mode !== 'temps') { renderCycle(P); return; }
   const data = portfolioData(P.month);
   let rows = data.rows;
@@ -5729,6 +6046,7 @@ function renderRefs() {
         <span class="use" title="Temps passé avec cette personne">${u[x.id] ? fmtDur(u[x.id], 'hm') : ''}</span>
         <button class="btn sm ghost" data-act="pfiche">Fiche</button>
         <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Ajoutez vos collègues, les interlocuteurs de vos clients et les organismes (URSSAF, OPCO, mutuelle…) : fiche avec e-mail et téléphone, temps passé avec eux.</div>`}</div></div>
+  ${tplRefsHTML()}
   ${trash.length ? `<i data-b="corbeille"></i><div class="toolbar"><h2>Corbeille (${trash.length})</h2><span class="muted small">Les éléments supprimés restent ici tant que vous ne les supprimez pas définitivement. Les temps déjà saisis sont conservés.</span><span class="sp"></span><button class="btn sm danger" data-act="trash-empty">Vider la corbeille</button></div>
   <div class="card ref-list trash-list">${trash.map(x => `<div class="ref-row" data-kind="${x.kind}" data-id="${x.o.id}">
       <span class="tag">${kindLabel[x.kind]}</span>${x.kind === 'client' ? `${cliIc(x.o.id)}` : x.kind === 'person' ? `<span class="pers-ic">${ICON.person}</span>` : ''}
@@ -6125,6 +6443,8 @@ function applyTheme() {
 }
 applyTheme();
 document.body.classList.toggle('stick', lsGet('stick', '1') === '1');
+let NEWS_OLD = false; try { NEWS_OLD = Object.keys(localStorage).some(k => k.startsWith('chronocab:') && k !== 'chronocab:seenVer'); } catch (e) {}
+applyDsc(); setTimeout(newsCheck, 2500);
 const themeHTML = () => `<span class="th-sws" role="radiogroup" aria-label="Couleur de l’application">${Object.entries(THEMES).map(([k, t]) => `<button type="button" class="th-sw ${themeKey() === k ? 'on' : ''}" data-act="theme" data-v="${k}" style="--c:${t.a}" title="${esc(t.l)}" aria-label="${esc(t.l)}" role="radio" aria-checked="${themeKey() === k}"></button>`).join('')}</span>`;
 function renderSettings() {
   const st = S.meta.settings, tab = ['travail', 'appareil', 'donnees'].includes(lsGet('setTab', 'travail')) ? lsGet('setTab', 'travail') : 'travail';
@@ -6141,6 +6461,7 @@ function renderSettings() {
   else if (tab === 'appareil') html += `<i data-b="affichage" data-half="1"></i><h2>Affichage</h2><div class="card settings">
       <div class="setting"><div>Couleur de l’application<div class="d">${esc(THEMES[themeKey()].l)} · sur cet appareil (l’icône de l’application installée reste verte)</div></div>${themeHTML()}</div>
       <div class="setting"><div>Figer les barres en haut de l’écran<div class="d">Sur ordinateur : barre et en-têtes du tableau de Mon cycle, en-tête et filtres du Carnet, filtres des Rapports. Sur téléphone : l’en-tête du carnet seulement.</div></div><select id="set-stick"><option value="1" ${lsGet('stick', '1') === '1' ? 'selected' : ''}>Oui</option><option value="0" ${lsGet('stick', '1') === '1' ? '' : 'selected'}>Non</option></select></div>
+      <div class="setting"><div>Mode discret (partage d’écran)<div class="d">Bouton 👁 en haut à droite ou barre de commande. Éléments masqués quand il est activé :</div><div class="dsc-opts">${DSC_OPTS.map(([k, l]) => `<label class="chk"><input type="checkbox" data-dsco="${k}" ${dscOpts().includes(k) ? 'checked' : ''}> ${esc(l)}</label>`).join('')}</div></div><select id="set-dsc"><option value="1" ${dscOn() ? 'selected' : ''}>Activé</option><option value="0" ${dscOn() ? '' : 'selected'}>Désactivé</option></select></div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div>
     ${tabsHTML()}`;
@@ -6276,6 +6597,8 @@ function bindRefsOn(body) {
       if (S.meta.settings.liss.mode === 'fill' && !S.meta.settings.liss.task) { const t = S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm('Administratif interne')); if (t) S.meta.settings.liss.task = t.id; }
       touchMeta(); return;
     }
+    if (i.dataset.dsco) { lsSet('dscOpts', JSON.stringify([...document.querySelectorAll('[data-dsco]:checked')].map(x => x.dataset.dsco))); applyDsc(); return; }
+    if (i.id === 'set-dsc') { lsSet('dsc', i.value); applyDsc(); return; }
     if (i.id === 'set-stick') { lsSet('stick', i.value); document.body.classList.toggle('stick', i.value === '1'); return; }
     if (i.id === 'set-quote') { lsSet('quote', i.value); if (i.value === '1') showQuote(true); return; }
     if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
