@@ -754,6 +754,11 @@ a.btn:not(.primary){color:var(--ink)}
 .note-d{background:var(--surface-2);border-radius:8px;padding:0 6px}.note-d.now{background:var(--todo-soft)}.note-d.late{background:var(--stop-soft);color:var(--stop)}
 .gaps{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 14px;border-top:1px dashed var(--line);background:color-mix(in srgb,var(--surface-2) 50%,var(--surface))}.gap{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1px 2px 1px 8px}.gap small{font-family:var(--sans)}
 .rep12 th,.rep12 td{white-space:nowrap}.rep12 td.n,.rep12 th.n{text-align:right;font-variant-numeric:tabular-nums}.rep12 tfoot td{font-weight:600;border-top:2px solid var(--line)}.r12-c{display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none}.r12-c:hover .cl{text-decoration:underline}
+.ae-months{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 10px}@media (max-width:700px){.ae-months{grid-template-columns:repeat(2,1fr)}}
+.ann-ic{font-size:12px;margin-left:4px;filter:saturate(.6)}.ann-ic.done{opacity:.45}
+.ann-t th,.ann-t td{vertical-align:top;padding:5px 6px;border-left:1px solid var(--line)}.ann-t th{text-align:center;font-size:12px}.ann-t th.cur,.ann-t td.cur{background:color-mix(in srgb,var(--accent-soft) 45%,var(--surface))}.ann-t td{min-width:84px}.ann-t tfoot td{text-align:center;font-weight:600;color:var(--muted)}
+.ann-n a{display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none;white-space:nowrap}.ann-n a:hover .cl{text-decoration:underline}
+.ann-chip{display:block;width:100%;text-align:left;margin:0 0 3px;border:1px solid color-mix(in srgb,var(--accent) 25%,var(--line));background:color-mix(in srgb,var(--accent-soft) 60%,var(--surface));border-radius:6px;padding:2px 5px;font-size:11.5px;line-height:1.25;cursor:pointer;color:inherit}.ann-chip.grp{border-style:dashed}.ann-chip.done{background:var(--surface-2);color:var(--muted);border-color:var(--line)}.ann-chip small{color:var(--muted)}
 .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px 16px}.sp-g{display:grid;gap:3px;align-content:start}.sp-gh{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}.sp-g .chk{font-size:13px;align-items:flex-start}
 .sp-tags{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 2px}.sp-tags span{font:600 10px var(--mono);letter-spacing:.02em;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);border-radius:5px;padding:0 4px}
 .ms-to{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:28px}.ct-card{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;display:grid;gap:4px}.ct-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ct-l{display:flex;align-items:center;gap:8px}.ct-l .muted{min-width:70px}.ct-note{font-size:12.5px;color:var(--muted);white-space:pre-wrap}
@@ -1128,7 +1133,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.55.0';
+const APP_VERSION = '1.57.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2830,7 +2835,7 @@ function openNewDossier() {
 /* ---------- Recherche dans le contenu des carnets (v1.45.0) ---------- */
 function cbHayFields(o, isG) {
   const b = cbPeek(o);
-  return [['Pratiques', b.prat], ['Particularités', b.part], ['Salariés particuliers', [spOf(b).map(k => SP_L[k][1]).join(', '), b.spNote].filter(Boolean).join(' · ')], ['Notes du groupe', isG ? b.notes : ''], ['Remarque permanente', !isG && o.cy ? o.cy.notes : ''], ['Relation client', b.rel && b.rel.note],
+  return [['Pratiques', b.prat], ['Particularités', b.part], ['Salariés particuliers', [spOf(b).map(k => SP_L[k][1]).join(', '), b.spNote].filter(Boolean).join(' · ')], ...(b.ann || []).map(e => ['Calendrier annuel', e.t + (e.note ? ' · ' + e.note : '')]), ['Notes du groupe', isG ? b.notes : ''], ['Remarque permanente', !isG && o.cy ? o.cy.notes : ''], ['Relation client', b.rel && b.rel.note],
     ...(b.points || []).map(x => [x.done ? 'Point clos' : 'Point en cours', x.t]), ...(b.journal || []).map(x => ['Journal', x.t + (x.ref ? ' [réf. ' + x.ref + ']' : '')]),
     ...(!isG ? (o.alerts || []).map(a => ['Alerte salarié', a.name + (a.tag ? ' (' + a.tag + ')' : '')]) : [])].filter(x => x[1]);
 }
@@ -2971,7 +2976,9 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
-  ['1.55.0', '15/11/2026', ['Carnet : nouveau bloc « Salariés particuliers » — 28 cases réparties en quatre thèmes (statuts, contrats, temps de travail, situations particulières) et une remarque libre ; abréviations sur les tuiles, filtre du Carnet, export et copie de carnet. Remplace la case forfait jours de la v1.54.0 (reprise automatiquement).']],
+  ['1.57.0', '15/11/2026', ['Carnet : « Calendrier annuel » — événements récurrents du dossier ou du groupe (un ou plusieurs mois, date fixe, tous les N ans), choisis dans une liste d’événements courants ou saisis librement ; rappel dans À faire aujourd’hui, 📅 dans Mon cycle, comptés dans la charge à venir, nouvelle vue « Année » dans Mon cycle ; copie, export et copie de carnet.']],
+  ['1.56.0', '15/11/2026', ['Salariés particuliers : « Copier vers… » d’autres dossiers (ajouter ou remplacer, remarque en option, raccourcis groupe et portefeuille) et « Appliquer à tout le groupe » depuis le carnet d’un dossier ; dans le carnet d’un groupe, cocher une case l’applique à tous ses dossiers.']],
+  ['1.55.0', '15/11/2026', ['Carnet : nouveau bloc « Salariés particuliers » — 28 cases réparties en quatre thèmes (statuts, contrats, temps de travail, situations particulières) et une remarque libre ; abréviations sur les tuiles, filtre du Carnet, export et copie de carnet. Remplace la case forfait jours de la v1.54.0 (reprise automatiquement). v1.55.1 : bloc placé sous Pratiques et particularités.']],
   ['1.54.0', '15/11/2026', ['Notes rapides (bouton 🗒 en haut) : une idée en une ligne, rattachée au dossier (« Dupont : … » ou chrono en cours), rappel facultatif (« demain », « lundi », « 25/11 ») dans À faire aujourd’hui ; à traiter d’un clic ou à transformer en point en cours, entrée du journal ou pratique du dossier. Aussi « note … » dans la barre de commande.', 'Trous dans la journée : les créneaux de votre horaire sans saisie (dès 15 min, réglable) s’affichent sous les saisies du jour, avec « Affecter ».', 'Rapports : 12 derniers mois par dossier avec temps moyen par bulletin, rappelé dans le carnet.', 'Carnet : case « Salariés au forfait jours » et filtre correspondant (remplacée en v1.55.0 par le bloc « Salariés particuliers »).']],
   ['1.52.0', '15/11/2026', ['Fenêtre de message : rappel de l’adresse e-mail de l’interlocuteur choisi, avec un bouton pour la copier.', 'Chrono en cours : « 👥 Interlocuteurs » pour un dossier (e-mail, téléphone, notes, message), « 👤 Fiche » pour une personne ; aussi dans la pastille du chrono et la barre de commande.']],
   ['1.51.0', '15/11/2026', ['Rupture conventionnelle : option « Signature un jour ouvré » (cochée par défaut) ; en partant de la date de rupture souhaitée, la signature au plus tard tombe sur un jour ouvré ; depuis la date d’entretien, elle est reportée au jour ouvré suivant ; une date de signature saisie un week-end ou un férié est signalée.']],
@@ -3179,12 +3186,190 @@ const SP_ALL = SP_LIST.flatMap(g => g[1]), SP_L = Object.fromEntries(SP_ALL.map(
 const spOf = b => { const s2 = new Set(Array.isArray(b && b.sp) ? b.sp : []); if (b && b.fj) s2.add('fj'); return [...s2].filter(k => SP_L[k]).sort((a, c) => SP_ALL.findIndex(x => x[0] === a) - SP_ALL.findIndex(x => x[0] === c)); };
 function spHTML(c) {
   const b = cbPeek(c), on = new Set(spOf(b));
-  return `<i data-b="salaries" data-half="1"></i><h2>Salariés particuliers${on.size ? ` (${on.size})` : ''}</h2><div class="card cb-sec"><div class="sp-grid">${SP_LIST.map(([gl, items]) => `<div class="sp-g"><div class="sp-gh">${esc(gl)}</div>${items.map(([k, l]) => `<label class="chk"><input type="checkbox" data-cbsp="${k}" ${on.has(k) ? 'checked' : ''}> ${esc(l)}</label>`).join('')}</div>`).join('')}</div>
+  const g = groupOf(c.group), gn = g ? grpMembers(g).length - 1 : 0;
+  return `<i data-b="salaries" data-half="1"></i><div class="toolbar"><h2>Salariés particuliers${on.size ? ` (${on.size})` : ''}</h2><span class="sp"></span>${gn > 0 ? `<button class="btn sm ghost" data-spgrp title="Les ${gn} autres dossiers du ${esc(grpTitle(g))} reçoivent exactement ces cases et cette remarque (Annuler possible)">Appliquer à tout le groupe</button>` : ''}<button class="btn sm ghost" data-spcopy title="Copier ces cases vers d’autres dossiers">Copier vers…</button></div><div class="card cb-sec"><div class="sp-grid">${SP_LIST.map(([gl, items]) => `<div class="sp-g"><div class="sp-gh">${esc(gl)}</div>${items.map(([k, l]) => `<label class="chk"><input type="checkbox" data-cbsp="${k}" ${on.has(k) ? 'checked' : ''}> ${esc(l)}</label>`).join('')}</div>`).join('')}</div>
     <label class="fld" style="margin-top:8px"><span>Remarque</span><textarea data-cbf="spNote" rows="2" placeholder="ex. 2 apprentis BTS jusqu’en 08/2027 · gérant majoritaire non salarié">${esc(b.spNote || '')}</textarea></label></div>`;
 }
+function spApply(ids, L, note, mode) { // mode 'replace' | 'add' ; retourne la fonction d'annulation
+  const before = ids.map(id => { const x = clientOf(id); return [x, x.cb ? JSON.parse(JSON.stringify({ sp: x.cb.sp, fj: x.cb.fj, spNote: x.cb.spNote })) : null]; });
+  for (const id of ids) { const x = clientOf(id), b = cbOf(x), cur = mode === 'add' ? spOf(b) : []; b.sp = [...new Set([...cur, ...L])]; delete b.fj; if (!b.sp.length) delete b.sp; if (note != null) { if (note) b.spNote = note; else delete b.spNote; } }
+  touchMeta();
+  return () => { for (const [x, o] of before) { const b = cbOf(x); for (const k of ['sp', 'fj', 'spNote']) { if (o && o[k] != null) b[k] = o[k]; else delete b[k]; } } touchMeta(); };
+}
+function openSpCopy(c) {
+  const src = cbPeek(c), L = spOf(src), g = groupOf(c.group);
+  const cs = S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.id !== c.id).sort((a, b) => (isMine(b) ? 1 : 0) - (isMine(a) ? 1 : 0) || a.name.localeCompare(b.name, 'fr')), gm = g ? cs.filter(x => x.group === g.id) : [];
+  const m = modal(`<div class="modal-h"><h3>Copier les salariés particuliers de ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:8px"><div class="small">${L.length ? 'Cases cochées : <b>' + esc(L.map(k => SP_L[k][1]).join(', ')) + '</b>' : '<span class="muted">Aucune case cochée dans ce dossier.</span>'}</div>
+      <div class="seg" id="spc-mode"><button type="button" data-v="add" class="on" title="Les cases déjà cochées dans les dossiers choisis sont gardées">Ajouter aux cases existantes</button><button type="button" data-v="replace" title="Les dossiers choisis auront exactement les mêmes cases">Remplacer</button></div>
+      ${src.spNote ? `<label class="chk"><input type="checkbox" id="spc-note"> Copier aussi la remarque (« ${esc(src.spNote.slice(0, 60))}${src.spNote.length > 60 ? '…' : ''} »)</label>` : ''}
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${gm.length ? `<button class="btn sm" id="spc-grp">Tout le ${esc(grpTitle(g))} (${gm.length})</button>` : ''}<button class="btn sm ghost" id="spc-mine">Mon portefeuille</button><button class="btn sm ghost" id="spc-none">Tout décocher</button><input id="spc-q" placeholder="Filtrer…" style="flex:1;min-width:140px"></div>
+      <div class="cc-list">${cs.map(x => `<label class="chk" data-n="${esc(norm(x.name + ' ' + (x.code || '') + ' ' + (groupOf(x.group)?.name || '')))}"><input type="checkbox" value="${x.id}"> ${esc(x.name)}${x.code ? ' <span class="muted small">' + esc(x.code) + '</span>' : ''}${groupOf(x.group) ? ' ' + grpTag(groupOf(x.group)) : ''}${spOf(cbPeek(x)).length ? ` <span class="muted small">· ${spOf(cbPeek(x)).length} case(s)</span>` : ''}</label>`).join('')}</div></div>
+    <div class="modal-f"><span class="muted small" id="spc-n">0 dossier</span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="spc-ok" disabled>Copier</button></div>`);
+  const q = x => m.el.querySelector(x), boxes = () => [...m.el.querySelectorAll('.cc-list input')];
+  let mode = 'add';
+  const upd = () => { const n = boxes().filter(b => b.checked).length; q('#spc-n').textContent = n + ' dossier' + (n > 1 ? 's' : ''); q('#spc-ok').disabled = !n; };
+  q('#spc-mode').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; mode = b.dataset.v; q('#spc-mode').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+  m.el.addEventListener('change', upd);
+  q('#spc-grp')?.addEventListener('click', () => { boxes().forEach(b => { if (gm.some(x => x.id === b.value)) b.checked = true; }); upd(); });
+  q('#spc-mine').addEventListener('click', () => { boxes().forEach(b => { if (isMine(clientOf(b.value))) b.checked = true; }); upd(); });
+  q('#spc-none').addEventListener('click', () => { boxes().forEach(b => { b.checked = false; }); upd(); });
+  q('#spc-q').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('.cc-list label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
+  q('#spc-ok').addEventListener('click', () => {
+    const ids = boxes().filter(b => b.checked).map(b => b.value); if (!ids.length) return;
+    const undo = spApply(ids, L, q('#spc-note') && q('#spc-note').checked ? src.spNote : null, mode); m.close();
+    toast('Salariés particuliers copiés vers ' + ids.length + ' dossier' + (ids.length > 1 ? 's' : '') + (mode === 'replace' ? ' (remplacés)' : ''), 'Annuler', undo);
+  });
+}
+function spGroupHTML(g) { // carnet du groupe : cases réparties sur tous les dossiers du groupe
+  const mem = grpMembers(g), n = mem.length; if (!n) return '';
+  const cnt = k => mem.filter(x => spOf(cbPeek(x)).includes(k)).length;
+  return `<i data-b="gsalaries"></i><div class="toolbar"><h2>Salariés particuliers du groupe</h2><span class="muted small">Cocher une case l’applique à tous les dossiers du groupe ; la décocher la retire de tous. Entre parenthèses : dossiers concernés.</span></div><div class="card cb-sec"><div class="sp-grid">${SP_LIST.map(([gl, items]) => `<div class="sp-g"><div class="sp-gh">${esc(gl)}</div>${items.map(([k, l]) => { const c0 = cnt(k); return `<label class="chk" title="${esc(mem.filter(x => spOf(cbPeek(x)).includes(k)).map(x => x.name).join(', '))}"><input type="checkbox" data-gsp="${k}" ${c0 === n ? 'checked' : ''} ${c0 && c0 < n ? 'data-ind="1"' : ''}> ${esc(l)}${c0 ? ` <span class="muted small">(${c0}/${n})</span>` : ''}</label>`; }).join('')}</div>`).join('')}</div></div>`;
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-spcopy],[data-spgrp]'); if (!b || !UI.cbId) return; const c = clientOf(UI.cbId); if (!c) return;
+  if (b.dataset.spcopy != null) { openSpCopy(c); return; }
+  const g = groupOf(c.group); if (!g) return; const ids = grpMembers(g).filter(x => x.id !== c.id).map(x => x.id); if (!ids.length) { toast('Aucun autre dossier dans le groupe'); return; }
+  const undo = spApply(ids, spOf(cbPeek(c)), cbPeek(c).spNote || '', 'replace');
+  toast('Salariés particuliers appliqués aux ' + ids.length + ' autres dossiers du ' + grpTitle(g), 'Annuler', undo);
+});
+document.addEventListener('change', ev => {
+  const t = ev.target; if (!t.dataset || !t.dataset.gsp || !UI.cbG) return; const g = groupOf(UI.cbG); if (!g) return; const k = t.dataset.gsp, mem = grpMembers(g);
+  const before = mem.map(x => [x, x.cb ? JSON.parse(JSON.stringify({ sp: x.cb.sp, fj: x.cb.fj })) : null]);
+  for (const x of mem) { const b = cbOf(x), set = new Set(spOf(b)); if (t.checked) set.add(k); else set.delete(k); delete b.fj; b.sp = [...set]; if (!b.sp.length) delete b.sp; }
+  touchMeta();
+  toast((t.checked ? 'Ajouté à ' : 'Retiré de ') + mem.length + ' dossier' + (mem.length > 1 ? 's' : '') + ' : ' + SP_L[k][1], 'Annuler', () => { for (const [x, o] of before) { const b = cbOf(x); for (const kk of ['sp', 'fj']) { if (o && o[kk] != null) b[kk] = o[kk]; else delete b[kk]; } } touchMeta(); });
+});
+/* ---------- Calendrier annuel des dossiers (v1.57.0) ----------
+   cb.ann = [{ id, t, kind: 'm' | 'd', months: [1..12], day: 'MM-JJ', every: N, from: année, lead: jours, note }], cb.annDone = { clé d'occurrence: 'AAAA-MM-JJ' }
+   Clé d'occurrence : 'idÉvénement|AAAA-MM' (mois) ou 'idÉvénement|AAAA-MM-JJ' (date) ; un événement de groupe vaut pour chaque dossier du groupe (fait noté par dossier). */
+const ANN_LIB = [
+  ['Actualisation des fiches de paramétrage', 'm', [1]], ['Revalorisation des salaires / augmentations', 'm', [1]], ['Régularisation annuelle prévoyance / mutuelle', 'm', [1]],
+  ['NAO (négociation annuelle obligatoire)', 'm', [1]], ['Index égalité professionnelle (publication avant le 1er mars)', 'd', '03-01'], ['DOETH (DSN d’avril)', 'm', [4]],
+  ['Taxe d’apprentissage (solde, DSN d’avril)', 'm', [4]], ['Fin de la période d’acquisition des congés payés', 'd', '05-31'], ['Versement intéressement / participation', 'd', '05-31'],
+  ['Prime de vacances', 'm', [6]], ['Primes trimestrielles', 'm', [3, 6, 9, 12]], ['Prime annuelle / 13e mois', 'm', [12]], ['Prime de fin d’année / bonus', 'm', [12]],
+  ['Médailles du travail', 'm', [5]], ['Entretiens professionnels', 'm', [9], 2], ['État des lieux récapitulatif des entretiens (6 ans)', 'm', [9], 6], ['Élections du CSE', 'm', [10], 4],
+  ['Mise à jour des titres-restaurant / avantages', 'm', [1]], ['Clôture de l’exercice (provisions congés payés)', 'm', [12]]];
+const MON_S = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const annOwn = o => (cbPeek(o).ann || []).filter(e => e && e.id && e.t);
+function annEvents(c) { const g = groupOf(c.group); return [...annOwn(c).map(e => ({ e, src: c })), ...(g ? annOwn(g).map(e => ({ e, src: g, grp: 1 })) : [])]; }
+const annEvery = e => Math.max(1, parseInt(e.every, 10) || 1);
+const annYearOk = (e, y) => { const n = annEvery(e); if (n === 1) return true; const f = parseInt(e.from, 10) || y; return y >= f && (y - f) % n === 0; };
+function annRecTxt(e) {
+  const n = annEvery(e), ev = n > 1 ? `tous les ${n} ans (${e.from || '—'}, ${e.from ? +e.from + n : '…'}…)` : 'chaque année';
+  if (e.kind === 'd') { const [m, d] = String(e.day || '').split('-'); return `le ${+d || '?'} ${m ? MONTHS_L[+m - 1] : '?'}, ${ev}`; }
+  const ms = (e.months || []).slice().sort((a, b) => a - b); return (ms.length ? (ms.length === 1 ? 'en ' + MONTHS_L[ms[0] - 1] : ms.map(m => MON_S[m - 1]).join(', ')) : 'mois à choisir') + ', ' + ev;
+}
+function annOcc(e, from, to) { // occurrences dont l'échéance tombe entre from et to (ms) → { due, end, key, mk }
+  const out = []; const y0 = new Date(from).getFullYear() - 1, y1 = new Date(to).getFullYear() + 1;
+  for (let y = y0; y <= y1; y++) { if (!annYearOk(e, y)) continue;
+    if (e.kind === 'd') { const [m, d] = String(e.day || '').split('-').map(Number); if (!m || !d) continue; const due = new Date(y, m - 1, Math.min(d, new Date(y, m, 0).getDate())).getTime(); if (due >= from && due <= to) out.push({ due, end: due, key: e.id + '|' + dayKey(due), mk: monthKey(due) }); }
+    else for (const m of (e.months || [])) { const due = new Date(y, m - 1, 1).getTime(), end = new Date(y, m, 0).getTime(); if (end >= from && due <= to) out.push({ due, end, key: e.id + '|' + monthKey(due), mk: monthKey(due) }); } }
+  return out.sort((a, b) => a.due - b.due);
+}
+const annDone = (c, key) => (cbPeek(c).annDone || {})[key];
+function annSetDone(c, key, v) { const b = cbOf(c); b.annDone ||= {}; if (v) b.annDone[key] = isoDay(Date.now()); else delete b.annDone[key]; if (!Object.keys(b.annDone).length) delete b.annDone; touchMeta(); }
+const annWhen = (e, o) => e.kind === 'd' ? 'le ' + fmtDate(o.due).slice(0, 5) : MONTHS_L[new Date(o.due).getMonth()] + ' ' + new Date(o.due).getFullYear();
+function annTodo(today) { // occurrences à rappeler : dans le délai de rappel, non faites, au plus 62 jours en arrière
+  const items = [];
+  for (const c of cyClients()) for (const { e, grp } of annEvents(c)) {
+    const lead = Math.max(0, parseInt(e.lead, 10) || 7);
+    for (const o of annOcc(e, addDays(today, -62), addDays(today, lead))) { if (annDone(c, o.key)) continue; if (today < addDays(o.due, -lead)) continue;
+      items.push({ mk: monthKey(today), cid: c.id, f: 'ann', key: o.key, txt: '📅 ' + c.name + ' — ' + e.t + ' (' + annWhen(e, o) + ')' + (grp ? ' · groupe' : ''), late: today > o.end, d: o.due }); }
+  }
+  return items;
+}
+function annInMonth(c, mk) { const a = monthStart(mk), b = monthEnd(mk); return annEvents(c).flatMap(({ e, grp }) => annOcc(e, a, b).map(o => ({ e, o, grp, done: annDone(c, o.key) }))); }
+function annCarnetHTML(o, isG) {
+  const own = annOwn(o), g = !isG && groupOf(o.group), ge = g ? annOwn(g) : [], today = startOfDay(Date.now());
+  const nxt = e => { const L = annOcc(e, addDays(today, -31), addDays(today, 365 * annEvery(e) + 31)).filter(x => isG || !annDone(o, x.key)); const x = L.find(x => x.end >= today) || L[0]; return x ? annWhen(e, x) : '—'; };
+  const row = (e, ro) => `<div class="cb-it ann-it" data-ann="${esc(e.id)}"><span class="x"><b>${esc(e.t)}</b><span class="ref">${esc(annRecTxt(e))} · rappel ${parseInt(e.lead, 10) >= 0 && e.lead !== '' && e.lead != null ? +e.lead : 7} j avant${isG ? '' : ' · prochaine : ' + esc(nxt(e))}${e.note ? ' · ' + esc(e.note) : ''}</span></span>${ro ? '<span class="muted small">groupe</span>' : `<button class="btn sm ghost" data-annact="edit">Modifier</button><button class="icon xs" data-annact="del" title="Supprimer">${ICON.trash}</button>`}</div>`;
+  return `<i data-b="annuel" data-half="1"></i><div class="toolbar"><h2>Calendrier annuel (${own.length + ge.length})</h2><span class="sp"></span>${!isG && own.length ? '<button class="btn sm ghost" data-annact="copy" title="Copier ces événements vers d’autres dossiers">Copier vers…</button>' : ''}<button class="btn sm" data-annact="new">＋ Événement</button></div><div class="card cb-sec">
+    ${own.map(e => row(e, false)).join('') || `<div class="cb-hint">Aucun événement ${isG ? 'de groupe' : 'propre à ce dossier'}. Ex. 13e mois en décembre, prime de vacances en juin, entretiens professionnels tous les 2 ans.</div>`}
+    ${ge.length ? `<div class="cb-hint" style="margin-top:6px">Du ${esc(grpTitle(g))} (valent pour tous ses dossiers)</div>${ge.map(e => row(e, true)).join('')}` : ''}
+    ${isG ? '<div class="cb-hint" style="margin-top:6px">Ces événements valent pour chaque dossier du groupe : rappel dans À faire aujourd’hui, Mon cycle et la charge à venir.</div>' : ''}</div>`;
+}
+function openAnnEdit(owner, id) {
+  const e = id ? annOwn(owner).find(x => x.id === id) : null, d = e ? { ...e } : { kind: 'm', months: [], every: 1, lead: 7 }, y = new Date().getFullYear();
+  const [dm, dd] = String(d.day || '').split('-');
+  const m = modal(`<div class="modal-h"><h3>${e ? 'Modifier l’événement' : 'Nouvel événement annuel'} — ${esc(isGroupObj(owner) ? grpTitle(owner) : owner.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px">
+      ${e ? '' : `<label class="fld"><span>Choisir un événement courant (facultatif)</span><select id="ae-lib"><option value="">— Saisie libre —</option>${ANN_LIB.map((x, i) => `<option value="${i}">${esc(x[0])}</option>`).join('')}</select></label>`}
+      <label class="fld"><span>Événement</span><input id="ae-t" maxlength="100" value="${esc(d.t || '')}" placeholder="ex. Prime de 13e mois"></label>
+      <div class="seg" id="ae-k"><button type="button" data-v="m" class="${d.kind !== 'd' ? 'on' : ''}">Un ou plusieurs mois</button><button type="button" data-v="d" class="${d.kind === 'd' ? 'on' : ''}">Une date fixe</button></div>
+      <div id="ae-m" class="ae-months" ${d.kind === 'd' ? 'hidden' : ''}>${MONTHS_L.map((l, i) => `<label class="chk"><input type="checkbox" value="${i + 1}" ${(d.months || []).includes(i + 1) ? 'checked' : ''}> ${l}</label>`).join('')}</div>
+      <div id="ae-d" class="fld-row" ${d.kind === 'd' ? '' : 'hidden'}><label class="fld"><span>Jour</span><select id="ae-dd">${Array.from({ length: 31 }, (_, i) => `<option ${+dd === i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label><label class="fld"><span>Mois</span><select id="ae-dm">${MONTHS_L.map((l, i) => `<option value="${i + 1}" ${+dm === i + 1 ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+      <div class="fld-row"><label class="fld"><span>Fréquence</span><select id="ae-ev">${[1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${annEvery(d) === n ? 'selected' : ''}>${n === 1 ? 'Chaque année' : 'Tous les ' + n + ' ans'}</option>`).join('')}</select></label><label class="fld" id="ae-from-w" ${annEvery(d) > 1 ? '' : 'hidden'}><span>À partir de (année)</span><input id="ae-from" inputmode="numeric" value="${esc(d.from || y)}"></label><label class="fld"><span>Rappel (jours avant)</span><input id="ae-lead" inputmode="numeric" value="${esc(d.lead ?? 7)}"></label></div>
+      <label class="fld"><span>Note (facultatif)</span><input id="ae-note" maxlength="200" value="${esc(d.note || '')}" placeholder="ex. prime = 1 mois de salaire brut, au prorata du temps de présence"></label>
+      <div class="muted small">Un événement « mois » remonte dans À faire aujourd’hui ${'quelques jours avant le début du mois'} ; un événement « date » avant la date. « Fait » se note pour chaque année${isGroupObj(owner) ? ' et pour chaque dossier du groupe' : ''}.</div></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="ae-ok">${e ? 'Enregistrer' : 'Ajouter'}</button></div>`);
+  const q = x => m.el.querySelector(x); let kind = d.kind === 'd' ? 'd' : 'm';
+  const setK = k => { kind = k; q('#ae-k').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === k)); q('#ae-m').hidden = k === 'd'; q('#ae-d').hidden = k !== 'd'; };
+  q('#ae-k').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) setK(b.dataset.v); });
+  q('#ae-ev').addEventListener('change', () => { q('#ae-from-w').hidden = +q('#ae-ev').value <= 1; });
+  q('#ae-lib')?.addEventListener('change', ev => { const x = ANN_LIB[+ev.target.value]; if (!x) return; q('#ae-t').value = x[0]; setK(x[1]);
+    if (x[1] === 'm') m.el.querySelectorAll('#ae-m input').forEach(i => { i.checked = x[2].includes(+i.value); }); else { const [mm, d2] = x[2].split('-'); q('#ae-dm').value = String(+mm); q('#ae-dd').value = String(+d2); }
+    q('#ae-ev').value = String(x[3] || 1); q('#ae-from-w').hidden = (x[3] || 1) <= 1; });
+  setTimeout(() => (q('#ae-lib') || q('#ae-t')).focus(), 30);
+  q('#ae-ok').addEventListener('click', () => {
+    const t = q('#ae-t').value.trim(); if (!t) { toast('Donnez un nom à l’événement'); return; }
+    const o = { id: e ? e.id : newId(), t, kind, every: +q('#ae-ev').value, lead: Math.max(0, parseInt(q('#ae-lead').value, 10) || 0) };
+    if (kind === 'm') { o.months = [...m.el.querySelectorAll('#ae-m input:checked')].map(i => +i.value); if (!o.months.length) { toast('Cochez au moins un mois'); return; } }
+    else o.day = pad(+q('#ae-dm').value) + '-' + pad(+q('#ae-dd').value);
+    if (o.every > 1) o.from = parseInt(q('#ae-from').value, 10) || y; const nt = q('#ae-note').value.trim(); if (nt) o.note = nt;
+    const b = cbOf(owner); b.ann ||= []; if (e) b.ann = b.ann.map(x => x.id === e.id ? o : x); else b.ann.push(o);
+    touchMeta(); m.close(); toast(e ? 'Événement enregistré' : 'Événement ajouté : ' + t);
+  });
+}
+function openAnnCopy(c) {
+  const L = annOwn(c), cs = S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.id !== c.id).sort((a, b) => (isMine(b) ? 1 : 0) - (isMine(a) ? 1 : 0) || a.name.localeCompare(b.name, 'fr')), g = groupOf(c.group), gm = g ? cs.filter(x => x.group === g.id) : [];
+  const m = modal(`<div class="modal-h"><h3>Copier le calendrier annuel de ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:8px"><div class="small">Événements : <b>${esc(L.map(e => e.t).join(', '))}</b></div>
+      <div class="seg" id="anc-mode"><button type="button" data-v="add" class="on" title="Les événements déjà présents (même nom) ne sont pas dupliqués">Ajouter aux événements existants</button><button type="button" data-v="replace">Remplacer</button></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${gm.length ? `<button class="btn sm" id="anc-grp">Tout le ${esc(grpTitle(g))} (${gm.length})</button>` : ''}<button class="btn sm ghost" id="anc-mine">Mon portefeuille</button><button class="btn sm ghost" id="anc-none">Tout décocher</button><input id="anc-q" placeholder="Filtrer…" style="flex:1;min-width:140px"></div>
+      <div class="cc-list">${cs.map(x => `<label class="chk" data-n="${esc(norm(x.name + ' ' + (x.code || '') + ' ' + (groupOf(x.group)?.name || '')))}"><input type="checkbox" value="${x.id}"> ${esc(x.name)}${groupOf(x.group) ? ' ' + grpTag(groupOf(x.group)) : ''}${annOwn(x).length ? ` <span class="muted small">· ${annOwn(x).length} événement(s)</span>` : ''}</label>`).join('')}</div></div>
+    <div class="modal-f"><span class="muted small" id="anc-n">0 dossier</span><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="anc-ok" disabled>Copier</button></div>`);
+  const q = x => m.el.querySelector(x), boxes = () => [...m.el.querySelectorAll('.cc-list input')]; let mode = 'add';
+  const upd = () => { const n = boxes().filter(b => b.checked).length; q('#anc-n').textContent = n + ' dossier' + (n > 1 ? 's' : ''); q('#anc-ok').disabled = !n; };
+  q('#anc-mode').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; mode = b.dataset.v; q('#anc-mode').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+  m.el.addEventListener('change', upd);
+  q('#anc-grp')?.addEventListener('click', () => { boxes().forEach(b => { if (gm.some(x => x.id === b.value)) b.checked = true; }); upd(); });
+  q('#anc-mine').addEventListener('click', () => { boxes().forEach(b => { if (isMine(clientOf(b.value))) b.checked = true; }); upd(); });
+  q('#anc-none').addEventListener('click', () => { boxes().forEach(b => { b.checked = false; }); upd(); });
+  q('#anc-q').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('.cc-list label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
+  q('#anc-ok').addEventListener('click', () => {
+    const ids = boxes().filter(b => b.checked).map(b => b.value), before = ids.map(id => [clientOf(id), JSON.parse(JSON.stringify(cbPeek(clientOf(id)).ann || null))]);
+    for (const id of ids) { const b = cbOf(clientOf(id)), cur = mode === 'add' ? (b.ann || []) : [], have = new Set(cur.map(e => norm(e.t))); b.ann = [...cur, ...L.filter(e => !have.has(norm(e.t))).map(e => ({ ...JSON.parse(JSON.stringify(e)), id: newId() }))]; if (!b.ann.length) delete b.ann; }
+    touchMeta(); m.close();
+    toast('Calendrier annuel copié vers ' + ids.length + ' dossier' + (ids.length > 1 ? 's' : ''), 'Annuler', () => { for (const [x, a] of before) { const b = cbOf(x); if (a) b.ann = a; else delete b.ann; } touchMeta(); });
+  });
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-annact]'); if (!b) return; const owner = UI.cbG ? groupOf(UI.cbG) : UI.cbId ? clientOf(UI.cbId) : null; if (!owner) return;
+  const a = b.dataset.annact, id = b.closest('[data-ann]')?.dataset.ann;
+  if (a === 'new') openAnnEdit(owner); else if (a === 'edit') openAnnEdit(owner, id); else if (a === 'copy') openAnnCopy(owner);
+  else if (a === 'del') { const bb = cbOf(owner), prev = JSON.parse(JSON.stringify(bb.ann || [])), e = prev.find(x => x.id === id); bb.ann = (bb.ann || []).filter(x => x.id !== id); if (!bb.ann.length) delete bb.ann; touchMeta(); toast('Événement supprimé : ' + (e ? e.t : ''), 'Annuler', () => { cbOf(owner).ann = prev; touchMeta(); }); }
+});
+/* Vue « Année » de Mon cycle : dossiers de mon portefeuille × 12 mois */
+function renderAnnee(P) {
+  const body = $('#portefeuille-body'), y = P.annY ||= new Date().getFullYear(), cur = monthKey(Date.now());
+  const rows = cyClients().map(c => ({ c, m: Array.from({ length: 12 }, (_, i) => annInMonth(c, y + '-' + pad(i + 1))) })).filter(r => r.m.some(x => x.length));
+  const tot = Array.from({ length: 12 }, (_, i) => rows.reduce((a, r) => a + r.m[i].length, 0));
+  let html = `<div class="card filters pf-head">${pfSwitch(P)}<div class="month-nav"><button class="icon" data-anny="-1" title="Année précédente">‹</button><b>Calendrier annuel ${y}</b><button class="icon" data-anny="1" title="Année suivante">›</button>${y !== new Date().getFullYear() ? '<button class="btn sm ghost" data-anny="0">Cette année</button>' : ''}</div><span class="sp" style="flex:1"></span><span class="muted small">Clic sur un événement : fait / à faire</span></div>`;
+  if (!rows.length) html += `<div class="card empty">Aucun événement annuel dans les dossiers de votre portefeuille. Ajoutez-en depuis le carnet d’un dossier ou d’un groupe (bloc « Calendrier annuel »).</div>`;
+  else html += `<div class="card tbl-wrap"><table class="t ann-t"><thead><tr><th>Dossier</th>${MON_S.map((l, i) => `<th class="${y + '-' + pad(i + 1) === cur ? 'cur' : ''}">${l}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(r => `<tr><td class="ann-n"><a href="#carnet/${encodeURIComponent(r.c.id)}">${cliIc(r.c.id)}<span class="cl dsc-n">${esc(r.c.name)}</span></a></td>${r.m.map((L, i) => `<td class="${y + '-' + pad(i + 1) === cur ? 'cur' : ''}">${L.map(x => `<button type="button" class="ann-chip ${x.done ? 'done' : ''} ${x.grp ? 'grp' : ''}" data-annt="${esc(r.c.id)}|${esc(x.o.key)}" title="${esc(x.e.t + ' — ' + annRecTxt(x.e) + (x.grp ? ' (groupe)' : '') + (x.done ? ' · fait le ' + fmtDate(parseDay(x.done)) : '') + (x.e.note ? ' · ' + x.e.note : ''))}">${x.done ? '✓ ' : ''}${esc(x.e.t.length > 18 ? x.e.t.slice(0, 17) + '…' : x.e.t)}${x.e.kind === 'd' ? ' <small>' + esc(fmtDate(x.o.due).slice(0, 5)) + '</small>' : ''}</button>`).join('')}</td>`).join('')}</tr>`).join('')}
+    </tbody><tfoot><tr><td>Événements</td>${tot.map((n, i) => `<td class="${y + '-' + pad(i + 1) === cur ? 'cur' : ''}">${n || ''}</td>`).join('')}</tr></tfoot></table></div>`;
+  body.innerHTML = html;
+}
+document.addEventListener('click', ev => {
+  const y = ev.target.closest('[data-anny]'); if (y && UI.pfv) { const d = +y.dataset.anny; UI.pfv.annY = d ? (UI.pfv.annY || new Date().getFullYear()) + d : new Date().getFullYear(); renderPortfolio(); return; }
+  const t = ev.target.closest('[data-annt]'); if (!t) return; const [cid, ...k] = t.dataset.annt.split('|'), key = k.join('|'), c = clientOf(cid); if (!c) return;
+  const was = annDone(c, key); annSetDone(c, key, !was); toast(was ? 'Remis à faire' : 'Noté comme fait', 'Annuler', () => annSetDone(c, key, !!was));
+});
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
-const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['sp', 'Salariés particuliers', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
+const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['sp', 'Salariés particuliers', 1], ['ann', 'Calendrier annuel', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
   ['notes', 'Remarque permanente', 0], ['interloc', 'Interlocuteurs (rattachés aux deux dossiers)', 0], ['points', 'Points en cours', 0], ['journal', 'Journal', 0], ['rel', 'Relation client', 0], ['alertes', 'Alertes salariés', 0]];
 function cbCopyFields(dstId) {
   const cs = S.meta.clients.filter(c => !c.deletedAt && c.id !== dstId).sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
@@ -3205,6 +3390,7 @@ function cbCopy(dst, src, keys) { // retourne le nombre d'éléments copiés
   if (K.has('ccn') && (sb.ccn || []).length && !db().ccn.length) { db().ccn = clone(sb.ccn); n++; }
   if (K.has('cycle') && src.cy) { const sp = cyOf(src), cy = { ...(dst.cy || {}) }; let k2 = 0; for (const k of CY_COPY_KEYS) if (cy[k] == null || cy[k] === '') { if (sp[k] != null && sp[k] !== '') { cy[k] = sp[k]; k2++; } } if (k2) { dst.cy = cy; n++; } }
   if (K.has('notes') && src.cy && src.cy.notes && !(dst.cy && dst.cy.notes)) { dst.cy = { ...(dst.cy || {}), notes: src.cy.notes }; n++; }
+  if (K.has('ann') && annOwn(src).length && !annOwn(dst).length) { db().ann = annOwn(src).map(e => ({ ...clone(e), id: newId() })); n++; }
   if (K.has('sp')) { const L = spOf(sb); if (L.length && !spOf(cbPeek(dst)).length) { db().sp = [...L]; n++; } if (sb.spNote && !cbPeek(dst).spNote) { db().spNote = sb.spNote; n++; } }
   if (K.has('prat')) for (const f of ['prat', 'part']) if (sb[f] && !db()[f]) { db()[f] = sb[f]; n++; }
   if (K.has('tarifs')) { if (src.rates) { const r = { ...(dst.rates || {}) }; let k2 = 0; for (const [t, v] of Object.entries(src.rates)) if (!r[t]) { r[t] = clone(v); k2++; } if (k2) { dst.rates = r; n++; } } if (src.billing && !dst.billing) { dst.billing = src.billing; n++; } }
@@ -3233,8 +3419,8 @@ function openCbCopy(dstId) {
 /* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
 const CBX = {
-  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours']],
-  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal']]
+  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['annuel', 'Calendrier annuel'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours']],
+  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal']]
 };
 function cbxSel(kind) { // { sel: [...], all: [clés connues] } ; une rubrique ajoutée depuis le dernier choix prend sa valeur par défaut
   const def = CBX[kind].filter(x => !x[2]).map(x => x[0]);
@@ -3260,6 +3446,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + ' — ' + (x.mode === 'validate' ? 'à valider : ' + alTrigText(x) : 'pour information') + (x.until ? ' · jusqu’au cycle de ' + mkLabel(x.until) : '')]), 'Aucune alerte active');
     add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x) + (x.note ? ' — ' + x.note : '')]), 'Aucun interlocuteur');
     add('tarifs', 'Tarifs de facturation', S.meta.tasks.filter(t => !t.deletedAt && rateOf(c.id, t.id)).map(t => [t.name, rateTxt(rateOf(c.id, t.id)) + (rateOf(c.id, t.id).own ? ' (propre au dossier)' : ' (tarif de la tâche)')]), 'Aucun tarif');
+    add('annuel', 'Calendrier annuel', [...annOwn(c).map(e => [e.t, annRecTxt(e) + (e.note ? ' — ' + e.note : '')]), ...(g ? annOwn(g).map(e => [e.t + ' (groupe)', annRecTxt(e) + (e.note ? ' — ' + e.note : '')]) : [])], 'Aucun événement');
     { const L = spOf(b); add('salaries', 'Salariés particuliers', [...SP_LIST.map(([gl, items]) => [gl, items.filter(x => L.includes(x[0])).map(x => x[1]).join(', ')]).filter(x => x[1]), ...(b.spNote ? [['Remarque', b.spNote]] : [])], 'Aucun renseigné'); }
     add('pratiques', 'Pratiques et particularités', [['Pratiques du client', b.prat || '—'], ['Particularités du cycle et des salariés', b.part || '—']]);
     add('points', 'Points en cours', ptsOf(b.points), 'Aucun point');
@@ -3273,6 +3460,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
   const g = obj, b = cbPeek(g), mem = grpMembers(g);
   add('ident', 'Le groupe', [['Nom', g.name], ['Société mère', g.mother && clientOf(g.mother) ? clientOf(g.mother).name : '—'], ['Nombre de dossiers', String(mem.length)], ['Bulletins (cycle de ' + mkLabel(mk) + ')', String(mem.reduce((a2, x) => a2 + (effBs(mk, x.id).n || 0), 0) || '—')]]);
   add('notes', 'Notes du groupe', [['', b.notes || '—']]);
+  add('annuel', 'Calendrier annuel du groupe', annOwn(g).map(e => [e.t, annRecTxt(e) + (e.note ? ' — ' + e.note : '')]), 'Aucun événement');
   add('dossiers', 'Dossiers et conventions collectives', mem.map(x => [x.name + (x.code ? ' (n° ' + x.code + ')' : '') + (isMother(x) ? ' — société mère' : ''), ((cbPeek(x).ccn || []).map(ccnTxt).join(' ; ') || 'convention non renseignée') + (isMine(x) ? '' : ' · hors de mon portefeuille')]), 'Aucun dossier');
   add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && pInGroup(x, g.id)).map(x => ['', pplTxt(x) + ' — ' + pAttTxt(x).join(', ')]), 'Aucun interlocuteur');
   add('points', 'Points en cours', [...ptsOf(b.points, 'Groupe'), ...mem.flatMap(x => ptsOf(cbPeek(x).points, x.name))], 'Aucun point');
@@ -3475,8 +3663,11 @@ function renderCarnetGroupe(body, g) {
     ${pts.length ? `<div><div class="cb-hint" style="margin-bottom:4px">Points en cours des dossiers (${pts.length})</div><div class="cb-list">${pts.map(({ p, x }) => `<div class="cb-it"><a class="d" href="#carnet/${encodeURIComponent(x.id)}" style="min-width:120px">${esc(x.name)}</a><span class="x">${esc(p.t)}</span>${p.due ? `<span class="due ${p.due < today ? 'late' : ''}">⏰ ${fmtDate(parseDay(p.due)).slice(0, 5)}</span>` : ''}</div>`).join('')}</div></div>` : ''}</div>`;
   html += `<i data-b="gpoints" data-half="1"></i><h2>Points en cours du groupe (${b.points.filter(x => !x.done).length})</h2><div class="card cb-sec">${cbPointsHTML(b.points, today, ' du groupe')}</div>`;
   html += `<i data-b="gjournal" data-half="1"></i><h2>Journal du groupe (${b.journal.length})</h2><div class="card cb-sec">${cbJournalHTML(b.journal, today)}</div>`;
+  html += annCarnetHTML(g, true);
+  html += spGroupHTML(g);
   html += tplCarnetHTML(g, true);
   body.innerHTML = html;
+  body.querySelectorAll('[data-ind]').forEach(i => { i.indeterminate = true; });
   blkify(body, 'carnetgroupe');
 }
 function renderCarnetDossier(body, c) {
@@ -3500,7 +3691,6 @@ function renderCarnetDossier(body, c) {
     ${b.ccn.map((k, i) => { const r = k.i != null ? ccnOf(k.i) : null; const br = k.b || (r && r[4]) || ''; return `<div class="cb-ccn" data-ccn="${i}"><span class="ci">${k.i != null ? idccStr(k.i) : '—'}</span><div class="ct">${esc(k.t)}<div class="cs">${ccnIsNone(k) ? 'Code IDCC 9999 à déclarer en DSN · seules les règles du Code du travail s’appliquent (et les accords d’entreprise éventuels)' : (k.i != null ? 'IDCC ' + idccStr(k.i) : 'Convention non répertoriée (saisie libre)') + (br ? ' · brochure JO n° ' + esc(br) : '') + ` · <a href="${esc(ccnUrl(k))}" target="_blank" rel="noopener">Voir sur Légifrance ↗</a>` + (ccnOld(r) ? `<div class="ccn-oldw">⚠ ${esc(ccnOldTxt(r))}${r[6] && ccnOf(r[6]) && !b.ccn.some(x => x.i === r[6]) ? ` <button type="button" class="btn sm" data-cba="ccnrepl">Remplacer par l’IDCC ${idccStr(r[6])}</button>` : ''}</div>` : '')}</div></div><button class="icon xs" data-cba="ccndel" title="Retirer cette convention">${ICON.trash}</button></div>`; }).join('')}
     ${b.ccn.some(ccnIsNone) ? '' : `<div class="ccn-search"><input id="ccn-q" placeholder="${b.ccn.length ? 'Ajouter une autre convention collective' : 'Convention collective'} : nom, IDCC (ex. 1486) ou n° de brochure JO (ex. 3018)" autocomplete="off"><div class="ccn-res" id="ccn-res" hidden></div></div>
     <div class="cb-hint">Liste du ministère du Travail (${ccnDateTxt(CCN_DATE)}) : ${CCN_LIST.filter(r => r[5] === 1).length} conventions en vigueur et ${CCN_LIST.filter(ccnOld).length} anciennes ; plusieurs conventions possibles (ex. établissements différents). Introuvable ? Tapez son nom puis choisissez « Ajouter tel quel ». Vérifiez toujours la convention applicable sur Légifrance.${b.ccn.length ? '' : ' <button type="button" class="btn sm ghost" data-cba="ccnnone">Dossier sans convention collective (Code du travail)</button>'}</div>`}</div>`;
-  html += spHTML(c);
   if (g) {
     const gb = cbPeek(g), gOpen = (gb.points || []).filter(x => !x.done), others = grpMembers(g).filter(x => x.id !== c.id);
     html += `<i data-b="groupe"></i><div class="toolbar"><h2>${esc(grpTitle(g))}</h2><span class="sp"></span><a class="btn sm" href="#carnet/groupe/${encodeURIComponent(g.id)}">📖 Carnet du groupe</a></div><div class="card cb-sec cb-gnote" style="--g:${grpColor(g)}">
@@ -3532,6 +3722,7 @@ function renderCarnetDossier(body, c) {
     <label class="fld"><span>Particularités du cycle et des salariés</span><textarea data-cbf="part" placeholder="ex. Primes trimestrielles en mars, juin, septembre, décembre · 13e mois en novembre">${esc(b.part || '')}</textarea></label>
     <div class="cb-hint">Données personnelles : restez factuel et minimal (pas de détail de santé), et supprimez ce qui n’est plus utile.</div></div>`;
   // Points en cours
+  html += spHTML(c).replace('data-b="salaries" data-half="1"', 'data-b="salaries"');
   html += `<i data-b="points" data-half="1"></i><h2>Points en cours (${open.length})</h2><div class="card cb-sec">
     <div class="cb-add"><input id="pt-t" placeholder="Nouveau point (ex. Analyse de caisse URSSAF en cours)" autocomplete="off"><label class="cb-hint" style="display:flex;gap:5px;align-items:center">Échéance <input type="date" id="pt-due"></label><button class="btn sm primary" data-cba="ptadd">Ajouter</button></div>
     ${open.length ? `<div class="cb-list">${open.map(ptHTML).join('')}</div>` : '<div class="cb-hint">Aucun point en cours. Un point avec échéance apparaît dans « À faire aujourd’hui » le jour venu.</div>'}
@@ -3541,6 +3732,7 @@ function renderCarnetDossier(body, c) {
     <div class="cb-add"><input type="date" id="jr-d" value="${today}"><input id="jr-t" placeholder="Événement (ex. Rejet DSN de mars, courrier URSSAF…)" autocomplete="off"></div>
     <div class="cb-add"><input id="jr-ref" placeholder="Référence du document dans la GED (facultatif)" autocomplete="off"><button class="btn sm primary" data-cba="jradd">Ajouter</button></div>
     ${jr.length ? `<div class="cb-list">${jr.map(x => `<div class="cb-it" data-jr="${x.id}"><span class="d">${fmtDate(parseDay(x.d))}</span><span class="x">${esc(x.t)}${x.ref ? `<span class="ref">📎 ${esc(x.ref)}</span>` : ''}</span><button class="icon xs" data-cba="jrdel" title="Supprimer">${ICON.trash}</button></div>`).join('')}</div>` : '<div class="cb-hint">Aucun événement noté. Texte seul : pour un document, notez sa référence dans la GED du cabinet.</div>'}</div>`;
+  html += annCarnetHTML(c, false);
   html += tplCarnetHTML(c, false);
   // Calendrier des virements
   const months = Array.from({ length: 12 }, (_, i) => year + '-' + pad(i + 1));
@@ -5068,6 +5260,8 @@ function cyTodo() {
     if (g.deletedAt) continue;
     for (const pt of (g.cb && g.cb.points) || []) if (!pt.done && pt.due && today >= parseDay(pt.due)) items.push({ mk: cur, gid: g.id, f: 'pt', pid: pt.id, txt: 'Point en cours — ' + grpTitle(g) + ' : ' + pt.t + ' (échéance le ' + fmtDate(parseDay(pt.due)).slice(0, 5) + ')', late: today > parseDay(pt.due), d: parseDay(pt.due) });
   }
+  // Calendrier annuel des dossiers (v1.57.0)
+  items.push(...annTodo(today));
   // Notes rapides dont le rappel est arrivé (v1.54.0)
   for (const n of notesOpen()) if (n.due && today >= parseDay(n.due)) items.push({ mk: cur, cid: n.cid && clientOf(n.cid) ? n.cid : null, f: 'note', nid: n.id, txt: '🗒 Note — ' + (n.cid && clientOf(n.cid) ? clientOf(n.cid).name + ' : ' : '') + n.t + (n.due < dayKey(today) ? ' (rappel du ' + fmtDate(parseDay(n.due)).slice(0, 5) + ')' : ''), late: n.due < dayKey(today) });
   // Campagne de la DSN d'avril
@@ -5081,13 +5275,14 @@ function cyTodo() {
 // Action « Fait » d'un rappel du jour (Mon cycle et Ma journée)
 function cyTodoDo(t) {
   if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
+  if (t.f === 'ann') { const c = clientOf(t.cid); if (c) { annSetDone(c, t.key, true); toast('Noté comme fait', 'Annuler', () => annSetDone(c, t.key, false)); } return; }
   if (t.f === 'note') { const n = notesL().find(x => x.id === t.nid); if (n) noteDone(n); return; }
   if (t.f === 'pt') { cbPointDone(t.cid || t.gid, t.pid, true); toast('Point clos', 'Annuler', () => cbPointDone(t.cid || t.gid, t.pid, false)); return; }
   if (t.f === 'al') { alSetOk(t.mk, t.cid, t.aid, true); toast('Alerte notée comme traitée pour ce cycle', 'Annuler', () => alSetOk(t.mk, t.cid, t.aid, false)); return; }
   cySet(t.mk, t.cid, { [t.f]: isoDay(Date.now()) });
   toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
 }
-const cyTodoLbl = t => t.f === 'note' ? 'Traitée' : t.f === 'rel' ? 'Relance faite' : t.f === 'val' ? 'Validée aujourd’hui' : t.f === 'al' ? 'Traité' : t.f === 'pt' ? 'Point clos' : 'Fait aujourd’hui';
+const cyTodoLbl = t => t.f === 'ann' ? 'Fait' : t.f === 'note' ? 'Traitée' : t.f === 'rel' ? 'Relance faite' : t.f === 'val' ? 'Validée aujourd’hui' : t.f === 'al' ? 'Traité' : t.f === 'pt' ? 'Point clos' : 'Fait aujourd’hui';
 // Échéances des prochains jours (Ma journée, v1.38.0) : cycle en cours et précédent, dossiers de mon portefeuille
 function cyUpcoming(days = 7) {
   const today = startOfDay(Date.now()), lim = addDays(today, days), cur = monthKey(today), out = [];
@@ -5107,9 +5302,9 @@ function cyUpcoming(days = 7) {
 /* ---------- Charge à venir (v1.45.0) : échéances attendues d'après les paramètres et dates habituelles du cycle ----------
    Étapes non faites : réception des variables (date habituelle, sinon relance par défaut), 1er envoi (réception + délai),
    validation client, virements, dépôt des bulletins, DSN ; points en cours datés des carnets (dossiers et groupes). */
-const FC_STEPS = [['rec', 'Réception des variables'], ['env', '1er envoi'], ['val', 'Validation client'], ['vir', 'Virements'], ['dep', 'Dépôt des bulletins'], ['dsn', 'DSN'], ['pt', 'Points en cours']];
+const FC_STEPS = [['rec', 'Réception des variables'], ['env', '1er envoi'], ['val', 'Validation client'], ['vir', 'Virements'], ['dep', 'Dépôt des bulletins'], ['dsn', 'DSN'], ['ann', 'Calendrier annuel'], ['pt', 'Points en cours']];
 const FC_L = Object.fromEntries(FC_STEPS);
-const FC_COL = { rec: 0, env: 5, val: 2, vir: 6, dep: 3, dsn: 7, pt: 1 };
+const FC_COL = { rec: 0, env: 5, val: 2, vir: 6, dep: 3, dsn: 7, pt: 1, ann: 4 };
 const fcCol = k => GROUP_COLORS[FC_COL[k] % GROUP_COLORS.length];
 const isOpenDay = d => isWorkday(d) && !holidayOn(dayKey(d));
 function fcDays(from, n) { const out = []; let d = startOfDay(from); for (let i = 0; out.length < n && i < 400; i++) { if (isOpenDay(d)) out.push(d); d = addDays(d, 1); } return out; }
@@ -5130,6 +5325,7 @@ function cyForecast(from, to) {
     }
   }
   for (const c of cyClients()) for (const x of (cbPeek(c).points || [])) if (!x.done && x.due) add(parseDay(x.due), 'pt', c, null, { t: x.t });
+  for (const c of cyClients()) for (const { e, grp } of annEvents(c)) for (const o of annOcc(e, addDays(from, -31), to)) { if (annDone(c, o.key)) continue; let d = o.due; if (e.kind !== 'd') { for (let i = 0; i < 10 && !isOpenDay(d); i++) d = addDays(d, 1); } add(d, 'ann', c, o.mk, { t: e.t + (grp ? ' (groupe)' : '') }); }
   for (const g of groupsAll()) for (const x of (cbPeek(g).points || [])) if (!x.done && x.due) add(parseDay(x.due), 'pt', { id: g.id, name: grpTitle(g) }, null, { t: x.t, grp: 1 });
   const rk = k => FC_STEPS.findIndex(s2 => s2[0] === k);
   return out.sort((a, b) => a.d - b.d || rk(a.k) - rk(b.k) || a.nm.localeCompare(b.nm, 'fr'));
@@ -5333,7 +5529,7 @@ function renderCycle(P) {
   ${cyGroupRows(mk, rows, cols.length + 3, grouped, ({ c, row }) => {
     const p = cyOf(c), fin = cyRowDone(mk, c, row), gg = groupOf(c.group);
     return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''} ${gg ? 'has-grp' : ''} ${isMother(c) ? 'is-mother' : ''}" ${gg ? `style="--g:${grpColor(gg)}"` : ''}><td class="mono small">${esc(c.code || '')}</td>
-      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl dsc-n">${esc(c.name)}</span>${motherMark(c)}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
+      <td class="cy-name"><button class="what" data-cy="params" title="Paramètres du dossier">${cliIc(c.id)}<span class="cl dsc-n">${esc(c.name)}</span>${motherMark(c)}${(() => { const L = annInMonth(c, mk); return L.length ? `<span class="ann-ic ${L.every(x => x.done) ? 'done' : ''}" title="${esc('Calendrier annuel : ' + L.map(x => (x.done ? '✓ ' : '') + x.e.t + (x.e.kind === 'd' ? ' (' + fmtDate(x.o.due).slice(0, 5) + ')' : '')).join(' · '))}">📅</span>` : ''; })()}${fin ? '<span class="ok" title="Cycle terminé pour ce dossier">✓</span>' : ''}</button>${!grouped && gg ? grpTag(gg, 'sm') : ''}</td>
       ${cols.map(([f]) => {
         if (f === 'bs') { const eb = effBs(mk, c.id); return `<td class="c"><input class="cy-in num ${eb.own ? '' : 'sugg'}" data-in="bs" inputmode="numeric" value="${eb.n != null ? eb.n : ''}" placeholder="–" title="${eb.own ? 'Nombre de bulletins du mois' : eb.n != null ? 'Repris du cycle de ' + MONTHS_L[+eb.from.slice(5) - 1] + ' : tapez la valeur réelle pour la remplacer' : 'Nombre de bulletins du mois'}"></td>`; }
         if (f === 'al') return `<td>${alCellHTML(mk, c, row)}</td>`;
@@ -5774,7 +5970,7 @@ function openNoteEditor(inp, mk, cid) {
   ta.addEventListener('blur', () => finish(true));
 }
 function pfSwitch(P) {
-  return `<div class="seg" data-seg="pfmode"><button data-v="cycle" class="${P.mode !== 'temps' && P.mode !== 'charge' ? 'on' : ''}">Cycle de paie</button><button data-v="charge" class="${P.mode === 'charge' ? 'on' : ''}" title="Échéances attendues sur les deux prochains mois">Charge à venir</button><button data-v="temps" class="${P.mode === 'temps' ? 'on' : ''}">Temps & facturation</button></div>`;
+  return `<div class="seg" data-seg="pfmode"><button data-v="cycle" class="${!['temps', 'charge', 'annee'].includes(P.mode) ? 'on' : ''}">Cycle de paie</button><button data-v="charge" class="${P.mode === 'charge' ? 'on' : ''}" title="Échéances attendues sur les deux prochains mois">Charge à venir</button><button data-v="annee" class="${P.mode === 'annee' ? 'on' : ''}" title="Calendrier annuel des dossiers : 12 mois">Année</button><button data-v="temps" class="${P.mode === 'temps' ? 'on' : ''}">Temps & facturation</button></div>`;
 }
 function defaultCycleMonth() {
   const now = Date.now(), cur = monthKey(now), pm = prevMk(cur);
@@ -5834,6 +6030,7 @@ function renderPortfolio() {
   P.mode ||= 'cycle'; P.cmonth ||= defaultCycleMonth();
   $('#portefeuille-body').classList.toggle('dense', pfDense()); $('#portefeuille-body').classList.remove('blk-wrap');
   if (P.mode === 'charge') { renderCharge(P); return; }
+  if (P.mode === 'annee') { renderAnnee(P); return; }
   if (P.mode !== 'temps') { renderCycle(P); return; }
   const data = portfolioData(P.month);
   let rows = data.rows;
@@ -6884,6 +7081,7 @@ function applyTheme() {
 applyTheme();
 document.body.classList.toggle('stick', lsGet('stick', '1') === '1');
 let NEWS_OLD = false; try { NEWS_OLD = Object.keys(localStorage).some(k => k.startsWith('chronocab:') && k !== 'chronocab:seenVer'); } catch (e) {}
+try { if (lsGet('spMoved', '') !== '1') { const st = Blk.get('carnet'); if (Array.isArray(st.o) && st.o.includes('salaries')) { st.o = st.o.filter(x => x !== 'salaries'); Blk.put('carnet', st); } lsSet('spMoved', '1'); } } catch (e) {}
 applyUiz(); applyDsc(); setTimeout(newsCheck, 2500);
 const themeHTML = () => `<span class="th-sws" role="radiogroup" aria-label="Couleur de l’application">${Object.entries(THEMES).map(([k, t]) => `<button type="button" class="th-sw ${themeKey() === k ? 'on' : ''}" data-act="theme" data-v="${k}" style="--c:${t.a}" title="${esc(t.l)}" aria-label="${esc(t.l)}" role="radio" aria-checked="${themeKey() === k}"></button>`).join('')}</span>`;
 function renderSettings() {
