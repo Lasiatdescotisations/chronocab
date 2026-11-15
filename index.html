@@ -157,6 +157,14 @@ h2:first-child{margin-top:0}
 .icon svg,.btn svg{width:16px;height:16px}
 
 /* ---------- Timer bar ---------- */
+.cy-table td:first-child,.cy-table th:first-child{position:sticky;left:0;z-index:1;background:var(--surface);min-width:62px;width:62px}.cy-table th:first-child{z-index:3;background:var(--surface-2)}
+.cy-table th:nth-child(2){position:sticky;left:62px;z-index:3}
+body.stick #carnet-body .cb-head{position:sticky;top:64px;z-index:16;box-shadow:0 -9px 0 var(--bg),0 6px 14px -8px rgba(0,0,0,.25)}
+@media (min-width:701px){
+  body.stick #portefeuille-body .pf-head,body.stick #carnet-body .cb-tools,body.stick #rapports-body > .card.filters{position:sticky;top:64px;z-index:16;box-shadow:0 -9px 0 var(--bg),0 6px 14px -8px rgba(0,0,0,.25)}
+  body.stick #portefeuille-body .cy-tw{overflow:visible}body.stick #portefeuille-body .cy-table th{top:var(--pfh,126px);z-index:4}body.stick #portefeuille-body .cy-table th:first-child,body.stick #portefeuille-body .cy-table th:nth-child(2){z-index:5}
+}
+@media (max-width:700px){body.stick #carnet-body .cb-head{top:56px;padding:6px 10px;gap:6px}body.stick #carnet-body .cb-head h1{font-size:16px}}
 .timerbar{display:flex;align-items:stretch;gap:0;padding:8px;position:sticky;top:68px;z-index:20}
 .tb-fields{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.1fr) minmax(180px,1.7fr);gap:6px;flex:1;min-width:0}
 .tb-fields input{border-color:transparent;background:var(--surface-2);height:44px;font-size:15px}
@@ -231,7 +239,7 @@ h2:first-child{margin-top:0}
 .filters label.chk{flex-direction:row;align-items:center;gap:6px}
 .filters label.chk input{width:auto;padding:0}
 .cy-table th,.cy-table td{padding:6px 8px}
-.cy-table td.cy-name{position:sticky;left:0;background:var(--surface);z-index:1;min-width:190px}
+.cy-table td.cy-name{position:sticky;left:62px;background:var(--surface);z-index:1;min-width:190px}
 .cy-name .what{padding:0}
 .cy-name .what .cl{max-width:230px}
 .cy-perm{font-size:11px;color:var(--muted);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
@@ -407,11 +415,16 @@ h2:first-child{margin-top:0}
 #print-area{display:none}
 @media print{html,body.printing{height:auto!important;overflow:visible!important}body.printing > *:not(#print-area){display:none!important}body.printing{background:#fff}body.printing #print-area{display:block;font:11pt/1.45 Georgia,'Times New Roman',serif;color:#111;padding:0 4mm}
 #print-area h1{font-size:18pt;margin:0 0 2pt}#print-area .pa-sub{color:#555;font-size:10pt;margin-bottom:12pt}#print-area h2{font-size:12.5pt;margin:14pt 0 4pt;border-bottom:1px solid #999;padding-bottom:2pt;break-after:avoid}
-#print-area table{border-collapse:collapse;width:100%}#print-area th{text-align:left;font-weight:600;width:34%;vertical-align:top;padding:2pt 8pt 2pt 0}#print-area td{padding:2pt 0;vertical-align:top}#print-area ul{margin:0;padding-left:16pt}#print-area li{margin:1pt 0}#print-area tr,#print-area li{break-inside:avoid}}
+#print-area table{border-collapse:collapse;width:100%}#print-area th{text-align:left;font-weight:600;width:34%;vertical-align:top;padding:2pt 8pt 2pt 0}#print-area td{padding:2pt 0;vertical-align:top}#print-area ul{margin:0;padding-left:16pt}#print-area li{margin:1pt 0}#print-area tr,#print-area li{break-inside:avoid}#print-area.pa-styled h1{color:var(--pa)}#print-area.pa-styled h2{color:var(--pa);border-bottom:2px solid var(--pa)}#print-area.pa-styled{border-top:6px solid var(--pa);padding-top:8pt}}
 .pers-nm{all:unset;cursor:pointer;font-weight:600;min-width:140px}.pers-nm:hover{text-decoration:underline}.pers-role{min-width:120px}
 .cb-ppl{display:grid;gap:2px}.cb-pp{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}.cb-pp:last-child{border:0}.cb-pp .nm2{all:unset;cursor:pointer;font-weight:600}.cb-pp .nm2:hover{text-decoration:underline}
 .rate-in{display:inline-flex;gap:3px}.rate-in input{width:72px;text-align:right}.rate-in select{width:auto}
-.cat-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:6px;white-space:nowrap}.cat-cyc{background:#e3edf7;color:#2c5c8f}.cat-evt{background:#f5ebdf;color:#8a5212}.cat-exc{background:#efe6f6;color:#6a3d92}.cat-int{background:var(--surface-2);color:var(--ink-2)}
+.cat-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:6px;white-space:nowrap;color:var(--cc);background:color-mix(in srgb,var(--cc) 13%,var(--surface))}
+.cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cc);margin:0 5px 0 2px;flex:none;vertical-align:1px}
+.pers-ic{color:var(--pc,var(--ink-2))!important;background:color-mix(in srgb,var(--pc,var(--ink-2)) 14%,var(--surface))!important}
+.col-pills{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--line)}.col-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;border:1px solid var(--line-2);border-radius:20px;padding:2px 9px 2px 6px;background:var(--surface)}.col-pill i{width:10px;height:10px;border-radius:50%;background:var(--cc)}.col-pill:hover{border-color:var(--cc)}
+.ref-head .cat-dot{margin-left:0}
+.wk-cats{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:10px 12px 4px}.wk-cats i{display:block;height:100%}.wk-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);padding:0 12px 10px}
 .cy-upc{padding:6px 12px}.cy-upc-i{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}.cy-upc-i:last-child{border:0}.cy-upc-i .d{min-width:74px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 #chrono-body .cy-todo-i .icon.xs{margin-left:auto}
 .cy-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-top:12px;background:var(--todo-soft);border-color:transparent}
@@ -1059,8 +1072,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.41.1';
-const APP_DATE = '14/11/2026';
+const APP_VERSION = '1.43.0';
+const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -1167,6 +1180,8 @@ const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
   building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 9h2a2 2 0 0 1 2 2v10"/><path d="M3 21h18M8 7h4M8 11h4M8 15h4"/></svg>',
   case: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>',
+  man: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.8"/><path d="M8.6 5.6c1.6-1.6 5.2-1.6 6.8 0"/><path d="M5 21v-2.5A4.5 4.5 0 0 1 9.5 14h5a4.5 4.5 0 0 1 4.5 4.5V21"/><path d="m12 14 0 3"/></svg>',
+  woman: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.8"/><path d="M8.2 8.5C7.6 11 7 12.5 6 13.5M15.8 8.5c.6 2.5 1.2 4 2.2 5"/><path d="M12 14.5 6 21h12z"/></svg>',
   person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>',
   chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
 };
@@ -1661,7 +1676,7 @@ function applyDoc(key, body) {
 const J_MAX = 10;
 const J_F = { rec: 'réception', prep: 'préparation', env: '1er envoi', corr: 'correction', val: 'validation client', vir: 'virements', dep: 'dépôt', dsn: 'DSN', bs: 'nombre de BS', rel: 'relance', relN: 'relance', doeth: 'DOETH', tal: 'taxe d’apprentissage', alOk: 'alerte traitée' };
 const J_ARR = { clients: 'Client', tasks: 'Tâche', persons: 'Personne', groups: 'Groupe' };
-const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils', liss: 'lissage des temps', sugg: 'suggestions', suggHide: 'suggestion masquée' };
+const J_SET = { durFormat: 'format des durées', roundStep: 'arrondi', roundMode: 'mode d’arrondi', defaultBillable: 'facturable par défaut', dayStart: 'heure de début de journée', dayEnd: 'heure de fin de journée', dayEndAction: 'action en fin de journée', absDay: 'durée d’une journée d’absence', sched: 'planning habituel', tools: 'outils affichés', toolsSeen: 'outils affichés', toolsAM: 'jours fériés des outils', toolsAMShow: 'option Alsace-Moselle des outils', liss: 'lissage des temps', colors: 'couleurs des catégories', sugg: 'suggestions', suggHide: 'suggestion masquée' };
 const jEq = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
 const Journal = {
   snap: {}, pend: null, t: null, ready: false, mute: 0, open: false, warnId: null,
@@ -1923,7 +1938,7 @@ function autoCat(name) {
   return '';
 }
 const taskCat = t => (t = typeof t === 'string' ? taskOf(t) : t) ? (t.cat || autoCat(t.name)) : '';
-const catTag = c => c ? `<span class="cat-tag cat-${c}">${CAT_L[c]}</span>` : '';
+const catTag = c => c ? `<span class="cat-tag" style="--cc:${catCol('t', c)}">${CAT_L[c]}</span>` : '';
 const rateTxt = r => r && +r.amount > 0 ? (+r.amount).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + (r.mode === 'acte' ? ' € / acte' : ' € / h') : '';
 function rateOf(cid, tid) { const c = clientOf(cid), o = c && c.rates && c.rates[tid]; if (o && +o.amount > 0) return { ...o, own: true }; const t = taskOf(tid); return t && t.rate && +t.rate.amount > 0 ? t.rate : null; }
 function amountOf(e) { if (!e.billable) return 0; const r = rateOf(e.client, e.task); if (!r) return 0; return r.mode === 'acte' ? +r.amount : dur(e) / 3600000 * +r.amount; }
@@ -1996,7 +2011,7 @@ function Combo(root, o) {
     list.innerHTML = items.length ? items.map(i => {
       if (i.head) return `<div class="opt-head">${esc(i.label)}</div>`;
       n++;
-      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? `<span class="pers-ic">${ICON.person}</span>` : i.cli ? cliIc(i.cli) : ''}<span>${esc(i.label)}</span>${i.grp ? grpTag(groupOf(i.grp)) : ''}${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
+      return `<div class="opt ${i.create ? 'create' : ''} ${n === hi ? 'hi' : ''}" data-n="${n}">${i.person ? persIc(typeof i.person === 'string' ? i.person : null) : i.cli ? cliIc(i.cli) : ''}${i.cat ? catDot(i.cat) : ''}<span>${esc(i.label)}</span>${i.grp ? grpTag(groupOf(i.grp)) : ''}${i.sub ? `<span class="sub">${esc(i.sub)}</span>` : ''}</div>`;
     }).join('') : `<div class="opt-head">${typed ? 'Aucun résultat' : o.emptyText}</div>`;
     const h = list.querySelector('.opt.hi'); if (h) h.scrollIntoView({ block: 'nearest' });
   }
@@ -2048,7 +2063,7 @@ function clientOptions(q) {
   if (q) { const n = norm(q); cs = cs.filter(c => norm(c.name).includes(n) || norm(c.code).includes(n) || norm(groupOf(c.group)?.name).includes(n)); ps = ps.filter(x => norm(x.name + ' ' + (x.first || '') + ' ' + (x.last || '')).includes(n) || norm(pRoleTxt(x)).includes(n)); }
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
   const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), cli: c.id, grp: c.group });
-  const mapP = x => ({ id: x.id, label: x.name, sub: [P_KIND_L[pKind(x)], pRoleTxt(x)].filter(Boolean).join(' · '), person: true });
+  const mapP = x => ({ id: x.id, label: x.name, sub: [P_KIND_L[pKind(x)], pRoleTxt(x)].filter(Boolean).join(' · '), person: x.id });
   const intOpt = { id: INTERNAL_ID, label: INTERNAL_NAME, sub: 'formation, trajet, organisation… · non facturable', internal: true };
   const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : mapC(o);
   const out = [];
@@ -2257,10 +2272,11 @@ function statusOf(e) { return !e.billable ? 'no' : e.invoicedAt ? 'inv' : 'todo'
 function statusLabel(st) { return st === 'no' ? 'Non facturable' : st === 'inv' ? 'Facturé' : 'À facturer'; }
 function whatHTML(c, t) {
   if (c === ABS_ID) return `<span class="abs-ic">${ICON.cal}</span><span class="cl">${esc(ABS_NAME)}</span>`;
-  if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
-  if (isPersonId(c)) { const p = personOf(c); return `<span class="pers-ic">${ICON.person}</span><span class="cl">${esc(clientName(c))}</span>${p?.role ? `<span class="role">${esc(roleLabel(p.role))}</span>` : ''}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`; }
+  const tk = t ? `<span class="sep">›</span>${catDot(taskCat(t))}<span class="tk">${esc(taskName(t))}</span>` : '';
+  if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${tk}`;
+  if (isPersonId(c)) { const p = personOf(c); return `${persIc(p)}<span class="cl">${esc(clientName(c))}</span>${p && pRoleTxt(p) ? `<span class="role">${esc(pRoleTxt(p))}</span>` : ''}${tk}`; }
   const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
-  return `${cliIc(c)}${c ? `<span class="cl">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${t ? `<span class="sep">›</span><span class="tk">${esc(taskName(t))}</span>` : ''}`;
+  return `${cliIc(c)}${c ? `<span class="cl">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${tk}`;
 }
 function recents() {
   const seen = new Set(), out = [];
@@ -2686,29 +2702,40 @@ function cbxText(M) {
 /* PDF écrit directement (sans bibliothèque) : A4, Helvetica (encodage WinAnsi), coupure des lignes et pagination */
 const WIN1252 = { 0x20AC: 0x80, 0x201A: 0x82, 0x0192: 0x83, 0x201E: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02C6: 0x88, 0x2030: 0x89, 0x0160: 0x8A, 0x2039: 0x8B, 0x0152: 0x8C, 0x017D: 0x8E, 0x2018: 0x91, 0x2019: 0x92, 0x201C: 0x93, 0x201D: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02DC: 0x98, 0x2122: 0x99, 0x0161: 0x9A, 0x203A: 0x9B, 0x0153: 0x9C, 0x017E: 0x9E, 0x0178: 0x9F };
 const pdfStr = t => { let o = ''; for (const ch of String(t).replace(/[  ]/g, ' ').replace(/[→]/g, '->').replace(/[✓✔]/g, 'v')) { let c = ch.codePointAt(0); if (c > 255 || (c >= 0x80 && c < 0xA0)) c = WIN1252[c] || 63; const x = String.fromCharCode(c); o += x === '(' || x === ')' || x === '\\' ? '\\' + x : x; } return '(' + o + ')'; };
-function cbxPdf(M) {
+function cbxPdf(M, styled) {
   const W = 595.28, H = 841.89, ML = 50, MR = 50, MT = 56, MB = 56, cw = W - ML - MR;
   const cv = document.createElement('canvas').getContext('2d'), FN = 'Helvetica, Arial, "Liberation Sans", "Nimbus Sans", sans-serif';
   const tw = (t, sz, bold) => { cv.font = (bold ? 'bold ' : '') + sz + 'px ' + FN; return cv.measureText(t).width * 1.02; };
   const wrap = (t, sz, w, bold) => { const out = []; for (const para of String(t).split('\n')) { let cur = ''; for (const wd of para.split(/ +/)) { const tt = cur ? cur + ' ' + wd : wd; if (tw(tt, sz, bold) > w && cur) { out.push(cur); cur = wd; } else cur = tt; } out.push(cur); } return out; };
+  const rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255].map(v => v.toFixed(3)).join(' '); };
+  const TH = THEMES[themeKey()], AC = rgb(TH.a), SOFT = rgb(TH.s);
   const pages = []; let ops = [], y = H - MT;
-  const newPage = () => { pages.push(ops); ops = []; y = H - MT; };
+  const newPage = () => { pages.push(ops); ops = []; y = H - MT; if (styled) ops.push(`${AC} rg 0 ${H - 6} ${W} 6 re f`); };
   const need = h => { if (y - h < MB) newPage(); };
-  const txt = (t, x, sz, bold, gray) => ops.push(`BT ${gray ? '0.38 g' : '0 g'} /${bold ? 'F2' : 'F1'} ${sz} Tf 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm ${pdfStr(t)} Tj ET`);
-  const rule = () => ops.push(`0.6 G 0.5 w ${ML} ${y.toFixed(2)} m ${W - MR} ${y.toFixed(2)} l S`);
-  for (const l of wrap(M.title, 18, cw, true)) { need(24); y -= 20; txt(l, ML, 18, true); }
-  y -= 16; txt([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, true); y -= 6;
+  const txt = (t, x, sz, bold, gray, col) => ops.push(`BT ${col ? col + ' rg' : gray ? '0.38 g' : '0 g'} /${bold ? 'F2' : 'F1'} ${sz} Tf 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm ${pdfStr(t)} Tj ET`);
+  const rule = () => ops.push(`${styled ? SOFT + ' RG 1 w' : '0.6 G 0.5 w'} ${ML} ${y.toFixed(2)} m ${W - MR} ${y.toFixed(2)} l S`);
+  if (styled) { // bandeau aux couleurs de l'application, logo (horloge) et nom
+    const tl = wrap(M.title, 18, cw, true), bh = 30 + tl.length * 20 + 15 + 14;
+    ops.push(`${AC} rg 0 ${(H - bh).toFixed(2)} ${W} ${bh} re f`);
+    y = H - 22; for (const l of tl) { y -= 20; txt(l, ML, 18, true, false, '1 1 1'); }
+    y -= 15; txt([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, false, '0.92 0.95 0.94');
+    y = H - bh - 8;
+  } else {
+    for (const l of wrap(M.title, 18, cw, true)) { need(24); y -= 20; txt(l, ML, 18, true); }
+    y -= 16; txt([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '), ML, 9.5, false, true); y -= 6;
+  }
   for (const sec of M.sections) {
-    need(40); y -= 22; txt(sec.t.toUpperCase(), ML, 11, true); y -= 5; rule(); y -= 2;
+    need(40); y -= 22; if (styled) ops.push(`${AC} rg ${ML} ${(y - 2).toFixed(2)} 3 12 re f`); txt(sec.t.toUpperCase(), styled ? ML + 8 : ML, 11, true, false, styled ? AC : null); y -= 5; rule(); y -= 2;
     const tab = sec.items.some(x => x[0]), LW = 165;
     for (const [l, v] of sec.items) {
       const lines = tab ? wrap(v, 9.5, cw - LW - 8) : wrap('• ' + v, 9.5, cw - 10), ll = tab ? wrap(l, 9.5, LW - 6, true) : [];
       const n = Math.max(lines.length, ll.length); need(n * 12.5 + 3);
-      for (let i = 0; i < n; i++) { y -= 12.5; if (tab && ll[i]) txt(ll[i], ML, 9.5, true); if (lines[i] != null) txt(lines[i], tab ? ML + LW : ML + (i ? 9 : 0), 9.5); }
+      for (let i = 0; i < n; i++) { y -= 12.5; if (tab && ll[i]) txt(ll[i], ML, 9.5, true, false, styled ? '0.30 0.33 0.35' : null); if (lines[i] != null) txt(lines[i], tab ? ML + LW : ML + (i ? 9 : 0), 9.5); }
       y -= 3;
     }
   }
   pages.push(ops);
+  if (styled) for (let i = 1; i < pages.length; i++) pages[i].unshift(`${AC} rg 0 ${H - 6} ${W} 6 re f`);
   const N = pages.length, objs = [];
   objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
   objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
@@ -2716,7 +2743,9 @@ function cbxPdf(M) {
   const kids = [];
   pages.forEach((po, i) => {
     const pid = 5 + i * 2, cid = pid + 1; kids.push(pid + ' 0 R');
-    const foot = `BT 0.45 g /F1 8 Tf 1 0 0 1 ${ML} 30 Tm ${pdfStr(M.title + ' — page ' + (i + 1) + ' / ' + N)} Tj ET`;
+    const lg = (x0, y0) => { const r = 6.5, k = 0.5523 * r, cx = x0 + 9, cy = y0 + 9; return `${AC} rg ${x0} ${y0} 18 18 re f 1 1 1 RG 1.3 w ${cx + r} ${cy} m ${cx + r} ${cy + k} ${cx + k} ${cy + r} ${cx} ${cy + r} c ${cx - k} ${cy + r} ${cx - r} ${cy + k} ${cx - r} ${cy} c ${cx - r} ${cy - k} ${cx - k} ${cy - r} ${cx} ${cy - r} c ${cx + k} ${cy - r} ${cx + r} ${cy - k} ${cx + r} ${cy} c S ${cx} ${cy} m ${cx} ${cy + 4.6} l S ${cx} ${cy} m ${cx + 3.6} ${cy - 2} l S`; };
+    const pg = 'page ' + (i + 1) + ' / ' + N;
+    const foot = styled ? `${AC} RG 0.8 w ${ML} 46 m ${W - MR} 46 l S ${lg(ML, 22)} BT 0.45 g /F1 8 Tf 1 0 0 1 ${(W - MR - pg.length * 4.1).toFixed(2)} 28 Tm ${pdfStr(pg)} Tj ET` : `BT 0.45 g /F1 8 Tf 1 0 0 1 ${ML} 30 Tm ${pdfStr(M.title + ' — ' + pg)} Tj ET`;
     const st = po.concat(foot).join('\n');
     objs[pid] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${cid} 0 R >>`;
     objs[cid] = `<< /Length ${st.length} >>\nstream\n${st}\nendstream`;
@@ -2733,9 +2762,9 @@ function cbxPdfSave(name, u8) {
   const url = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' })), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
   toast('PDF téléchargé : ' + name);
 }
-function cbxPrint(M) {
+function cbxPrint(M, styled) {
   document.getElementById('print-area')?.remove();
-  const el = document.createElement('div'); el.id = 'print-area';
+  const el = document.createElement('div'); el.id = 'print-area'; if (styled) { el.className = 'pa-styled'; el.style.setProperty('--pa', THEMES[themeKey()].a); }
   el.innerHTML = `<h1>${esc(M.title)}</h1><div class="pa-sub">${esc([M.sub, 'Carnet de bord au ' + fmtDate(Date.now())].filter(Boolean).join(' · '))}</div>${M.sections.map(s2 => `<h2>${esc(s2.t)}</h2>${s2.items.some(x => x[0]) ? `<table>${s2.items.map(([l, v]) => `<tr><th>${esc(l)}</th><td>${esc(v).replace(/\n/g, '<br>')}</td></tr>`).join('')}</table>` : `<ul>${s2.items.map(([, v]) => `<li>${esc(v).replace(/\n/g, '<br>')}</li>`).join('')}</ul>`}`).join('')}`;
   document.body.appendChild(el); document.body.classList.add('printing');
   const done = () => { document.body.classList.remove('printing'); el.remove(); window.removeEventListener('afterprint', done); };
@@ -2747,8 +2776,10 @@ function openCbExport() {
   const kind = isG ? 'groupe' : 'dossier', sel = cbxSel(kind);
   const m = modal(`<div class="modal-h"><h3>Exporter le carnet — ${esc(isG ? 'groupe ' + obj.name : obj.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b" style="display:grid;gap:6px"><div class="small muted">Rubriques à inclure (une rubrique cochée apparaît toujours, avec « aucun… » si elle est vide) :</div>
-      ${CBX[kind].map(([k, l, sens]) => `<label class="chk"><input type="checkbox" value="${k}" ${sel.has(k) ? 'checked' : ''}> ${esc(l)}${sens ? ' <span class="muted small">— sensible, à cocher si besoin</span>' : ''}</label>`).join('')}</div>
+      ${CBX[kind].map(([k, l, sens]) => `<label class="chk"><input type="checkbox" value="${k}" ${sel.has(k) ? 'checked' : ''}> ${esc(l)}${sens ? ' <span class="muted small">— sensible, à cocher si besoin</span>' : ''}</label>`).join('')}
+      <div class="small" style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">Présentation du PDF <div class="seg" id="cbx-st"><button type="button" data-v="0" class="${lsGet('cbxStyle', '1') === '1' ? '' : 'on'}">Sobre</button><button type="button" data-v="1" class="${lsGet('cbxStyle', '1') === '1' ? 'on' : ''}">Mise en forme</button></div><span class="muted">aux couleurs de l’application</span></div></div>
     <div class="modal-f"><button class="btn" data-x="txt">${ICON.copy} Copier le texte</button><button class="btn" data-x="file">${ICON.down} Fichier .txt</button><span class="sp"></span><button class="btn" data-x="print" title="Fenêtre d’impression du navigateur">Imprimer</button><button class="btn primary" data-x="pdf">Fichier PDF</button></div>`);
+  m.el.querySelector('#cbx-st').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; lsSet('cbxStyle', b.dataset.v); m.el.querySelectorAll('#cbx-st button').forEach(x => x.classList.toggle('on', x === b)); });
   m.el.querySelector('.modal-f').addEventListener('click', ev => {
     const b = ev.target.closest('[data-x]'); if (!b) return;
     const ks = [...m.el.querySelectorAll('.modal-b input:checked')].map(i => i.value); lsSet('cbx-' + kind, JSON.stringify({ sel: ks, all: CBX[kind].map(x => x[0]) }));
@@ -2756,8 +2787,8 @@ function openCbExport() {
     const fn = 'carnet_' + norm(isG ? 'groupe ' + obj.name : obj.name).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') + '_' + dayKey(Date.now());
     if (b.dataset.x === 'txt') copyText(cbxText(M));
     else if (b.dataset.x === 'file') downloadText(fn + '.txt', cbxText(M), 'text/plain');
-    else if (b.dataset.x === 'print') { m.close(); cbxPrint(M); return; }
-    else { m.close(); try { cbxPdfSave(fn + '.pdf', cbxPdf(M)); } catch (e) { toast('Création du PDF impossible ici : utilisez « Imprimer » ou « Copier le texte »'); } return; }
+    else if (b.dataset.x === 'print') { m.close(); cbxPrint(M, lsGet('cbxStyle', '1') === '1'); return; }
+    else { m.close(); try { cbxPdfSave(fn + '.pdf', cbxPdf(M, lsGet('cbxStyle', '1') === '1')); } catch (e) { toast('Création du PDF impossible ici : utilisez « Imprimer » ou « Copier le texte »'); } return; }
     m.close();
   });
 }
@@ -2846,7 +2877,7 @@ function renderCarnetGroupe(body, g) {
       <label class="fld"><span>Ajouter un dossier au groupe</span><select id="cbg-add"><option value="">Choisir un dossier…</option>${cands.map(x => `<option value="${x.id}">${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}${x.group && groupOf(x.group) ? ' (groupe ' + esc(groupOf(x.group).name) + ')' : ''}</option>`).join('')}</select></label>
       <div><button class="btn sm danger" data-cbgdel>Supprimer le groupe</button> <span class="muted small">les dossiers sont conservés, sans groupe</span></div></div>`;
     const gpl = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).some(id => clientOf(id)?.group === g.id));
-    if (gpl.length) html += `<i data-b="ginterloc" data-half="1"></i><h2>Interlocuteurs du groupe</h2><div class="card cb-sec"><div class="cb-ppl">${gpl.map(x => `<div class="cb-pp"><button class="nm2" data-cbgp="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))} · ${esc((x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', '))}</span><span class="sp" style="flex:1"></span>${pContact(x)}</div>`).join('')}</div></div>`; }
+    if (gpl.length) html += `<i data-b="ginterloc" data-half="1"></i><h2>Interlocuteurs du groupe</h2><div class="card cb-sec"><div class="cb-ppl">${gpl.map(x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cbgp="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))} · ${esc((x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', '))}</span><span class="sp" style="flex:1"></span>${pContact(x)}</div>`).join('')}</div></div>`; }
   html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
     <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
     <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
@@ -2899,7 +2930,7 @@ function renderCarnetDossier(body, c) {
     ${al.length ? `<div class="cb-list">${al.map(a => { const st = alState(mk, c, row, a).st; return `<div class="cb-it"><span class="x"><b>${esc(a.name)}</b>${a.tag ? ' · ' + esc(a.tag) : ''}<span class="ref">${a.mode === 'validate' ? 'À valider : ' + esc(alTrigText(a)) + (st === 'ok' ? ' · ✓ validée pour ce cycle' : st === 'due' ? ' · à valider maintenant' : '') : 'Neutre (pour information)'}${a.until ? ' · jusqu’au cycle de ' + esc(mkLabel(a.until)) : ''}</span></span></div>`; }).join('')}</div>` : '<div class="cb-hint">Aucune alerte active pour le cycle de ' + esc(mkLabel(mk)) + '.</div>'}</div>`;
   // Interlocuteurs (v1.40.0)
   { const own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && (x.clients || []).some(id => clientOf(id)?.group === g.id)) : [];
-    const pp = x => `<div class="cb-pp"><button class="nm2" data-cba="pfiche" data-pid="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))}</span><span class="sp" style="flex:1"></span>${x.phone ? `<a class="small" href="${esc(telHref(x.phone))}">${esc(x.phone)}</a>` : ''}${pContact(x)}</div>`;
+    const pp = x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cba="pfiche" data-pid="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))}</span><span class="sp" style="flex:1"></span>${x.phone ? `<a class="small" href="${esc(telHref(x.phone))}">${esc(x.phone)}</a>` : ''}${pContact(x)}</div>`;
     html += `<i data-b="interloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs</h2><span class="sp"></span><button class="btn sm" data-cba="pnew">＋ Ajouter</button></div><div class="card cb-sec"><div class="cb-ppl">${own.map(pp).join('') || '<div class="cb-hint">Aucun interlocuteur pour ce dossier.</div>'}</div>${gp.length ? `<div class="cb-hint" style="margin-top:6px">Autres interlocuteurs du groupe</div><div class="cb-ppl">${gp.map(pp).join('')}</div>` : ''}
       ${(() => { const others = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pKind(x) === 'cli' && !own.includes(x)); return others.length ? `<div style="margin-top:6px;display:flex;gap:6px"><select id="cb-plink" style="flex:1"><option value="">Rattacher un interlocuteur existant…</option>${others.sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr')).map(x => `<option value="${x.id}">${esc(x.name)}${x.role ? ' · ' + esc(x.role) : ''}</option>`).join('')}</select></div>` : ''; })()}</div>`; }
   // Tarifs particuliers (v1.40.0)
@@ -3575,9 +3606,14 @@ function weekGridHTML() {
   const plan = shown.map(x => plannedOn(x.k)), wTot = shown.reduce((a, x) => a + (tot[x.k] || 0), 0), wPlan = plan.reduce((a, b) => a + b, 0);
   return `<i data-b="semaine" data-t="Ma semaine"></i><div class="toolbar"><h2>Ma semaine</h2><span class="sp"></span><button class="icon" data-act="wk" data-d="-1" title="Semaine précédente">‹</button><span class="small" style="min-width:120px;text-align:center">${esc(lbl)}</span><button class="icon" data-act="wk" data-d="1" title="Semaine suivante" ${off >= 0 ? 'disabled' : ''}>›</button>${off ? '<button class="btn sm ghost" data-act="wk" data-d="0">Cette semaine</button>' : ''}</div>
   <div class="card tbl-wrap"><table class="t wk-grid"><thead><tr><th>Dossier</th>${shown.map(x => `<th class="n ${x.k === today ? 'today' : ''}"><button class="wk-day" data-act="wkday" data-k="${x.k}" title="Récap à reporter de ce jour">${WD_S[new Date(x.d).getDay()]} ${new Date(x.d).getDate()}</button></th>`).join('')}<th class="n">Total</th></tr></thead><tbody>
-  ${list.map(([id, r, t]) => `<tr><td class="wk-who">${id ? (isInternalId(id) ? `<span class="int-ic">${ICON.building}</span> ` : cliIc(id) + ' ') + esc(clientName(id)) : '<span class="muted">Sans dossier</span>'}</td>${shown.map(x => `<td class="n ${r[x.k] ? 'has' : ''}" ${r[x.k] ? `data-act="wkday" data-k="${x.k}"` : ''}>${f(r[x.k])}</td>`).join('')}<td class="n"><b>${f(t)}</b></td></tr>`).join('') || `<tr><td colspan="${shown.length + 2}" class="empty">Aucun temps saisi cette semaine.</td></tr>`}
+  ${list.map(([id, r, t]) => `<tr><td class="wk-who">${id ? (isInternalId(id) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(id) ? persIc(id) + ' ' : cliIc(id) + ' ') + esc(clientName(id)) : '<span class="muted">Sans dossier</span>'}</td>${shown.map(x => `<td class="n ${r[x.k] ? 'has' : ''}" ${r[x.k] ? `data-act="wkday" data-k="${x.k}"` : ''}>${f(r[x.k])}</td>`).join('')}<td class="n"><b>${f(t)}</b></td></tr>`).join('') || `<tr><td colspan="${shown.length + 2}" class="empty">Aucun temps saisi cette semaine.</td></tr>`}
   <tr class="tot"><td>Total</td>${shown.map((x, i) => { const st = x.k > today || !plan[i] ? '' : (tot[x.k] || 0) >= plan[i] ? 'ok' : 'inc'; return `<td class="n wk-t ${st}" title="${plan[i] ? 'Prévu : ' + fmtDur(plan[i]) : 'Pas de temps prévu'}">${f(tot[x.k]) || (plan[i] && x.k <= today ? '0h00' : '')}</td>`; }).join('')}<td class="n">${f(wTot)}</td></tr>
-  <tr class="wk-plan"><td>Prévu</td>${plan.map(p => `<td class="n">${p ? fmtDur(p) : '—'}</td>`).join('')}<td class="n">${fmtDur(wPlan)}</td></tr></tbody></table></div>`;
+  <tr class="wk-plan"><td>Prévu</td>${plan.map(p => `<td class="n">${p ? fmtDur(p) : '—'}</td>`).join('')}<td class="n">${fmtDur(wPlan)}</td></tr></tbody></table>${(() => {
+    const byCat = {}; for (const e of allEntries()) { const k = dayKey(e.start); if (k < days[0].k || k > days[6].k) continue; const c = (isInternalId(e.client) ? 'int' : taskCat(e.task)) || ''; byCat[c] = (byCat[c] || 0) + dur(e); }
+    const tt = Object.values(byCat).reduce((a, b) => a + b, 0); if (!tt) return '';
+    const ks = [...TASK_CATS.map(c => c[0]), ''].filter(k => byCat[k]);
+    return `<div class="wk-cats" title="Répartition du temps de la semaine par catégorie de tâche">${ks.map(k => `<i style="width:${(byCat[k] * 100 / tt).toFixed(1)}%;background:${k ? catCol('t', k) : 'var(--line-2)'}"></i>`).join('')}</div><div class="wk-leg">${ks.map(k => `<span>${k ? catDot(k) : '<span class="cat-dot" style="--cc:var(--line-2)"></span>'}${esc(CAT_L[k] || 'Non classées')} ${fmtDur(byCat[k])} (${Math.round(byCat[k] * 100 / tt)} %)</span>`).join('')}</div>`;
+  })()}</div>`;
 }
 function renderChrono() {
   const body = $('#chrono-body');
@@ -4492,7 +4528,7 @@ function renderCycle(P) {
   </div>`;
   html += `<i data-b="dossiers"></i><div class="toolbar"><h2>Dossiers (${rows.length})</h2><span class="sp"></span>${hasGroups() ? `<label class="chk" title="Regrouper les dossiers sous le nom de leur groupe (clic sur le nom du groupe pour plier / déplier)"><input type="checkbox" data-cy="grp" ${grouped ? 'checked' : ''}> Regrouper par groupe</label>` : ''}${densitySeg()}
     <div class="seg" data-seg="cyf">${[['all', 'Tous'], ['todo', 'En cours'], ['late', 'À surveiller'], ['done', 'Terminés']].map(([v, l]) => `<button data-v="${v}" class="${(P.cfilter || 'all') === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
-  <div class="card tbl-wrap"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'al'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}" ${cols.find(x => x[1] === l)[0] === 'note' ? 'title="Remarque permanente : conservée de mois en mois"' : cols.find(x => x[1] === l)[0] === 'al' ? 'title="Alertes sur des salariés (ex. TPT), conservées jusqu’à leur suppression ou leur mois limite"' : ''}>${l}</th>`).join('')}<th></th></tr></thead><tbody>
+  <div class="card tbl-wrap cy-tw"><table class="t cy-table"><thead><tr><th>N°</th><th>Dossier</th>${cols.map(([, l]) => `<th class="${['note', 'al'].includes(cols.find(x => x[1] === l)[0]) ? '' : 'c'}" ${cols.find(x => x[1] === l)[0] === 'note' ? 'title="Remarque permanente : conservée de mois en mois"' : cols.find(x => x[1] === l)[0] === 'al' ? 'title="Alertes sur des salariés (ex. TPT), conservées jusqu’à leur suppression ou leur mois limite"' : ''}>${l}</th>`).join('')}<th></th></tr></thead><tbody>
   ${cyGroupRows(mk, rows, cols.length + 3, grouped, ({ c, row }) => {
     const p = cyOf(c), fin = cyRowDone(mk, c, row), gg = groupOf(c.group);
     return `<tr data-id="${c.id}" class="${fin ? 'cy-fin' : ''} ${gg ? 'has-grp' : ''} ${isMother(c) ? 'is-mother' : ''}" ${gg ? `style="--g:${grpColor(gg)}"` : ''}><td class="mono small">${esc(c.code || '')}</td>
@@ -4513,6 +4549,7 @@ function renderCycle(P) {
   const sx = body.querySelector('.tbl-wrap')?.scrollLeft || 0;
   body.innerHTML = html;
   blkify(body, 'cycle');
+  const ph = body.querySelector('.pf-head'); if (ph) document.documentElement.style.setProperty('--pfh', (64 + ph.offsetHeight) + 'px');
   const tw = body.querySelector('.tbl-wrap'); if (tw) tw.scrollLeft = sx;
   body._cyRows = rows; body._cyCols = cols; body._cyTodo = todo; body._cyMonth = monthLabel;
 }
@@ -5209,7 +5246,7 @@ function renderReports() {
       <button class="btn sm" data-bulk="nobill" ${sel.size ? '' : 'disabled'}>Passer non facturable</button>
       <span class="sp" style="flex:1"></span><button class="btn sm danger" data-bulk="del" ${sel.size ? '' : 'disabled'}>Supprimer</button></div>
     <div class="tbl-wrap"><table class="t"><thead><tr><th><input type="checkbox" data-selall ${shown.length && shown.every(e => sel.has(e.id)) ? 'checked' : ''}></th><th>Date</th><th>Client</th><th>Tâche</th><th>Libellé</th><th>Horaires</th><th class="n">Durée</th><th>Statut</th><th>Reporté</th><th></th></tr></thead><tbody>
-    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
+    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${catDot(taskCat(e.task))}${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
     </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
   const body = $('#rapports-body');
   body.innerHTML = html;
@@ -5249,7 +5286,7 @@ function pivot(list, group, cols, months) {
   const sorted = [...g.entries()].sort((a, b) => (group === 'pf' ? pfRank(a[0]) - pfRank(b[0]) : group === 'grp' ? (a[0] ? 0 : 1) - (b[0] ? 0 : 1) : group === 'cat' ? catRank(a[0]) - catRank(b[0]) : 0) || n1(a[0]).localeCompare(n1(b[0]), 'fr'));
   for (const [a, G] of sorted) {
     const v = vals(G.list);
-    rows += `<tr class="grp"><td>${group === 'grp' ? (groupOf(a) ? grpDot(groupOf(a)) + ' ' : '') : group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? `<span class="pers-ic">${ICON.person}</span> ` : `${cliIc(a)} `) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cellK(c[0], v[c[0]])}</td>`).join('')}</tr>`;
+    rows += `<tr class="grp"><td>${group === 'grp' ? (groupOf(a) ? grpDot(groupOf(a)) + ' ' : '') : group === 'client' ? (isInternalId(a) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(a) ? persIc(a) + ' ' : `${cliIc(a)} `) : group === 'cat' ? catDot(a) : group === 'task' ? catDot(taskCat(a)) : ''}${esc(n1(a))}</td>${colDefs.map(c => `<td class="n">${cellK(c[0], v[c[0]])}</td>`).join('')}</tr>`;
     const subs = [...G.subs.entries()].sort((x, y) => n2(x[0]).localeCompare(n2(y[0]), 'fr'));
     for (const [b, l] of subs) {
       const sv = vals(l);
@@ -5366,7 +5403,7 @@ function renderBilling() {
     <label>Temps jusqu’au<input type="date" data-f="until" value="${esc(f.until)}"></label>
     <label>&nbsp;<span style="display:flex;gap:6px"><button class="btn sm" data-act="until-lm">Fin du mois dernier</button><button class="btn sm" data-act="until-clear">Tout</button></span></label>
     ${hasGroups() ? `<label>Présentation<div class="seg" data-seg="fby"><button data-v="client" class="${byGrp ? '' : 'on'}">Par client</button><button data-v="grp" class="${byGrp ? 'on' : ''}">Par groupe</button></div></label>` : ''}</div>`;
-  html += `<i data-b="fsynthese" data-t="Synthèse"></i><div class="stats"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${(() => { const n = new Set(list.map(e => e.client || '')).size; return n + ' client' + (n > 1 ? 's' : ''); })()} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div>${(() => { const x = list.filter(e => taskCat(e.task) === 'exc'); return x.length ? `<div class="card stat"><div class="k"><span class="cat-tag cat-exc">Exceptionnel</span></div><div class="v">${fmtDur(x.reduce((a, e) => a + dur(e), 0))}</div><div class="s">${new Set(x.map(e => e.client || '')).size} client(s) · souvent facturé en plus du forfait</div></div>` : ''; })()}${hasRates() ? `<div class="card stat"><div class="k">Montant estimé</div><div class="v">${eurS(sumAmt(list))}</div><div class="s">d’après les tarifs des tâches et des dossiers</div></div>` : ''}</div>`;
+  html += `<i data-b="fsynthese" data-t="Synthèse"></i><div class="stats"><div class="card stat"><div class="k"><span class="dot" style="--c:var(--s-todo)"></span>Reste à facturer</div><div class="v">${fmtDur(tot)}</div><div class="s">${(() => { const n = new Set(list.map(e => e.client || '')).size; return n + ' client' + (n > 1 ? 's' : ''); })()} · ${list.length} saisie${list.length > 1 ? 's' : ''}</div></div>${(() => { const x = list.filter(e => taskCat(e.task) === 'exc'); return x.length ? `<div class="card stat"><div class="k"><span class="cat-tag" style="--cc:${catCol('t', 'exc')}">Exceptionnel</span></div><div class="v">${fmtDur(x.reduce((a, e) => a + dur(e), 0))}</div><div class="s">${new Set(x.map(e => e.client || '')).size} client(s) · souvent facturé en plus du forfait</div></div>` : ''; })()}${hasRates() ? `<div class="card stat"><div class="k">Montant estimé</div><div class="v">${eurS(sumAmt(list))}</div><div class="s">d’après les tarifs des tâches et des dossiers</div></div>` : ''}</div>`;
   html += `<i data-b="fliste" data-t="${byGrp ? 'Groupes' : 'Clients'} à facturer"></i>`;
   if (!groups.length) html += `<div class="card empty" style="margin-top:14px">Rien à facturer${f.until ? ' jusqu’à cette date' : ''}. 🎉</div>`;
   for (const g of groups) {
@@ -5374,7 +5411,7 @@ function renderBilling() {
     const first = Math.min(...g.l.map(e => e.start)), last = Math.max(...g.l.map(e => e.start));
     html += `<div class="card bclient" data-c="${esc(g.c)}"><div class="bclient-h">
       <button class="name" data-act="toggle"><span style="display:inline-flex;transform:rotate(${open ? 90 : 0}deg);transition:transform .15s;width:16px;color:var(--muted)">${ICON.chev}</span>${g.isG ? (g.g ? grpTag(g.g, 'lg') : '<span class="grp-none">Sans groupe</span>') : cliIc(g.c) + esc(g.title) + ' ' + grpTag(groupOfClient(g.c))}</button>
-      <span class="meta">${g.isG ? (() => { const n = new Set(g.l.map(e => e.client || '')).size; return n + ' dossier' + (n > 1 ? 's' : '') + ' · '; })() : ''}${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}${(() => { const x = g.l.filter(e => taskCat(e.task) === 'exc').reduce((a, e) => a + dur(e), 0); return x ? ` · <span class="cat-tag cat-exc">dont exceptionnel ${fmtDur(x)}</span>` : ''; })()}</span>
+      <span class="meta">${g.isG ? (() => { const n = new Set(g.l.map(e => e.client || '')).size; return n + ' dossier' + (n > 1 ? 's' : '') + ' · '; })() : ''}${g.l.length} saisie${g.l.length > 1 ? 's' : ''} · du ${fmtDate(first)} au ${fmtDate(last)}${(() => { const x = g.l.filter(e => taskCat(e.task) === 'exc').reduce((a, e) => a + dur(e), 0); return x ? ` · <span class="cat-tag" style="--cc:${catCol('t', 'exc')}">dont exceptionnel ${fmtDur(x)}</span>` : ''; })()}</span>
       <span class="amt">${fmtDur(g.ms)}${hasRates() && sumAmt(g.l) ? `<span class="amt-e">${eurS(sumAmt(g.l))}</span>` : ''}</span>
       <button class="btn sm" data-act="copy-client">${ICON.copy} Copier le détail</button>
       <button class="btn sm primary" data-act="inv-client">Marquer facturé</button></div>`;
@@ -5467,6 +5504,21 @@ document.addEventListener('change', ev => {
 /* ---------- Personnes (v1.40.0) : fiche complète ----------
    person = { id, name (affiché « Prénom NOM »), civ, first, last, kind: 'col' | 'cli' | 'org' | 'autre', role, email, phone, note, clients: [ids] }
    Anciennes personnes (prénom seul, fonction au cabinet) : collègues. Jamais d'identifiants ni de mots de passe. */
+// Couleurs des catégories (v1.42.0) : index dans GROUP_COLORS, enregistrées avec les réglages (settings.colors = { p: {…}, t: {…} })
+const COL_DEF = { p: { col: 0, cli: 1, org: 2, autre: 3 }, t: { cyc: 0, evt: 6, exc: 2, int: 3 } };
+const catCol = (grp, k) => { const c = (S.meta.settings.colors || {})[grp] || {}; const i = c[k] ?? COL_DEF[grp][k]; return i == null ? 'var(--muted)' : GROUP_COLORS[i % GROUP_COLORS.length]; };
+const pIcon = x => (x && x.civ === 'Mme') ? ICON.woman : (x && x.civ === 'M.') ? ICON.man : ICON.person;
+const persIc = (x, cls = '') => { x = typeof x === 'string' ? personOf(x) : x; return `<span class="pers-ic ${cls}" style="--pc:${x ? catCol('p', pKind(x)) : 'var(--muted)'}" title="${x ? esc(P_KIND_L[pKind(x)] + (x.civ ? ' · ' + x.civ : '')) : ''}">${pIcon(x)}</span>`; };
+const catDot = k => k ? `<span class="cat-dot" style="--cc:${catCol('t', k)}" title="${esc(CAT_L[k] || '')}"></span>` : '';
+function openCatColor(grp, k, label) {
+  const cur = ((S.meta.settings.colors || {})[grp] || {})[k] ?? COL_DEF[grp][k];
+  const m = modal(`<div class="modal-h"><h3>Couleur « ${esc(label)} »</h3><button class="icon" data-close>${ICON.close}</button></div><div class="modal-b"><div class="grp-sws" style="gap:10px">${GROUP_COLORS.map((col, i) => `<button class="grp-sw ${cur === i ? 'on' : ''}" data-i="${i}" style="--g:${col};width:30px;height:30px" title="${GROUP_COLOR_NAMES[i]}" aria-label="${GROUP_COLOR_NAMES[i]}"></button>`).join('')}</div><div class="muted small" style="margin-top:8px">Enregistrée avec vos réglages (tous vos appareils).</div></div><div class="modal-f"><button class="btn ghost" data-def>Couleur par défaut</button><span class="sp"></span><button class="btn" data-close>Fermer</button></div>`);
+  const set = i => { const c = JSON.parse(JSON.stringify(S.meta.settings.colors || {})); c[grp] = { ...(c[grp] || {}) }; if (i == null) delete c[grp][k]; else c[grp][k] = i; S.meta.settings.colors = c; touchMeta(); m.close(); };
+  m.el.querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => set(+b.dataset.i)));
+  m.el.querySelector('[data-def]').addEventListener('click', () => set(null));
+}
+const colPills = (grp, list) => `<div class="col-pills">${list.map(([k, l]) => `<button type="button" class="col-pill" data-colgrp="${grp}" data-colk="${k}" data-coll="${esc(l)}" style="--cc:${catCol(grp, k)}" title="Changer la couleur"><i></i>${esc(l)}</button>`).join('')}</div>`;
+document.addEventListener('click', ev => { const b = ev.target.closest('[data-colgrp]'); if (b) openCatColor(b.dataset.colgrp, b.dataset.colk, b.dataset.coll); });
 const P_KINDS = [['col', 'Collègue'], ['cli', 'Interlocuteur client'], ['org', 'Organisme / partenaire'], ['autre', 'Autre']];
 const P_KIND_L = Object.fromEntries(P_KINDS);
 const pKind = x => (x && x.kind) || 'col';
@@ -5475,7 +5527,7 @@ const P_ROLE_SUG = { cli: ['Dirigeant(e)', 'Gérant(e)', 'Responsable RH', 'Assi
 const telHref = v => 'tel:' + String(v || '').replace(/[^\d+]/g, '');
 const pContact = x => `${x.email ? `<a class="icon xs" href="mailto:${esc(x.email)}" title="${esc(x.email)}">✉</a>` : ''}${x.phone ? `<a class="icon xs" href="${esc(telHref(x.phone))}" title="${esc(x.phone)}">☎</a>` : ''}`;
 function openPersonFiche(id, preset = {}) {
-  const x = id ? personOf(id) : null, d = { kind: 'cli', ...preset, ...(x || {}) };
+  const x = id ? personOf(id) : null, d = { ...preset, ...(x || {}) }; d.kind = x ? pKind(x) : (preset.kind || 'cli');
   if (x && !x.first && !x.last) { d.first = x.name; }
   const kind = pKind(d), sel = new Set(d.clients || []);
   const cl = S.meta.clients.filter(c => !c.deletedAt).sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || a.name.localeCompare(b.name, 'fr'));
@@ -5553,7 +5605,8 @@ function renderRefs() {
       ${gCount[g.id] ? `<select data-k="mother" title="Société mère du groupe" class="grp-sel"><option value="">Société mère : aucune</option>${grpMembers(g).map(x => `<option value="${x.id}" ${g.mother === x.id ? 'selected' : ''}>Société mère : ${esc(x.name)}</option>`).join('')}</select>` : ''}
       <button class="icon" data-act="del-group" title="Supprimer le groupe (les dossiers sont conservés)">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun groupe. Créez-en un ici, puis choisissez le groupe de chaque dossier dans la liste des clients (ou dans les paramètres du dossier, depuis Mon cycle).</div>`}</div></div>
   <i data-b="taches"></i><h2>Tâches</h2><div class="card"><div class="ref-add"><input id="new-task" list="std-tasks" autocomplete="off" placeholder="Nouvelle tâche : tapez ou choisissez une tâche standard"><datalist id="std-tasks">${missingStandard().map(n => `<option value="${esc(n)}">`).join('')}</datalist><button class="btn primary" data-act="add-task">Ajouter</button></div>
-      <div class="ref-list">${catGrouped(ts, t => taskCat(t)).map(t => t.head ? `<div class="ref-head">${esc(t.label)}</div>` : `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
+      ${colPills('t', TASK_CATS)}
+      <div class="ref-list">${catGrouped(ts, t => taskCat(t)).map(t => t.head ? `<div class="ref-head">${catDot((TASK_CATS.find(c => c[1] === t.label) || [])[0])}${esc(t.label)}</div>` : `<div class="ref-row ${t.archived ? 'arch' : ''}" data-kind="task" data-id="${t.id}">
         <input class="nm" data-k="name" value="${esc(t.name)}">
         <select data-k="cat" title="Catégorie"><option value="" ${!t.cat ? 'selected' : ''}>Auto${autoCat(t.name) ? ' : ' + CAT_L[autoCat(t.name)] : ' : non classée'}</option>${TASK_CATS.map(([k, l]) => `<option value="${k}" ${t.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <span class="rate-in" title="Tarif de facturation par défaut (modifiable pour un dossier dans son carnet)"><input data-k="ramt" inputmode="decimal" placeholder="Tarif" value="${t.rate && +t.rate.amount ? esc(String(t.rate.amount).replace('.', ',')) : ''}"><select data-k="rmode"><option value="h" ${(t.rate?.mode || 'h') === 'h' ? 'selected' : ''}>€ / h</option><option value="acte" ${t.rate?.mode === 'acte' ? 'selected' : ''}>€ / acte</option></select></span>
@@ -5563,10 +5616,11 @@ function renderRefs() {
         <button class="icon" data-act="del-ref" title="Mettre à la corbeille">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucune tâche pour l’instant.<br><br><button class="btn" data-act="preset">Ajouter les tâches standards</button></div>`}</div>
       ${ts.length ? `<div style="padding:10px 12px;border-top:1px solid var(--line)"><button class="btn sm ghost" data-act="preset">+ Ajouter toutes les tâches standards</button></div>` : ''}</div>
     <i data-b="personnes"></i><div class="toolbar"><h2>Personnes</h2><span class="sp"></span><button class="btn sm primary" data-act="pnew">＋ Nouvelle personne</button></div><div class="card">
+      ${colPills('p', P_KINDS)}
       <div class="ref-tools"><div class="seg" data-seg="pkind">${[['', 'Toutes'], ...P_KINDS].map(([k, l]) => `<button data-v="${k}" class="${(UI.pk || '') === k ? 'on' : ''}">${l} (${ps.filter(x => !k || pKind(x) === k).length})</button>`).join('')}</div></div>
-      <div class="ref-list">${ps.filter(x => !UI.pk || pKind(x) === UI.pk).map(x => `<div class="ref-row ${x.archived ? 'arch' : ''}" data-kind="person" data-id="${x.id}"><span class="pers-ic">${ICON.person}</span>
+      <div class="ref-list">${ps.filter(x => !UI.pk || pKind(x) === UI.pk).map(x => `<div class="ref-row ${x.archived ? 'arch' : ''}" data-kind="person" data-id="${x.id}">${persIc(x)}
         <button class="pers-nm" data-act="pfiche" title="Ouvrir la fiche">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button>
-        <span class="tag pk">${P_KIND_L[pKind(x)]}</span><span class="muted small pers-role">${esc(pRoleTxt(x))}</span>
+        <span class="tag pk" style="color:${catCol('p', pKind(x))};background:color-mix(in srgb,${catCol('p', pKind(x))} 12%,var(--surface))">${P_KIND_L[pKind(x)]}</span><span class="muted small pers-role">${esc(pRoleTxt(x))}</span>
         <span class="muted small">${(x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).slice(0, 2).map(esc).join(', ')}${(x.clients || []).length > 2 ? ' +' + ((x.clients || []).length - 2) : ''}</span>
         <span class="sp" style="flex:1"></span>${pContact(x)}
         <span class="use" title="Clients de son portefeuille">${owned[x.id] ? owned[x.id] + ' client' + (owned[x.id] > 1 ? 's' : '') : ''}</span>
@@ -5968,6 +6022,7 @@ function applyTheme() {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#1c1d1b' : t.a);
 }
 applyTheme();
+document.body.classList.toggle('stick', lsGet('stick', '1') === '1');
 const themeHTML = () => `<span class="th-sws" role="radiogroup" aria-label="Couleur de l’application">${Object.entries(THEMES).map(([k, t]) => `<button type="button" class="th-sw ${themeKey() === k ? 'on' : ''}" data-act="theme" data-v="${k}" style="--c:${t.a}" title="${esc(t.l)}" aria-label="${esc(t.l)}" role="radio" aria-checked="${themeKey() === k}"></button>`).join('')}</span>`;
 function renderSettings() {
   const st = S.meta.settings, tab = ['travail', 'appareil', 'donnees'].includes(lsGet('setTab', 'travail')) ? lsGet('setTab', 'travail') : 'travail';
@@ -5983,6 +6038,7 @@ function renderSettings() {
     ${lissHTML()}`;
   else if (tab === 'appareil') html += `<i data-b="affichage" data-half="1"></i><h2>Affichage</h2><div class="card settings">
       <div class="setting"><div>Couleur de l’application<div class="d">${esc(THEMES[themeKey()].l)} · sur cet appareil (l’icône de l’application installée reste verte)</div></div>${themeHTML()}</div>
+      <div class="setting"><div>Figer les barres en haut de l’écran<div class="d">Sur ordinateur : barre et en-têtes du tableau de Mon cycle, en-tête et filtres du Carnet, filtres des Rapports. Sur téléphone : l’en-tête du carnet seulement.</div></div><select id="set-stick"><option value="1" ${lsGet('stick', '1') === '1' ? 'selected' : ''}>Oui</option><option value="0" ${lsGet('stick', '1') === '1' ? '' : 'selected'}>Non</option></select></div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div>
     ${tabsHTML()}`;
@@ -6118,6 +6174,7 @@ function bindRefsOn(body) {
       if (S.meta.settings.liss.mode === 'fill' && !S.meta.settings.liss.task) { const t = S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm('Administratif interne')); if (t) S.meta.settings.liss.task = t.id; }
       touchMeta(); return;
     }
+    if (i.id === 'set-stick') { lsSet('stick', i.value); document.body.classList.toggle('stick', i.value === '1'); return; }
     if (i.id === 'set-quote') { lsSet('quote', i.value); if (i.value === '1') showQuote(true); return; }
     if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
     if (i.dataset.s === 'dayStart') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayStart; toast('Heure non comprise (ex. 07:30)'); return; } S.meta.settings.dayStart = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
