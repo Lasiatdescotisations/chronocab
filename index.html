@@ -77,7 +77,9 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);padding:0
 @media (min-width:701px){ @container hdr (max-width:1180px){ .nav a{padding:0 7px} .nav a svg{display:none} } }
 @media (min-width:701px){ @container hdr (max-width:1340px){ .nav a{padding:0 8px} .top-right{gap:9px} .pill .what{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} } }
 @media (min-width:701px){ @container hdr (max-width:1180px){ .pill .what{display:none} .top:has(#pill:not([hidden])) .brand .txt{display:none} } }
-@media (min-width:701px){ @container hdr (max-width:1340px){ .nav a svg{display:none} } }
+@media (min-width:701px){ @container hdr (max-width:1340px){ .nav a svg{display:none} #help-btn{display:none} } }
+@media (min-width:701px){ @container hdr (max-width:1540px){ .pill .pill-msg{display:none} #help-btn{display:none} } }
+@media (max-width:700px){ .pill .pill-msg{display:none} }
 @media (max-width:700px){ #help-btn,#dsc-btn:not(.on){display:none} .top-right .ver{display:none} #account{font-size:0;padding:0!important;width:30px;justify-content:center} #account::after{content:'⏻';font-size:16px;line-height:1} .pill .what{display:none} .top:has(#pill:not([hidden])) .brand .txt{display:none} }
 @media (min-width:701px){ @container hdr (max-width:1180px){ #help-btn,#dsc-btn:not(.on){display:none} .nav a{padding:0 6px} } }
 @media (min-width:701px){ @container hdr (max-width:1540px){ .top-right{gap:4px} .top-right .hist-btn{width:30px} .nav a{padding:0 7px} .nav a svg{margin-left:4px} #account{font-size:0;padding:0;width:32px;justify-content:center} #account::after{content:'⏻';font-size:16px;line-height:1} .pill .what{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} } }
@@ -744,6 +746,15 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-card[data-tool=calc] .tl-out{display:none}.calc-prev{margin-top:4px}.calc-out{display:flex;align-items:baseline;gap:6px;justify-content:flex-end;min-height:34px}.calc-big{font:600 24px var(--mono,monospace);cursor:default}.calc-big[data-cins]{cursor:pointer}
 .calc-h-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}.calc-h{list-style:none;margin:0;padding:0;display:grid;gap:2px}.calc-h li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:7px;font-family:var(--mono,monospace);font-size:13.5px}.calc-h li:hover{background:var(--hover,rgba(0,0,0,.04))}
 .calc-e{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}.calc-n,.calc-r{background:none;border:0;padding:0 1px;font:inherit;color:inherit;cursor:pointer;border-radius:4px}.calc-n:hover,.calc-r:hover{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}.calc-r{font-weight:700;color:var(--ink,#222)}.calc-eq{color:var(--muted)}.calc-del{opacity:.35}.calc-h li:hover .calc-del{opacity:1}.calc-del svg{width:12px;height:12px}
+.note-btn{position:relative}.note-btn .nb{position:absolute;top:1px;right:0;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--s-todo);color:#fff;font-size:10px;font-weight:700;line-height:15px;text-align:center}
+.note-pan{width:400px}.note-add{display:flex;gap:6px;padding:10px 12px 4px}.note-add input{flex:1}.note-hint{padding:0 12px 6px}.note-list{display:grid;padding:2px 6px 6px}.note-pan>.btn{margin:0 8px 8px}
+.note-it{display:flex;align-items:flex-start;gap:8px;padding:7px 6px;border-top:1px solid var(--line)}.note-it.done .note-t{text-decoration:line-through;color:var(--muted)}
+.note-ck{flex:none;width:22px;height:22px;border:1.5px solid var(--line-2);border-radius:6px;background:var(--surface);color:transparent;font-size:13px;line-height:1;cursor:pointer;margin-top:1px}.note-ck:hover{border-color:var(--accent);color:var(--accent)}
+.note-b{flex:1;min-width:0}.note-t{font-size:13.5px;white-space:pre-wrap;word-break:break-word}.note-m{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11.5px;margin-top:2px}.note-c{display:inline-flex;align-items:center;gap:4px;color:var(--ink-2);text-decoration:none}.note-c:hover{text-decoration:underline}
+.note-d{background:var(--surface-2);border-radius:8px;padding:0 6px}.note-d.now{background:var(--todo-soft)}.note-d.late{background:var(--stop-soft);color:var(--stop)}
+.gaps{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 14px;border-top:1px dashed var(--line);background:color-mix(in srgb,var(--surface-2) 50%,var(--surface))}.gap{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1px 2px 1px 8px}.gap small{font-family:var(--sans)}
+.rep12 th,.rep12 td{white-space:nowrap}.rep12 td.n,.rep12 th.n{text-align:right;font-variant-numeric:tabular-nums}.rep12 tfoot td{font-weight:600;border-top:2px solid var(--line)}.r12-c{display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none}.r12-c:hover .cl{text-decoration:underline}
+.cb-fj{margin-top:8px}
 .ms-to{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:28px}.ct-card{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;display:grid;gap:4px}.ct-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ct-l{display:flex;align-items:center;gap:8px}.ct-l .muted{min-width:70px}.ct-note{font-size:12.5px;color:var(--muted);white-space:pre-wrap}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
@@ -1036,6 +1047,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
     <div id="pill" class="pill" hidden></div>
     <button id="cmd-btn" class="icon hist-btn" title="Rechercher et agir (Ctrl+K) : dossier, onglet, outil, saisie rapide" aria-label="Rechercher et agir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <button id="call-btn" class="icon hist-btn call-btn" title="Appel ou interruption : met le chrono en pause et lance un chrono d’appel" aria-label="Appel ou interruption"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="call-t mono"></span></button>
+    <button id="note-btn" class="icon hist-btn note-btn" title="Notes rapides : notez une idée pour plus tard" aria-label="Notes rapides"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/><path d="M7 12h6M7 16h8"/></svg><span class="nb" hidden></span></button>
     <button id="dsc-btn" class="icon hist-btn" aria-pressed="false" title="Mode discret (partage d’écran) : masque montants, temps et notes sensibles" aria-label="Mode discret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A10 10 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6C3.7 8.5 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M2 2l20 20"/></svg></button>
     <button id="help-btn" class="icon hist-btn" title="Aide de cet écran" aria-label="Aide de cet écran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
     <button id="hist-btn" class="icon hist-btn" title="Historique : vos 10 dernières actions, restaurables en un clic" aria-label="Historique des actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
@@ -1115,7 +1127,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.53.0';
+const APP_VERSION = '1.54.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2278,6 +2290,91 @@ function openContacts(cid) { // fiches des interlocuteurs d'un dossier, consulta
   });
 }
 document.addEventListener('click', ev => { if (ev.target.closest('[data-runppl]') && runCli()) openContacts(runCli().id); else if (ev.target.closest('[data-runfiche]') && runPers()) openPersonFiche(runPers().id); });
+/* ---------- Notes rapides « post-it » (v1.54.0) : S.meta.notes = [{ id, t, cid?, due?, at, done? }]
+   Dossier reconnu (« Dupont : … ») ou dossier du chrono en cours ; rappel facultatif (demain, lundi, 25/11) → À faire aujourd'hui ;
+   traitement : Traitée (gardée 30 jours), ou transformée en point en cours / entrée du journal / pratiques du dossier. ---------- */
+const notesL = () => (S.meta.notes ||= []);
+const notesOpen = () => notesL().filter(n => !n.done);
+function noteParse(raw) {
+  let t = String(raw || '').trim(), due = null, cid = null; const today = startOfDay(Date.now());
+  const WDN = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  const rx = /(?:^|[\s,;(])(?:(?:pour |à |a )?(?:le |la )?)(apr[eè]s[- ]demain|demain|aujourd['’]hui|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)\s*[).]?\s*$/i;
+  const m = rx.exec(t);
+  if (m) { const w = norm(m[1]); let d = null;
+    if (w === 'demain') d = addDays(today, 1); else if (/^apres/.test(w)) d = addDays(today, 2); else if (/^aujourd/.test(w)) d = today;
+    else if (WDN.includes(w)) { const k = WDN.indexOf(w); d = today; do { d = addDays(d, 1); } while (new Date(d).getDay() !== k); }
+    else { const p = m[1].split('/').map(Number); let y = p[2] ? (p[2] < 100 ? 2000 + p[2] : p[2]) : new Date(today).getFullYear(); d = new Date(y, p[1] - 1, p[0]).getTime(); if (!p[2] && d < today) d = new Date(y + 1, p[1] - 1, p[0]).getTime(); }
+    if (d != null && isFinite(d)) { due = dayKey(d); t = t.slice(0, m.index).replace(/[\s,;:(–-]+$/, '').trim() || t; } }
+  const mm = /^([^:]{2,60}?)\s*:\s*(.+)$/.exec(t);
+  if (mm) { const n = norm(mm[1]); const c = S.meta.clients.filter(x => !x.deletedAt).find(x => norm(x.name) === n) || S.meta.clients.filter(x => !x.deletedAt).find(x => norm(x.name).startsWith(n) || (x.code && norm(x.code) === n)); if (c) { cid = c.id; t = mm[2].trim(); } }
+  if (!cid && runCli()) cid = runCli().id;
+  return { t, due, cid };
+}
+function noteAdd(raw) { const p = noteParse(raw); if (!p.t) return null; const n = { id: newId(), t: p.t, at: Date.now() }; if (p.cid) n.cid = p.cid; if (p.due) n.due = p.due; notesL().unshift(n); touchMeta(); return n; }
+function notePurge() { const lim = Date.now() - 30 * DAY, L = notesL(), keep = L.filter(n => !n.done || n.done > lim); if (keep.length !== L.length) { S.meta.notes = keep; } }
+function noteBadge() { const b = $('#note-btn'); if (!b) return; const n = notesOpen().length; b.querySelector('.nb').textContent = n || ''; b.querySelector('.nb').hidden = !n; b.title = n ? n + ' note' + (n > 1 ? 's' : '') + ' à traiter' : 'Notes rapides : notez une idée pour plus tard'; }
+const Notes = {
+  open: false, showDone: false,
+  toggle() { this.open ? this.close() : this.show(); },
+  show() { this.open = true; this.render(); $('#note-btn').classList.add('on'); setTimeout(() => $('#note-in')?.focus(), 30);
+    document.addEventListener('mousedown', this._out = ev => { const pn = $('#note-pan'); if (pn && !pn.contains(ev.target) && !ev.target.closest('#note-btn') && !ev.target.closest('.overlay') && !ev.target.closest('.toast')) this.close(); }, true);
+    document.addEventListener('keydown', this._key = ev => { if (ev.key === 'Escape' && !document.querySelector('.overlay')) this.close(); }); },
+  close() { this.open = false; $('#note-pan')?.remove(); $('#note-btn')?.classList.remove('on'); document.removeEventListener('mousedown', this._out, true); document.removeEventListener('keydown', this._key); },
+  render() {
+    if (!this.open) return; notePurge(); const ae = document.activeElement, keep = ae && ae.id === 'note-in' ? [ae.value, ae.selectionStart] : null;
+    let pn = $('#note-pan'); if (!pn) { pn = document.createElement('div'); pn.id = 'note-pan'; pn.className = 'hist-pan note-pan'; pn.setAttribute('role', 'dialog'); pn.setAttribute('aria-label', 'Notes rapides'); document.body.appendChild(pn); this.bind(pn); }
+    const L = notesOpen().sort((a, b) => (a.due || '9999') .localeCompare(b.due || '9999') || b.at - a.at), D = notesL().filter(n => n.done).sort((a, b) => b.done - a.done), today = dayKey(Date.now()), rc = runCli();
+    const row = n => { const c = n.cid && clientOf(n.cid); return `<div class="note-it ${n.done ? 'done' : ''}" data-nid="${n.id}">
+      ${n.done ? `<button type="button" class="icon xs" data-na="undo" title="Remettre à traiter">↺</button>` : `<button type="button" class="note-ck" data-na="done" title="Traitée">✓</button>`}
+      <div class="note-b"><div class="note-t">${esc(n.t)}</div><div class="note-m">${c ? `<a href="#carnet/${encodeURIComponent(c.id)}" class="note-c" title="Ouvrir le carnet">${cliIc(c.id)}${esc(c.name)}</a>` : '<span class="muted">sans dossier</span>'}${n.due ? `<span class="note-d ${n.due < today ? 'late' : n.due === today ? 'now' : ''}">⏰ ${esc(n.due === today ? 'aujourd’hui' : fmtDate(parseDay(n.due)).slice(0, 5))}</span>` : ''}<span class="muted">${esc(fmtDate(n.at).slice(0, 5))}</span></div></div>
+      ${n.done ? `<button type="button" class="icon xs" data-na="del" title="Supprimer">${ICON.trash}</button>` : `<button type="button" class="icon xs" data-na="menu" title="Traiter : dossier, rappel, carnet…">⋯</button>`}</div>`; };
+    pn.innerHTML = `<div class="hist-h"><b>🗒 Notes rapides</b><span class="sp" style="flex:1"></span><button class="icon" data-na="close" title="Fermer">${ICON.close}</button></div>
+      <div class="note-add"><input id="note-in" placeholder="ex. Dupont : penser mutuelle, lundi" autocomplete="off" maxlength="300"><button type="button" class="btn sm primary" data-na="add">Noter</button></div>
+      <div class="muted small note-hint">Entrée pour noter. « Dossier : … » rattache la note${rc ? ` (sinon : ${esc(rc.name)}, chrono en cours)` : ''} ; « demain », « lundi » ou « 25/11 » à la fin = rappel dans À faire aujourd’hui.</div>
+      <div class="note-list">${L.map(row).join('') || '<div class="muted small" style="padding:8px 2px">Aucune note à traiter.</div>'}</div>
+      ${D.length ? `<button type="button" class="btn sm ghost" data-na="showdone">${this.showDone ? '▾' : '▸'} Traitées (${D.length}, gardées 30 jours)</button>${this.showDone ? `<div class="note-list">${D.map(row).join('')}</div>` : ''}` : ''}`;
+    if (keep) { const i = $('#note-in'); i.value = keep[0]; i.focus(); try { i.setSelectionRange(keep[1], keep[1]); } catch (e) {} }
+  },
+  bind(pn) {
+    pn.addEventListener('keydown', ev => { if (ev.target.id === 'note-in' && ev.key === 'Enter') { ev.preventDefault(); this.add(); } });
+    pn.addEventListener('click', ev => {
+      if (ev.target.closest('a.note-c')) { this.close(); return; }
+      const b = ev.target.closest('[data-na]'); if (!b) return; const a = b.dataset.na, id = b.closest('[data-nid]')?.dataset.nid, n = notesL().find(x => x.id === id);
+      if (a === 'close') return this.close(); if (a === 'add') return this.add(); if (a === 'showdone') { this.showDone = !this.showDone; return this.render(); }
+      if (!n) return;
+      if (a === 'done') { noteDone(n); } else if (a === 'undo') { delete n.done; touchMeta(); } else if (a === 'del') { const i = notesL().indexOf(n); notesL().splice(i, 1); touchMeta(); toast('Note supprimée', 'Annuler', () => { notesL().splice(i, 0, n); touchMeta(); }); }
+      else if (a === 'menu') { openNoteEdit(n); }
+    });
+  },
+  add() { const i = $('#note-in'); if (!i || !i.value.trim()) return; const n = noteAdd(i.value); i.value = ''; if (n) toast('Note ajoutée' + (n.cid ? ' · ' + clientName(n.cid) : '') + (n.due ? ' · rappel le ' + fmtDate(parseDay(n.due)).slice(0, 5) : '')); setTimeout(() => $('#note-in')?.focus(), 0); }
+};
+function noteDone(n) { n.done = Date.now(); touchMeta(); toast('Note traitée', 'Annuler', () => { delete n.done; touchMeta(); }); }
+function openNoteEdit(n) {
+  const cs = S.meta.clients.filter(c => !c.deletedAt && !c.archived).sort((a, b) => (isMine(b) ? 1 : 0) - (isMine(a) ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
+  const m = modal(`<div class="modal-h"><h3>🗒 Traiter la note</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:10px"><label class="fld"><span>Note</span><textarea id="ne-t" rows="3" style="width:100%">${esc(n.t)}</textarea></label>
+      <div class="fld-row"><label class="fld"><span>Dossier</span><select id="ne-c"><option value="">Sans dossier</option>${cs.map(c => `<option value="${esc(c.id)}" ${n.cid === c.id ? 'selected' : ''}>${esc(c.name)}${c.code ? ' (n° ' + esc(c.code) + ')' : ''}</option>`).join('')}</select></label>
+        <label class="fld" style="max-width:190px"><span>Rappel le (facultatif)</span><input type="date" id="ne-d" value="${esc(n.due || '')}"></label></div>
+      <div class="small"><b>Transformer dans le carnet du dossier</b> <span class="muted">(la note est ensuite marquée traitée)</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn sm" data-ne="pt">→ Point en cours</button><button type="button" class="btn sm" data-ne="jr">→ Entrée du journal</button><button type="button" class="btn sm" data-ne="prat">→ Pratiques du client</button></div></div>
+    <div class="modal-f"><button class="btn ghost" data-ne="del">Supprimer</button><span class="sp"></span><button class="btn" data-ne="done">✓ Traitée</button><button class="btn primary" data-ne="save">Enregistrer</button></div>`);
+  const q = x => m.el.querySelector(x);
+  const save = () => { const t = q('#ne-t').value.trim(); if (!t) { toast('La note est vide'); return false; } n.t = t; const c = q('#ne-c').value, d = q('#ne-d').value; if (c) n.cid = c; else delete n.cid; if (d) n.due = d; else delete n.due; return true; };
+  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-ne]'); if (!b) return; const a = b.dataset.ne;
+    if (a === 'del') { const i = notesL().indexOf(n); notesL().splice(i, 1); touchMeta(); m.close(); toast('Note supprimée', 'Annuler', () => { notesL().splice(i, 0, n); touchMeta(); }); return; }
+    if (!save()) return;
+    if (a === 'save') { touchMeta(); m.close(); return; }
+    if (a === 'done') { m.close(); noteDone(n); return; }
+    const c = n.cid && clientOf(n.cid); if (!c) { toast('Choisissez d’abord le dossier'); return; }
+    const b0 = JSON.parse(JSON.stringify(cbPeek(c))), bb = cbOf(c), today = dayKey(Date.now());
+    if (a === 'pt') bb.points.push({ id: newId(), t: n.t, open: today, due: n.due || null, done: null });
+    else if (a === 'jr') bb.journal.push({ id: newId(), d: today, t: n.t, ref: '' });
+    else if (a === 'prat') bb.prat = (bb.prat ? bb.prat.replace(/\s+$/, '') + '\n' : '') + n.t;
+    n.done = Date.now(); touchMeta(); m.close();
+    toast((a === 'pt' ? 'Point en cours ajouté' : a === 'jr' ? 'Entrée du journal ajoutée' : 'Ajouté aux pratiques') + ' · ' + c.name, 'Annuler', () => { c.cb = b0; delete n.done; touchMeta(); });
+  });
+}
+document.addEventListener('click', ev => { if (ev.target.closest('#note-btn')) Notes.toggle(); });
 function renderPill() {
   navLive();
   const p = $('#pill');
@@ -2305,7 +2402,7 @@ function onRemoteChange() {
 function render() {
   if (isEditingGuarded()) { _pending = true; renderHeader(); return; }
   renderHeader();
-  updateCycleBadge();
+  updateCycleBadge(); noteBadge(); Notes.render();
   if (UI.view === 'chrono') renderChrono();
   else if (UI.view === 'portefeuille') renderPortfolio();
   else if (UI.view === 'carnet') renderCarnet();
@@ -2690,7 +2787,7 @@ function cbTileHTML(x, mk, today) {
     <div class="t1">${cliIc(x.id)}<span class="nm dsc-n">${esc(x.name)}</span>${motherMark(x)}</div>
     <div class="t2">${x.code ? `<span class="mono">n° ${esc(x.code)}</span>` : ''}${g ? grpTag(g) : ''}${mine ? '' : `<span>${owner ? 'portef. ' + esc(owner) : 'hors portefeuille'}</span>`}</div>
     <div class="ccn ${ccn ? '' : 'none'}" title="${ccn ? esc((ccn.i != null ? 'IDCC ' + idccStr(ccn.i) + ' — ' : '') + ccn.t) : ''}">${ccn ? (ccn.i != null && !ccnIsNone(ccn) ? `<b class="mono">${idccStr(ccn.i)}</b> ` : '') + esc(ccnShort(ccn)) + ((b.ccn || []).some(k => k.i != null && ccnOld(ccnOf(k.i))) ? ' <span class="ccn-oldw" style="display:inline" title="Une convention de ce dossier n’est plus en vigueur">⚠</span>' : '') + (b.ccn.length > 1 ? ` <span class="muted">+${b.ccn.length - 1}</span>` : '') : 'Convention collective non renseignée'}</div>
-    ${UI._cbFound && UI._cbFound.get(x.id) ? `<div class="cb-found" title="Trouvé dans le carnet">🔎 ${esc(UI._cbFound.get(x.id))}</div>` : ''}<div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b cb-sens" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b cb-sens ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
+    ${UI._cbFound && UI._cbFound.get(x.id) ? `<div class="cb-found" title="Trouvé dans le carnet">🔎 ${esc(UI._cbFound.get(x.id))}</div>` : ''}<div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${b.fj ? '<span class="cb-b" title="Salariés au forfait jours">forfait jours</span>' : ''}${al ? `<span class="cb-b cb-sens" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b cb-sens ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
   </button>`;
 }
 const grpTitle = g => /^groupe\b/i.test(g.name.trim()) ? g.name : 'Groupe ' + g.name;
@@ -2706,7 +2803,7 @@ function cbFilterHTML(base, ff) { // filtre des tuiles (v1.37.0) : points en cou
   const ccns = new Map(); for (const x of base) for (const k of (cbPeek(x).ccn || [])) { const key = ccnKey(k); const e = ccns.get(key) || { k, n: 0 }; e.n++; ccns.set(key, e); }
   const lst = [...ccns.entries()].sort((a, b) => b[1].n - a[1].n || ccnShort(a[1].k).localeCompare(ccnShort(b[1].k), 'fr'));
   const o = (v, l) => `<option value="${esc(v)}" ${ff === v ? 'selected' : ''}>${esc(l)}</option>`;
-  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
+  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('fj', 'Avec salariés au forfait jours')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
 }
 function openNewDossier() {
   const m = modal(`<div class="modal-h"><h3>Nouveau dossier</h3><button class="icon" data-close>${ICON.close}</button></div>
@@ -2872,6 +2969,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.54.0', '15/11/2026', ['Notes rapides (bouton 🗒 en haut) : une idée en une ligne, rattachée au dossier (« Dupont : … » ou chrono en cours), rappel facultatif (« demain », « lundi », « 25/11 ») dans À faire aujourd’hui ; à traiter d’un clic ou à transformer en point en cours, entrée du journal ou pratique du dossier. Aussi « note … » dans la barre de commande.', 'Trous dans la journée : les créneaux de votre horaire sans saisie (dès 15 min, réglable) s’affichent sous les saisies du jour, avec « Affecter ».', 'Rapports : 12 derniers mois par dossier avec temps moyen par bulletin, rappelé dans le carnet.', 'Carnet : case « Salariés au forfait jours » et filtre correspondant.']],
   ['1.52.0', '15/11/2026', ['Fenêtre de message : rappel de l’adresse e-mail de l’interlocuteur choisi, avec un bouton pour la copier.', 'Chrono en cours : « 👥 Interlocuteurs » pour un dossier (e-mail, téléphone, notes, message), « 👤 Fiche » pour une personne ; aussi dans la pastille du chrono et la barre de commande.']],
   ['1.51.0', '15/11/2026', ['Rupture conventionnelle : option « Signature un jour ouvré » (cochée par défaut) ; en partant de la date de rupture souhaitée, la signature au plus tard tombe sur un jour ouvré ; depuis la date d’entretien, elle est reportée au jour ouvré suivant ; une date de signature saisie un week-end ou un férié est signalée.']],
   ['1.53.0', '15/11/2026', ['Calculatrice : chaque ligne de l’historique peut être supprimée seule (✕ au bout de la ligne, avec Annuler).']],
@@ -3276,6 +3374,7 @@ function renderCarnet() {
     if (ff === 'pts') return (b.points || []).some(p => !p.done);
     if (ff === 'al') return alActive(x, mk0).length > 0;
     if (ff === 'rel') return ['surveiller', 'difficile'].includes(b.rel && b.rel.lvl);
+    if (ff === 'fj') return !!b.fj;
     if (ff === 'noccn') return !cc.length;
     if (ff === 'oldccn') return cc.some(k => k.i != null && ccnOld(ccnOf(k.i)));
     if (ff.startsWith('ccn:')) return cc.some(k => ccnKey(k) === ff.slice(4));
@@ -3380,6 +3479,7 @@ function renderCarnetDossier(body, c) {
   // Identité et conventions collectives
   html += `<i data-b="ident"></i><h2>Identité et convention collective</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Raison sociale</dt><dd>${esc(c.name)}</dd><dt>N° de dossier</dt><dd>${esc(c.code || '—')}</dd>${c.siret ? `<dt>SIRET</dt><dd class="mono">${esc(fmtSiret(c.siret))}</dd>` : ''}<dt>Groupe</dt><dd>${g ? grpTag(g) : '—'}</dd><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${effBs(mk, c.id).n ?? '—'}</dd></dl>
+    <label class="chk cb-fj"><input type="checkbox" data-cbfj ${b.fj ? 'checked' : ''}> Salariés au forfait jours dans ce dossier</label>
     ${b.ccn.map((k, i) => { const r = k.i != null ? ccnOf(k.i) : null; const br = k.b || (r && r[4]) || ''; return `<div class="cb-ccn" data-ccn="${i}"><span class="ci">${k.i != null ? idccStr(k.i) : '—'}</span><div class="ct">${esc(k.t)}<div class="cs">${ccnIsNone(k) ? 'Code IDCC 9999 à déclarer en DSN · seules les règles du Code du travail s’appliquent (et les accords d’entreprise éventuels)' : (k.i != null ? 'IDCC ' + idccStr(k.i) : 'Convention non répertoriée (saisie libre)') + (br ? ' · brochure JO n° ' + esc(br) : '') + ` · <a href="${esc(ccnUrl(k))}" target="_blank" rel="noopener">Voir sur Légifrance ↗</a>` + (ccnOld(r) ? `<div class="ccn-oldw">⚠ ${esc(ccnOldTxt(r))}${r[6] && ccnOf(r[6]) && !b.ccn.some(x => x.i === r[6]) ? ` <button type="button" class="btn sm" data-cba="ccnrepl">Remplacer par l’IDCC ${idccStr(r[6])}</button>` : ''}</div>` : '')}</div></div><button class="icon xs" data-cba="ccndel" title="Retirer cette convention">${ICON.trash}</button></div>`; }).join('')}
     ${b.ccn.some(ccnIsNone) ? '' : `<div class="ccn-search"><input id="ccn-q" placeholder="${b.ccn.length ? 'Ajouter une autre convention collective' : 'Convention collective'} : nom, IDCC (ex. 1486) ou n° de brochure JO (ex. 3018)" autocomplete="off"><div class="ccn-res" id="ccn-res" hidden></div></div>
     <div class="cb-hint">Liste du ministère du Travail (${ccnDateTxt(CCN_DATE)}) : ${CCN_LIST.filter(r => r[5] === 1).length} conventions en vigueur et ${CCN_LIST.filter(ccnOld).length} anciennes ; plusieurs conventions possibles (ex. établissements différents). Introuvable ? Tapez son nom puis choisissez « Ajouter tel quel ». Vérifiez toujours la convention applicable sur Légifrance.${b.ccn.length ? '' : ' <button type="button" class="btn sm ghost" data-cba="ccnnone">Dossier sans convention collective (Code du travail)</button>'}</div>`}</div>`;
@@ -3393,7 +3493,7 @@ function renderCarnetDossier(body, c) {
   // Cycle de paie (mêmes données que Mon cycle)
   html += `<i data-b="cycle" data-half="1"></i><div class="toolbar"><h2>Cycle de paie</h2><span class="sp"></span><button class="btn sm" data-cba="params">Modifier les paramètres</button></div><div class="card cb-sec">
     <dl class="cb-kv"><dt>Réception des variables</dt><dd>${esc(recTxt)}</dd><dt>Alerte 1er envoi</dt><dd>${p.envDelay === 0 ? 'Pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception'}</dd><dt>Validation client</dt><dd>${p.valid ? 'Demandée' + (cyValDelay(c) ? ' · relance ' + cyValDelay(c) + ' jours ouvrés après l’envoi' : ' · pas de relance') : 'Non demandée'}</dd><dt>Virements</dt><dd>${esc(CY_LBL.vir[p.vir] || p.vir)}${Object.keys(b.vir).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier ci-dessous' : ''}</dd><dt>Dépôt des bulletins</dt><dd>${esc(CY_LBL.dep[p.dep] || p.dep)}${p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : ''}</dd><dt>Échéance DSN</dt><dd>${dsnTxt}</dd></dl>
-    ${(() => { const a = cliAvg(c.id); return a ? `<div class="cb-hint">⏱ Temps moyen : <b>${fmtDur(a.avg)}</b> par mois (3 derniers mois) · ce mois-ci : <b>${fmtDur(a.cur)}</b></div>` : ''; })()}
+    ${(() => { const a = cliAvg(c.id), mks = months12(), r = cli12(c.id, mks, monthlyBy(e => e.client === c.id ? c.id : null)); const parts = []; if (a) parts.push(`Temps moyen : <b>${fmtDur(a.avg)}</b> par mois (3 derniers mois) · ce mois-ci : <b>${fmtDur(a.cur)}</b>`); if (r.avgBs != null) parts.push(`par bulletin : <b>${fmtDur(r.avgBs)}</b> (12 derniers mois, ${r.bs} bulletins)`); else if (r.tot) parts.push(`12 derniers mois : <b>${fmtDur(r.tot)}</b>`); return parts.length ? `<div class="cb-hint">⏱ ${parts.join(' · ')}</div>` : ''; })()}
     <label class="fld"><span>Remarque permanente (colonne Remarques de Mon cycle)</span><textarea data-cbf="notes" rows="3" placeholder="ex. Paies sur quel RIB ? · MySilae uniquement">${esc(p.notes || '')}</textarea></label></div>`;
   // Alertes salariés
   html += `<i data-b="alertes" data-half="1"></i><div class="toolbar"><h2>Alertes salariés</h2><span class="sp"></span><button class="btn sm" data-cba="alerts">Gérer les alertes</button></div><div class="card cb-sec">
@@ -3506,6 +3606,7 @@ function bindCarnet() {
       else b[t.dataset.cbf] = v;
       touchMeta(); cbSaved(); return;
     }
+    if (t.dataset.cbfj != null) { const b = cbOf(c); if (t.checked) b.fj = true; else delete b.fj; touchMeta(); cbSaved(); return; }
     if (t.dataset.vir) { const b = cbOf(c); if (t.value) b.vir[t.dataset.vir] = t.value; else delete b.vir[t.dataset.vir]; touchMeta(); cbSaved(); return; }
     if (t.dataset.cba === 'ptdone') { const id = t.closest('[data-pt]').dataset.pt; cbPointDone(c.id, id, t.checked); return; }
   });
@@ -4160,6 +4261,7 @@ function renderChrono() {
       <span class="tb">à facturer ${fmtDur(totB)}</span><span class="t">${fmtDur(tot)}</span></div>`;
     if (run) html += `<div class="row running"><div class="what">${whatHTML(run.client, run.task)}</div><div class="muted small lbl-ro">${esc(run.label) || 'En cours…'}</div><span class="bill ${run.billable ? '' : 'no'}" style="pointer-events:none">${run.billable ? 'À facturer' : 'Non facturable'}</span><span></span><span></span><span class="times mono small">${hhmm(run.start)} – …</span><span class="dur" data-live="clock">${fmtClock(dur(run))}</span><div class="acts"><button class="icon" data-act="stoprun" title="Arrêter">${ICON.stop}</button></div></div>`;
     html += chGrp ? groupRowsHTML(k, list) : list.map(rowHTML).join('');
+    html += gapsHTML(k, list, run);
     html += `</div>`;
   }
   if (keys.length > UI.daysShown) html += `<div class="more"><button class="btn" data-act="more">Afficher les jours précédents</button></div>`;
@@ -4167,6 +4269,36 @@ function renderChrono() {
   blkify(body, 'chrono');
   tick();
 }
+/* ---------- Trous dans la journée (v1.54.0) : plages de l'horaire habituel sans saisie, à partir de settings.gapMin minutes (15 par défaut, 0 = jamais) ---------- */
+const gapMin = () => { const v = S.meta.settings.gapMin; return v == null || v === '' ? 15 : +v; };
+const gapIgn = () => { try { return new Set(JSON.parse(lsGet('gapIgn', '[]'))); } catch (e) { return new Set(); } };
+function dayGaps(k, list, run) {
+  const th = gapMin(), today = dayKey(Date.now()); if (!th || k > today || holidayOn(k)) return [];
+  if (list.some(e => e.allday)) return [];
+  const d = parseDay(k), s = schedOf(d); if (!s.work || !s.ranges.length) return [];
+  const busy = list.filter(e => !e.allday).map(e => [e.start, e.end || Date.now()]); if (run) busy.push([run.start, Date.now()]);
+  if (!busy.length) return []; busy.sort((a, b) => a[0] - b[0]);
+  const ign = gapIgn(), out = [], now = Date.now();
+  const span = s.ranges.reduce((a, r) => a + hmMin(r[1]) - hmMin(r[0]), 0), pause = s.mode === 'fixed' ? 0 : Math.max(0, span - (s.min || 0)), L0 = timeOn(d, '11:30'), L1 = timeOn(d, '14:30');
+  const push = (x, y) => { if (y - x < th * 60000 || ign.has(k + '|' + x)) return; if (pause && x >= L0 && y <= L1 && y - x <= (pause + 5) * 60000) return; out.push([x, y]); };
+  for (const [a, b] of s.ranges) {
+    const st = timeOn(d, a), en = Math.min(timeOn(d, b), k === today ? now : Infinity); if (en <= st) continue;
+    let cur = st; for (const [x, y] of busy) { if (y <= cur) continue; if (x >= en) break; if (x > cur) push(cur, Math.min(x, en)); cur = Math.max(cur, y); if (cur >= en) break; }
+    if (cur < en) push(cur, en);
+  }
+  return out;
+}
+function gapsHTML(k, list, run) {
+  const g = dayGaps(k, list, run); if (!g.length) return '';
+  return `<div class="gaps"><span class="muted small">⏳ Rien de saisi :</span>${g.map(([x, y]) => `<span class="gap" data-gk="${k}" data-gs="${x}" data-ge="${y}">${hhmm(x)} – ${hhmm(y)} <small class="muted">(${fmtDur(y - x, 'hm')})</small><button type="button" class="btn sm ghost" data-gap="fill" title="Saisir ce créneau (dossier, tâche)">Affecter</button><button type="button" class="icon xs" data-gap="ign" title="Ignorer ce créneau">${ICON.close}</button></span>`).join('')}</div>`;
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-gap]'); if (!b) return; const g = b.closest('[data-gk]'), k = g.dataset.gk, x = +g.dataset.gs, y = +g.dataset.ge;
+  if (b.dataset.gap === 'ign') { const s2 = gapIgn(); s2.add(k + '|' + x); lsSet('gapIgn', JSON.stringify([...s2].slice(-200))); renderChrono(); toast('Créneau ignoré', 'Annuler', () => { const s3 = gapIgn(); s3.delete(k + '|' + x); lsSet('gapIgn', JSON.stringify([...s3])); renderChrono(); }); return; }
+  if (S.running) { toast('Le chrono tourne : arrêtez-le pour saisir ce créneau, ou modifiez une saisie voisine.'); return; }
+  UI.mode = 'manual'; syncTimerBar(); $('#mn-date').value = k; $('#mn-start').value = hhmm(x); $('#mn-end').value = hhmm(y);
+  window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => { cbClient.input.focus(); }, 250); toast('Créneau ' + hhmm(x) + ' – ' + hhmm(y) + ' prêt à saisir : choisissez le dossier et la tâche, puis « Ajouter ».');
+});
 /* Regroupement d'affichage des lignes identiques d'une journée (v1.27.0) : même client / personne / interne, même tâche,
    même libellé et mêmes statuts (facturable, facturé, reporté). Les saisies d'origine restent intactes. */
 const grpKeyE = e => [e.client || '', e.task || '', norm(e.label || '').trim(), e.billable ? 1 : 0, e.invoicedAt ? 1 : 0, e.logged ? 1 : 0].join('|');
@@ -4544,6 +4676,8 @@ function cmdQuickSave(o) {
 }
 function cmdItems(q) {
   const n = norm(q).trim(), out = [];
+  const nq = /^\s*(?:note|post-?it)\s*[:\-]?\s+(.+)$/i.exec(q || '');
+  if (nq) out.push({ ic: '🗒', t: 'Noter : « ' + nq[1].trim() + ' »', s: 'Note rapide à traiter plus tard', run: () => { const x = noteAdd(nq[1]); if (x) toast('Note ajoutée' + (x.cid ? ' · ' + clientName(x.cid) : '') + (x.due ? ' · rappel le ' + fmtDate(parseDay(x.due)).slice(0, 5) : '')); } });
   const qk = n ? cmdQuick(q) : null;
   if (qk) out.push({ ic: '⏱', t: 'Créer la saisie : ' + fmtDur(qk.mins * 60000) + ' · ' + (qk.client ? clientName(qk.client) : 'sans dossier') + (qk.task ? ' · ' + taskName(qk.task) : '') + (qk.label ? ' · « ' + qk.label + ' »' : '') + (qk.day ? ' · hier' : ' · aujourd’hui'), s: 'Entrée pour enregistrer', run: () => cmdQuickSave(qk) });
   const cl = S.meta.clients.filter(c => !c.deletedAt);
@@ -4577,7 +4711,7 @@ function cmdItems(q) {
     ...groupsAll().map(g => ({ ic: '📖', t: 'Carnet du groupe ' + g.name, s: 'Groupe', k: 'groupe ' + g.name, run: () => { location.hash = 'carnet/groupe/' + encodeURIComponent(g.id); } }))];
   nav.push(...(tabOn('portefeuille') ? [{ ic: '📊', t: 'Charge à venir', s: 'Mon cycle', k: 'charge prevision semaines echeances', run: () => { (UI.pfv ||= {}).mode = 'charge'; location.hash = 'portefeuille'; renderPortfolio(); } },
     { ic: '🧳', t: 'Préparer une absence', s: 'Congés : ce qui tombera pendant l’absence', k: 'conges absence depart vacances', run: openAbsPrep }, { ic: '↩', t: 'Pendant mon absence', s: 'Retour de congés', k: 'retour conges absence', run: openAbsBack }] : []),
-    { ic: '👁', t: dscOn() ? 'Désactiver le mode discret' : 'Mode discret', s: 'Partage d’écran', k: 'discret partage ecran masquer', run: toggleDsc }, { ic: '✉', t: 'Modèles de messages', s: 'Références', k: 'modeles messages mail courriel', run: () => cmdGoBlk('referentiel', 'modeles') },
+    { ic: '🗒', t: 'Notes rapides', s: notesOpen().length + ' à traiter', k: 'notes post-it idees memo', run: () => Notes.show() }, { ic: '👁', t: dscOn() ? 'Désactiver le mode discret' : 'Mode discret', s: 'Partage d’écran', k: 'discret partage ecran masquer', run: toggleDsc }, { ic: '✉', t: 'Modèles de messages', s: 'Références', k: 'modeles messages mail courriel', run: () => cmdGoBlk('referentiel', 'modeles') },
     { ic: 'A+', t: 'Agrandir l’affichage', s: 'Taille actuelle : ' + uizGet() + ' % · Ctrl +', k: 'taille police texte zoom agrandir plus grand lisibilite', run: () => setUiz(uizGet() + 10) }, { ic: 'A−', t: 'Réduire l’affichage', s: 'Taille actuelle : ' + uizGet() + ' % · Ctrl −', k: 'taille police texte zoom reduire plus petit', run: () => setUiz(uizGet() - 10) }, { ic: 'A', t: 'Taille normale de l’affichage (100 %)', s: 'Ctrl 0', k: 'taille police texte zoom normale', run: () => setUiz(100) },
     { ic: '✨', t: 'Historique des versions', s: 'Nouveautés · version ' + APP_VERSION, k: 'nouveautes version mise a jour historique notes', run: () => openNews(null) }, { ic: '?', t: 'Aide de cet écran', s: 'Aide', k: 'aide help comment', run: openHelp });
   if (n.length >= 3) { const hs = cbSearch(q, 6); if (hs.length) out.push({ head: 'Dans les carnets' }, ...hs.map(h => ({ ic: '🔎', t: h.isG ? grpTitle(h.o) : h.o.name, s: h.where + ' : « ' + h.snip + ' »', run: () => { location.hash = 'carnet/' + (h.isG ? 'groupe/' : '') + encodeURIComponent(h.o.id); } }))); }
@@ -4916,6 +5050,8 @@ function cyTodo() {
     if (g.deletedAt) continue;
     for (const pt of (g.cb && g.cb.points) || []) if (!pt.done && pt.due && today >= parseDay(pt.due)) items.push({ mk: cur, gid: g.id, f: 'pt', pid: pt.id, txt: 'Point en cours — ' + grpTitle(g) + ' : ' + pt.t + ' (échéance le ' + fmtDate(parseDay(pt.due)).slice(0, 5) + ')', late: today > parseDay(pt.due), d: parseDay(pt.due) });
   }
+  // Notes rapides dont le rappel est arrivé (v1.54.0)
+  for (const n of notesOpen()) if (n.due && today >= parseDay(n.due)) items.push({ mk: cur, cid: n.cid && clientOf(n.cid) ? n.cid : null, f: 'note', nid: n.id, txt: '🗒 Note — ' + (n.cid && clientOf(n.cid) ? clientOf(n.cid).name + ' : ' : '') + n.t + (n.due < dayKey(today) ? ' (rappel du ' + fmtDate(parseDay(n.due)).slice(0, 5) + ')' : ''), late: n.due < dayKey(today) });
   // Campagne de la DSN d'avril
   const y = new Date(today).getFullYear(), amk = y + '-04';
   if (today >= parseDay(y + '-04-15') && today <= parseDay(y + '-05-15')) {
@@ -4927,12 +5063,13 @@ function cyTodo() {
 // Action « Fait » d'un rappel du jour (Mon cycle et Ma journée)
 function cyTodoDo(t) {
   if (t.f === 'rel') { const r0 = cyRow(t.mk, t.cid); cySet(t.mk, t.cid, { rel: isoDay(Date.now()), relN: (r0.relN || (r0.rel ? 1 : 0)) + 1 }); toast('Relance notée (« R »)', 'Annuler', () => cySet(t.mk, t.cid, { rel: r0.rel || null, relN: r0.relN || null })); return; }
+  if (t.f === 'note') { const n = notesL().find(x => x.id === t.nid); if (n) noteDone(n); return; }
   if (t.f === 'pt') { cbPointDone(t.cid || t.gid, t.pid, true); toast('Point clos', 'Annuler', () => cbPointDone(t.cid || t.gid, t.pid, false)); return; }
   if (t.f === 'al') { alSetOk(t.mk, t.cid, t.aid, true); toast('Alerte notée comme traitée pour ce cycle', 'Annuler', () => alSetOk(t.mk, t.cid, t.aid, false)); return; }
   cySet(t.mk, t.cid, { [t.f]: isoDay(Date.now()) });
   toast('Noté comme fait aujourd’hui', 'Annuler', () => cySet(t.mk, t.cid, { [t.f]: null }));
 }
-const cyTodoLbl = t => t.f === 'rel' ? 'Relance faite' : t.f === 'val' ? 'Validée aujourd’hui' : t.f === 'al' ? 'Traité' : t.f === 'pt' ? 'Point clos' : 'Fait aujourd’hui';
+const cyTodoLbl = t => t.f === 'note' ? 'Traitée' : t.f === 'rel' ? 'Relance faite' : t.f === 'val' ? 'Validée aujourd’hui' : t.f === 'al' ? 'Traité' : t.f === 'pt' ? 'Point clos' : 'Fait aujourd’hui';
 // Échéances des prochains jours (Ma journée, v1.38.0) : cycle en cours et précédent, dossiers de mon portefeuille
 function cyUpcoming(days = 7) {
   const today = startOfDay(Date.now()), lim = addDays(today, days), cur = monthKey(today), out = [];
@@ -5830,6 +5967,24 @@ function totals(list) {
   for (const e of list) { const d = dur(e), st = statusOf(e); t.all += d; t[st] += d; if (e.billable) t.bill += d; }
   return t;
 }
+/* ---------- 12 derniers mois par dossier et temps moyen par bulletin (v1.54.0) ---------- */
+function months12() { const out = []; let mk = monthKey(Date.now()); for (let i = 0; i < 12; i++) { out.unshift(mk); mk = prevMk(mk); } return out; }
+function cli12(cid, mks, byCM) { // { m: [ms par mois], tot, bs, avgBs }
+  const m = mks.map(mk => (byCM[cid] || {})[mk] || 0); let bsN = 0, bsT = 0;
+  mks.forEach((mk, i) => { if (!m[i]) return; const b = effBs(mk, cid).n; if (b) { bsN += b; bsT += m[i]; } });
+  return { m, tot: m.reduce((a, x) => a + x, 0), bs: bsN, avgBs: bsN ? bsT / bsN : null };
+}
+function rep12HTML() {
+  const mks = months12(), by = monthlyBy(e => (!e.client || isPersonId(e.client) || isInternalId(e.client) || e.client === ABS_ID) ? null : e.client);
+  const rows = Object.keys(by).map(cid => ({ c: clientOf(cid), ...cli12(cid, mks, by) })).filter(r => r.c && !r.c.deletedAt && r.tot > 0).sort((a, b) => b.tot - a.tot);
+  if (!rows.length) return '';
+  const tot = mks.map((_, i) => rows.reduce((a, r) => a + r.m[i], 0)), T = tot.reduce((a, x) => a + x, 0), B = rows.reduce((a, r) => a + r.bs, 0), BT = rows.reduce((a, r) => a + (r.avgBs != null ? r.avgBs * r.bs : 0), 0);
+  const mh = mk => ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][+mk.slice(5) - 1] + (mk.slice(5) === '01' || mk === mks[0] ? ' ' + mk.slice(2, 4) : '');
+  return `<i data-b="douze"></i><div class="toolbar"><h2>12 derniers mois par dossier</h2><span class="muted small">Temps saisi par mois (tous les temps, sans filtre) · bulletins d’après Mon cycle · temps moyen par bulletin sur les mois où le nombre de bulletins est connu</span></div>
+    <div class="card tbl-wrap"><table class="t rep12"><thead><tr><th>Dossier</th>${mks.map(mk => `<th class="n">${esc(mh(mk))}</th>`).join('')}<th class="n">Total</th><th class="n" title="Bulletins des mois travaillés">Bulletins</th><th class="n">Temps moyen / bulletin</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td><a href="#carnet/${encodeURIComponent(r.c.id)}" class="r12-c">${cliIc(r.c.id)}<span class="cl dsc-n">${esc(r.c.name)}</span></a></td>${r.m.map(x => `<td class="n ${x ? '' : 'muted'}">${x ? fmtDur(x) : '·'}</td>`).join('')}<td class="n"><b>${fmtDur(r.tot)}</b></td><td class="n">${r.bs || '—'}</td><td class="n">${r.avgBs != null ? '<b>' + fmtDur(r.avgBs) + '</b>' : '—'}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td>Total (${rows.length} dossier${rows.length > 1 ? 's' : ''})</td>${tot.map(x => `<td class="n">${x ? fmtDur(x) : '·'}</td>`).join('')}<td class="n"><b>${fmtDur(T)}</b></td><td class="n">${B || '—'}</td><td class="n">${B ? '<b>' + fmtDur(BT / B) + '</b>' : '—'}</td></tr></tfoot></table></div>`;
+}
 function renderReports() {
   const r = UI.rep, [from, to] = periodRange();
   const list = filtered();
@@ -5883,6 +6038,7 @@ function renderReports() {
   // détail
   const sel = r.sel; for (const id of [...sel]) if (!list.some(e => e.id === id)) sel.delete(id);
   const shown = list.slice(0, r.limit);
+  html += rep12HTML();
   html += `<i data-b="detail"></i><div class="toolbar"><h2>Détail des saisies</h2><span class="sp"></span>
     <button class="btn sm" data-act="copy-detail">${ICON.copy} Copier pour Excel</button><button class="btn sm" data-act="dl-csv">${ICON.down} Télécharger CSV</button></div>
     <div class="card"><div class="bulk"><span class="small"><b>${sel.size}</b> sélectionnée${sel.size > 1 ? 's' : ''}</span>
@@ -6721,6 +6877,7 @@ function renderSettings() {
       <div class="setting"><div>Arrondi des récaps et exports<div class="d">Les temps bruts ne sont jamais modifiés</div></div><span style="display:flex;gap:6px"><select data-s="roundStep">${[0, 5, 6, 10, 15, 30].map(v => `<option value="${v}" ${+st.roundStep === v ? 'selected' : ''}>${v ? v + ' min' : 'Aucun'}</option>`).join('')}</select><select data-s="roundMode"><option value="nearest" ${st.roundMode === 'nearest' ? 'selected' : ''}>au plus proche</option><option value="up" ${st.roundMode === 'up' ? 'selected' : ''}>au supérieur</option></select></span></div>
       <div class="setting"><div>À l’heure de fin de journée<div class="d">Si le chrono tourne encore à l’heure de fin prévue par votre planning (commencé avant). Application fermée à ce moment-là : appliqué à la réouverture.</div></div><select data-s="dayEndAction"><option value="none" ${(st.dayEndAction || 'none') === 'none' ? 'selected' : ''}>Ne rien faire</option><option value="ask" ${st.dayEndAction === 'ask' ? 'selected' : ''}>Me demander</option><option value="stop" ${st.dayEndAction === 'stop' ? 'selected' : ''}>Arrêter automatiquement</option></select></div>
       <div class="setting"><div>Suggestions discrètes<div class="d">Dans Ma journée (deux au plus par jour, masquables) : date habituelle des variables, temps du mois nettement au-dessus de la moyenne, tâche habituelle à cette période du mois. Il faut au moins 3 mois de saisies.</div></div><select data-s="sugg"><option value="1" ${st.sugg !== false ? 'selected' : ''}>Oui</option><option value="0" ${st.sugg === false ? 'selected' : ''}>Non</option></select></div>
+      <div class="setting"><div>Trous dans la journée<div class="d">Dans les Saisies : créneaux de votre horaire habituel sans aucune saisie, avec « Affecter » pour les saisir (pause de midi exclue, journées d’absence ignorées).</div></div><select data-s="gapMin">${[[0, 'Ne pas signaler'], [5, 'À partir de 5 min'], [10, 'À partir de 10 min'], [15, 'À partir de 15 min'], [30, 'À partir de 30 min'], [60, 'À partir d’une heure']].map(([v, l]) => `<option value="${v}" ${gapMin() === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
       <div class="setting"><div>Facturation par défaut<div class="d">Si ni la tâche ni le client n’imposent un choix. Le temps passé avec une personne est non facturable par défaut.</div></div><select data-s="defaultBillable"><option value="1" ${st.defaultBillable ? 'selected' : ''}>À facturer</option><option value="0" ${st.defaultBillable ? '' : 'selected'}>Non facturable</option></select></div>
     </div>
     ${lissHTML()}`;
@@ -6874,7 +7031,7 @@ function bindRefsOn(body) {
     if (i.dataset.s === 'absDay') { const mn = parseDur(i.value); if (!mn || mn > 24 * 60) { i.value = fmtDur((+S.meta.settings.absDay || 420) * 60000, 'hm'); toast('Durée non comprise (ex. 7h ou 7h48)'); return; } S.meta.settings.absDay = mn; touchMeta(); toast('Les prochaines journées saisies compteront ' + fmtDur(mn * 60000, 'hm')); return; }
     if (i.dataset.s === 'dayStart') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayStart; toast('Heure non comprise (ex. 07:30)'); return; } S.meta.settings.dayStart = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
     if (i.dataset.s === 'dayEnd') { const hm = parseHM(i.value); if (!hm) { i.value = S.meta.settings.dayEnd; toast('Heure non comprise (ex. 18:00)'); return; } S.meta.settings.dayEnd = pad(hm[0]) + ':' + pad(hm[1]); touchMeta(); return; }
-    if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' ? +i.value : (k === 'defaultBillable' || k === 'sugg') ? i.value === '1' : i.value; touchMeta(); return; }
+    if (i.dataset.s) { const k = i.dataset.s; S.meta.settings[k] = k === 'roundStep' || k === 'gapMin' ? +i.value : (k === 'defaultBillable' || k === 'sugg') ? i.value === '1' : i.value; touchMeta(); return; }
     const row = i.closest('.ref-row'); if (!row || !i.dataset.k) return;
     const o = objOf(row.dataset.kind, row.dataset.id); if (!o) return;
     if (i.dataset.k === 'group') {
