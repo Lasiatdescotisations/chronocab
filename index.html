@@ -1113,7 +1113,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.50.1';
+const APP_VERSION = '1.51.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2849,6 +2849,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.51.0', '15/11/2026', ['Rupture conventionnelle : option « Signature un jour ouvré » (cochée par défaut) ; en partant de la date de rupture souhaitée, la signature au plus tard tombe sur un jour ouvré ; depuis la date d’entretien, elle est reportée au jour ouvré suivant ; une date de signature saisie un week-end ou un férié est signalée.']],
   ['1.50.0', '15/11/2026', ['v1.50.1 : un nombre à décimales d’un calcul précédent (ex. 12,8835) s’insère en entier, même tapé avec un point.', 'Nouvel outil Calculatrice : opérations usuelles, parenthèses, pourcentage, ±, racine carrée, arrondi à 2 décimales ; historique des 10 derniers calculs (sur cet appareil), effaçable ; un clic sur un nombre ou un résultat l’insère dans le calcul, ↺ reprend un calcul entier, ↑ ↓ et « ans » rappellent les précédents.']],
   ['1.49.0', '15/11/2026', ['Une personne (interlocuteur, catégorie ajoutée) peut être rattachée à un ou plusieurs groupes de dossiers : elle apparaît dans le carnet du groupe et dans ceux de tous ses dossiers. « ＋ Ajouter » dans le bloc Interlocuteurs du groupe.']],
   ['1.48.0', '15/11/2026', ['Chrono en cours sur un dossier : bouton « ✉ Message à … » sous la barre du chrono, ✉ dans la pastille du chrono des autres onglets, et en tête de la barre de commande.']],
@@ -3568,7 +3569,7 @@ function rcPlan(sig, o) {
   return { sig, retStart: addDays(sig, 1), retRaw, retEnd, dep0, dep, rec, iStart: addDays(rec, 1), iRaw, iEnd, rup };
 }
 function rcLatestSig(target, o) { // signature au plus tard pour une rupture au plus tard à la date voulue
-  for (let s = target; s > addDays(target, -120); s = addDays(s, -1)) if (rcPlan(s, o).rup <= target) return s;
+  for (let s = target; s > addDays(target, -120); s = addDays(s, -1)) if ((!o.sigOuvre || isOuvre(s)) && rcPlan(s, o).rup <= target) return s;
   return null;
 }
 /* Avantage en nature véhicule (v1.31.0) — véhicules mis à disposition à compter du 1er février 2025
@@ -3651,16 +3652,17 @@ const TOOLS = [
       return `${tlIdent(st, [['sal', 'Salarié', 'ex. M. Martin'], ['classif', 'Classification', 'ex. Niveau III, coefficient 240'], ['statut', 'Statut', 'ex. Cadre', ['Ouvrier', 'Employé', 'Technicien', 'Agent de maîtrise', 'Cadre', 'Apprenti']], ['anc', 'Ancienneté', 'ex. 6 ans et 4 mois']])}
         <div class="seg" data-kseg="mode">${[['sig', 'Date de signature'], ['ent', 'Date d’entretien'], ['ret', 'Fin de rétractation'], ['rup', 'Date de rupture souhaitée']].map(([v, l]) => `<button type="button" data-v="${v}" class="${mode === v ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="tl-row">${mode === 'ent' ? `<label class="fld"><span>Date de l’entretien</span><input type="date" data-k="ent" value="${esc(st.ent || '')}"></label><label class="fld"><span>Délai jusqu’à la signature (jours)</span><input data-k="dEnt" inputmode="numeric" value="${esc(st.dEnt ?? '0')}"></label>` : `<label class="fld"><span>${{ sig: 'Date de signature de la convention', ret: 'Date de fin du délai de rétractation', rup: 'Date de rupture souhaitée (au plus tard)' }[mode]}</span><input type="date" data-k="d_${mode}" value="${esc(st['d_' + mode] || '')}"></label>`}</div>
-        <div class="tl-opts"><label class="chk"><input type="checkbox" data-k="depOuvre" ${st.depOuvre ? 'checked' : ''}> Dépôt de la demande un jour ouvré (lundi → vendredi, hors fériés)</label>
+        <div class="tl-opts"><label class="chk"><input type="checkbox" data-k="sigOuvre" ${st.sigOuvre !== false ? 'checked' : ''}> Signature un jour ouvré (lundi → vendredi, hors fériés)</label>
+          <label class="chk"><input type="checkbox" data-k="depOuvre" ${st.depOuvre ? 'checked' : ''}> Dépôt de la demande un jour ouvré (lundi → vendredi, hors fériés)</label>
           <label class="tl-inl">Marge avant le dépôt <input data-k="mDep" inputmode="numeric" value="${esc(st.mDep ?? '0')}"> j</label>
           <label class="tl-inl">Réception de la demande <input data-k="post" inputmode="numeric" value="${esc(st.post ?? '0')}"> j après l’envoi <span class="muted small">(0 avec TéléRC)</span></label>
           <label class="tl-inl">Marge avant la rupture <input data-k="mRup" inputmode="numeric" value="${esc(st.mRup ?? '0')}"> j</label></div>`;
     },
     calc: st => {
-      const mode = st.mode || 'sig', o = { depOuvre: !!st.depOuvre, mDep: Math.max(0, parseInt(st.mDep, 10) || 0), post: Math.max(0, parseInt(st.post, 10) || 0), mRup: Math.max(0, parseInt(st.mRup, 10) || 0) };
-      let sig = null, ent = null, p, note = '';
-      if (mode === 'sig') sig = dIn(st.d_sig);
-      else if (mode === 'ent') { ent = dIn(st.ent); if (ent != null) sig = addDays(ent, Math.max(0, parseInt(st.dEnt, 10) || 0)); }
+      const mode = st.mode || 'sig', o = { sigOuvre: st.sigOuvre !== false, depOuvre: !!st.depOuvre, mDep: Math.max(0, parseInt(st.mDep, 10) || 0), post: Math.max(0, parseInt(st.post, 10) || 0), mRup: Math.max(0, parseInt(st.mRup, 10) || 0) };
+      let sig = null, ent = null, p, note = '', sigSub = '';
+      if (mode === 'sig') { sig = dIn(st.d_sig); if (sig != null && o.sigOuvre && !isOuvre(sig)) note = 'Attention : la date de signature saisie tombe un ' + (tlHol(dayKey(sig)) ? 'jour férié (' + tlHol(dayKey(sig)) + ')' : WD[new Date(sig).getDay()]) + ', qui n’est pas un jour ouvré.'; }
+      else if (mode === 'ent') { ent = dIn(st.ent); if (ent != null) { sig = addDays(ent, Math.max(0, parseInt(st.dEnt, 10) || 0)); if (o.sigOuvre && !isOuvre(sig)) { const s0 = sig; while (!isOuvre(sig)) sig = addDays(sig, 1); sigSub = 'reportée au jour ouvré suivant (' + dLong(s0) + ' non ouvré)'; } } }
       else if (mode === 'rup') { const t = dIn(st.d_rup); if (t != null) { sig = rcLatestSig(t, o); note = sig == null ? '' : `Pour une rupture au plus tard le <b>${dLong(t)}</b>, la convention doit être signée au plus tard le <b>${dLong(sig)}</b>.`; } }
       if (mode === 'ret') {
         const r = dIn(st.d_ret); if (r == null) return '<div class="tl-empty">Saisissez la date de fin du délai de rétractation.</div>';
@@ -3674,7 +3676,7 @@ const TOOLS = [
       const fi = p.iStart ? fer(p.iStart, p.iEnd) : [];
       return `${note ? `<div class="tl-note">${note}</div>` : ''}<ol class="tl-steps">
         ${ent != null ? li('Entretien', ent, '') : ''}
-        ${p.sig != null ? li('Signature de la convention', p.sig, '', true) : ''}
+        ${p.sig != null ? li('Signature de la convention', p.sig, sigSub || (mode === 'rup' && o.sigOuvre ? 'dernier jour ouvré possible' : ''), true) : ''}
         ${p.retStart != null ? li('Délai de rétractation', p.retStart, '15 jours calendaires, du ' + fmtDate(p.retStart).slice(0, 5) + ' au ' + fmtDate(p.retEnd) + (p.retEnd !== p.retRaw ? ' (15e jour le ' + dLong(p.retRaw) + ' : prorogé au jour ouvrable suivant)' : '')) : ''}
         ${li('Fin de la rétractation (minuit)', p.retEnd, '', true)}
         ${li('Envoi de la demande d’homologation, au plus tôt', p.dep, (o.mDep ? 'avec ' + plur(o.mDep, 'jour') + ' de marge' : 'lendemain de la fin de rétractation') + (p.dep !== p.dep0 ? ' · décalé au jour ouvré suivant' : ''))}
