@@ -734,7 +734,8 @@ a.btn:not(.primary){color:var(--ink)}
 @media (max-width:700px){.fc-row{grid-template-columns:34px repeat(5,1fr) 30px}.fc-c{padding:4px;min-height:50px}.fc-ct{display:none}}
 .fc-grp{margin:6px 0 10px}.fc-grp ul{margin:4px 0 0;padding-left:18px}.fc-grp li{margin:2px 0}.ab-h{margin:10px 0 4px}
 .cb-found{font-size:11.5px;color:var(--muted);margin:4px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
-.tpl-sc{font-size:11px;white-space:nowrap}.tpl-sc.sc-g{opacity:.7}.tpl-cb .cb-it .x{flex:1;min-width:0}
+.tag.tpl-sc{width:auto;white-space:nowrap;margin:0 10px 0 6px;max-width:280px;overflow:hidden;text-overflow:ellipsis}.tpl-sc.sc-g{opacity:.7}.tpl-cb .cb-it .x{flex:1;min-width:0}
+.tp-pick{width:100%;margin-top:6px}.tp-pick input#tp-cq{width:100%;margin-bottom:4px}.tp-list{max-height:180px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 12px}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
 .dsc-opts{display:grid;gap:2px;margin-top:4px}#ver{cursor:pointer}
@@ -1105,7 +1106,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.47.0';
+const APP_VERSION = '1.47.1';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2733,45 +2734,53 @@ function tplVals(c, x, mk) {
 const tplFill = (t, V) => String(t || '').replace(/\{([^{}\n]{1,40})\}/g, (m0, k) => { const kk = norm(k).trim(); return kk in V ? (V[kk] || '[' + k + ']') : m0; });
 function tplRefsHTML() {
   const L = tplList();
-  return `<i data-b="modeles"></i><div class="toolbar"><h2>Modèles de messages</h2><span class="muted small">Génériques (tous les clients), propres à un groupe ou à un dossier ; à insérer depuis le carnet d’un dossier (✉ Message), adaptés à l’interlocuteur. Le texte est copié, jamais envoyé.</span><span class="sp"></span><button class="btn sm primary" data-tpl="new">＋ Nouveau modèle</button></div>
+  return `<i data-b="modeles"></i><div class="toolbar"><h2>Modèles de messages</h2><span class="muted small">Génériques (tous les clients), ou propres à un ou plusieurs groupes ou dossiers ; à insérer depuis le carnet d’un dossier (✉ Message), adaptés à l’interlocuteur. Le texte est copié, jamais envoyé.</span><span class="sp"></span><button class="btn sm primary" data-tpl="new">＋ Nouveau modèle</button></div>
     <div class="card ref-list">${L.slice().sort((a, b) => tplRank(a) - tplRank(b) || tplScTxt(a).localeCompare(tplScTxt(b), 'fr') || a.n.localeCompare(b.n, 'fr')).map(t => tplRowHTML(t, true)).join('') || `<div class="empty">Aucun modèle. Créez vos messages types (relance des variables, envoi des bulletins…) avec des zones automatiques : {formule}, {dossier}, {mois de paie}… <br><button class="btn sm" data-tpl="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>`}</div>`;
 }
 function tplAddExamples() { S.meta.settings.tpl = [...tplList(), ...TPL_EX.map(t => ({ id: 'm' + newId(), ...t }))]; touchMeta(); toast('3 modèles ajoutés, à adapter à votre façon d’écrire'); }
 const tplSc = t => t && (t.sc === 'grp' || t.sc === 'cli') ? t.sc : 'g';
-const tplScTxt = t => tplSc(t) === 'g' ? 'Générique' : tplSc(t) === 'grp' ? (groupOf(t.ref) ? grpTitle(groupOf(t.ref)) : 'Groupe supprimé') : (clientOf(t.ref) ? 'Dossier ' + clientOf(t.ref).name : 'Dossier supprimé');
-const tplFor = c => tplList().filter(t => (tplSc(t) === 'cli' && t.ref === c.id) || (tplSc(t) === 'grp' && c.group && t.ref === c.group));
+const tplRefs = t => { const r = Array.isArray(t.refs) ? t.refs : t.ref ? [t.ref] : []; return tplSc(t) === 'grp' ? r.filter(id => groupOf(id)) : tplSc(t) === 'cli' ? r.filter(id => clientOf(id) && !clientOf(id).deletedAt) : []; };
+const tplRefNames = t => tplRefs(t).map(id => tplSc(t) === 'grp' ? grpTitle(groupOf(id)) : clientOf(id).name);
+const tplScTxt = t => { if (tplSc(t) === 'g') return 'Générique'; const nm = tplRefNames(t), grp = tplSc(t) === 'grp'; if (!nm.length) return grp ? 'Aucun groupe' : 'Aucun dossier'; return nm.length === 1 ? (grp ? nm[0] : 'Dossier ' + nm[0]) : nm.length + (grp ? ' groupes' : ' dossiers'); };
+const tplScTip = t => tplSc(t) === 'g' ? 'Pour tous les clients' : tplRefNames(t).join(', ');
+const tplFor = c => tplList().filter(t => (tplSc(t) === 'cli' && tplRefs(t).includes(c.id)) || (tplSc(t) === 'grp' && c.group && tplRefs(t).includes(c.group)));
 const tplGen = () => tplList().filter(t => tplSc(t) === 'g');
 const tplRank = t => ({ g: 0, grp: 1, cli: 2 })[tplSc(t)];
-function tplRowHTML(t, scope) { return `<div class="ref-row" data-tplid="${esc(t.id)}"><span style="font-weight:500;min-width:180px">✉ ${esc(t.n)}</span>${scope ? `<span class="tag tpl-sc sc-${tplSc(t)}">${esc(tplScTxt(t))}</span>` : ''}<span class="muted small" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.s || '')}</span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`; }
+function tplRowHTML(t, scope) { return `<div class="ref-row" data-tplid="${esc(t.id)}"><span style="font-weight:500;min-width:180px">✉ ${esc(t.n)}</span>${scope ? `<span class="tag tpl-sc sc-${tplSc(t)}" title="${esc(tplScTip(t))}">${esc(tplScTxt(t))}</span>` : ''}<span class="muted small" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.s || '')}</span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`; }
 function tplCarnetHTML(obj, isG) {
-  const L = (isG ? tplList().filter(t => (tplSc(t) === 'grp' && t.ref === obj.id) || (tplSc(t) === 'cli' && clientOf(t.ref)?.group === obj.id)) : tplFor(obj)).sort((a, b) => tplRank(a) - tplRank(b) || a.n.localeCompare(b.n, 'fr')), ng = tplGen().length;
+  const L = (isG ? tplList().filter(t => (tplSc(t) === 'grp' && tplRefs(t).includes(obj.id)) || (tplSc(t) === 'cli' && tplRefs(t).some(id => clientOf(id)?.group === obj.id))) : tplFor(obj)).sort((a, b) => tplRank(a) - tplRank(b) || a.n.localeCompare(b.n, 'fr')), ng = tplGen().length;
   return `<i data-b="modeles" data-half="1"></i><div class="toolbar"><h2>Modèles de messages (${L.length})</h2><span class="sp"></span>${isG ? '' : '<button class="btn sm ghost" data-cba="msg" title="Préparer un message à partir d’un modèle">✉ Message</button>'}<button class="btn sm" data-tpl="new" data-sc="${isG ? 'grp' : 'cli'}" data-ref="${esc(obj.id)}">＋ Modèle ${isG ? 'du groupe' : 'du dossier'}</button></div><div class="card cb-sec tpl-cb">
-    ${L.map(t => `<div class="cb-it" data-tplid="${esc(t.id)}"><span class="x">✉ ${esc(t.n)}<span class="ref">${esc(isG ? (tplSc(t) === 'grp' ? 'pour tous les dossiers du groupe' : tplScTxt(t)) : (tplSc(t) === 'cli' ? 'propre à ce dossier' : tplScTxt(t) + ' (tous les dossiers du groupe)'))}${t.s ? ' · ' + esc(t.s) : ''}</span></span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon xs" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`).join('') || `<div class="cb-hint">Aucun modèle propre à ${isG ? 'ce groupe' : 'ce dossier'}.</div>`}
+    ${L.map(t => `<div class="cb-it" data-tplid="${esc(t.id)}"><span class="x">✉ ${esc(t.n)}<span class="ref" title="${esc(tplScTip(t))}">${esc((() => { const n = tplRefs(t).length - 1, o = n > 0 ? ' et ' + n + ' autre' + (n > 1 ? 's' : '') : ''; return isG ? (tplSc(t) === 'grp' ? 'pour tous les dossiers du groupe' + (n > 0 ? ' (et ' + n + ' autre' + (n > 1 ? 's groupes' : ' groupe') + ')' : '') : tplScTxt(t)) : (tplSc(t) === 'cli' ? (n > 0 ? 'ce dossier' + o : 'propre à ce dossier') : 'groupe' + (n > 0 ? 's' : '') + ' : ' + tplRefNames(t).join(', ')); })())}${t.s ? ' · ' + esc(t.s) : ''}</span></span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon xs" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`).join('') || `<div class="cb-hint">Aucun modèle propre à ${isG ? 'ce groupe' : 'ce dossier'}.</div>`}
     <div class="cb-hint" style="margin-top:6px">${ng} modèle${ng > 1 ? 's' : ''} générique${ng > 1 ? 's' : ''} (tous les clients), gérés dans <a href="#referentiel">Références</a>.</div></div>`;
 }
 function openTplEdit(id, after, preset) {
-  const t = id ? tplList().find(x => x.id === id) : null; let sc = t ? tplSc(t) : (preset && preset.sc) || 'g'; const ref0 = t ? t.ref : preset && preset.ref;
+  const t = id ? tplList().find(x => x.id === id) : null; let sc = t ? tplSc(t) : (preset && preset.sc) || 'g'; const sel0 = new Set(t ? tplRefs(t) : preset && preset.ref ? [preset.ref] : []);
   const cs = S.meta.clients.filter(c => !c.deletedAt && !c.archived).sort((a, b) => (isMine(b) ? 1 : 0) - (isMine(a) ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
   const m = modal(`<div class="modal-h"><h3>${t ? 'Modifier le modèle' : 'Nouveau modèle de message'}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b" style="display:grid;gap:10px"><label class="fld"><span>Nom du modèle</span><input id="tp-n" maxlength="60" value="${esc(t ? t.n : '')}" placeholder="ex. Relance des variables"></label>
-      <div class="fld"><span>Pour qui ?</span><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" id="tp-sc"><button type="button" data-v="g">Générique (tous les clients)</button><button type="button" data-v="grp" ${groupsAll().length ? '' : 'disabled title="Aucun groupe"'}>Un groupe</button><button type="button" data-v="cli">Un dossier</button></div>
-        <select id="tp-grp" hidden>${groupsAll().map(g => `<option value="${esc(g.id)}" ${ref0 === g.id ? 'selected' : ''}>${esc(grpTitle(g))}</option>`).join('')}</select>
-        <select id="tp-cli" hidden style="max-width:280px">${cs.map(c => `<option value="${esc(c.id)}" ${ref0 === c.id ? 'selected' : ''}>${esc(c.name)}${c.code ? ' (n° ' + esc(c.code) + ')' : ''}${isMine(c) ? '' : ' · hors portefeuille'}</option>`).join('')}</select></div></div>
+      <div class="fld"><span>Pour qui ?</span><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" id="tp-sc"><button type="button" data-v="g">Générique (tous les clients)</button><button type="button" data-v="grp" ${groupsAll().length ? '' : 'disabled title="Aucun groupe"'}>Des groupes</button><button type="button" data-v="cli">Des dossiers</button></div>
+<span class="muted small" id="tp-n-sel"></span></div>
+        <div id="tp-grp" class="tp-pick" hidden><div class="tp-list">${groupsAll().map(g => `<label class="chk"><input type="checkbox" value="${esc(g.id)}" ${sel0.has(g.id) ? 'checked' : ''}> ${esc(grpTitle(g))} <span class="muted small">(${grpMembers(g).length})</span></label>`).join('')}</div></div>
+        <div id="tp-cli" class="tp-pick" hidden><input id="tp-cq" placeholder="Filtrer les dossiers…" autocomplete="off"><div class="tp-list">${cs.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '')))}"><input type="checkbox" value="${esc(c.id)}" ${sel0.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">n° ' + esc(c.code) + '</span>' : ''}${isMine(c) ? '' : ' <span class="muted small">· hors portefeuille</span>'}</label>`).join('')}</div></div></div>
       <label class="fld"><span>Objet</span><input id="tp-s" maxlength="200" value="${esc(t ? t.s || '' : '')}" placeholder="ex. {dossier} – variables de {mois de paie}"></label>
       <label class="fld"><span>Texte</span><textarea id="tp-b" rows="11" style="width:100%;resize:vertical">${esc(t ? t.b || '' : '')}</textarea></label>
       <div><div class="small" style="margin-bottom:4px">Insérer une zone automatique (à l’endroit du curseur) :</div><div class="tpl-z">${TPL_Z.map(([k, d]) => `<button type="button" class="chip-btn" data-z="${esc(k)}" title="${esc(d || k)}">{${esc(k)}}</button>`).join('')}</div>
       <div class="muted small" style="margin-top:4px">Une zone sans valeur pour le dossier choisi apparaît entre crochets, à compléter. Ne notez jamais d’identifiants ni de mots de passe dans un modèle.</div></div></div>
     <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tp-ok">Enregistrer</button></div>`, 'wide');
   const q = x => m.el.querySelector(x); let foc = q('#tp-b');
-  const scUI = () => { q('#tp-sc').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === sc)); q('#tp-grp').hidden = sc !== 'grp'; q('#tp-cli').hidden = sc !== 'cli'; };
+  const scUI = () => { q('#tp-sc').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === sc)); q('#tp-grp').hidden = sc !== 'grp'; q('#tp-cli').hidden = sc !== 'cli'; cnt(); };
+  const picked = () => sc === 'g' ? [] : [...m.el.querySelectorAll('#tp-' + sc + ' input[type=checkbox]:checked')].map(x => x.value);
+  const cnt = () => { const n = picked().length; q('#tp-n-sel').textContent = sc === 'g' ? '' : n ? n + (sc === 'grp' ? ' groupe' : ' dossier') + (n > 1 ? 's' : '') + ' choisi' + (n > 1 ? 's' : '') : 'cochez un ou plusieurs ' + (sc === 'grp' ? 'groupes' : 'dossiers'); };
+  m.el.addEventListener('change', ev => { if (ev.target.closest('.tp-pick')) cnt(); });
+  q('#tp-cq').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('#tp-cli label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
   scUI(); q('#tp-sc').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b || b.disabled) return; sc = b.dataset.v; scUI(); });
   [q('#tp-s'), q('#tp-b')].forEach(f => f.addEventListener('focus', () => { foc = f; }));
   q('.tpl-z').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; const z = '{' + b.dataset.z + '}', a = foc.selectionStart ?? foc.value.length, e = foc.selectionEnd ?? a; foc.value = foc.value.slice(0, a) + z + foc.value.slice(e); foc.focus(); foc.setSelectionRange(a + z.length, a + z.length); });
   setTimeout(() => q('#tp-n').focus(), 30);
   q('#tp-ok').addEventListener('click', () => {
     const n = q('#tp-n').value.trim(); if (!n) { toast('Donnez un nom au modèle'); q('#tp-n').focus(); return; }
-    const ref = sc === 'grp' ? q('#tp-grp').value : sc === 'cli' ? q('#tp-cli').value : ''; if (sc !== 'g' && !ref) { toast('Choisissez le ' + (sc === 'grp' ? 'groupe' : 'dossier')); return; }
-    const o = { id: t ? t.id : 'm' + newId(), n, s: q('#tp-s').value.trim(), b: q('#tp-b').value.replace(/\s+$/, '') }; if (sc !== 'g') { o.sc = sc; o.ref = ref; }
+    const refs = picked(); if (sc !== 'g' && !refs.length) { toast('Cochez au moins un ' + (sc === 'grp' ? 'groupe' : 'dossier')); return; }
+    const o = { id: t ? t.id : 'm' + newId(), n, s: q('#tp-s').value.trim(), b: q('#tp-b').value.replace(/\s+$/, '') }; if (sc !== 'g') { o.sc = sc; o.refs = refs; }
     S.meta.settings.tpl = t ? tplList().map(x => x.id === t.id ? o : x) : [...tplList(), o]; touchMeta(); m.close(); toast((t ? 'Modèle enregistré' : 'Modèle créé : ' + n) + ' · ' + tplScTxt(o)); if (after) after(o.id);
   });
 }
@@ -2831,7 +2840,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
-  ['1.47.0', '15/11/2026', ['Modèles de messages génériques (tous les clients), propres à un groupe ou à un dossier ; liste des modèles dans chaque carnet ; à l’envoi, bascule « Spécifiques / Génériques ».', 'Historique complet des versions (Réglages › Données, ou clic sur le numéro de version).', 'Réglage pour ne plus afficher les nouveautés à l’ouverture (Réglages › Cet appareil).']],
+  ['1.47.0', '15/11/2026', ['Modèles de messages génériques (tous les clients), propres à des groupes ou à des dossiers (plusieurs possibles, v1.47.1) ; liste des modèles dans chaque carnet ; à l’envoi, bascule « Spécifiques / Génériques ».', 'Historique complet des versions (Réglages › Données, ou clic sur le numéro de version).', 'Réglage pour ne plus afficher les nouveautés à l’ouverture (Réglages › Cet appareil).']],
   ['1.46.0', '15/11/2026', ['Taille de l’affichage réglable de 85 % à 140 % (texte, boutons, icônes), propre à chaque appareil : Réglages › Cet appareil, Ctrl + « + » / « − » / 0, ou la barre de commande.']],
   ['1.45.0', '15/11/2026', ['Charge à venir : les échéances des deux prochaines semaines dans Ma journée, et une vue sur deux mois dans Mon cycle (clic sur un jour : le détail).', 'Préparer une absence : ce qui tombera pendant vos congés, par dossier ou par date, en PDF, texte ou impression.', 'Pendant mon absence : au retour, ce qui est arrivé à échéance sans être noté.', 'Recherche dans le contenu des carnets (pratiques, journal, points, notes…) depuis la loupe et la recherche du Carnet.', 'Modèles de messages (Références) à insérer depuis le carnet d’un dossier, adaptés à l’interlocuteur.', 'Mode discret pour le partage d’écran (bouton 👁 en haut à droite), réglable dans Réglages › Cet appareil.', 'v1.45.1 : horaires et durées des saisies aussi floutés ; option « Noms des dossiers » renommée.', 'Aide de chaque écran (bouton ?) et ces nouveautés après chaque mise à jour.']],
   ['1.44.0', '15/11/2026', ['Catégories de tâches et de personnes à votre main : ajout, nom, ordre, couleur, mots-clés et facturation par défaut.', 'Copie du carnet d’un autre dossier, à la création ou depuis un carnet.', 'Barre des Outils figée en haut de l’écran.']],
