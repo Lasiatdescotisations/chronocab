@@ -737,6 +737,12 @@ a.btn:not(.primary){color:var(--ink)}
 .tag.tpl-sc{width:auto;white-space:nowrap;margin:0 10px 0 6px;max-width:280px;overflow:hidden;text-overflow:ellipsis}.tpl-sc.sc-g{opacity:.7}.tpl-cb .cb-it .x{flex:1;min-width:0}
 .tp-pick{width:100%;margin-top:6px}.tp-pick input#tp-cq{width:100%;margin-bottom:4px}.tp-list{max-height:180px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 12px}
 .tb-msg{margin-left:6px;vertical-align:middle}.pill-msg{background:none;border:0;cursor:pointer;color:inherit;font-size:14px;padding:0 4px;line-height:1}
+.calc{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;align-items:start}@media (max-width:760px){.calc{grid-template-columns:1fr}}
+.calc-in{width:100%;font:500 18px var(--mono,monospace);padding:10px 12px;text-align:right}
+.calc-pad{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}.calc-pad button{height:42px;border:1px solid var(--line);background:var(--surface);border-radius:9px;font-size:16px;cursor:pointer;color:inherit}.calc-pad button:hover{border-color:var(--accent)}.calc-pad button.num{background:var(--surface-2,#f4f4f1);font-weight:600}.calc-pad button.eq{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}.calc-pad button.clr{color:var(--s-late,#c0392b)}.calc-pad button[data-ck=copy],.calc-pad button[data-ck=ans]{font-size:13px}
+.tl-card[data-tool=calc] .tl-out{display:none}.calc-prev{margin-top:4px}.calc-out{display:flex;align-items:baseline;gap:6px;justify-content:flex-end;min-height:34px}.calc-big{font:600 24px var(--mono,monospace);cursor:default}.calc-big[data-cins]{cursor:pointer}
+.calc-h-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}.calc-h{list-style:none;margin:0;padding:0;display:grid;gap:2px}.calc-h li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:7px;font-family:var(--mono,monospace);font-size:13.5px}.calc-h li:hover{background:var(--hover,rgba(0,0,0,.04))}
+.calc-e{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}.calc-n,.calc-r{background:none;border:0;padding:0 1px;font:inherit;color:inherit;cursor:pointer;border-radius:4px}.calc-n:hover,.calc-r:hover{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}.calc-r{font-weight:700;color:var(--ink,#222)}.calc-eq{color:var(--muted)}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
 .dsc-opts{display:grid;gap:2px;margin-top:4px}#ver{cursor:pointer}
@@ -1107,7 +1113,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.49.0';
+const APP_VERSION = '1.50.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2843,6 +2849,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.50.0', '15/11/2026', ['Nouvel outil Calculatrice : opérations usuelles, parenthèses, pourcentage, ±, racine carrée, arrondi à 2 décimales ; historique des 10 derniers calculs (sur cet appareil), effaçable ; un clic sur un nombre ou un résultat l’insère dans le calcul, ↺ reprend un calcul entier, ↑ ↓ et « ans » rappellent les précédents.']],
   ['1.49.0', '15/11/2026', ['Une personne (interlocuteur, catégorie ajoutée) peut être rattachée à un ou plusieurs groupes de dossiers : elle apparaît dans le carnet du groupe et dans ceux de tous ses dossiers. « ＋ Ajouter » dans le bloc Interlocuteurs du groupe.']],
   ['1.48.0', '15/11/2026', ['Chrono en cours sur un dossier : bouton « ✉ Message à … » sous la barre du chrono, ✉ dans la pastille du chrono des autres onglets, et en tête de la barre de commande.']],
   ['1.47.0', '15/11/2026', ['Modèles de messages génériques (tous les clients), propres à des groupes ou à des dossiers (plusieurs possibles, v1.47.1) ; liste des modèles dans chaque carnet ; à l’envoi, bascule « Spécifiques / Génériques ».', 'Historique complet des versions (Réglages › Données, ou clic sur le numéro de version).', 'Réglage pour ne plus afficher les nouveautés à l’ouverture (Réglages › Cet appareil).']],
@@ -2927,6 +2934,113 @@ function openHelp() {
     <div class="modal-f"><button class="btn ghost" data-h="news">Historique des versions</button><span class="sp"></span><button class="btn primary" data-close>Fermer</button></div>`);
   m.el.querySelector('[data-h]').addEventListener('click', () => { m.close(); openNews(null); });
 }
+/* ---------- Calculatrice (v1.50.0) : opérations usuelles, parenthèses, pourcentage façon calculatrice de bureau, ±, √ ;
+   historique des 10 derniers calculs sur cet appareil (chronocab:calcHist), reprise d'un résultat, d'un nombre ou d'un calcul ---------- */
+const CALC_MAX = 10;
+const calcHist = () => { try { const v = JSON.parse(lsGet('calcHist', '[]')); return Array.isArray(v) ? v.slice(0, CALC_MAX) : []; } catch (e) { return []; } };
+const calcR2 = () => lsGet('calcR2', '1') === '1';
+const calcNum = n => { if (n == null || !isFinite(n)) return 'Erreur'; const r = calcR2() ? Math.round(n * 100) / 100 : n; return r.toLocaleString('fr-FR', calcR2() ? { minimumFractionDigits: Number.isInteger(r) ? 0 : 2, maximumFractionDigits: 2 } : { maximumFractionDigits: 10 }); };
+const calcRaw = n => { const r = calcR2() ? Math.round(n * 100) / 100 : +n.toPrecision(12); return String(r).replace('.', ','); }; // pour l'insertion dans une saisie
+function calcTokens(s) {
+  s = String(s || '').replace(/[  ]/g, ' ').replace(/[×xX*]/g, '*').replace(/[÷:/]/g, '/').replace(/[−–]/g, '-').replace(/√|racine/gi, 'r');
+  const out = []; let i = 0;
+  while (i < s.length) {
+    const c = s[i];
+    if (c === ' ') { i++; continue; }
+    const m = /^\d(?:[\d ]*\d)?(?:[.,]\d*)?|^[.,]\d+/.exec(s.slice(i));
+    if (m) { out.push({ t: 'n', v: parseFloat(m[0].replace(/ /g, '').replace(',', '.')) }); i += m[0].length; continue; }
+    if (/^ans/i.test(s.slice(i))) { out.push({ t: 'ans' }); i += 3; continue; }
+    if ('+-*/()%r'.includes(c)) { out.push({ t: c }); i++; continue; }
+    throw new Error('car');
+  }
+  return out;
+}
+function calcEval(src, ans) {
+  const T = calcTokens(src); let p = 0;
+  if (T.length && ['+', '*', '/', '%'].includes(T[0].t)) { if (ans == null) throw new Error('vide'); T.unshift({ t: 'n', v: ans }); }
+  const peek = () => T[p] && T[p].t, eat = t => { if (peek() !== t) throw new Error('syn'); p++; };
+  function factor() {
+    const k = peek();
+    if (k === '-') { p++; const f = factor(); return { v: -f.v, pct: f.pct }; }
+    if (k === '+') { p++; return factor(); }
+    if (k === 'r') { p++; const f = factor(); const v = f.pct ? f.v / 100 : f.v; if (v < 0) throw new Error('neg'); return { v: Math.sqrt(v), pct: false }; }
+    let v;
+    if (k === 'n') v = T[p++].v; else if (k === 'ans') { p++; if (ans == null) throw new Error('vide'); v = ans; }
+    else if (k === '(') { p++; v = expr(); if (peek() === ')') p++; }
+    else throw new Error('syn');
+    let pct = false; while (peek() === '%') { p++; if (pct) v /= 100; pct = true; }
+    return { v, pct };
+  }
+  function term() {
+    let f = factor(); if (peek() !== '*' && peek() !== '/') return f;
+    let v = f.pct ? f.v / 100 : f.v;
+    while (peek() === '*' || peek() === '/') { const op = T[p++].t, g = factor(), w = g.pct ? g.v / 100 : g.v; if (op === '*') v *= w; else { if (w === 0) throw new Error('div0'); v /= w; } }
+    return { v, pct: false };
+  }
+  function expr() {
+    const first = term(); let v = first.pct ? first.v / 100 : first.v;
+    while (peek() === '+' || peek() === '-') { const op = T[p++].t, t = term(), w = t.pct ? v * t.v / 100 : t.v; v = op === '+' ? v + w : v - w; }
+    return v;
+  }
+  if (!T.length) throw new Error('vide');
+  const r = expr(); if (p < T.length) throw new Error('syn'); if (!isFinite(r)) throw new Error('div0');
+  return r;
+}
+const calcPretty = s => String(s || '').replace(/[*xX]/g, '×').replace(/\//g, '÷').replace(/(\d)\s*([+\-×÷])\s*/g, '$1 $2 ').replace(/\s+/g, ' ').trim();
+function calcExprHTML(e) { // nombres cliquables
+  return esc(calcPretty(e)).replace(/\d(?:[\d ]*\d)?(?:,\d+)?/g, m => `<button type="button" class="calc-n" data-cins="${esc(m.replace(/ /g, ''))}" title="Insérer ${esc(m)} dans le calcul">${m}</button>`);
+}
+function calcHistHTML() {
+  const H = calcHist();
+  return `<div class="calc-h-head"><b>Derniers calculs</b><span class="muted small">${H.length ? 'clic sur un nombre ou un résultat : il s’insère dans le calcul ; ↺ reprend le calcul entier' : ''}</span><span class="sp" style="flex:1"></span>${H.length ? '<button type="button" class="btn sm ghost" data-ck="clearh">Effacer l’historique</button>' : ''}</div>
+    ${H.length ? `<ol class="calc-h">${H.map((h, i) => `<li><span class="calc-e">${calcExprHTML(h.e)}</span><span class="calc-eq">=</span><button type="button" class="calc-r" data-cins="${esc(calcRaw(h.r))}" title="Insérer ce résultat">${esc(calcNum(h.r))}</button><button type="button" class="icon xs" data-ck="reload" data-i="${i}" title="Reprendre ce calcul">↺</button></li>`).join('')}</ol>` : '<div class="muted small">Aucun calcul pour l’instant. Tapez par exemple « 1 250,50 × 12 + 300 » puis Entrée.</div>'}`;
+}
+const CALC_KEYS = [['C', 'clear', 'Tout effacer (Échap)'], ['(', '('], [')', ')'], ['%', '%', 'Pourcentage : 200 + 10 % = 220 ; 200 × 10 % = 20'], ['÷', '÷'],
+  ['7', '7'], ['8', '8'], ['9', '9'], ['√', '√', 'Racine carrée'], ['×', '×'],
+  ['4', '4'], ['5', '5'], ['6', '6'], ['±', 'neg', 'Changer le signe du dernier nombre'], ['−', '-'],
+  ['1', '1'], ['2', '2'], ['3', '3'], ['⌫', 'back', 'Effacer le dernier caractère'], ['+', '+'],
+  ['0', '0'], [',', ','], ['ans', 'ans', 'Dernier résultat'], ['Copier', 'copy', 'Copier le résultat'], ['=', 'eq', 'Calculer (Entrée)']];
+function calcPreview(st) {
+  const ex = (st.ex || '').trim(), H = calcHist(), ans = H.length ? H[0].r : null;
+  if (!ex) return ans != null ? `<div class="calc-out"><span class="muted small">Dernier résultat</span><b class="calc-big" data-cins="${esc(calcRaw(ans))}" title="Insérer">${esc(calcNum(ans))}</b></div>` : '<div class="calc-out muted small">Le résultat s’affiche ici pendant la saisie.</div>';
+  try { const r = calcEval(ex, ans); return `<div class="calc-out"><span class="muted small">= </span><b class="calc-big">${esc(calcNum(r))}</b></div>`; }
+  catch (e) { return `<div class="calc-out muted small">${e.message === 'div0' ? 'Division par zéro' : e.message === 'neg' ? 'Racine d’un nombre négatif' : e.message === 'car' ? 'Caractère non reconnu' : '…'}</div>`; }
+}
+function calcCommit(sec) {
+  const st = (UI.tl.calc ||= {}), inp = sec.querySelector('[data-k=ex]'), ex = (inp.value || '').trim(); if (!ex) return;
+  const H = calcHist(), ans = H.length ? H[0].r : null;
+  let r; try { r = calcEval(ex, ans); } catch (e) { toast(e.message === 'div0' ? 'Division par zéro' : e.message === 'neg' ? 'Racine d’un nombre négatif' : 'Calcul incomplet ou incorrect'); return; }
+  const e = /^[+*/%×÷xX]/.test(ex) && ans != null ? calcRaw(ans) + ' ' + ex : ex;
+  lsSet('calcHist', JSON.stringify([{ e: calcPretty(e), r }, ...H].slice(0, CALC_MAX)));
+  st.ex = ''; st.hi = -1; inp.value = ''; calcRefresh(sec); inp.focus();
+}
+function calcRefresh(sec) { const st = (UI.tl.calc ||= {}); const h = sec.querySelector('.calc-hist'); if (h) h.innerHTML = calcHistHTML(); const o = sec.querySelector('.calc-prev'); if (o) o.innerHTML = calcPreview(st); }
+function calcInsert(sec, txt, replace) {
+  const inp = sec.querySelector('[data-k=ex]'), st = (UI.tl.calc ||= {});
+  if (replace) { inp.value = txt; } else { const a = inp.selectionStart ?? inp.value.length, b = inp.selectionEnd ?? a; inp.value = inp.value.slice(0, a) + txt + inp.value.slice(b); const c = a + txt.length; inp.focus(); inp.setSelectionRange(c, c); }
+  st.ex = inp.value; calcRefresh(sec); inp.focus();
+}
+document.addEventListener('click', ev => {
+  const sec = ev.target.closest('[data-tool=calc]'); if (!sec) return;
+  const ins = ev.target.closest('[data-cins]'); if (ins) { calcInsert(sec, ins.dataset.cins); return; }
+  const b = ev.target.closest('[data-ck]'); if (!b) return; const k = b.dataset.ck, inp = sec.querySelector('[data-k=ex]'), st = (UI.tl.calc ||= {});
+  if (k === 'eq') return calcCommit(sec);
+  if (k === 'clear') { inp.value = ''; st.ex = ''; calcRefresh(sec); inp.focus(); return; }
+  if (k === 'back') { const a = inp.selectionStart ?? inp.value.length; if (a > 0) { inp.value = inp.value.slice(0, a - 1) + inp.value.slice(a); inp.setSelectionRange(a - 1, a - 1); } st.ex = inp.value; calcRefresh(sec); inp.focus(); return; }
+  if (k === 'neg') { const v = inp.value, m = /(-?)(\d[\d ,.]*)\s*$/.exec(v); if (m) { const i = m.index; inp.value = v.slice(0, i) + (m[1] ? '' : (i > 0 && !/[\s(+\-×÷*/]$/.test(v.slice(0, i)) ? ' ' : '') + '-') + m[2]; } else inp.value = v ? '-(' + v + ')' : '-'; st.ex = inp.value; calcRefresh(sec); inp.focus(); return; }
+  if (k === 'copy') { const H = calcHist(), ex = (inp.value || '').trim(); let r = null; try { r = ex ? calcEval(ex, H.length ? H[0].r : null) : (H.length ? H[0].r : null); } catch (e) {} if (r == null) { toast('Aucun résultat à copier'); return; } copyText(calcNum(r).replace(/[  ]/g, ' ')); return; }
+  if (k === 'reload') { const h = calcHist()[+b.dataset.i]; if (h) calcInsert(sec, h.e, true); return; }
+  if (k === 'clearh') { const prev = lsGet('calcHist', '[]'); lsSet('calcHist', '[]'); calcRefresh(sec); toast('Historique des calculs effacé', 'Annuler', () => { lsSet('calcHist', prev); const s2 = document.querySelector('[data-tool=calc]'); if (s2) calcRefresh(s2); }); return; }
+  if (k === 'r2') return;
+  calcInsert(sec, { '×': ' × ', '÷': ' ÷ ', '+': ' + ', '-': ' − ', '%': ' %', '√': '√' }[k] ?? k);
+});
+document.addEventListener('change', ev => { if (ev.target.id === 'calc-r2') { lsSet('calcR2', ev.target.checked ? '1' : '0'); const s2 = ev.target.closest('[data-tool=calc]'); if (s2) calcRefresh(s2); } });
+document.addEventListener('keydown', ev => {
+  const inp = ev.target.closest && ev.target.closest('[data-tool=calc] [data-k=ex]'); if (!inp) return; const sec = inp.closest('[data-tool=calc]'), st = (UI.tl.calc ||= {});
+  if (ev.key === 'Enter' || (ev.key === '=' && !ev.ctrlKey)) { ev.preventDefault(); calcCommit(sec); }
+  else if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); inp.value = ''; st.ex = ''; calcRefresh(sec); }
+  else if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') { const H = calcHist(); if (!H.length) return; ev.preventDefault(); st.hi = Math.max(-1, Math.min(H.length - 1, (st.hi ?? -1) + (ev.key === 'ArrowUp' ? 1 : -1))); inp.value = st.hi < 0 ? '' : H[st.hi].e; st.ex = inp.value; calcRefresh(sec); }
+}, true);
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
 const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
@@ -3516,6 +3630,13 @@ function aevCalc(st) {
 // Champs d'identification facultatifs (texte libre), repris dans l'export
 const tlIdent = (st, defs) => `<details class="tl-ident" ${defs.some(([k]) => st[k]) ? 'open' : ''}><summary>Informations (facultatif)</summary><div class="tl-row aev-grid">${defs.map(([k, l, ph, list]) => `<label class="fld"><span>${l}</span><input data-k="${k}" data-txt="1" autocomplete="off" maxlength="80" value="${esc(st[k] || '')}" placeholder="${esc(ph || '')}"${list ? ` list="dl-${k}"` : ''}>${list ? `<datalist id="dl-${k}">${list.map(x => `<option value="${esc(x)}">`).join('')}</datalist>` : ''}</label>`).join('')}</div></details>`;
 const TOOLS = [
+  { id: 'calc', t: 'Calculatrice', d: 'Opérations usuelles, pourcentage, historique des 10 derniers calculs',
+    html: st => `<div class="calc"><div class="calc-l"><input data-k="ex" class="calc-in" value="${esc(st.ex || '')}" placeholder="ex. 1 250,50 × 12 + 300" autocomplete="off" inputmode="decimal" aria-label="Calcul" spellcheck="false"><div class="calc-prev">${calcPreview(st)}</div>
+      <div class="calc-pad">${CALC_KEYS.map(([l, k, ti]) => `<button type="button" data-ck="${esc(k)}" class="${/^[0-9,]$/.test(k) ? 'num' : k === 'eq' ? 'eq' : k === 'clear' ? 'clr' : ''}" ${ti ? `title="${esc(ti)}"` : ''}>${esc(l)}</button>`).join('')}</div>
+      <label class="chk small" style="margin-top:6px"><input type="checkbox" id="calc-r2" ${calcR2() ? 'checked' : ''}> Arrondir les résultats à 2 décimales</label>
+      <div class="muted small">Au clavier : Entrée pour calculer, Échap pour effacer, ↑ ↓ pour rappeler un calcul. Commencer par un opérateur (ex. « × 12 ») reprend le dernier résultat.</div></div>
+      <div class="calc-hist">${calcHistHTML()}</div></div>`,
+    sync: (root, st) => { const p = root.querySelector('.calc-prev'); if (p) p.innerHTML = calcPreview(st); }, calc: () => '' },
   { id: 'dates', t: 'Écart entre deux dates', d: 'Nombre de jours, mois et années entre deux dates',
     html: st => `<div class="tl-row"><label class="fld"><span>Date de début</span><input type="date" data-k="a" value="${esc(st.a || '')}"></label><label class="fld"><span>Date de fin</span><input type="date" data-k="b" value="${esc(st.b || '')}"></label></div>
       <label class="chk"><input type="checkbox" data-k="inc" ${st.inc !== false ? 'checked' : ''}> Compter le jour de fin (ex. durée d’un contrat du 1er au 31 = 31 jours)</label>`,
@@ -3846,7 +3967,7 @@ function renderOutils() {
   const body = $('#outils-body'), on = toolsOn();
   let html = `<div class="card filters tl-head"><div><b>Outils du gestionnaire de paie</b><div class="muted small">Calculs indicatifs : vérifiez toujours les règles de votre convention collective.</div></div><span class="sp" style="flex:1"></span>${S.meta.settings.toolsAMShow ? `<div class="seg" role="radiogroup" aria-label="Jours fériés utilisés par les outils" title="S’applique à tous les outils"><button type="button" data-tla="am" data-v="0" class="${toolsAM() ? '' : 'on'}">Fériés métropole</button><button type="button" data-tla="am" data-v="1" class="${toolsAM() ? 'on' : ''}">Fériés Alsace-Moselle</button></div>` : ''}<button class="btn sm" data-tla="choose">⚙ Choisir mes outils (${on.length}/${TOOLS.length})</button></div>`;
   if (!on.length) html += `<div class="card empty">Aucun outil affiché. <button class="btn sm" data-tla="choose">Choisir mes outils</button></div>`;
-  for (const id of on) { const t = TOOLS.find(x => x.id === id), st = (UI.tl[id] ||= {}); html += `<i data-b="tool-${id}" data-half="${['hm', 'pct', 'add', 'count', 'dates', 'prorata'].includes(id) ? '1' : ''}" data-t="${esc(t.t)}"></i><h2>${esc(t.t)}</h2><div class="card tl-card" data-tool="${id}"><div class="tl-in">${t.html(st)}</div><div class="tl-out"></div><div class="tl-acts"><button type="button" class="btn sm ghost" data-tla="export" data-fmt="img" title="Copier le calcul (données, résultat, détail) en image, à coller dans un mail">${ICON.copy} Copier en image</button><button type="button" class="btn sm ghost" data-tla="export" data-fmt="txt" title="Copier le calcul en texte">${ICON.copy} Copier en texte</button></div></div>`; }
+  for (const id of on) { const t = TOOLS.find(x => x.id === id), st = (UI.tl[id] ||= {}); html += `<i data-b="tool-${id}" data-half="${['hm', 'pct', 'add', 'count', 'dates', 'prorata'].includes(id) ? '1' : ''}" data-t="${esc(t.t)}"></i><h2>${esc(t.t)}</h2><div class="card tl-card" data-tool="${id}"><div class="tl-in">${t.html(st)}</div><div class="tl-out"></div>${id === 'calc' ? '' : `<div class="tl-acts"><button type="button" class="btn sm ghost" data-tla="export" data-fmt="img" title="Copier le calcul (données, résultat, détail) en image, à coller dans un mail">${ICON.copy} Copier en image</button><button type="button" class="btn sm ghost" data-tla="export" data-fmt="txt" title="Copier le calcul en texte">${ICON.copy} Copier en texte</button></div>`}</div>`; }
   body.innerHTML = html.replace(/data-half=""/g, '');
   blkify(body, 'outils');
   body.querySelectorAll('[data-tool]').forEach(toolCalc);
