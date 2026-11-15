@@ -734,6 +734,7 @@ a.btn:not(.primary){color:var(--ink)}
 @media (max-width:700px){.fc-row{grid-template-columns:34px repeat(5,1fr) 30px}.fc-c{padding:4px;min-height:50px}.fc-ct{display:none}}
 .fc-grp{margin:6px 0 10px}.fc-grp ul{margin:4px 0 0;padding-left:18px}.fc-grp li{margin:2px 0}.ab-h{margin:10px 0 4px}
 .cb-found{font-size:11.5px;color:var(--muted);margin:4px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.tpl-sc{font-size:11px;white-space:nowrap}.tpl-sc.sc-g{opacity:.7}.tpl-cb .cb-it .x{flex:1;min-width:0}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
 .dsc-opts{display:grid;gap:2px;margin-top:4px}#ver{cursor:pointer}
@@ -1104,7 +1105,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.46.0';
+const APP_VERSION = '1.47.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2732,54 +2733,77 @@ function tplVals(c, x, mk) {
 const tplFill = (t, V) => String(t || '').replace(/\{([^{}\n]{1,40})\}/g, (m0, k) => { const kk = norm(k).trim(); return kk in V ? (V[kk] || '[' + k + ']') : m0; });
 function tplRefsHTML() {
   const L = tplList();
-  return `<i data-b="modeles"></i><div class="toolbar"><h2>Modèles de messages</h2><span class="muted small">À insérer depuis le carnet d’un dossier (bloc Interlocuteurs › ✉ Message), adaptés à l’interlocuteur. Le texte est copié, jamais envoyé.</span><span class="sp"></span><button class="btn sm primary" data-tpl="new">＋ Nouveau modèle</button></div>
-    <div class="card ref-list">${L.map(t => `<div class="ref-row" data-tplid="${esc(t.id)}"><span style="font-weight:500;min-width:180px">✉ ${esc(t.n)}</span><span class="muted small" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.s || '')}</span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`).join('') || `<div class="empty">Aucun modèle. Créez vos messages types (relance des variables, envoi des bulletins…) avec des zones automatiques : {formule}, {dossier}, {mois de paie}… <br><button class="btn sm" data-tpl="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>`}</div>`;
+  return `<i data-b="modeles"></i><div class="toolbar"><h2>Modèles de messages</h2><span class="muted small">Génériques (tous les clients), propres à un groupe ou à un dossier ; à insérer depuis le carnet d’un dossier (✉ Message), adaptés à l’interlocuteur. Le texte est copié, jamais envoyé.</span><span class="sp"></span><button class="btn sm primary" data-tpl="new">＋ Nouveau modèle</button></div>
+    <div class="card ref-list">${L.slice().sort((a, b) => tplRank(a) - tplRank(b) || tplScTxt(a).localeCompare(tplScTxt(b), 'fr') || a.n.localeCompare(b.n, 'fr')).map(t => tplRowHTML(t, true)).join('') || `<div class="empty">Aucun modèle. Créez vos messages types (relance des variables, envoi des bulletins…) avec des zones automatiques : {formule}, {dossier}, {mois de paie}… <br><button class="btn sm" data-tpl="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>`}</div>`;
 }
 function tplAddExamples() { S.meta.settings.tpl = [...tplList(), ...TPL_EX.map(t => ({ id: 'm' + newId(), ...t }))]; touchMeta(); toast('3 modèles ajoutés, à adapter à votre façon d’écrire'); }
-function openTplEdit(id, after) {
-  const t = id ? tplList().find(x => x.id === id) : null;
+const tplSc = t => t && (t.sc === 'grp' || t.sc === 'cli') ? t.sc : 'g';
+const tplScTxt = t => tplSc(t) === 'g' ? 'Générique' : tplSc(t) === 'grp' ? (groupOf(t.ref) ? grpTitle(groupOf(t.ref)) : 'Groupe supprimé') : (clientOf(t.ref) ? 'Dossier ' + clientOf(t.ref).name : 'Dossier supprimé');
+const tplFor = c => tplList().filter(t => (tplSc(t) === 'cli' && t.ref === c.id) || (tplSc(t) === 'grp' && c.group && t.ref === c.group));
+const tplGen = () => tplList().filter(t => tplSc(t) === 'g');
+const tplRank = t => ({ g: 0, grp: 1, cli: 2 })[tplSc(t)];
+function tplRowHTML(t, scope) { return `<div class="ref-row" data-tplid="${esc(t.id)}"><span style="font-weight:500;min-width:180px">✉ ${esc(t.n)}</span>${scope ? `<span class="tag tpl-sc sc-${tplSc(t)}">${esc(tplScTxt(t))}</span>` : ''}<span class="muted small" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.s || '')}</span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`; }
+function tplCarnetHTML(obj, isG) {
+  const L = (isG ? tplList().filter(t => (tplSc(t) === 'grp' && t.ref === obj.id) || (tplSc(t) === 'cli' && clientOf(t.ref)?.group === obj.id)) : tplFor(obj)).sort((a, b) => tplRank(a) - tplRank(b) || a.n.localeCompare(b.n, 'fr')), ng = tplGen().length;
+  return `<i data-b="modeles" data-half="1"></i><div class="toolbar"><h2>Modèles de messages (${L.length})</h2><span class="sp"></span>${isG ? '' : '<button class="btn sm ghost" data-cba="msg" title="Préparer un message à partir d’un modèle">✉ Message</button>'}<button class="btn sm" data-tpl="new" data-sc="${isG ? 'grp' : 'cli'}" data-ref="${esc(obj.id)}">＋ Modèle ${isG ? 'du groupe' : 'du dossier'}</button></div><div class="card cb-sec tpl-cb">
+    ${L.map(t => `<div class="cb-it" data-tplid="${esc(t.id)}"><span class="x">✉ ${esc(t.n)}<span class="ref">${esc(isG ? (tplSc(t) === 'grp' ? 'pour tous les dossiers du groupe' : tplScTxt(t)) : (tplSc(t) === 'cli' ? 'propre à ce dossier' : tplScTxt(t) + ' (tous les dossiers du groupe)'))}${t.s ? ' · ' + esc(t.s) : ''}</span></span><button class="btn sm ghost" data-tpl="edit">Modifier</button><button class="icon xs" data-tpl="del" title="Supprimer le modèle">${ICON.trash}</button></div>`).join('') || `<div class="cb-hint">Aucun modèle propre à ${isG ? 'ce groupe' : 'ce dossier'}.</div>`}
+    <div class="cb-hint" style="margin-top:6px">${ng} modèle${ng > 1 ? 's' : ''} générique${ng > 1 ? 's' : ''} (tous les clients), gérés dans <a href="#referentiel">Références</a>.</div></div>`;
+}
+function openTplEdit(id, after, preset) {
+  const t = id ? tplList().find(x => x.id === id) : null; let sc = t ? tplSc(t) : (preset && preset.sc) || 'g'; const ref0 = t ? t.ref : preset && preset.ref;
+  const cs = S.meta.clients.filter(c => !c.deletedAt && !c.archived).sort((a, b) => (isMine(b) ? 1 : 0) - (isMine(a) ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
   const m = modal(`<div class="modal-h"><h3>${t ? 'Modifier le modèle' : 'Nouveau modèle de message'}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b" style="display:grid;gap:10px"><label class="fld"><span>Nom du modèle</span><input id="tp-n" maxlength="60" value="${esc(t ? t.n : '')}" placeholder="ex. Relance des variables"></label>
+      <div class="fld"><span>Pour qui ?</span><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" id="tp-sc"><button type="button" data-v="g">Générique (tous les clients)</button><button type="button" data-v="grp" ${groupsAll().length ? '' : 'disabled title="Aucun groupe"'}>Un groupe</button><button type="button" data-v="cli">Un dossier</button></div>
+        <select id="tp-grp" hidden>${groupsAll().map(g => `<option value="${esc(g.id)}" ${ref0 === g.id ? 'selected' : ''}>${esc(grpTitle(g))}</option>`).join('')}</select>
+        <select id="tp-cli" hidden style="max-width:280px">${cs.map(c => `<option value="${esc(c.id)}" ${ref0 === c.id ? 'selected' : ''}>${esc(c.name)}${c.code ? ' (n° ' + esc(c.code) + ')' : ''}${isMine(c) ? '' : ' · hors portefeuille'}</option>`).join('')}</select></div></div>
       <label class="fld"><span>Objet</span><input id="tp-s" maxlength="200" value="${esc(t ? t.s || '' : '')}" placeholder="ex. {dossier} – variables de {mois de paie}"></label>
       <label class="fld"><span>Texte</span><textarea id="tp-b" rows="11" style="width:100%;resize:vertical">${esc(t ? t.b || '' : '')}</textarea></label>
       <div><div class="small" style="margin-bottom:4px">Insérer une zone automatique (à l’endroit du curseur) :</div><div class="tpl-z">${TPL_Z.map(([k, d]) => `<button type="button" class="chip-btn" data-z="${esc(k)}" title="${esc(d || k)}">{${esc(k)}}</button>`).join('')}</div>
       <div class="muted small" style="margin-top:4px">Une zone sans valeur pour le dossier choisi apparaît entre crochets, à compléter. Ne notez jamais d’identifiants ni de mots de passe dans un modèle.</div></div></div>
     <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="tp-ok">Enregistrer</button></div>`, 'wide');
   const q = x => m.el.querySelector(x); let foc = q('#tp-b');
+  const scUI = () => { q('#tp-sc').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === sc)); q('#tp-grp').hidden = sc !== 'grp'; q('#tp-cli').hidden = sc !== 'cli'; };
+  scUI(); q('#tp-sc').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b || b.disabled) return; sc = b.dataset.v; scUI(); });
   [q('#tp-s'), q('#tp-b')].forEach(f => f.addEventListener('focus', () => { foc = f; }));
   q('.tpl-z').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (!b) return; const z = '{' + b.dataset.z + '}', a = foc.selectionStart ?? foc.value.length, e = foc.selectionEnd ?? a; foc.value = foc.value.slice(0, a) + z + foc.value.slice(e); foc.focus(); foc.setSelectionRange(a + z.length, a + z.length); });
   setTimeout(() => q('#tp-n').focus(), 30);
   q('#tp-ok').addEventListener('click', () => {
     const n = q('#tp-n').value.trim(); if (!n) { toast('Donnez un nom au modèle'); q('#tp-n').focus(); return; }
-    const o = { id: t ? t.id : 'm' + newId(), n, s: q('#tp-s').value.trim(), b: q('#tp-b').value.replace(/\s+$/, '') };
-    S.meta.settings.tpl = t ? tplList().map(x => x.id === t.id ? o : x) : [...tplList(), o]; touchMeta(); m.close(); toast(t ? 'Modèle enregistré' : 'Modèle créé : ' + n); if (after) after(o.id);
+    const ref = sc === 'grp' ? q('#tp-grp').value : sc === 'cli' ? q('#tp-cli').value : ''; if (sc !== 'g' && !ref) { toast('Choisissez le ' + (sc === 'grp' ? 'groupe' : 'dossier')); return; }
+    const o = { id: t ? t.id : 'm' + newId(), n, s: q('#tp-s').value.trim(), b: q('#tp-b').value.replace(/\s+$/, '') }; if (sc !== 'g') { o.sc = sc; o.ref = ref; }
+    S.meta.settings.tpl = t ? tplList().map(x => x.id === t.id ? o : x) : [...tplList(), o]; touchMeta(); m.close(); toast((t ? 'Modèle enregistré' : 'Modèle créé : ' + n) + ' · ' + tplScTxt(o)); if (after) after(o.id);
   });
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-tpl]'); if (!b) return; const id = b.closest('[data-tplid]')?.dataset.tplid, a = b.dataset.tpl;
-  if (a === 'new') openTplEdit(null); else if (a === 'ex') tplAddExamples(); else if (a === 'edit') openTplEdit(id);
+  if (a === 'new') openTplEdit(null, null, b.dataset.sc ? { sc: b.dataset.sc, ref: b.dataset.ref } : null); else if (a === 'ex') tplAddExamples(); else if (a === 'edit') openTplEdit(id);
   else if (a === 'del') { const prev = tplList(), t = prev.find(x => x.id === id); S.meta.settings.tpl = prev.filter(x => x.id !== id); touchMeta(); toast('Modèle supprimé : ' + (t ? t.n : ''), 'Annuler', () => { S.meta.settings.tpl = prev; touchMeta(); }); }
 });
-function openMsg(cid, pid) {
+function openMsg(cid, pid, prefer) {
   const c = clientOf(cid); if (!c) return;
   const g = groupOf(c.group), own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && (x.clients || []).some(id => clientOf(id)?.group === g.id)) : [];
   const mk0 = defaultCycleMonth(), mks = [prevMk(mk0), mk0, nextMk(mk0)], last = lsGet('tplLast', '');
-  const L = tplList(), pOpt = x => `<option value="${x.id}" ${x.id === (pid || (own[0] || {}).id) ? 'selected' : ''}>${esc(x.name)}${pRoleTxt(x) ? ' · ' + esc(pRoleTxt(x)) : ''}</option>`;
+  const spec = tplFor(c).sort((a, b) => tplRank(b) - tplRank(a) || a.n.localeCompare(b.n, 'fr')), gen = tplGen().sort((a, b) => a.n.localeCompare(b.n, 'fr'));
+  let mode = prefer || (spec.length ? 'spec' : 'gen'); if (mode === 'spec' && !spec.length) mode = 'gen'; if (mode === 'gen' && !gen.length && spec.length) mode = 'spec';
+  const any = spec.length + gen.length, pOpt = x => `<option value="${x.id}" ${x.id === (pid || (own[0] || {}).id) ? 'selected' : ''}>${esc(x.name)}${pRoleTxt(x) ? ' · ' + esc(pRoleTxt(x)) : ''}</option>`;
   const m = modal(`<div class="modal-h"><h3>✉ Message — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
-    <div class="modal-b" style="display:grid;gap:10px">${!L.length ? `<div class="card empty" style="margin:0">Aucun modèle de message pour l’instant.<br><button class="btn sm primary" data-msg="new" style="margin-top:8px">＋ Créer un modèle</button> <button class="btn sm" data-msg="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>` : `
-      <div class="fld-row"><label class="fld"><span>Modèle</span><select id="ms-t">${L.map(t => `<option value="${esc(t.id)}" ${t.id === last ? 'selected' : ''}>${esc(t.n)}</option>`).join('')}</select></label>
+    <div class="modal-b" style="display:grid;gap:10px">${!any ? `<div class="card empty" style="margin:0">Aucun modèle de message pour l’instant.<br><button class="btn sm primary" data-msg="new" style="margin-top:8px">＋ Créer un modèle</button> <button class="btn sm" data-msg="ex" style="margin-top:8px">Ajouter 3 exemples</button></div>` : `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="seg" id="ms-sc"><button type="button" data-v="spec" ${spec.length ? '' : 'disabled'} title="Modèles propres à ce dossier ou à son groupe">Spécifiques (${spec.length})</button><button type="button" data-v="gen" ${gen.length ? '' : 'disabled'} title="Modèles pour tous les clients">Génériques (${gen.length})</button></div><span class="sp" style="flex:1"></span><button type="button" class="btn sm ghost" data-msg="newspec">＋ Modèle pour ce dossier</button></div>
+      <div class="fld-row"><label class="fld"><span>Modèle</span><select id="ms-t"></select></label>
         <label class="fld"><span>Interlocuteur</span><select id="ms-p">${own.length ? `<optgroup label="Interlocuteurs du dossier">${own.map(pOpt).join('')}</optgroup>` : ''}${gp.length ? `<optgroup label="Autres interlocuteurs du groupe">${gp.map(pOpt).join('')}</optgroup>` : ''}<option value="" ${!own.length && !pid ? 'selected' : ''}>Sans interlocuteur</option></select></label>
         <label class="fld" style="max-width:190px"><span>Mois de paie</span><select id="ms-m">${mks.map(k => `<option value="${k}" ${k === mk0 ? 'selected' : ''}>${esc(mkLabel(k))}</option>`).join('')}</select></label></div>
       <label class="fld"><span>Objet</span><input id="ms-s"></label><label class="fld"><span>Texte (modifiable avant de copier)</span><textarea id="ms-b" rows="12" style="width:100%;resize:vertical"></textarea></label>
       <div id="ms-warn" class="small" style="color:var(--s-warn,#a66a00)" hidden></div>`}</div>
-    <div class="modal-f">${L.length ? `<button class="btn ghost" data-msg="edit" title="Modifier ce modèle">Modifier le modèle</button><span class="sp"></span><button class="btn" data-msg="cs">${ICON.copy} Copier l’objet</button><button class="btn" data-msg="cb">${ICON.copy} Copier le texte</button><button class="btn primary" data-msg="ca">${ICON.copy} Copier tout</button>` : '<span class="sp"></span><button class="btn" data-close>Fermer</button>'}</div>`, 'wide');
+    <div class="modal-f">${any ? `<button class="btn ghost" data-msg="edit" title="Modifier ce modèle">Modifier le modèle</button><span class="sp"></span><button class="btn" data-msg="cs">${ICON.copy} Copier l’objet</button><button class="btn" data-msg="cb">${ICON.copy} Copier le texte</button><button class="btn primary" data-msg="ca">${ICON.copy} Copier tout</button>` : '<span class="sp"></span><button class="btn" data-close>Fermer</button>'}</div>`, 'wide');
   const q = x => m.el.querySelector(x);
   const fill = () => { const t = tplList().find(x => x.id === q('#ms-t').value); if (!t) return; lsSet('tplLast', t.id); const V = tplVals(c, personOf(q('#ms-p').value) || null, q('#ms-m').value); q('#ms-s').value = tplFill(t.s, V); q('#ms-b').value = tplFill(t.b, V);
     const miss = [...new Set([...(q('#ms-s').value + q('#ms-b').value).matchAll(/\[([^\]\n]{1,40})\]/g)].map(x => x[1]).filter(k => norm(k) in V))]; q('#ms-warn').hidden = !miss.length; q('#ms-warn').textContent = miss.length ? 'À compléter : ' + miss.join(', ') + ' (non renseigné pour ce dossier ou cet interlocuteur).' : ''; };
-  if (L.length) { ['#ms-t', '#ms-p', '#ms-m'].forEach(x => q(x).addEventListener('change', fill)); fill(); }
-  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-msg]'); if (!b) return; const a = b.dataset.msg;
-    if (a === 'new' || a === 'ex') { m.close(); if (a === 'ex') { tplAddExamples(); openMsg(cid, pid); } else openTplEdit(null, () => openMsg(cid, pid)); return; }
-    if (a === 'edit') { const id = q('#ms-t').value; m.close(); openTplEdit(id, () => openMsg(cid, q('#ms-p') ? q('#ms-p').value : pid)); return; }
+  const list = () => { const L = mode === 'spec' ? spec : gen; q('#ms-sc').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === mode)); q('#ms-t').innerHTML = L.map(t => `<option value="${esc(t.id)}" ${t.id === last ? 'selected' : ''}>${esc(t.n)}${mode === 'spec' && tplSc(t) === 'grp' ? ' (groupe)' : ''}</option>`).join(''); fill(); };
+  if (any) { q('#ms-sc').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b || b.disabled) return; mode = b.dataset.v; list(); }); ['#ms-t', '#ms-p', '#ms-m'].forEach(x => q(x).addEventListener('change', fill)); list(); }
+  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-msg]'); if (!b) return; const a = b.dataset.msg, pp = q('#ms-p') ? q('#ms-p').value : pid;
+    if (a === 'new' || a === 'ex' || a === 'newspec') { m.close(); if (a === 'ex') { tplAddExamples(); openMsg(cid, pid); } else openTplEdit(null, () => openMsg(cid, pp, a === 'newspec' ? 'spec' : null), a === 'newspec' ? { sc: 'cli', ref: c.id } : null); return; }
+    if (a === 'edit') { const id = q('#ms-t').value; if (!id) return; m.close(); openTplEdit(id, () => openMsg(cid, pp, mode)); return; }
     copyText(a === 'cs' ? q('#ms-s').value : a === 'cb' ? q('#ms-b').value : 'Objet : ' + q('#ms-s').value + '\n\n' + q('#ms-b').value); });
 }
 /* ---------- Mode discret pour le partage d'écran (v1.45.0), propre à l'appareil ---------- */
@@ -2807,23 +2831,69 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.47.0', '15/11/2026', ['Modèles de messages génériques (tous les clients), propres à un groupe ou à un dossier ; liste des modèles dans chaque carnet ; à l’envoi, bascule « Spécifiques / Génériques ».', 'Historique complet des versions (Réglages › Données, ou clic sur le numéro de version).', 'Réglage pour ne plus afficher les nouveautés à l’ouverture (Réglages › Cet appareil).']],
   ['1.46.0', '15/11/2026', ['Taille de l’affichage réglable de 85 % à 140 % (texte, boutons, icônes), propre à chaque appareil : Réglages › Cet appareil, Ctrl + « + » / « − » / 0, ou la barre de commande.']],
   ['1.45.0', '15/11/2026', ['Charge à venir : les échéances des deux prochaines semaines dans Ma journée, et une vue sur deux mois dans Mon cycle (clic sur un jour : le détail).', 'Préparer une absence : ce qui tombera pendant vos congés, par dossier ou par date, en PDF, texte ou impression.', 'Pendant mon absence : au retour, ce qui est arrivé à échéance sans être noté.', 'Recherche dans le contenu des carnets (pratiques, journal, points, notes…) depuis la loupe et la recherche du Carnet.', 'Modèles de messages (Références) à insérer depuis le carnet d’un dossier, adaptés à l’interlocuteur.', 'Mode discret pour le partage d’écran (bouton 👁 en haut à droite), réglable dans Réglages › Cet appareil.', 'v1.45.1 : horaires et durées des saisies aussi floutés ; option « Noms des dossiers » renommée.', 'Aide de chaque écran (bouton ?) et ces nouveautés après chaque mise à jour.']],
   ['1.44.0', '15/11/2026', ['Catégories de tâches et de personnes à votre main : ajout, nom, ordre, couleur, mots-clés et facturation par défaut.', 'Copie du carnet d’un autre dossier, à la création ou depuis un carnet.', 'Barre des Outils figée en haut de l’écran.']],
   ['1.43.0', '15/11/2026', ['Barres principales figées en haut de l’écran (Mon cycle, Carnet, Rapports), désactivables.', 'Export PDF du carnet : pied de page réduit au logo.']],
   ['1.42.0', '15/11/2026', ['Couleurs des catégories de tâches et de personnes, icône selon la civilité.', 'PDF du carnet aux couleurs de l’application.']]];
+const NEWS_HIST = [
+  ['1.41.1', '14/11/2026', ['Export des carnets complété (texte complet) et vrai fichier PDF généré par l’application.']],
+  ['1.41.0', '14/11/2026', ['Export d’un carnet (dossier ou groupe) : rubriques au choix, PDF, texte copié ou fichier .txt.']],
+  ['1.40.0', '14/11/2026', ['Groupes gérés dans le Carnet ; catégories de tâches (cyclique, événementiel, exceptionnel, interne) ; tarifs par tâche et par dossier ; fiche complète des personnes.']],
+  ['1.39.0', '14/11/2026', ['Réglages en trois rubriques ; planning seul (journée type ou horaires fixes) ; création d’un dossier depuis les tuiles ; colonnes de Mon cycle au choix ; lien entre cycle et chrono ; Ma semaine ; suggestions discrètes.']],
+  ['1.38.0', '14/11/2026', ['Carnet de bord en tuiles ou en liste (fiche dossier unique) ; onglet Références ; Ma journée avec À faire et échéances ; barre de commande (Ctrl+K).']],
+  ['1.37.0', '14/11/2026', ['Lissage des temps (vue lissée) ; copie des paramètres du cycle vers d’autres dossiers ; pastille d’état du cycle ; filtres des tuiles du Carnet.']],
+  ['1.36.0', '14/11/2026', ['Couleur de l’application au choix, par appareil.']],
+  ['1.35.0', '14/11/2026', ['Colonne Validation client dans Mon cycle ; liste des conventions collectives à jour (ministère du Travail, octobre 2026).']],
+  ['1.34.0', '14/11/2026', ['Informations facultatives (salarié, véhicule…) en tête des outils, reprises à l’export ; montant mensuel de l’avantage véhicule ; marges à zéro non reprises.']],
+  ['1.33.0', '14/11/2026', ['Export des calculs : montants en €, règles et sources en option.']],
+  ['1.32.0', '14/11/2026', ['Export d’un calcul des Outils en image ou en texte.']],
+  ['1.31.0', '14/11/2026', ['Outil Avantage en nature véhicule (règles depuis février 2025), forfait et réel comparés.']],
+  ['1.30.0', '14/11/2026', ['Import de dossiers (extraction Silae, .xlsx, .csv) : complète les champs vides ; SIRET ; couronne au trait pour la société mère (1.30.1).']],
+  ['1.29.0', '14/11/2026', ['Remise à zéro sécurisée (sauvegarde obligatoire puis mot « EFFACER »).']],
+  ['1.28.0', '14/11/2026', ['Société mère d’un groupe.']],
+  ['1.27.0', '14/11/2026', ['Regroupement des lignes de saisie identiques d’une journée.']],
+  ['1.26.0', '14/11/2026', ['Onglets affichés au choix, par appareil, avec profils.']],
+  ['1.25.0', '14/11/2026', ['Version alpha signalée ; icônes des onglets ; chrono animé ; dossier sans convention collective.']],
+  ['1.24.0', '14/11/2026', ['Jours fériés d’Alsace-Moselle : un choix commun à tous les outils.']],
+  ['1.23.0', '14/11/2026', ['Forfait jours : congés non acquis, deux méthodes de calcul, journée de solidarité ; sélection d’un mois entier (1.23.1).']],
+  ['1.22.0', '14/11/2026', ['Outil Forfait jours : jours de repos.']],
+  ['1.21.0', '14/11/2026', ['Nouvel onglet Outils : huit calculateurs du quotidien.']],
+  ['1.20.0', '14/11/2026', ['Planning habituel (horaires fixes ou forfait) utilisé partout ; correctif d’enregistrement des horaires (1.20.1).']],
+  ['1.19.0', '14/11/2026', ['Carnets de groupe.']],
+  ['1.18.0', '14/11/2026', ['Nouvel onglet Carnet de bord : conventions collectives, pratiques, points en cours, journal, virements, relation client.']],
+  ['1.17.0', '14/11/2026', ['Mode appel : met le chrono en pause pendant une interruption, puis l’affecte.']],
+  ['1.16.0', '13/11/2026', ['Blocs déplaçables et repliables dans tous les onglets.']],
+  ['1.15.0', '13/11/2026', ['Rappels bienveillants sur le temps de travail (repos, déconnexion).']],
+  ['1.14.0', '13/11/2026', ['Historique des 10 dernières actions, restaurables ; citations de la pop culture (1.14.1).']],
+  ['1.13.0', '13/11/2026', ['Groupes de dossiers ; journées entières et absences ; jours fériés proposés à l’avance.']],
+  ['1.12.0', '13/11/2026', ['Pastille du mois en disque de progression ; action à l’heure de fin de journée.']],
+  ['1.11.0', '13/11/2026', ['Onglet renommé « Mon cycle » ; alertes salariés neutres par défaut.']],
+  ['1.10.0', '13/11/2026', ['Colonne Alerte salarié ; remarques permanentes par dossier.']],
+  ['1.9.0', '12/11/2026', ['Nouvel onglet Réglages.']],
+  ['1.8.0', '12/11/2026', ['L’application devient Antevorta ; citations sur le temps (1.8.1 à 1.8.5) ; icône de portefeuille (1.8.7).']],
+  ['1.7.0', '12/11/2026', ['Temps interne au cabinet ; clôture manuelle d’un cycle (1.7.1) ; dépôt le jour de la validation (1.7.2) ; alerte 1er envoi (1.7.3).']],
+  ['1.6.0', '12/11/2026', ['Suivi du cycle de paie ; réception habituelle des variables (1.6.2).']],
+  ['1.5.0', '12/11/2026', ['Onglet « Mon portefeuille ».']],
+  ['1.4.0', '12/11/2026', ['Portefeuilles et personnes.']],
+  ['1.3.0', '12/11/2026', ['Application installable sur téléphone (PWA).']],
+  ['1.2.0', '11/11/2026', ['Validation des comptes Google par l’administrateur.']],
+  ['1.1.0', '11/11/2026', ['Numéro de version, corbeille, chrono oublié.']],
+  ['1.0', '11/11/2026', ['Première version : chrono, saisies, clients et tâches, rapports, à facturer.']]];
 const verCmp = (a, b) => { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; };
 function openNews(since) {
-  const L = since ? NEWS.filter(n => verCmp(n[0], since) > 0) : NEWS;
-  const m = modal(`<div class="modal-h"><h3>✨ ${since ? 'Nouveautés de la version ' + APP_VERSION : 'Nouveautés d’Antevorta'}</h3><button class="icon" data-close>${ICON.close}</button></div>
-    <div class="modal-b news">${(L.length ? L : NEWS.slice(0, 1)).map(([v, d, items]) => `<h4>Version ${esc(v)} <span class="muted small">· ${esc(d)}</span></h4><ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>
-    <div class="modal-f">${since ? '<button class="btn ghost" data-news="all">Toutes les nouveautés</button>' : ''}<span class="sp"></span><button class="btn primary" data-close>C’est noté</button></div>`);
-  m.el.querySelector('[data-news]')?.addEventListener('click', () => { m.close(); openNews(null); });
+  const ALL = [...NEWS, ...NEWS_HIST], L = since ? NEWS.filter(n => verCmp(n[0], since) > 0) : ALL;
+  const m = modal(`<div class="modal-h"><h3>✨ ${since ? 'Nouveautés de la version ' + APP_VERSION : 'Historique des versions d’Antevorta'}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b news">${since ? '' : `<div class="muted small" style="margin-bottom:8px">${ALL.length} versions depuis le 11/11/2026 · version actuelle ${esc(APP_VERSION)}</div>`}${(L.length ? L : NEWS.slice(0, 1)).map(([v, d, items]) => `<h4>Version ${esc(v)} <span class="muted small">· ${esc(d)}</span></h4><ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>
+    <div class="modal-f">${since ? '<button class="btn ghost" data-news="all">Historique complet</button><button class="btn ghost" data-news="off" title="Réglable ensuite dans Réglages › Cet appareil">Ne plus afficher à l’ouverture</button>' : ''}<span class="sp"></span><button class="btn primary" data-close>C’est noté</button></div>`);
+  m.el.querySelector('[data-news=all]')?.addEventListener('click', () => { m.close(); openNews(null); });
+  m.el.querySelector('[data-news=off]')?.addEventListener('click', () => { lsSet('newsPop', '0'); m.close(); toast('Les nouveautés ne s’afficheront plus à l’ouverture (Réglages › Cet appareil pour les réactiver)'); });
 }
 function newsCheck() {
   const seen = lsGet('seenVer', ''); if (seen === APP_VERSION) return;
   const old = typeof NEWS_OLD !== 'undefined' && NEWS_OLD;
-  lsSet('seenVer', APP_VERSION);
+  lsSet('seenVer', APP_VERSION); if (lsGet('newsPop', '1') !== '1') return;
   if ((old || seen) && NEWS.some(n => n[0] === APP_VERSION) && !document.querySelector('.overlay')) openNews(seen || '1.44.0');
 }
 const HELP = {
@@ -2832,7 +2902,7 @@ const HELP = {
   carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
   facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
-  referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier.']],
+  referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages génériques, de groupe ou de dossier : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier (✉ Message : bascule Spécifiques / Génériques).']],
   outils: ['Outils', ['Calculateurs du quotidien : dates, rupture conventionnelle, forfait jours, avantage véhicule, prorata…', '« Choisir mes outils » règle ceux qui s’affichent ; chaque calcul se copie en image ou en texte.', 'Calculs indicatifs : vérifiez toujours votre convention collective.']],
   reglages: ['Réglages', ['Mon travail : planning, saisie des temps, suggestions, lissage.', 'Cet appareil : couleur, taille de l’affichage, barres figées, mode discret, citations, onglets affichés.', 'Données : sauvegarde, imports, conventions collectives, remise à zéro.']]
 };
@@ -2840,7 +2910,7 @@ function openHelp() {
   const v = (location.hash.slice(1).split('/')[0] || 'chrono').replace('acces', 'reglages'), h = HELP[v] || HELP.chrono;
   const m = modal(`<div class="modal-h"><h3>? Aide — ${esc(h[0])}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b news"><ul>${h[1].map(x => `<li>${esc(x)}</li>`).join('')}</ul><h4>Partout</h4><ul><li>Ctrl+K (ou la loupe) : chercher un dossier, le contenu des carnets, un onglet, un outil, ou saisir « 1h30 Dupont paie ».</li><li>Bouton horloge : vos 10 dernières actions, restaurables. 👁 : mode discret pour le partage d’écran.</li><li>Ctrl + « + » / « − » / 0 : taille de l’affichage.</li></ul></div>
-    <div class="modal-f"><button class="btn ghost" data-h="news">Nouveautés de la version</button><span class="sp"></span><button class="btn primary" data-close>Fermer</button></div>`);
+    <div class="modal-f"><button class="btn ghost" data-h="news">Historique des versions</button><span class="sp"></span><button class="btn primary" data-close>Fermer</button></div>`);
   m.el.querySelector('[data-h]').addEventListener('click', () => { m.close(); openNews(null); });
 }
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
@@ -3133,6 +3203,7 @@ function renderCarnetGroupe(body, g) {
     ${pts.length ? `<div><div class="cb-hint" style="margin-bottom:4px">Points en cours des dossiers (${pts.length})</div><div class="cb-list">${pts.map(({ p, x }) => `<div class="cb-it"><a class="d" href="#carnet/${encodeURIComponent(x.id)}" style="min-width:120px">${esc(x.name)}</a><span class="x">${esc(p.t)}</span>${p.due ? `<span class="due ${p.due < today ? 'late' : ''}">⏰ ${fmtDate(parseDay(p.due)).slice(0, 5)}</span>` : ''}</div>`).join('')}</div></div>` : ''}</div>`;
   html += `<i data-b="gpoints" data-half="1"></i><h2>Points en cours du groupe (${b.points.filter(x => !x.done).length})</h2><div class="card cb-sec">${cbPointsHTML(b.points, today, ' du groupe')}</div>`;
   html += `<i data-b="gjournal" data-half="1"></i><h2>Journal du groupe (${b.journal.length})</h2><div class="card cb-sec">${cbJournalHTML(b.journal, today)}</div>`;
+  html += tplCarnetHTML(g, true);
   body.innerHTML = html;
   blkify(body, 'carnetgroupe');
 }
@@ -3197,6 +3268,7 @@ function renderCarnetDossier(body, c) {
     <div class="cb-add"><input type="date" id="jr-d" value="${today}"><input id="jr-t" placeholder="Événement (ex. Rejet DSN de mars, courrier URSSAF…)" autocomplete="off"></div>
     <div class="cb-add"><input id="jr-ref" placeholder="Référence du document dans la GED (facultatif)" autocomplete="off"><button class="btn sm primary" data-cba="jradd">Ajouter</button></div>
     ${jr.length ? `<div class="cb-list">${jr.map(x => `<div class="cb-it" data-jr="${x.id}"><span class="d">${fmtDate(parseDay(x.d))}</span><span class="x">${esc(x.t)}${x.ref ? `<span class="ref">📎 ${esc(x.ref)}</span>` : ''}</span><button class="icon xs" data-cba="jrdel" title="Supprimer">${ICON.trash}</button></div>`).join('')}</div>` : '<div class="cb-hint">Aucun événement noté. Texte seul : pour un document, notez sa référence dans la GED du cabinet.</div>'}</div>`;
+  html += tplCarnetHTML(c, false);
   // Calendrier des virements
   const months = Array.from({ length: 12 }, (_, i) => year + '-' + pad(i + 1));
   html += `<i data-b="calendrier"></i><div class="toolbar"><h2>Calendrier des virements</h2><span class="sp"></span><div class="seg"><button data-cba="yprev" title="Année précédente">‹</button><button disabled style="opacity:1;font-weight:600">${year}</button><button data-cba="ynext" title="Année suivante">›</button></div></div><div class="card cb-sec">
@@ -4341,7 +4413,7 @@ function cmdItems(q) {
     { ic: '🧳', t: 'Préparer une absence', s: 'Congés : ce qui tombera pendant l’absence', k: 'conges absence depart vacances', run: openAbsPrep }, { ic: '↩', t: 'Pendant mon absence', s: 'Retour de congés', k: 'retour conges absence', run: openAbsBack }] : []),
     { ic: '👁', t: dscOn() ? 'Désactiver le mode discret' : 'Mode discret', s: 'Partage d’écran', k: 'discret partage ecran masquer', run: toggleDsc }, { ic: '✉', t: 'Modèles de messages', s: 'Références', k: 'modeles messages mail courriel', run: () => cmdGoBlk('referentiel', 'modeles') },
     { ic: 'A+', t: 'Agrandir l’affichage', s: 'Taille actuelle : ' + uizGet() + ' % · Ctrl +', k: 'taille police texte zoom agrandir plus grand lisibilite', run: () => setUiz(uizGet() + 10) }, { ic: 'A−', t: 'Réduire l’affichage', s: 'Taille actuelle : ' + uizGet() + ' % · Ctrl −', k: 'taille police texte zoom reduire plus petit', run: () => setUiz(uizGet() - 10) }, { ic: 'A', t: 'Taille normale de l’affichage (100 %)', s: 'Ctrl 0', k: 'taille police texte zoom normale', run: () => setUiz(100) },
-    { ic: '✨', t: 'Nouveautés de la version', s: 'Version ' + APP_VERSION, k: 'nouveautes version mise a jour', run: () => openNews(null) }, { ic: '?', t: 'Aide de cet écran', s: 'Aide', k: 'aide help comment', run: openHelp });
+    { ic: '✨', t: 'Historique des versions', s: 'Nouveautés · version ' + APP_VERSION, k: 'nouveautes version mise a jour historique notes', run: () => openNews(null) }, { ic: '?', t: 'Aide de cet écran', s: 'Aide', k: 'aide help comment', run: openHelp });
   if (n.length >= 3) { const hs = cbSearch(q, 6); if (hs.length) out.push({ head: 'Dans les carnets' }, ...hs.map(h => ({ ic: '🔎', t: h.isG ? grpTitle(h.o) : h.o.name, s: h.where + ' : « ' + h.snip + ' »', run: () => { location.hash = 'carnet/' + (h.isG ? 'groupe/' : '') + encodeURIComponent(h.o.id); } }))); }
   const navF = n ? nav.filter(x => n.split(/\s+/).every(w => norm(x.t + ' ' + x.k).includes(w))).slice(0, 8) : nav.filter(x => x.s === 'Onglet');
   if (navF.length) out.push({ head: n ? 'Aller à' : 'Onglets' }, ...navF);
@@ -6487,13 +6559,14 @@ function renderSettings() {
       <div class="setting"><div>Figer les barres en haut de l’écran<div class="d">Sur ordinateur : barre et en-têtes du tableau de Mon cycle, en-tête et filtres du Carnet, filtres des Rapports. Sur téléphone : l’en-tête du carnet seulement.</div></div><select id="set-stick"><option value="1" ${lsGet('stick', '1') === '1' ? 'selected' : ''}>Oui</option><option value="0" ${lsGet('stick', '1') === '1' ? '' : 'selected'}>Non</option></select></div>
       <div class="setting"><div>Taille de l’affichage<div class="d">Agrandit ou réduit tout l’affichage de l’application (texte, boutons, icônes), sur cet appareil. Raccourcis : Ctrl + « + », Ctrl + « − », Ctrl + 0 (100 %).</div><div class="uiz-ctl"><button type="button" class="icon xs" data-uiz="-5" title="Réduire" aria-label="Réduire">A−</button><input type="range" id="set-uiz" min="${UIZ_MIN}" max="${UIZ_MAX}" step="5" value="${uizGet()}" aria-label="Taille de l’affichage"><button type="button" class="icon xs" data-uiz="5" title="Agrandir" aria-label="Agrandir">A+</button><b id="set-uiz-v">${uizGet()} %</b><button type="button" class="btn sm ghost" data-uiz="0" ${uizGet() === 100 ? 'disabled' : ''}>100 %</button></div></div></div>
       <div class="setting"><div>Mode discret (partage d’écran)<div class="d">Bouton 👁 en haut à droite ou barre de commande. Éléments masqués quand il est activé :</div><div class="dsc-opts">${DSC_OPTS.map(([k, l]) => `<label class="chk"><input type="checkbox" data-dsco="${k}" ${dscOpts().includes(k) ? 'checked' : ''}> ${esc(l)}</label>`).join('')}</div></div><select id="set-dsc"><option value="1" ${dscOn() ? 'selected' : ''}>Activé</option><option value="0" ${dscOn() ? '' : 'selected'}>Désactivé</option></select></div>
+      <div class="setting"><div>Nouveautés après une mise à jour<div class="d">Fenêtre des nouveautés à la première ouverture d’une nouvelle version (sur cet appareil). L’historique complet reste accessible dans Réglages › Données ou par un clic sur le numéro de version.</div></div><select id="set-newspop"><option value="1" ${lsGet('newsPop', '1') === '1' ? 'selected' : ''}>Afficher</option><option value="0" ${lsGet('newsPop', '1') === '1' ? '' : 'selected'}>Ne pas afficher</option></select></div>
       <div class="setting"><div>Citation sur le temps à l’ouverture<div class="d">Défile dans le bandeau du haut au démarrage, puis après 15 minutes d’inactivité sans chrono lancé (sur cet appareil) ; un clic la masque. ${QUOTES.length} citations.</div></div><select id="set-quote"><option value="1" ${quoteOn() ? 'selected' : ''}>Oui</option><option value="0" ${quoteOn() ? '' : 'selected'}>Non</option></select></div>
     </div>
     ${tabsHTML()}`;
   else html += `    <i data-b="donnees" data-half="1"></i><h2>Données</h2><div class="card settings">
       <div class="setting"><div>${Store.mode === 'firebase' ? 'Stockage Firebase (compte Google)' : Store.mode === 'cloud' ? 'Stockage privé lié à votre compte' : 'Stockage dans ce navigateur'}<div class="d">${Store.mode === 'firebase' ? 'Connecté : ' + esc(Store.fb?.user?.email || '') + '. Vos saisies vous suivent d’un poste à l’autre.' : Store.mode === 'cloud' ? 'Vos saisies vous suivent d’un poste à l’autre ; personne d’autre ne les voit.' : 'Les données restent sur ce poste et ce navigateur. Exportez régulièrement.'}</div></div></div>
       ${Store.mode === 'firebase' ? `<div class="setting"><div>Application sur cet appareil<div class="d">${Install.standalone() ? 'Antevorta est ouvert en tant qu’application installée.' : 'Installez Antevorta pour l’ouvrir depuis une icône, en plein écran (téléphone ou ordinateur).'}</div></div>${Install.standalone() ? '' : '<button class="btn sm primary" data-act="install">Installer</button>'}</div>` : ''}
-      <div class="setting"><div>Version de l’application<div class="d">Antevorta v${APP_VERSION} du ${APP_DATE}</div></div></div>
+      <div class="setting"><div>Version de l’application<div class="d">Antevorta v${APP_VERSION} du ${APP_DATE}</div></div><button class="btn sm" type="button" onclick="openNews(null)">Historique des versions</button></div>
       <div class="setting"><div>Sauvegarde complète<div class="d">${allEntries().length} saisies · ${S.meta.clients.length} clients · ${S.meta.persons.length} personnes · ${S.meta.tasks.length} tâches</div></div><span style="display:flex;gap:6px"><button class="btn sm" data-act="export">${ICON.down} Exporter</button><label class="btn sm" style="cursor:pointer">Importer<input type="file" accept=".json,application/json" id="import-file" hidden></label></span></div>
       <div class="setting"><div>Importer des dossiers<div class="d">Liste de clients extraite de Silae (XML Excel 2003), d’Excel (.xlsx) ou en CSV : n° de dossier, raison sociale, groupe, SIRET. Aperçu avant tout ajout.</div></div><label class="btn sm" style="cursor:pointer">Choisir un fichier…<input type="file" accept=".xml,.xlsx,.csv,.txt" id="imp-cli-file" hidden></label></div>
       <div class="setting"><div>Liste des conventions collectives<div class="d">Liste du ministère du Travail utilisée par le carnet de bord : ${ccnDateTxt(CCN_DATE)}${CCN_DATE !== CCN_BASE_DATE ? ' (mise à jour sur cet appareil)' : ' (intégrée)'}. Pour la mettre à jour : téléchargez le « Fichier de suivi historique des conventions collectives » (XLSX) sur <a href="https://travail-emploi.gouv.fr/conventions-collectives-nomenclatures" target="_blank" rel="noopener">travail-emploi.gouv.fr ↗</a>, puis choisissez-le ici.</div></div><span style="display:flex;gap:6px;flex-wrap:wrap">${CCN_DATE !== CCN_BASE_DATE ? '<button class="btn sm ghost" data-act="ccn-reset">Revenir à la liste intégrée</button>' : ''}<label class="btn sm" style="cursor:pointer">Mettre à jour…<input type="file" accept=".xlsx" id="ccn-file" hidden></label></span></div>
@@ -6623,6 +6696,7 @@ function bindRefsOn(body) {
       touchMeta(); return;
     }
     if (i.dataset.dsco) { lsSet('dscOpts', JSON.stringify([...document.querySelectorAll('[data-dsco]:checked')].map(x => x.dataset.dsco))); applyDsc(); return; }
+    if (i.id === 'set-newspop') { lsSet('newsPop', i.value); return; }
     if (i.id === 'set-uiz') { setUiz(+i.value, true); return; }
     if (i.id === 'set-dsc') { lsSet('dsc', i.value); applyDsc(); return; }
     if (i.id === 'set-stick') { lsSet('stick', i.value); document.body.classList.toggle('stick', i.value === '1'); return; }
