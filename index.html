@@ -1113,7 +1113,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.50.0';
+const APP_VERSION = '1.50.1';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2849,7 +2849,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
-  ['1.50.0', '15/11/2026', ['Nouvel outil Calculatrice : opérations usuelles, parenthèses, pourcentage, ±, racine carrée, arrondi à 2 décimales ; historique des 10 derniers calculs (sur cet appareil), effaçable ; un clic sur un nombre ou un résultat l’insère dans le calcul, ↺ reprend un calcul entier, ↑ ↓ et « ans » rappellent les précédents.']],
+  ['1.50.0', '15/11/2026', ['v1.50.1 : un nombre à décimales d’un calcul précédent (ex. 12,8835) s’insère en entier, même tapé avec un point.', 'Nouvel outil Calculatrice : opérations usuelles, parenthèses, pourcentage, ±, racine carrée, arrondi à 2 décimales ; historique des 10 derniers calculs (sur cet appareil), effaçable ; un clic sur un nombre ou un résultat l’insère dans le calcul, ↺ reprend un calcul entier, ↑ ↓ et « ans » rappellent les précédents.']],
   ['1.49.0', '15/11/2026', ['Une personne (interlocuteur, catégorie ajoutée) peut être rattachée à un ou plusieurs groupes de dossiers : elle apparaît dans le carnet du groupe et dans ceux de tous ses dossiers. « ＋ Ajouter » dans le bloc Interlocuteurs du groupe.']],
   ['1.48.0', '15/11/2026', ['Chrono en cours sur un dossier : bouton « ✉ Message à … » sous la barre du chrono, ✉ dans la pastille du chrono des autres onglets, et en tête de la barre de commande.']],
   ['1.47.0', '15/11/2026', ['Modèles de messages génériques (tous les clients), propres à des groupes ou à des dossiers (plusieurs possibles, v1.47.1) ; liste des modèles dans chaque carnet ; à l’envoi, bascule « Spécifiques / Génériques ».', 'Historique complet des versions (Réglages › Données, ou clic sur le numéro de version).', 'Réglage pour ne plus afficher les nouveautés à l’ouverture (Réglages › Cet appareil).']],
@@ -2986,9 +2986,9 @@ function calcEval(src, ans) {
   const r = expr(); if (p < T.length) throw new Error('syn'); if (!isFinite(r)) throw new Error('div0');
   return r;
 }
-const calcPretty = s => String(s || '').replace(/[*xX]/g, '×').replace(/\//g, '÷').replace(/(\d)\s*([+\-×÷])\s*/g, '$1 $2 ').replace(/\s+/g, ' ').trim();
+const calcPretty = s => String(s || '').replace(/(\d)\.(\d)/g, '$1,$2').replace(/[*xX]/g, '×').replace(/\//g, '÷').replace(/(\d)\s*([+\-×÷])\s*/g, '$1 $2 ').replace(/\s+/g, ' ').trim();
 function calcExprHTML(e) { // nombres cliquables
-  return esc(calcPretty(e)).replace(/\d(?:[\d ]*\d)?(?:,\d+)?/g, m => `<button type="button" class="calc-n" data-cins="${esc(m.replace(/ /g, ''))}" title="Insérer ${esc(m)} dans le calcul">${m}</button>`);
+  return esc(calcPretty(e)).replace(/\d(?:[\d ]*\d)?(?:[.,]\d+)?/g, m => `<button type="button" class="calc-n" data-cins="${esc(m.replace(/ /g, '').replace('.', ','))}" title="Insérer ${esc(m)} dans le calcul">${m}</button>`);
 }
 function calcHistHTML() {
   const H = calcHist();
