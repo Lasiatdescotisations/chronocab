@@ -743,6 +743,7 @@ a.btn:not(.primary){color:var(--ink)}
 .tl-card[data-tool=calc] .tl-out{display:none}.calc-prev{margin-top:4px}.calc-out{display:flex;align-items:baseline;gap:6px;justify-content:flex-end;min-height:34px}.calc-big{font:600 24px var(--mono,monospace);cursor:default}.calc-big[data-cins]{cursor:pointer}
 .calc-h-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}.calc-h{list-style:none;margin:0;padding:0;display:grid;gap:2px}.calc-h li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:7px;font-family:var(--mono,monospace);font-size:13.5px}.calc-h li:hover{background:var(--hover,rgba(0,0,0,.04))}
 .calc-e{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}.calc-n,.calc-r{background:none;border:0;padding:0 1px;font:inherit;color:inherit;cursor:pointer;border-radius:4px}.calc-n:hover,.calc-r:hover{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}.calc-r{font-weight:700;color:var(--ink,#222)}.calc-eq{color:var(--muted)}
+.ms-to{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:28px}.ct-card{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;display:grid;gap:4px}.ct-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ct-l{display:flex;align-items:center;gap:8px}.ct-l .muted{min-width:70px}.ct-note{font-size:12.5px;color:var(--muted);white-space:pre-wrap}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
 .dsc-opts{display:grid;gap:2px;margin-top:4px}#ver{cursor:pointer}
@@ -1113,7 +1114,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.51.0';
+const APP_VERSION = '1.52.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2234,7 +2235,7 @@ function syncTimerBar() {
   go.title = manual ? 'Ajouter la saisie' : S.running ? 'Arrêter' : 'Démarrer';
   const sub = $('#tb-sub');
   if (S.running) {
-    sub.innerHTML = `En cours depuis <input id="tb-start" inputmode="numeric" value="${hhmm(S.running.start)}" title="Corriger l'heure de début"> · le chrono continue même si vous fermez l'onglet.${runCli() ? ` <button type="button" class="btn sm ghost tb-msg" data-runmsg title="Préparer un message pour ce dossier à partir d’un modèle">✉ Message à ${esc(runCli().name)}</button>` : ''}`;
+    sub.innerHTML = `En cours depuis <input id="tb-start" inputmode="numeric" value="${hhmm(S.running.start)}" title="Corriger l'heure de début"> · le chrono continue même si vous fermez l'onglet.${runCli() ? ` <button type="button" class="btn sm ghost tb-msg" data-runmsg title="Préparer un message pour ce dossier à partir d’un modèle">✉ Message à ${esc(runCli().name)}</button><button type="button" class="btn sm ghost tb-msg" data-runppl title="Fiches des interlocuteurs du dossier : e-mail, téléphone, notes">👥 Interlocuteurs</button>` : ''}${runPers() ? ` <button type="button" class="btn sm ghost tb-msg" data-runfiche title="Fiche de la personne : coordonnées, notes">👤 Fiche de ${esc(runPers().name)}</button>` : ''}`;
     $('#tb-start').addEventListener('change', ev => {
       const t = timeOn(startOfDay(S.running.start), ev.target.value);
       if (t != null && t < Date.now()) { updateRunning({ start: t }); tick(); }
@@ -2258,13 +2259,31 @@ function tick() {
 function navLive() { const a = document.querySelector('.nav a[data-view=chrono]'); if (!a) return; const call = !!Call.get(); a.classList.toggle('call', call); a.classList.toggle('run', !call && !!S.running); a.title = call ? 'Appel en cours' : S.running ? 'Chrono en cours' : ''; }
 const runCli = () => { const r = S.running; if (!r || !r.client || isPersonId(r.client) || isInternalId(r.client) || r.client === ABS_ID) return null; const c = clientOf(r.client); return c && !c.deletedAt ? c : null; };
 document.addEventListener('click', ev => { if (ev.target.closest('[data-runmsg]') && runCli()) openMsg(runCli().id); });
+const runPers = () => { const r = S.running; if (!r || !isPersonId(r.client)) return null; const x = personOf(r.client); return x && !x.deletedAt ? x : null; };
+function cliContacts(c) { const own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)); const g = groupOf(c.group); return { own, gp: g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && pInGroup(x, g.id)) : [], g }; }
+function openContacts(cid) { // fiches des interlocuteurs d'un dossier, consultation rapide (v1.52.0)
+  const c = clientOf(cid); if (!c) return; const { own, gp, g } = cliContacts(c);
+  const card = x => `<div class="ct-card" data-pid="${x.id}"><div class="ct-h">${persIc(x)}<b>${esc((x.civ ? x.civ + ' ' : '') + x.name)}</b>${pRoleTxt(x) ? `<span class="muted small">${esc(pRoleTxt(x))}</span>` : ''}<span class="sp" style="flex:1"></span><button type="button" class="btn sm ghost" data-ct="msg" title="Préparer un message à cet interlocuteur">✉ Message</button><button type="button" class="btn sm ghost" data-ct="fiche">Fiche</button></div>
+    ${x.email ? `<div class="ct-l"><span class="muted small">E-mail</span><a href="mailto:${esc(x.email)}">${esc(x.email)}</a><button type="button" class="icon xs" data-ctcopy="${esc(x.email)}" title="Copier l’adresse">${ICON.copy}</button></div>` : ''}
+    ${x.phone ? `<div class="ct-l"><span class="muted small">Téléphone</span><a href="${esc(telHref(x.phone))}">${esc(x.phone)}</a><button type="button" class="icon xs" data-ctcopy="${esc(x.phone)}" title="Copier le numéro">${ICON.copy}</button></div>` : ''}
+    ${!x.email && !x.phone ? '<div class="muted small">Ni e-mail ni téléphone renseigné.</div>' : ''}${x.note ? `<div class="ct-note">${esc(x.note)}</div>` : ''}</div>`;
+  const m = modal(`<div class="modal-h"><h3>Interlocuteurs — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b">${own.length ? own.map(card).join('') : '<div class="muted">Aucun interlocuteur rattaché à ce dossier.</div>'}${gp.length ? `<div class="small" style="margin:10px 0 4px"><b>Autres interlocuteurs du ${esc(grpTitle(g))}</b></div>${gp.map(card).join('')}` : ''}</div>
+    <div class="modal-f"><button class="btn ghost" data-ct="new">＋ Ajouter un interlocuteur</button><span class="sp"></span><a class="btn" href="#carnet/${encodeURIComponent(c.id)}" data-close>Ouvrir le carnet</a><button class="btn primary" data-close>Fermer</button></div>`);
+  m.el.addEventListener('click', ev => {
+    const cp = ev.target.closest('[data-ctcopy]'); if (cp) { copyText(cp.dataset.ctcopy); return; }
+    const b = ev.target.closest('[data-ct]'); if (!b) return; const pid = b.closest('[data-pid]')?.dataset.pid;
+    if (b.dataset.ct === 'msg') { m.close(); openMsg(c.id, pid); } else if (b.dataset.ct === 'fiche') { m.close(); openPersonFiche(pid); } else if (b.dataset.ct === 'new') { m.close(); openPersonFiche(null, { kind: 'cli', clients: [c.id] }); }
+  });
+}
+document.addEventListener('click', ev => { if (ev.target.closest('[data-runppl]') && runCli()) openContacts(runCli().id); else if (ev.target.closest('[data-runfiche]') && runPers()) openPersonFiche(runPers().id); });
 function renderPill() {
   navLive();
   const p = $('#pill');
   if (!S.running || UI.view === 'chrono' || !tabOn('chrono')) { p.hidden = true; return; }
   p.hidden = false;
   const r = S.running;
-  p.innerHTML = `<span class="what">${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span>${runCli() ? '<button type="button" class="pill-msg" data-runmsg title="Préparer un message pour ce dossier">✉</button>' : ''}<button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
+  p.innerHTML = `<span class="what">${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span>${runCli() ? '<button type="button" class="pill-msg" data-runmsg title="Préparer un message pour ce dossier">✉</button><button type="button" class="pill-msg" data-runppl title="Interlocuteurs du dossier">👥</button>' : ''}${runPers() ? '<button type="button" class="pill-msg" data-runfiche title="Fiche de la personne">👤</button>' : ''}<button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
   $('#pill-stop').onclick = () => stopTimer();
 }
 
@@ -2811,15 +2830,18 @@ function openMsg(cid, pid, prefer) {
       <div class="fld-row"><label class="fld"><span>Modèle</span><select id="ms-t"></select></label>
         <label class="fld"><span>Interlocuteur</span><select id="ms-p">${own.length ? `<optgroup label="Interlocuteurs du dossier">${own.map(pOpt).join('')}</optgroup>` : ''}${gp.length ? `<optgroup label="Autres interlocuteurs du groupe">${gp.map(pOpt).join('')}</optgroup>` : ''}<option value="" ${!own.length && !pid ? 'selected' : ''}>Sans interlocuteur</option></select></label>
         <label class="fld" style="max-width:190px"><span>Mois de paie</span><select id="ms-m">${mks.map(k => `<option value="${k}" ${k === mk0 ? 'selected' : ''}>${esc(mkLabel(k))}</option>`).join('')}</select></label></div>
+      <div id="ms-to" class="ms-to"></div>
       <label class="fld"><span>Objet</span><input id="ms-s"></label><label class="fld"><span>Texte (modifiable avant de copier)</span><textarea id="ms-b" rows="12" style="width:100%;resize:vertical"></textarea></label>
       <div id="ms-warn" class="small" style="color:var(--s-warn,#a66a00)" hidden></div>`}</div>
     <div class="modal-f">${any ? `<button class="btn ghost" data-msg="edit" title="Modifier ce modèle">Modifier le modèle</button><span class="sp"></span><button class="btn" data-msg="cs">${ICON.copy} Copier l’objet</button><button class="btn" data-msg="cb">${ICON.copy} Copier le texte</button><button class="btn primary" data-msg="ca">${ICON.copy} Copier tout</button>` : '<span class="sp"></span><button class="btn" data-close>Fermer</button>'}</div>`, 'wide');
   const q = x => m.el.querySelector(x);
-  const fill = () => { const t = tplList().find(x => x.id === q('#ms-t').value); if (!t) return; lsSet('tplLast', t.id); const V = tplVals(c, personOf(q('#ms-p').value) || null, q('#ms-m').value); q('#ms-s').value = tplFill(t.s, V); q('#ms-b').value = tplFill(t.b, V);
+  const toLine = () => { const x = personOf(q('#ms-p').value); q('#ms-to').innerHTML = !x ? '<span class="muted small">Sans interlocuteur : pas d’adresse à rappeler.</span>' : x.email ? `<span class="muted small">À :</span> <a href="mailto:${esc(x.email)}">${esc(x.email)}</a> <button type="button" class="btn sm ghost" data-msgto="${esc(x.email)}">${ICON.copy} Copier l’adresse</button>${x.phone ? ` <span class="muted small">· ${esc(x.phone)}</span>` : ''}` : `<span class="muted small">Pas d’adresse e-mail dans la fiche de ${esc(x.name)}.</span> <button type="button" class="btn sm ghost" data-msgto-fiche="${x.id}">Compléter la fiche</button>`; };
+  const fill = () => { toLine(); const t = tplList().find(x => x.id === q('#ms-t').value); if (!t) return; lsSet('tplLast', t.id); const V = tplVals(c, personOf(q('#ms-p').value) || null, q('#ms-m').value); q('#ms-s').value = tplFill(t.s, V); q('#ms-b').value = tplFill(t.b, V);
     const miss = [...new Set([...(q('#ms-s').value + q('#ms-b').value).matchAll(/\[([^\]\n]{1,40})\]/g)].map(x => x[1]).filter(k => norm(k) in V))]; q('#ms-warn').hidden = !miss.length; q('#ms-warn').textContent = miss.length ? 'À compléter : ' + miss.join(', ') + ' (non renseigné pour ce dossier ou cet interlocuteur).' : ''; };
   const list = () => { const L = mode === 'spec' ? spec : gen; q('#ms-sc').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === mode)); q('#ms-t').innerHTML = L.map(t => `<option value="${esc(t.id)}" ${t.id === last ? 'selected' : ''}>${esc(t.n)}${mode === 'spec' && tplSc(t) === 'grp' ? ' (groupe)' : ''}</option>`).join(''); fill(); };
   if (any) { q('#ms-sc').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b || b.disabled) return; mode = b.dataset.v; list(); }); ['#ms-t', '#ms-p', '#ms-m'].forEach(x => q(x).addEventListener('change', fill)); list(); }
-  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-msg]'); if (!b) return; const a = b.dataset.msg, pp = q('#ms-p') ? q('#ms-p').value : pid;
+  m.el.addEventListener('click', ev => { const to = ev.target.closest('[data-msgto]'); if (to) { copyText(to.dataset.msgto); return; } const tf = ev.target.closest('[data-msgto-fiche]'); if (tf) { m.close(); openPersonFiche(tf.dataset.msgtoFiche); return; }
+    const b = ev.target.closest('[data-msg]'); if (!b) return; const a = b.dataset.msg, pp = q('#ms-p') ? q('#ms-p').value : pid;
     if (a === 'new' || a === 'ex' || a === 'newspec') { m.close(); if (a === 'ex') { tplAddExamples(); openMsg(cid, pid); } else openTplEdit(null, () => openMsg(cid, pp, a === 'newspec' ? 'spec' : null), a === 'newspec' ? { sc: 'cli', ref: c.id } : null); return; }
     if (a === 'edit') { const id = q('#ms-t').value; if (!id) return; m.close(); openTplEdit(id, () => openMsg(cid, pp, mode)); return; }
     copyText(a === 'cs' ? q('#ms-s').value : a === 'cb' ? q('#ms-b').value : 'Objet : ' + q('#ms-s').value + '\n\n' + q('#ms-b').value); });
@@ -2849,6 +2871,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.52.0', '15/11/2026', ['Fenêtre de message : rappel de l’adresse e-mail de l’interlocuteur choisi, avec un bouton pour la copier.', 'Chrono en cours : « 👥 Interlocuteurs » pour un dossier (e-mail, téléphone, notes, message), « 👤 Fiche » pour une personne ; aussi dans la pastille du chrono et la barre de commande.']],
   ['1.51.0', '15/11/2026', ['Rupture conventionnelle : option « Signature un jour ouvré » (cochée par défaut) ; en partant de la date de rupture souhaitée, la signature au plus tard tombe sur un jour ouvré ; depuis la date d’entretien, elle est reportée au jour ouvré suivant ; une date de signature saisie un week-end ou un férié est signalée.']],
   ['1.50.0', '15/11/2026', ['v1.50.1 : un nombre à décimales d’un calcul précédent (ex. 12,8835) s’insère en entier, même tapé avec un point.', 'Nouvel outil Calculatrice : opérations usuelles, parenthèses, pourcentage, ±, racine carrée, arrondi à 2 décimales ; historique des 10 derniers calculs (sur cet appareil), effaçable ; un clic sur un nombre ou un résultat l’insère dans le calcul, ↺ reprend un calcul entier, ↑ ↓ et « ans » rappellent les précédents.']],
   ['1.49.0', '15/11/2026', ['Une personne (interlocuteur, catégorie ajoutée) peut être rattachée à un ou plusieurs groupes de dossiers : elle apparaît dans le carnet du groupe et dans ceux de tous ses dossiers. « ＋ Ajouter » dans le bloc Interlocuteurs du groupe.']],
@@ -4522,6 +4545,8 @@ function cmdItems(q) {
   if (qk) out.push({ ic: '⏱', t: 'Créer la saisie : ' + fmtDur(qk.mins * 60000) + ' · ' + (qk.client ? clientName(qk.client) : 'sans dossier') + (qk.task ? ' · ' + taskName(qk.task) : '') + (qk.label ? ' · « ' + qk.label + ' »' : '') + (qk.day ? ' · hier' : ' · aujourd’hui'), s: 'Entrée pour enregistrer', run: () => cmdQuickSave(qk) });
   const cl = S.meta.clients.filter(c => !c.deletedAt);
   if (runCli() && (!n || 'message mail courriel ecrire'.includes(n) || norm(runCli().name).includes(n))) out.push({ ic: '✉', t: 'Message à ' + runCli().name, s: 'Dossier du chrono en cours — à partir d’un modèle', run: () => openMsg(runCli().id) });
+  if (runCli() && (!n || 'interlocuteurs contacts adresse telephone'.includes(n) || norm(runCli().name).includes(n))) out.push({ ic: '👥', t: 'Interlocuteurs de ' + runCli().name, s: 'Dossier du chrono en cours — e-mail, téléphone, notes', run: () => openContacts(runCli().id) });
+  if (runPers() && (!n || 'fiche personne contact'.includes(n) || norm(runPers().name).includes(n))) out.push({ ic: '👤', t: 'Fiche de ' + runPers().name, s: 'Personne du chrono en cours', run: () => openPersonFiche(runPers().id) });
   let ds = [];
   if (n) {
     const ws = n.split(/\s+/);
