@@ -754,7 +754,8 @@ a.btn:not(.primary){color:var(--ink)}
 .note-d{background:var(--surface-2);border-radius:8px;padding:0 6px}.note-d.now{background:var(--todo-soft)}.note-d.late{background:var(--stop-soft);color:var(--stop)}
 .gaps{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 14px;border-top:1px dashed var(--line);background:color-mix(in srgb,var(--surface-2) 50%,var(--surface))}.gap{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1px 2px 1px 8px}.gap small{font-family:var(--sans)}
 .rep12 th,.rep12 td{white-space:nowrap}.rep12 td.n,.rep12 th.n{text-align:right;font-variant-numeric:tabular-nums}.rep12 tfoot td{font-weight:600;border-top:2px solid var(--line)}.r12-c{display:inline-flex;align-items:center;gap:6px;color:inherit;text-decoration:none}.r12-c:hover .cl{text-decoration:underline}
-.cb-fj{margin-top:8px}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px 16px}.sp-g{display:grid;gap:3px;align-content:start}.sp-gh{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}.sp-g .chk{font-size:13px;align-items:flex-start}
+.sp-tags{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 2px}.sp-tags span{font:600 10px var(--mono);letter-spacing:.02em;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);border-radius:5px;padding:0 4px}
 .ms-to{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:28px}.ct-card{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;display:grid;gap:4px}.ct-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ct-l{display:flex;align-items:center;gap:8px}.ct-l .muted{min-width:70px}.ct-note{font-size:12.5px;color:var(--muted);white-space:pre-wrap}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
@@ -1127,7 +1128,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.54.0';
+const APP_VERSION = '1.55.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2787,7 +2788,7 @@ function cbTileHTML(x, mk, today) {
     <div class="t1">${cliIc(x.id)}<span class="nm dsc-n">${esc(x.name)}</span>${motherMark(x)}</div>
     <div class="t2">${x.code ? `<span class="mono">n° ${esc(x.code)}</span>` : ''}${g ? grpTag(g) : ''}${mine ? '' : `<span>${owner ? 'portef. ' + esc(owner) : 'hors portefeuille'}</span>`}</div>
     <div class="ccn ${ccn ? '' : 'none'}" title="${ccn ? esc((ccn.i != null ? 'IDCC ' + idccStr(ccn.i) + ' — ' : '') + ccn.t) : ''}">${ccn ? (ccn.i != null && !ccnIsNone(ccn) ? `<b class="mono">${idccStr(ccn.i)}</b> ` : '') + esc(ccnShort(ccn)) + ((b.ccn || []).some(k => k.i != null && ccnOld(ccnOf(k.i))) ? ' <span class="ccn-oldw" style="display:inline" title="Une convention de ce dossier n’est plus en vigueur">⚠</span>' : '') + (b.ccn.length > 1 ? ` <span class="muted">+${b.ccn.length - 1}</span>` : '') : 'Convention collective non renseignée'}</div>
-    ${UI._cbFound && UI._cbFound.get(x.id) ? `<div class="cb-found" title="Trouvé dans le carnet">🔎 ${esc(UI._cbFound.get(x.id))}</div>` : ''}<div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${b.fj ? '<span class="cb-b" title="Salariés au forfait jours">forfait jours</span>' : ''}${al ? `<span class="cb-b cb-sens" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b cb-sens ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
+    ${UI._cbFound && UI._cbFound.get(x.id) ? `<div class="cb-found" title="Trouvé dans le carnet">🔎 ${esc(UI._cbFound.get(x.id))}</div>` : ''}${(() => { const L = spOf(b); return L.length ? `<div class="sp-tags" title="Salariés particuliers : ${esc(L.map(k => SP_L[k][1]).join(', '))}">${L.slice(0, 6).map(k => `<span>${esc(SP_L[k][2])}</span>`).join('')}${L.length > 6 ? `<span>+${L.length - 6}</span>` : ''}</div>` : ''; })()}<div class="cb-badges">${eb ? `<span class="cb-b">${eb} BS</span>` : ''}${open.length ? `<span class="cb-b ${late ? 'late' : dueNow ? 'warn' : ''}" title="Points en cours${late ? ' (dont ' + late + ' en retard)' : ''}">${open.length} point${open.length > 1 ? 's' : ''} en cours</span>` : ''}${al ? `<span class="cb-b cb-sens" title="Alertes salariés actives">${al} alerte${al > 1 ? 's' : ''}</span>` : ''}${nv ? `<span class="cb-b" title="Prochaine date de virement du calendrier">virement ${fmtDate(parseDay(nv)).slice(0, 5)}</span>` : ''}${rel ? `<span class="cb-b cb-sens ${rel === 'fluide' ? 'rel-fluide' : rel === 'difficile' ? 'late' : 'warn'}" title="Relation client">${esc(CB_REL.find(r => r[0] === rel)[1])}</span>` : ''}</div>
   </button>`;
 }
 const grpTitle = g => /^groupe\b/i.test(g.name.trim()) ? g.name : 'Groupe ' + g.name;
@@ -2803,7 +2804,8 @@ function cbFilterHTML(base, ff) { // filtre des tuiles (v1.37.0) : points en cou
   const ccns = new Map(); for (const x of base) for (const k of (cbPeek(x).ccn || [])) { const key = ccnKey(k); const e = ccns.get(key) || { k, n: 0 }; e.n++; ccns.set(key, e); }
   const lst = [...ccns.entries()].sort((a, b) => b[1].n - a[1].n || ccnShort(a[1].k).localeCompare(ccnShort(b[1].k), 'fr'));
   const o = (v, l) => `<option value="${esc(v)}" ${ff === v ? 'selected' : ''}>${esc(l)}</option>`;
-  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('fj', 'Avec salariés au forfait jours')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
+  const spc = {}; for (const x of base) for (const k of spOf(cbPeek(x))) spc[k] = (spc[k] || 0) + 1; const spOpts = SP_ALL.filter(x => spc[x[0]]).map(x => o('sp:' + x[0], x[1] + ' (' + spc[x[0]] + ')')).join('');
+  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${spOpts ? `<optgroup label="Salariés particuliers">${spOpts}</optgroup>` : ''}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
 }
 function openNewDossier() {
   const m = modal(`<div class="modal-h"><h3>Nouveau dossier</h3><button class="icon" data-close>${ICON.close}</button></div>
@@ -2828,7 +2830,7 @@ function openNewDossier() {
 /* ---------- Recherche dans le contenu des carnets (v1.45.0) ---------- */
 function cbHayFields(o, isG) {
   const b = cbPeek(o);
-  return [['Pratiques', b.prat], ['Particularités', b.part], ['Notes du groupe', isG ? b.notes : ''], ['Remarque permanente', !isG && o.cy ? o.cy.notes : ''], ['Relation client', b.rel && b.rel.note],
+  return [['Pratiques', b.prat], ['Particularités', b.part], ['Salariés particuliers', [spOf(b).map(k => SP_L[k][1]).join(', '), b.spNote].filter(Boolean).join(' · ')], ['Notes du groupe', isG ? b.notes : ''], ['Remarque permanente', !isG && o.cy ? o.cy.notes : ''], ['Relation client', b.rel && b.rel.note],
     ...(b.points || []).map(x => [x.done ? 'Point clos' : 'Point en cours', x.t]), ...(b.journal || []).map(x => ['Journal', x.t + (x.ref ? ' [réf. ' + x.ref + ']' : '')]),
     ...(!isG ? (o.alerts || []).map(a => ['Alerte salarié', a.name + (a.tag ? ' (' + a.tag + ')' : '')]) : [])].filter(x => x[1]);
 }
@@ -2969,7 +2971,8 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
-  ['1.54.0', '15/11/2026', ['Notes rapides (bouton 🗒 en haut) : une idée en une ligne, rattachée au dossier (« Dupont : … » ou chrono en cours), rappel facultatif (« demain », « lundi », « 25/11 ») dans À faire aujourd’hui ; à traiter d’un clic ou à transformer en point en cours, entrée du journal ou pratique du dossier. Aussi « note … » dans la barre de commande.', 'Trous dans la journée : les créneaux de votre horaire sans saisie (dès 15 min, réglable) s’affichent sous les saisies du jour, avec « Affecter ».', 'Rapports : 12 derniers mois par dossier avec temps moyen par bulletin, rappelé dans le carnet.', 'Carnet : case « Salariés au forfait jours » et filtre correspondant.']],
+  ['1.55.0', '15/11/2026', ['Carnet : nouveau bloc « Salariés particuliers » — 28 cases réparties en quatre thèmes (statuts, contrats, temps de travail, situations particulières) et une remarque libre ; abréviations sur les tuiles, filtre du Carnet, export et copie de carnet. Remplace la case forfait jours de la v1.54.0 (reprise automatiquement).']],
+  ['1.54.0', '15/11/2026', ['Notes rapides (bouton 🗒 en haut) : une idée en une ligne, rattachée au dossier (« Dupont : … » ou chrono en cours), rappel facultatif (« demain », « lundi », « 25/11 ») dans À faire aujourd’hui ; à traiter d’un clic ou à transformer en point en cours, entrée du journal ou pratique du dossier. Aussi « note … » dans la barre de commande.', 'Trous dans la journée : les créneaux de votre horaire sans saisie (dès 15 min, réglable) s’affichent sous les saisies du jour, avec « Affecter ».', 'Rapports : 12 derniers mois par dossier avec temps moyen par bulletin, rappelé dans le carnet.', 'Carnet : case « Salariés au forfait jours » et filtre correspondant (remplacée en v1.55.0 par le bloc « Salariés particuliers »).']],
   ['1.52.0', '15/11/2026', ['Fenêtre de message : rappel de l’adresse e-mail de l’interlocuteur choisi, avec un bouton pour la copier.', 'Chrono en cours : « 👥 Interlocuteurs » pour un dossier (e-mail, téléphone, notes, message), « 👤 Fiche » pour une personne ; aussi dans la pastille du chrono et la barre de commande.']],
   ['1.51.0', '15/11/2026', ['Rupture conventionnelle : option « Signature un jour ouvré » (cochée par défaut) ; en partant de la date de rupture souhaitée, la signature au plus tard tombe sur un jour ouvré ; depuis la date d’entretien, elle est reportée au jour ouvré suivant ; une date de signature saisie un week-end ou un férié est signalée.']],
   ['1.53.0', '15/11/2026', ['Calculatrice : chaque ligne de l’historique peut être supprimée seule (✕ au bout de la ligne, avec Annuler).']],
@@ -3166,9 +3169,22 @@ document.addEventListener('keydown', ev => {
   else if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); inp.value = ''; st.ex = ''; calcRefresh(sec); }
   else if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') { const H = calcHist(); if (!H.length) return; ev.preventDefault(); st.hi = Math.max(-1, Math.min(H.length - 1, (st.hi ?? -1) + (ev.key === 'ArrowUp' ? 1 : -1))); inp.value = st.hi < 0 ? '' : H[st.hi].e; st.ex = inp.value; calcRefresh(sec); }
 }, true);
+/* Salariés particuliers (v1.55.0) : client.cb.sp = [clés cochées], cb.spNote = remarque libre ; l'ancienne case cb.fj (v1.54.0) vaut « fj » */
+const SP_LIST = [
+  ['Statuts et catégories', [['cad', 'Cadres', 'CAD'], ['ncad', 'Non-cadres (ouvriers, employés)', 'NC'], ['tam', 'TAM / ETAM', 'TAM'], ['vrp', 'VRP', 'VRP'], ['jrn', 'Journalistes', 'JRN'], ['ms', 'Mandataires sociaux assimilés salariés', 'MS']]],
+  ['Contrats', [['app', 'Apprentis', 'APP'], ['pro', 'Contrats de professionnalisation', 'PRO'], ['stg', 'Stagiaires gratifiés', 'STG'], ['cdd', 'CDD', 'CDD'], ['sais', 'Saisonniers', 'SAIS'], ['intm', 'Intermittents du spectacle', 'INTM'], ['aide', 'Contrats aidés', 'AIDÉ'], ['tp', 'Temps partiel', 'TP']]],
+  ['Temps de travail', [['fj', 'Forfait jours', 'FJ'], ['fh', 'Forfait heures annuel', 'FH'], ['annu', 'Annualisation / modulation', 'ANN'], ['nuit', 'Travail de nuit', 'NUIT'], ['dim', 'Travail le dimanche', 'DIM'], ['ast', 'Astreintes', 'AST']]],
+  ['Situations particulières', [['th', 'Travailleurs handicapés (DOETH)', 'TH'], ['min', 'Salariés de moins de 18 ans', '−18'], ['cer', 'Cumul emploi-retraite', 'CER'], ['multi', 'Multi-employeurs', 'MULTI'], ['etr', 'Salariés étrangers (titre de séjour)', 'ÉTR'], ['det', 'Détachés / expatriés', 'DÉT'], ['mtt', 'Mi-temps thérapeutique', 'MTT'], ['front', 'Frontaliers', 'FRONT']]]];
+const SP_ALL = SP_LIST.flatMap(g => g[1]), SP_L = Object.fromEntries(SP_ALL.map(x => [x[0], x]));
+const spOf = b => { const s2 = new Set(Array.isArray(b && b.sp) ? b.sp : []); if (b && b.fj) s2.add('fj'); return [...s2].filter(k => SP_L[k]).sort((a, c) => SP_ALL.findIndex(x => x[0] === a) - SP_ALL.findIndex(x => x[0] === c)); };
+function spHTML(c) {
+  const b = cbPeek(c), on = new Set(spOf(b));
+  return `<i data-b="salaries" data-half="1"></i><h2>Salariés particuliers${on.size ? ` (${on.size})` : ''}</h2><div class="card cb-sec"><div class="sp-grid">${SP_LIST.map(([gl, items]) => `<div class="sp-g"><div class="sp-gh">${esc(gl)}</div>${items.map(([k, l]) => `<label class="chk"><input type="checkbox" data-cbsp="${k}" ${on.has(k) ? 'checked' : ''}> ${esc(l)}</label>`).join('')}</div>`).join('')}</div>
+    <label class="fld" style="margin-top:8px"><span>Remarque</span><textarea data-cbf="spNote" rows="2" placeholder="ex. 2 apprentis BTS jusqu’en 08/2027 · gérant majoritaire non salarié">${esc(b.spNote || '')}</textarea></label></div>`;
+}
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
-const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
+const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['sp', 'Salariés particuliers', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
   ['notes', 'Remarque permanente', 0], ['interloc', 'Interlocuteurs (rattachés aux deux dossiers)', 0], ['points', 'Points en cours', 0], ['journal', 'Journal', 0], ['rel', 'Relation client', 0], ['alertes', 'Alertes salariés', 0]];
 function cbCopyFields(dstId) {
   const cs = S.meta.clients.filter(c => !c.deletedAt && c.id !== dstId).sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
@@ -3189,6 +3205,7 @@ function cbCopy(dst, src, keys) { // retourne le nombre d'éléments copiés
   if (K.has('ccn') && (sb.ccn || []).length && !db().ccn.length) { db().ccn = clone(sb.ccn); n++; }
   if (K.has('cycle') && src.cy) { const sp = cyOf(src), cy = { ...(dst.cy || {}) }; let k2 = 0; for (const k of CY_COPY_KEYS) if (cy[k] == null || cy[k] === '') { if (sp[k] != null && sp[k] !== '') { cy[k] = sp[k]; k2++; } } if (k2) { dst.cy = cy; n++; } }
   if (K.has('notes') && src.cy && src.cy.notes && !(dst.cy && dst.cy.notes)) { dst.cy = { ...(dst.cy || {}), notes: src.cy.notes }; n++; }
+  if (K.has('sp')) { const L = spOf(sb); if (L.length && !spOf(cbPeek(dst)).length) { db().sp = [...L]; n++; } if (sb.spNote && !cbPeek(dst).spNote) { db().spNote = sb.spNote; n++; } }
   if (K.has('prat')) for (const f of ['prat', 'part']) if (sb[f] && !db()[f]) { db()[f] = sb[f]; n++; }
   if (K.has('tarifs')) { if (src.rates) { const r = { ...(dst.rates || {}) }; let k2 = 0; for (const [t, v] of Object.entries(src.rates)) if (!r[t]) { r[t] = clone(v); k2++; } if (k2) { dst.rates = r; n++; } } if (src.billing && !dst.billing) { dst.billing = src.billing; n++; } }
   if (K.has('vir') && sb.vir) { const v = db().vir; let k2 = 0; for (const [mk, d] of Object.entries(sb.vir)) if (!v[mk]) { v[mk] = d; k2++; } if (k2) n++; }
@@ -3216,7 +3233,7 @@ function openCbCopy(dstId) {
 /* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
 const CBX = {
-  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours']],
+  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours']],
   groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal']]
 };
 function cbxSel(kind) { // { sel: [...], all: [clés connues] } ; une rubrique ajoutée depuis le dernier choix prend sa valeur par défaut
@@ -3243,6 +3260,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + ' — ' + (x.mode === 'validate' ? 'à valider : ' + alTrigText(x) : 'pour information') + (x.until ? ' · jusqu’au cycle de ' + mkLabel(x.until) : '')]), 'Aucune alerte active');
     add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x) + (x.note ? ' — ' + x.note : '')]), 'Aucun interlocuteur');
     add('tarifs', 'Tarifs de facturation', S.meta.tasks.filter(t => !t.deletedAt && rateOf(c.id, t.id)).map(t => [t.name, rateTxt(rateOf(c.id, t.id)) + (rateOf(c.id, t.id).own ? ' (propre au dossier)' : ' (tarif de la tâche)')]), 'Aucun tarif');
+    { const L = spOf(b); add('salaries', 'Salariés particuliers', [...SP_LIST.map(([gl, items]) => [gl, items.filter(x => L.includes(x[0])).map(x => x[1]).join(', ')]).filter(x => x[1]), ...(b.spNote ? [['Remarque', b.spNote]] : [])], 'Aucun renseigné'); }
     add('pratiques', 'Pratiques et particularités', [['Pratiques du client', b.prat || '—'], ['Particularités du cycle et des salariés', b.part || '—']]);
     add('points', 'Points en cours', ptsOf(b.points), 'Aucun point');
     add('journal', 'Journal', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]), 'Aucun événement');
@@ -3374,7 +3392,7 @@ function renderCarnet() {
     if (ff === 'pts') return (b.points || []).some(p => !p.done);
     if (ff === 'al') return alActive(x, mk0).length > 0;
     if (ff === 'rel') return ['surveiller', 'difficile'].includes(b.rel && b.rel.lvl);
-    if (ff === 'fj') return !!b.fj;
+    if (ff.startsWith('sp:')) return spOf(b).includes(ff.slice(3));
     if (ff === 'noccn') return !cc.length;
     if (ff === 'oldccn') return cc.some(k => k.i != null && ccnOld(ccnOf(k.i)));
     if (ff.startsWith('ccn:')) return cc.some(k => ccnKey(k) === ff.slice(4));
@@ -3479,10 +3497,10 @@ function renderCarnetDossier(body, c) {
   // Identité et conventions collectives
   html += `<i data-b="ident"></i><h2>Identité et convention collective</h2><div class="card cb-sec">
     <dl class="cb-kv"><dt>Raison sociale</dt><dd>${esc(c.name)}</dd><dt>N° de dossier</dt><dd>${esc(c.code || '—')}</dd>${c.siret ? `<dt>SIRET</dt><dd class="mono">${esc(fmtSiret(c.siret))}</dd>` : ''}<dt>Groupe</dt><dd>${g ? grpTag(g) : '—'}</dd><dt>Bulletins (cycle de ${esc(MONTHS_L[+mk.slice(5) - 1])})</dt><dd>${effBs(mk, c.id).n ?? '—'}</dd></dl>
-    <label class="chk cb-fj"><input type="checkbox" data-cbfj ${b.fj ? 'checked' : ''}> Salariés au forfait jours dans ce dossier</label>
     ${b.ccn.map((k, i) => { const r = k.i != null ? ccnOf(k.i) : null; const br = k.b || (r && r[4]) || ''; return `<div class="cb-ccn" data-ccn="${i}"><span class="ci">${k.i != null ? idccStr(k.i) : '—'}</span><div class="ct">${esc(k.t)}<div class="cs">${ccnIsNone(k) ? 'Code IDCC 9999 à déclarer en DSN · seules les règles du Code du travail s’appliquent (et les accords d’entreprise éventuels)' : (k.i != null ? 'IDCC ' + idccStr(k.i) : 'Convention non répertoriée (saisie libre)') + (br ? ' · brochure JO n° ' + esc(br) : '') + ` · <a href="${esc(ccnUrl(k))}" target="_blank" rel="noopener">Voir sur Légifrance ↗</a>` + (ccnOld(r) ? `<div class="ccn-oldw">⚠ ${esc(ccnOldTxt(r))}${r[6] && ccnOf(r[6]) && !b.ccn.some(x => x.i === r[6]) ? ` <button type="button" class="btn sm" data-cba="ccnrepl">Remplacer par l’IDCC ${idccStr(r[6])}</button>` : ''}</div>` : '')}</div></div><button class="icon xs" data-cba="ccndel" title="Retirer cette convention">${ICON.trash}</button></div>`; }).join('')}
     ${b.ccn.some(ccnIsNone) ? '' : `<div class="ccn-search"><input id="ccn-q" placeholder="${b.ccn.length ? 'Ajouter une autre convention collective' : 'Convention collective'} : nom, IDCC (ex. 1486) ou n° de brochure JO (ex. 3018)" autocomplete="off"><div class="ccn-res" id="ccn-res" hidden></div></div>
     <div class="cb-hint">Liste du ministère du Travail (${ccnDateTxt(CCN_DATE)}) : ${CCN_LIST.filter(r => r[5] === 1).length} conventions en vigueur et ${CCN_LIST.filter(ccnOld).length} anciennes ; plusieurs conventions possibles (ex. établissements différents). Introuvable ? Tapez son nom puis choisissez « Ajouter tel quel ». Vérifiez toujours la convention applicable sur Légifrance.${b.ccn.length ? '' : ' <button type="button" class="btn sm ghost" data-cba="ccnnone">Dossier sans convention collective (Code du travail)</button>'}</div>`}</div>`;
+  html += spHTML(c);
   if (g) {
     const gb = cbPeek(g), gOpen = (gb.points || []).filter(x => !x.done), others = grpMembers(g).filter(x => x.id !== c.id);
     html += `<i data-b="groupe"></i><div class="toolbar"><h2>${esc(grpTitle(g))}</h2><span class="sp"></span><a class="btn sm" href="#carnet/groupe/${encodeURIComponent(g.id)}">📖 Carnet du groupe</a></div><div class="card cb-sec cb-gnote" style="--g:${grpColor(g)}">
@@ -3606,7 +3624,7 @@ function bindCarnet() {
       else b[t.dataset.cbf] = v;
       touchMeta(); cbSaved(); return;
     }
-    if (t.dataset.cbfj != null) { const b = cbOf(c); if (t.checked) b.fj = true; else delete b.fj; touchMeta(); cbSaved(); return; }
+    if (t.dataset.cbsp) { const b = cbOf(c), set = new Set(spOf(b)); if (t.checked) set.add(t.dataset.cbsp); else set.delete(t.dataset.cbsp); delete b.fj; b.sp = [...set]; if (!b.sp.length) delete b.sp; touchMeta(); cbSaved(); return; }
     if (t.dataset.vir) { const b = cbOf(c); if (t.value) b.vir[t.dataset.vir] = t.value; else delete b.vir[t.dataset.vir]; touchMeta(); cbSaved(); return; }
     if (t.dataset.cba === 'ptdone') { const id = t.closest('[data-pt]').dataset.pt; cbPointDone(c.id, id, t.checked); return; }
   });
