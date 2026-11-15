@@ -736,6 +736,7 @@ a.btn:not(.primary){color:var(--ink)}
 .cb-found{font-size:11.5px;color:var(--muted);margin:4px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
 .tag.tpl-sc{width:auto;white-space:nowrap;margin:0 10px 0 6px;max-width:280px;overflow:hidden;text-overflow:ellipsis}.tpl-sc.sc-g{opacity:.7}.tpl-cb .cb-it .x{flex:1;min-width:0}
 .tp-pick{width:100%;margin-top:6px}.tp-pick input#tp-cq{width:100%;margin-bottom:4px}.tp-list{max-height:180px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 12px}
+.tb-msg{margin-left:6px;vertical-align:middle}.pill-msg{background:none;border:0;cursor:pointer;color:inherit;font-size:14px;padding:0 4px;line-height:1}
 .tpl-z{display:flex;flex-wrap:wrap;gap:4px}.tpl-z button{font:12px var(--mono,monospace);border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 6px;cursor:pointer;color:inherit}.tpl-z button:hover{border-color:var(--accent)}
 .news h4{margin:12px 0 4px}.news h4:first-child{margin-top:0}.news ul{margin:0;padding-left:20px}.news li{margin:4px 0}
 .dsc-opts{display:grid;gap:2px;margin-top:4px}#ver{cursor:pointer}
@@ -1106,7 +1107,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.47.1';
+const APP_VERSION = '1.48.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -2227,7 +2228,7 @@ function syncTimerBar() {
   go.title = manual ? 'Ajouter la saisie' : S.running ? 'Arrêter' : 'Démarrer';
   const sub = $('#tb-sub');
   if (S.running) {
-    sub.innerHTML = `En cours depuis <input id="tb-start" inputmode="numeric" value="${hhmm(S.running.start)}" title="Corriger l'heure de début"> · le chrono continue même si vous fermez l'onglet.`;
+    sub.innerHTML = `En cours depuis <input id="tb-start" inputmode="numeric" value="${hhmm(S.running.start)}" title="Corriger l'heure de début"> · le chrono continue même si vous fermez l'onglet.${runCli() ? ` <button type="button" class="btn sm ghost tb-msg" data-runmsg title="Préparer un message pour ce dossier à partir d’un modèle">✉ Message à ${esc(runCli().name)}</button>` : ''}`;
     $('#tb-start').addEventListener('change', ev => {
       const t = timeOn(startOfDay(S.running.start), ev.target.value);
       if (t != null && t < Date.now()) { updateRunning({ start: t }); tick(); }
@@ -2249,13 +2250,15 @@ function tick() {
   if (++_tickN % 30 === 0) checkForgotten();
 }
 function navLive() { const a = document.querySelector('.nav a[data-view=chrono]'); if (!a) return; const call = !!Call.get(); a.classList.toggle('call', call); a.classList.toggle('run', !call && !!S.running); a.title = call ? 'Appel en cours' : S.running ? 'Chrono en cours' : ''; }
+const runCli = () => { const r = S.running; if (!r || !r.client || isPersonId(r.client) || isInternalId(r.client) || r.client === ABS_ID) return null; const c = clientOf(r.client); return c && !c.deletedAt ? c : null; };
+document.addEventListener('click', ev => { if (ev.target.closest('[data-runmsg]') && runCli()) openMsg(runCli().id); });
 function renderPill() {
   navLive();
   const p = $('#pill');
   if (!S.running || UI.view === 'chrono' || !tabOn('chrono')) { p.hidden = true; return; }
   p.hidden = false;
   const r = S.running;
-  p.innerHTML = `<span class="what">${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span><button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
+  p.innerHTML = `<span class="what">${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span>${runCli() ? '<button type="button" class="pill-msg" data-runmsg title="Préparer un message pour ce dossier">✉</button>' : ''}<button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
   $('#pill-stop').onclick = () => stopTimer();
 }
 
@@ -2840,6 +2843,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.48.0', '15/11/2026', ['Chrono en cours sur un dossier : bouton « ✉ Message à … » sous la barre du chrono, ✉ dans la pastille du chrono des autres onglets, et en tête de la barre de commande.']],
   ['1.47.0', '15/11/2026', ['Modèles de messages génériques (tous les clients), propres à des groupes ou à des dossiers (plusieurs possibles, v1.47.1) ; liste des modèles dans chaque carnet ; à l’envoi, bascule « Spécifiques / Génériques ».', 'Historique complet des versions (Réglages › Données, ou clic sur le numéro de version).', 'Réglage pour ne plus afficher les nouveautés à l’ouverture (Réglages › Cet appareil).']],
   ['1.46.0', '15/11/2026', ['Taille de l’affichage réglable de 85 % à 140 % (texte, boutons, icônes), propre à chaque appareil : Réglages › Cet appareil, Ctrl + « + » / « − » / 0, ou la barre de commande.']],
   ['1.45.0', '15/11/2026', ['Charge à venir : les échéances des deux prochaines semaines dans Ma journée, et une vue sur deux mois dans Mon cycle (clic sur un jour : le détail).', 'Préparer une absence : ce qui tombera pendant vos congés, par dossier ou par date, en PDF, texte ou impression.', 'Pendant mon absence : au retour, ce qui est arrivé à échéance sans être noté.', 'Recherche dans le contenu des carnets (pratiques, journal, points, notes…) depuis la loupe et la recherche du Carnet.', 'Modèles de messages (Références) à insérer depuis le carnet d’un dossier, adaptés à l’interlocuteur.', 'Mode discret pour le partage d’écran (bouton 👁 en haut à droite), réglable dans Réglages › Cet appareil.', 'v1.45.1 : horaires et durées des saisies aussi floutés ; option « Noms des dossiers » renommée.', 'Aide de chaque écran (bouton ?) et ces nouveautés après chaque mise à jour.']],
@@ -4393,6 +4397,7 @@ function cmdItems(q) {
   const qk = n ? cmdQuick(q) : null;
   if (qk) out.push({ ic: '⏱', t: 'Créer la saisie : ' + fmtDur(qk.mins * 60000) + ' · ' + (qk.client ? clientName(qk.client) : 'sans dossier') + (qk.task ? ' · ' + taskName(qk.task) : '') + (qk.label ? ' · « ' + qk.label + ' »' : '') + (qk.day ? ' · hier' : ' · aujourd’hui'), s: 'Entrée pour enregistrer', run: () => cmdQuickSave(qk) });
   const cl = S.meta.clients.filter(c => !c.deletedAt);
+  if (runCli() && (!n || 'message mail courriel ecrire'.includes(n) || norm(runCli().name).includes(n))) out.push({ ic: '✉', t: 'Message à ' + runCli().name, s: 'Dossier du chrono en cours — à partir d’un modèle', run: () => openMsg(runCli().id) });
   let ds = [];
   if (n) {
     const ws = n.split(/\s+/);
