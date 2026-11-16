@@ -743,6 +743,10 @@ table.cyx tr.has-x td:first-child a{font-weight:600}
 .cyx-dos{font-size:13px;line-height:1.9;padding:6px 8px;border-radius:8px;background:var(--surface-2)}
 .cyx-chip{display:inline-flex;align-items:center;gap:3px;background:var(--todo-soft);color:var(--ink);border-radius:10px;padding:0 4px 0 8px;font-size:12px;white-space:nowrap}
 .cyx-chip button{border:0;background:none;cursor:pointer;color:var(--accent);padding:0 3px;font:inherit}
+.tag-g{font-size:10.5px;border-radius:8px;padding:0 6px;background:var(--surface-2);color:var(--muted)}
+.team-r{font-size:12.5px;padding:2px 6px;max-width:230px}
+.team-pp.arch{opacity:.55}
+.pf-qb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
 .lbl-w{display:flex;align-items:center;gap:4px;min-width:0}
 .lbl-w .lbl{flex:1;min-width:0}
 .ppl-b{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:3px 4px;border-radius:7px;display:inline-flex;align-items:center;flex:none;max-width:60%;overflow:hidden}
@@ -1193,7 +1197,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.61.0';
+const APP_VERSION = '1.62.0';
 const APP_DATE = '16/11/2026';
 /* =========================================================
    Utilitaires
@@ -2883,7 +2887,9 @@ function cbFilterHTML(base, ff) { // filtre des tuiles (v1.37.0) : points en cou
   const lst = [...ccns.entries()].sort((a, b) => b[1].n - a[1].n || ccnShort(a[1].k).localeCompare(ccnShort(b[1].k), 'fr'));
   const o = (v, l) => `<option value="${esc(v)}" ${ff === v ? 'selected' : ''}>${esc(l)}</option>`;
   const spc = {}; for (const x of base) for (const k of spOf(cbPeek(x))) spc[k] = (spc[k] || 0) + 1; const spOpts = SP_ALL.filter(x => spc[x[0]]).map(x => o('sp:' + x[0], x[1] + ' (' + spc[x[0]] + ')')).join('');
-  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${spOpts ? `<optgroup label="Salariés particuliers">${spOpts}</optgroup>` : ''}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
+  const tmc = new Map(); for (const x of base) for (const t of teamOf(x)) tmc.set(t.x.id, (tmc.get(t.x.id) || 0) + 1);
+  const tmOpts = [...tmc.entries()].map(([id, n]) => [personOf(id), n]).filter(z => z[0]).sort((a, b) => a[0].name.localeCompare(b[0].name, 'fr')).map(([x, n]) => o('tm:' + x.id, x.name + ' (' + n + ')')).join('');
+  return `<select id="cb-ff" title="Filtrer les dossiers" class="${ff ? 'on' : ''}">${o('', 'Tous les dossiers')}${tmOpts ? `<optgroup label="Équipe : avec le collègue">${tmOpts}</optgroup>` : ''}${o('pts', 'Avec points en cours')}${o('al', 'Avec alertes salariés')}${o('rel', 'Relation à surveiller ou difficile')}${o('noccn', 'Sans convention renseignée')}${o('oldccn', 'Convention plus en vigueur')}${spOpts ? `<optgroup label="Salariés particuliers">${spOpts}</optgroup>` : ''}${lst.length ? `<optgroup label="Convention collective">${lst.map(([key, e]) => o('ccn:' + key, (e.k.i != null && !ccnIsNone(e.k) ? idccStr(e.k.i) + ' · ' : '') + ccnShort(e.k) + ' (' + e.n + ')')).join('')}</optgroup>` : ''}</select>`;
 }
 function openNewDossier() {
   const m = modal(`<div class="modal-h"><h3>Nouveau dossier</h3><button class="icon" data-close>${ICON.close}</button></div>
@@ -3049,6 +3055,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.62.0', '16/11/2026', ['Carnet : bloc « Équipe du dossier » (et « Équipe du groupe ») — les collègues qui interviennent sur le dossier, avec leur rôle (comptable du dossier, responsable, remplaçant(e) pendant mes absences, expert-comptable… ou saisie libre). L’équipe d’un groupe vaut pour tous ses dossiers.', 'L’équipe est proposée en premier dans les personnes associées (👤), reprise dans « Préparer une absence » et l’export du carnet ; filtre des tuiles « avec le collègue ».', 'Rattacher une personne existante en quelques clics : bouton « Rattacher… » dans les interlocuteurs du dossier et du groupe (recherche, plusieurs à la fois) ; dans la fiche d’une personne, recherche et « Cocher mon portefeuille » / « Cocher les dossiers affichés » / « Tout décocher », y compris pour les collègues (équipe).']],
   ['1.61.0', '16/11/2026', ['Personnes associées à une saisie : un collègue vous pose une question sur un dossier ? Bouton 👤 dans la barre du chrono (avant ou pendant : « Appliquer à la saisie en cours » ou « Nouvelle saisie avec ces personnes »), sur chaque ligne de saisie, dans la fin d’appel, la modification d’une saisie et la saisie rapide (« 20min Dupont question paie avec Paul »).', 'Les noms apparaissent dans le récap à reporter (libellé « avec … » et colonne « Avec » de la copie Excel ; une saisie avec d’autres personnes reste sur sa ligne), dans les Rapports (filtre « Avec », colonne du détail et de l’export) et dans la fiche de la personne (temps passé avec elle, par dossier).']],
   ['1.60.0', '16/11/2026', ['Carnet : « Calendrier de réception des variables » — une date attendue par mois de paie (règles de remplissage, dont « d’après la date habituelle ») ; elle remplace la date habituelle ce mois-là pour la relance, Mon cycle et la Charge à venir.', 'Cycle de paie du groupe : dans le carnet d’un groupe, paramètres du cycle, remarque permanente et calendriers (réception, virements) suivis automatiquement par tous ses dossiers ; ce qu’un dossier modifie lui-même devient une exception.', 'Exceptions d’un coup d’œil : tableau des dossiers du groupe (« = » s’il suit le groupe, valeur surlignée sinon, valeur du groupe au survol), boutons « Aligner » ; dans le carnet d’un dossier, ce qui lui est propre avec ↺ pour reprendre la valeur du groupe.']],
   ['1.59.0', '16/11/2026', ['Le n° de dossier s’affiche devant le nom (« 1234 · Dupont SAS ») quand il est renseigné : saisies de Ma journée, récap à reporter, Ma semaine, Rapports (tableau et détail), À facturer, barre et pastille du chrono.']],
@@ -3131,7 +3138,7 @@ function newsCheck() {
 const HELP = {
   chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.', 'Bouton 👤 (barre du chrono et lignes de saisie) : associer une ou plusieurs personnes à une saisie, par exemple le collègue qui vous pose une question sur un dossier ; pendant le chrono, au choix sur la saisie en cours ou sur une nouvelle saisie.']],
   portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
-  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
+  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Équipe du dossier / du groupe : les collègues qui interviennent sur le dossier, avec leur rôle (remplaçant(e)…) ; « Rattacher… » pour ajouter des personnes déjà enregistrées.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
   facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
   referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages génériques, de groupe ou de dossier : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier (✉ Message : bascule Spécifiques / Génériques).']],
@@ -3488,6 +3495,7 @@ function hxView(o, isG) { // { clé: [rubrique, libellé, texte] } : une entrée
     put('cy.notes', 'cycle', 'Remarque permanente' + (isG ? ' du groupe' : ''), cy.notes); }
   for (const [m, v] of Object.entries(b.rec || {})) put('rec:' + m, 'virements', 'Réception des variables de la paie de ' + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), hxD(v));
   for (const [m, v] of Object.entries(b.vir || {})) put('vir:' + m, 'virements', 'Virements de la paie de ' + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), hxD(v));
+  for (const t of teamOwn(o)) put('tm:' + t.x.id, 'interloc', 'Équipe', t.x.name + (t.r ? ' (' + teamRL(t.r) + ')' : ''));
   for (const x of b.points || []) put('pt:' + x.id, 'points', 'Point en cours', x.t + (x.due ? ' · échéance le ' + hxD(x.due) : '') + (x.done ? ' · clos le ' + hxD(x.done) : ''));
   for (const x of b.journal || []) put('jr:' + x.id, 'journal', 'Événement du journal', jrTxt(x));
   for (const e of b.ann || []) put('ann:' + e.id, 'annuel', 'Événement annuel', e.t + ' · ' + annRecTxt(e) + (e.lead != null ? ' · rappel ' + e.lead + ' j avant' : '') + (e.note ? ' — ' + e.note : ''));
@@ -3642,7 +3650,8 @@ function pplChipsHTML(l, max = 2) {
 }
 function pplCands(cid) { // collègues d'abord, puis interlocuteurs du dossier (et de son groupe), puis les autres
   const c = cid && !isPersonId(cid) ? clientOf(cid) : null, g = c ? groupOf(c.group) : null;
-  const rk = x => pKind(x) === 'col' ? 0 : c && ((x.clients || []).includes(c.id) || (g && pInGroup(x, g.id))) ? 1 : 2;
+  const tm = new Set(c ? teamOf(c).map(t => t.x.id) : []);
+  const rk = x => tm.has(x.id) ? 0 : pKind(x) === 'col' ? 1 : c && ((x.clients || []).includes(c.id) || (g && pInGroup(x, g.id))) ? 2 : 3;
   return S.meta.persons.filter(x => !x.deletedAt && !x.archived && x.id !== cid).sort((a, b) => rk(a) - rk(b) || a.name.localeCompare(b.name, 'fr')).map(x => ({ x, rk: rk(x) }));
 }
 // Fenêtre de choix : o = { sel, cid, onChange(list) } (application immédiate) ou { running: true } (deux boutons de validation)
@@ -3650,14 +3659,14 @@ function openPplPick(anchor, o) {
   document.getElementById('ppl-pop')?.remove();
   let sel = [...(o.sel || [])];
   const pop = document.createElement('div'); pop.id = 'ppl-pop'; pop.className = 'cy-pop ppl-pop';
-  const RK = ['Collègues', 'Interlocuteurs du dossier', 'Autres personnes'];
+  const RK = ['Équipe du dossier', 'Autres collègues', 'Interlocuteurs du dossier', 'Autres personnes'];
   const draw = (q = '') => {
-    const n = norm(q), C = pplCands(o.cid).filter(r => !n || norm(r.x.name + ' ' + pRoleTxt(r.x)).includes(n));
+    const n = norm(q), C = pplCands(o.cid).filter(r => (!o.filter || o.filter(r.x)) && (!n || norm(r.x.name + ' ' + pRoleTxt(r.x)).includes(n)));
     let last = -1, h = '';
     for (const r of C) { if (r.rk !== last) { h += `<div class="ppl-h">${RK[r.rk]}</div>`; last = r.rk; } h += `<label class="ppl-i"><input type="checkbox" value="${r.x.id}" ${sel.includes(r.x.id) ? 'checked' : ''}>${persIc(r.x)}<span>${esc(r.x.name)}<span class="muted small"> ${esc(pRoleTxt(r.x))}</span></span></label>`; }
     pop.querySelector('.ppl-l').innerHTML = h || `<div class="muted small" style="padding:8px">Aucune personne${n ? ' ne correspond' : ' : créez-les dans Références › Personnes'}.</div>`;
   };
-  pop.innerHTML = `<div class="cy-pop-h">Personnes associées</div><div style="padding:4px 6px"><input class="ppl-q" placeholder="Rechercher une personne…" autocomplete="off"></div><div class="ppl-l"></div>
+  pop.innerHTML = `<div class="cy-pop-h">${esc(o.title || 'Personnes associées')}</div><div style="padding:4px 6px"><input class="ppl-q" placeholder="Rechercher une personne…" autocomplete="off"></div><div class="ppl-l"></div>
     <div class="ppl-f">${o.running ? `<button class="btn sm" data-pp="add">Ajouter à la saisie en cours</button><button class="btn sm primary" data-pp="new" title="Arrête la saisie en cours et en démarre une nouvelle sur le même dossier, la même tâche et le même libellé">Nouvelle saisie avec ces personnes</button>` : `${sel.length ? '<button class="btn sm ghost" data-pp="clear">Tout retirer</button>' : ''}<span class="sp" style="flex:1"></span><button class="btn sm primary" data-pp="ok">OK</button>`}</div>`;
   document.body.appendChild(pop); draw();
   const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth;
@@ -3699,6 +3708,41 @@ function pplTimeHTML(pid) {
   return `<div class="small"><b>${fmtDur(sum(m))}</b> ce mois-ci (${m.length} saisie${m.length > 1 ? 's' : ''}) · <b>${fmtDur(sum(y))}</b> sur 12 mois (${y.length})</div>
     ${top.length ? `<div class="ppl-top">${top.map(([c, ms]) => `<div><span>${c ? cnoHTML(c) + esc(clientName(c) || '—') : '<span class="muted">Sans dossier</span>'}</span><span class="mono">${fmtDur(ms)}</span></div>`).join('')}</div>` : ''}
     <div class="muted small">Dernière : ${fmtDate(Math.max(...all.map(e => e.start)))}. Information pour vous organiser, jamais un contrôle.</div>`;
+}
+/* ---------- Équipe du dossier (v1.62.0) ----------
+   Collègues rattachés à un dossier ou à un groupe : person.team = { [id du dossier ou du groupe]: rôle } (texte libre ou clé de TEAM_R).
+   L'équipe d'un groupe vaut pour tous ses dossiers. Sert aux personnes associées des saisies, à la préparation d'une absence,
+   à l'export du carnet et au filtre des tuiles. */
+const TEAM_R = [['compta', 'Comptable du dossier'], ['resp', 'Responsable du dossier'], ['rempl', 'Remplaçant(e) pendant mes absences'], ['ec', 'Expert-comptable'], ['paie', 'Gestionnaire de paie'], ['juri', 'Juriste'], ['assist', 'Assistant(e)']];
+const teamRL = r => (TEAM_R.find(x => x[0] === r) || [, r || ''])[1];
+const teamOwn = o => o ? S.meta.persons.filter(x => !x.deletedAt && x.team && Object.prototype.hasOwnProperty.call(x.team, o.id)).map(x => ({ x, r: x.team[o.id] || '' })).sort((a, b) => a.x.name.localeCompare(b.x.name, 'fr')) : [];
+function teamOf(c) { // équipe d'un dossier : la sienne puis celle de son groupe (sans doublon)
+  if (!c) return []; if (isGroupObj(c)) return teamOwn(c).map(t => ({ ...t, g: null }));
+  const own = teamOwn(c).map(t => ({ ...t, g: null })), g = groupOf(c.group), ids = new Set(own.map(t => t.x.id));
+  return [...own, ...(g ? teamOwn(g).filter(t => !ids.has(t.x.id)).map(t => ({ ...t, g })) : [])];
+}
+const teamTxt = c => teamOf(c).filter(t => !t.x.archived).map(t => t.x.name + (t.r ? ' (' + teamRL(t.r) + ')' : '')).join(', ');
+function teamSet(x, oid, role) { if (role === null) { if (x.team) { delete x.team[oid]; if (!Object.keys(x.team).length) delete x.team; } } else x.team = { ...(x.team || {}), [oid]: role }; }
+function teamRoleSel(t, oid) {
+  const known = TEAM_R.some(z => z[0] === t.r);
+  return `<select class="team-r" data-teamr="${t.x.id}" data-oid="${esc(oid)}" title="Rôle sur ce dossier"><option value="">Rôle…</option>${TEAM_R.map(([k, l]) => `<option value="${k}" ${t.r === k ? 'selected' : ''}>${l}</option>`).join('')}${t.r && !known ? `<option value="${esc(t.r)}" selected>${esc(t.r)}</option>` : ''}<option value="__custom">Autre (saisir)…</option></select>`;
+}
+function teamHTML(o, isG) {
+  const T = teamOf(o), oid = o.id, g = !isG && groupOf(o.group);
+  const row = t => `<div class="cb-pp team-pp ${t.x.archived ? 'arch' : ''}">${persIc(t.x)}<button class="nm2" data-cba="pfiche" data-pid="${t.x.id}">${esc(t.x.name)}</button><span class="muted small">${esc(pRoleTxt(t.x))}</span>
+    ${t.g ? `<span class="tag-g" title="Rattaché à tout le groupe ${esc(t.g.name)}">groupe</span><span class="small">${esc(teamRL(t.r))}</span>` : teamRoleSel(t, oid)}<span class="sp" style="flex:1"></span>${pContact(t.x)}${t.g ? '' : `<button class="icon xs" data-teamrm="${t.x.id}" data-oid="${esc(oid)}" title="Retirer de l’équipe">${ICON.close}</button>`}</div>`;
+  return `<i data-b="${isG ? 'gequipe' : 'equipe'}" data-half="1"></i><div class="toolbar"><h2>Équipe ${isG ? 'du groupe' : 'du dossier'}</h2><span class="sp"></span><button class="btn sm" data-teamadd="${esc(oid)}" title="Rattacher des collègues existants">＋ Collègues</button><button class="btn sm ghost" data-teamnew="${esc(oid)}" title="Créer la fiche d’un nouveau collègue">Nouveau</button></div><div class="card cb-sec">
+    ${T.length ? `<div class="cb-ppl">${T.map(row).join('')}</div>` : `<div class="cb-hint">Aucun collègue rattaché. Ex. le comptable du dossier, votre remplaçant(e) pendant vos absences, l’expert-comptable.</div>`}
+    <div class="cb-hint">${isG ? 'Les collègues de l’équipe du groupe valent pour chacun de ses dossiers.' : g ? `L’équipe du groupe <a href="#carnet/groupe/${encodeURIComponent(g.id)}">${esc(g.name)}</a> s’ajoute à celle du dossier.` : ''} Proposés en premier dans les personnes associées aux saisies (👤) et repris dans « Préparer une absence ».</div></div>`;
+}
+function teamPick(anchor, o) { // rattacher des collègues existants (application immédiate)
+  openPplPick(anchor, { title: 'Équipe — collègues', filter: x => pKind(x) === 'col', sel: teamOwn(o).map(t => t.x.id), cid: isGroupObj(o) ? null : o.id,
+    onChange: l => { for (const x of S.meta.persons) if (pKind(x) === 'col') { const has = !!(x.team && Object.prototype.hasOwnProperty.call(x.team, o.id)); if (l.includes(x.id) && !has) teamSet(x, o.id, ''); else if (!l.includes(x.id) && has) teamSet(x, o.id, null); } touchMeta(); } });
+}
+function intPick(anchor, o) { // rattacher des interlocuteurs existants au dossier ou au groupe
+  const isG = isGroupObj(o), f = isG ? 'groups' : 'clients';
+  openPplPick(anchor, { title: isG ? 'Interlocuteurs du groupe' : 'Interlocuteurs du dossier', filter: x => pKind(x) !== 'col', sel: S.meta.persons.filter(x => (x[f] || []).includes(o.id)).map(x => x.id), cid: isG ? null : o.id,
+    onChange: l => { for (const x of S.meta.persons) { if (pKind(x) === 'col') continue; const has = (x[f] || []).includes(o.id); if (l.includes(x.id) && !has) x[f] = [...(x[f] || []), o.id]; else if (!l.includes(x.id) && has) { x[f] = x[f].filter(i => i !== o.id); if (!x[f].length) delete x[f]; } } touchMeta(); } });
 }
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
@@ -3752,8 +3796,8 @@ function openCbCopy(dstId) {
 /* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
 const CBX = {
-  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['annuel', 'Calendrier annuel'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours'], ['historique', 'Historique des modifications', 1]],
-  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['gcycle', 'Cycle de paie du groupe et exceptions'], ['gcal', 'Calendriers de réception et des virements'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal'], ['historique', 'Historique des modifications', 1]]
+  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['equipe', 'Équipe du dossier (collègues)'], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['annuel', 'Calendrier annuel'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours'], ['historique', 'Historique des modifications', 1]],
+  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['gcycle', 'Cycle de paie du groupe et exceptions'], ['gcal', 'Calendriers de réception et des virements'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['equipe', 'Équipe du groupe (collègues)'], ['points', 'Points en cours'], ['journal', 'Journal'], ['historique', 'Historique des modifications', 1]]
 };
 function cbxSel(kind) { // { sel: [...], all: [clés connues] } ; une rubrique ajoutée depuis le dernier choix prend sa valeur par défaut
   const def = CBX[kind].filter(x => !x[2]).map(x => x[0]);
@@ -3778,6 +3822,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     add('suivi', 'Suivi du cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' (clôturé)' : ''), [['Réception des variables', st('rec') + (row.rel ? ' · relancé le ' + d(row.rel) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') : '')], ['1er envoi', st('env')], ['Corrections', (row.corr || []).length ? st('corr') : '—'], ['Validation client', p.valid ? st('val') : 'non demandée'], ['Virements', st('vir')], ['Dépôt des bulletins', st('dep')], ['DSN', st('dsn')], ['Dossier terminé', cyRowDone(mk, c, row) ? 'oui' : 'non']]);
     add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + ' — ' + (x.mode === 'validate' ? 'à valider : ' + alTrigText(x) : 'pour information') + (x.until ? ' · jusqu’au cycle de ' + mkLabel(x.until) : '')]), 'Aucune alerte active');
     add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x) + (x.note ? ' — ' + x.note : '')]), 'Aucun interlocuteur');
+    add('equipe', 'Équipe du dossier', teamOf(c).map(t => ['', t.x.name + ' — ' + [teamRL(t.r), pRoleTxt(t.x), t.g ? 'équipe du groupe' : '', t.x.email, t.x.phone].filter(Boolean).join(' · ')]), 'Aucun collègue rattaché');
     add('tarifs', 'Tarifs de facturation', S.meta.tasks.filter(t => !t.deletedAt && rateOf(c.id, t.id)).map(t => [t.name, rateTxt(rateOf(c.id, t.id)) + (rateOf(c.id, t.id).own ? ' (propre au dossier)' : ' (tarif de la tâche)')]), 'Aucun tarif');
     add('annuel', 'Calendrier annuel', [...annOwn(c).map(e => [e.t, annRecTxt(e) + (e.note ? ' — ' + e.note : '')]), ...(g ? annOwn(g).map(e => [e.t + ' (groupe)', annRecTxt(e) + (e.note ? ' — ' + e.note : '')]) : [])], 'Aucun événement');
     { const L = spOf(b); add('salaries', 'Salariés particuliers', [...SP_LIST.map(([gl, items]) => [gl, items.filter(x => L.includes(x[0])).map(x => x[1]).join(', ')]).filter(x => x[1]), ...(b.spNote ? [['Remarque', b.spNote]] : [])], 'Aucun renseigné'); }
@@ -3800,6 +3845,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
   add('annuel', 'Calendrier annuel du groupe', annOwn(g).map(e => [e.t, annRecTxt(e) + (e.note ? ' — ' + e.note : '')]), 'Aucun événement');
   add('dossiers', 'Dossiers et conventions collectives', mem.map(x => [x.name + (x.code ? ' (n° ' + x.code + ')' : '') + (isMother(x) ? ' — société mère' : ''), ((cbPeek(x).ccn || []).map(ccnTxt).join(' ; ') || 'convention non renseignée') + (isMine(x) ? '' : ' · hors de mon portefeuille')]), 'Aucun dossier');
   add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && pInGroup(x, g.id)).map(x => ['', pplTxt(x) + ' — ' + pAttTxt(x).join(', ')]), 'Aucun interlocuteur');
+  add('equipe', 'Équipe du groupe', teamOf(g).map(t => ['', t.x.name + ' — ' + [teamRL(t.r), pRoleTxt(t.x), t.x.email, t.x.phone].filter(Boolean).join(' · ')]), 'Aucun collègue rattaché');
   add('points', 'Points en cours', [...ptsOf(b.points, 'Groupe'), ...mem.flatMap(x => ptsOf(cbPeek(x).points, x.name))], 'Aucun point');
   add('journal', 'Journal du groupe', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]), 'Aucun événement');
   add('historique', 'Historique des modifications (24 derniers mois)', HX.list(g.id).slice().reverse().map(e => [hxWhen(e.t), hxLine(e)]), 'Aucune modification enregistrée');
@@ -3919,6 +3965,7 @@ function renderCarnet() {
     if (ff === 'al') return alActive(x, mk0).length > 0;
     if (ff === 'rel') return ['surveiller', 'difficile'].includes(b.rel && b.rel.lvl);
     if (ff.startsWith('sp:')) return spOf(b).includes(ff.slice(3));
+    if (ff.startsWith('tm:')) return teamOf(x).some(t => t.x.id === ff.slice(3));
     if (ff === 'noccn') return !cc.length;
     if (ff === 'oldccn') return cc.some(k => k.i != null && ccnOld(ccnOf(k.i)));
     if (ff.startsWith('ccn:')) return cc.some(k => ccnKey(k) === ff.slice(4));
@@ -3989,7 +4036,8 @@ function renderCarnetGroupe(body, g) {
       <label class="fld"><span>Ajouter un dossier au groupe</span><select id="cbg-add"><option value="">Choisir un dossier…</option>${cands.map(x => `<option value="${x.id}">${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}${x.group && groupOf(x.group) ? ' (groupe ' + esc(groupOf(x.group).name) + ')' : ''}</option>`).join('')}</select></label>
       <div><button class="btn sm danger" data-cbgdel>Supprimer le groupe</button> <span class="muted small">les dossiers sont conservés, sans groupe</span></div></div>`;
     const gpl = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pInGroup(x, g.id));
-    html += `<i data-b="ginterloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs du groupe</h2><span class="sp"></span><button class="btn sm" data-gpnew="${esc(g.id)}">＋ Ajouter</button></div><div class="card cb-sec">${gpl.length ? '' : '<div class="cb-hint">Aucun interlocuteur rattaché au groupe ou à ses dossiers.</div>'}<div class="cb-ppl">${gpl.map(x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cbgp="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc([pRoleTxt(x), (x.groups || []).includes(g.id) ? 'tout le groupe' : '', (x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', ')].filter(Boolean).join(' · '))}</span><span class="sp" style="flex:1"></span>${pContact(x)}</div>`).join('')}</div></div>`; }
+    html += `<i data-b="ginterloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs du groupe</h2><span class="sp"></span><button class="btn sm ghost" data-intadd="${esc(g.id)}" title="Rattacher au groupe des personnes déjà enregistrées">Rattacher…</button><button class="btn sm" data-gpnew="${esc(g.id)}">＋ Nouvelle</button></div><div class="card cb-sec">${gpl.length ? '' : '<div class="cb-hint">Aucun interlocuteur rattaché au groupe ou à ses dossiers.</div>'}<div class="cb-ppl">${gpl.map(x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cbgp="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc([pRoleTxt(x), (x.groups || []).includes(g.id) ? 'tout le groupe' : '', (x.clients || []).map(id => clientOf(id)?.name).filter(Boolean).join(', ')].filter(Boolean).join(' · '))}</span><span class="sp" style="flex:1"></span>${pContact(x)}</div>`).join('')}</div></div>`; }
+  html += teamHTML(g, true);
   html += `<i data-b="gnotes"></i><h2>Notes du groupe</h2><div class="card cb-sec">
     <label class="fld"><span>Organisation du groupe, interlocuteurs communs (DRH, comptable du groupe…), pratiques communes</span><textarea data-cbf="gnotes" placeholder="ex. DRH du groupe : Mme X · variables centralisées pour toutes les sociétés · validation par la holding">${esc(b.notes || '')}</textarea></label>
     <div class="cb-hint">Ces notes s’affichent aussi dans le carnet de chaque dossier du groupe.</div></div>`;
@@ -4051,7 +4099,8 @@ function renderCarnetDossier(body, c) {
   { const own = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)), gp = g ? S.meta.persons.filter(x => !x.deletedAt && !x.archived && !own.includes(x) && pInGroup(x, g.id)) : [];
     const pp = x => `<div class="cb-pp">${persIc(x)}<button class="nm2" data-cba="pfiche" data-pid="${x.id}">${esc((x.civ ? x.civ + ' ' : '') + x.name)}</button><span class="muted small">${esc(pRoleTxt(x))}</span><span class="sp" style="flex:1"></span>${x.phone ? `<a class="small" href="${esc(telHref(x.phone))}">${esc(x.phone)}</a>` : ''}${pContact(x)}</div>`;
     html += `<i data-b="interloc" data-half="1"></i><div class="toolbar"><h2>Interlocuteurs</h2><span class="sp"></span><button class="btn sm ghost" data-cba="msg" title="Préparer un message à partir d’un modèle, adapté à l’interlocuteur">✉ Message</button><button class="btn sm" data-cba="pnew">＋ Ajouter</button></div><div class="card cb-sec"><div class="cb-ppl">${own.map(pp).join('') || '<div class="cb-hint">Aucun interlocuteur pour ce dossier.</div>'}</div>${gp.length ? `<div class="cb-hint" style="margin-top:6px">Autres interlocuteurs du groupe</div><div class="cb-ppl">${gp.map(pp).join('')}</div>` : ''}
-      ${(() => { const others = S.meta.persons.filter(x => !x.deletedAt && !x.archived && pLinked(pKind(x)) && !own.includes(x)); return others.length ? `<div style="margin-top:6px;display:flex;gap:6px"><select id="cb-plink" style="flex:1"><option value="">Rattacher un interlocuteur existant…</option>${others.sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr')).map(x => `<option value="${x.id}">${esc(x.name)}${x.role ? ' · ' + esc(x.role) : ''}</option>`).join('')}</select></div>` : ''; })()}</div>`; }
+      ${(() => { return `<div style="margin-top:6px"><button class="btn sm ghost" data-intadd="${esc(c.id)}">Rattacher des personnes existantes…</button></div>`; })()}</div>`; }
+  html += teamHTML(c, false);
   // Tarifs particuliers (v1.40.0)
   { const rs = Object.entries(c.rates || {}).filter(([tid]) => taskOf(tid)), ts2 = S.meta.tasks.filter(t => !t.deletedAt && !t.archived && !(c.rates || {})[t.id]).sort((a2, b2) => a2.name.localeCompare(b2.name, 'fr'));
     html += `<i data-b="tarifs" data-half="1"></i><h2>Tarifs de facturation</h2><div class="card cb-sec"><div class="cb-hint">Par défaut : tarif de chaque tâche (Références › Tâches). Ici, les tarifs propres à ce dossier.</div>
@@ -4142,6 +4191,7 @@ function bindCarnet() {
     const t = ev.target;
     if (t.id === 'cb-grp') { lsSet('cbGroup', t.checked ? '1' : '0'); renderCarnet(); return; }
     if (t.id === 'cb-ff') { UI.cb.ff = t.value; renderCarnet(); return; }
+    if (t.dataset.teamr) { const x = personOf(t.dataset.teamr); if (!x) return; let v = t.value; if (v === '__custom') { v = (prompt('Rôle sur ce dossier :') || '').trim(); if (!v) { renderCarnet(); return; } } teamSet(x, t.dataset.oid, v); touchMeta(); cbSaved(); return; }
     if (t.dataset.hxf != null) { (UI.hxF ||= {})[t.dataset.hxf] = t.value; renderCarnet(); return; }
     if (t.id === 'cb-plink' && t.value) { const x = personOf(t.value), c0 = cur(); if (x && c0) { x.clients = [...new Set([...(x.clients || []), c0.id])]; touchMeta(); toast(x.name + ' rattaché au dossier'); } return; }
     if (t.id === 'cbg-name' && UI.cbG) { const g = groupOf(UI.cbG), v = t.value.trim().replace(/\s+/g, ' '); if (!v) { t.value = g.name; return; } if (S.meta.groups.some(x => x !== g && norm(x.name) === norm(v))) { toast('Un groupe porte déjà ce nom'); t.value = g.name; return; } g.name = v; touchMeta(); return; }
@@ -4165,6 +4215,10 @@ function bindCarnet() {
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     if (ev.target.closest('[data-cbexp]')) { openCbExport(); return; }
+    { const tb = ev.target.closest('[data-teamadd],[data-teamnew],[data-teamrm],[data-intadd]'); if (tb) { const d = tb.dataset, oid = d.teamadd || d.teamnew || d.oid || d.intadd, o = clientOf(oid) || groupOf(oid); if (!o) return;
+      if (d.teamadd) teamPick(tb, o); else if (d.intadd) intPick(tb, o); else if (d.teamnew) openPersonFiche(null, { kind: 'col', team: { [oid]: '' } });
+      else { const x = personOf(d.teamrm), old = x.team ? { ...x.team } : null; teamSet(x, oid, null); touchMeta(); toast(x.name + ' retiré(e) de l’équipe', 'Annuler', () => { if (old) x.team = old; touchMeta(); }); }
+      return; } }
     { const hm = ev.target.closest('[data-hxmore]'); if (hm) { const id = hm.dataset.hxmore; (UI.hxN ||= {})[id] = ((UI.hxN[id]) || 25) + 50; renderCarnet(); return; } }
     if (ev.target.closest('[data-cbcopy]') && UI.cbId) { openCbCopy(UI.cbId); return; }
     if (ev.target.closest('[data-cba=newdos]')) { openNewDossier(); return; }
@@ -5779,13 +5833,14 @@ function absPrepModel(from, to, pres, late, prat) {
     const days = [...new Set(list.map(x => x.d))];
     for (const d of days) { const xs = list.filter(x => x.d === d), ks = FC_STEPS.filter(s2 => xs.some(x => x.k === s2[0]));
       sections.push({ t: fmtDayLong(dayKey(d)).replace(/^./, c => c.toUpperCase()), items: ks.flatMap(([k, l]) => k === 'pt' ? xs.filter(x => x.k === k).map(x => [l, x.nm + ' : ' + x.t]) : [[l, xs.filter(x => x.k === k).map(x => x.nm).join(', ')]]) }); }
-    if (prat) for (const id of ids) { const c = clientOf(id); if (!c) continue; const b = cbPeek(c), it = [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', cyOf(c).notes]].filter(x => x[1]); if (it.length) sections.push({ t: 'Mémo · ' + c.name + (c.code ? ' (n° ' + c.code + ')' : ''), items: it }); }
+    if (prat) for (const id of ids) { const c = clientOf(id); if (!c) continue; const b = cbPeek(c), it = [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', cyOf(c).notes], ['Équipe', teamTxt(c)]].filter(x => x[1]); if (it.length) sections.push({ t: 'Mémo · ' + c.name + (c.code ? ' (n° ' + c.code + ')' : ''), items: it }); }
   } else {
     const order = [...ids].map(id => ({ id, d: Math.min(...[...list, ...lt].filter(x => x.cid === id).map(x => x.d)) })).sort((a, b) => a.d - b.d);
     for (const { id } of order) { const xs = list.filter(x => x.cid === id); if (!xs.length && !prat) continue; const c = clientOf(id), g = !c && groupOf(id), b = cbPeek(c || g || {});
       const it = xs.map(x => [fd(x), lbl(x)]); if (!it.length) it.push(['', 'Rien d’attendu pendant l’absence (voir les retards ci-dessus)']);
       if (prat && c) for (const [l, v] of [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', cyOf(c).notes]]) if (v) it.push([l, v]);
       if (prat && c) { const pp = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(id)); if (pp.length) it.push(['Interlocuteurs', pp.map(x => x.name + (pRoleTxt(x) ? ' (' + pRoleTxt(x) + ')' : '')).join(', ')]); }
+      if (c && teamTxt(c)) it.push(['Équipe', teamTxt(c)]);
       sections.push({ t: (c ? c.name + (c.code ? ' (n° ' + c.code + ')' : '') : g ? grpTitle(g) : '?'), items: it }); }
   }
   if (!sections.length) sections.push({ t: 'Pendant l’absence', items: [['', 'Aucune échéance attendue sur la période.']] });
@@ -6961,7 +7016,7 @@ const pContact = x => `${x.email ? `<a class="icon xs" href="mailto:${esc(x.emai
 function openPersonFiche(id, preset = {}) {
   const x = id ? personOf(id) : null, d = { ...preset, ...(x || {}) }; d.kind = x ? pKind(x) : (preset.kind || 'cli');
   if (x && !x.first && !x.last) { d.first = x.name; }
-  const kind = pKind(d), sel = new Set(d.clients || []);
+  const kind = pKind(d), isCol0 = kind === 'col', sel = new Set(isCol0 ? Object.keys(d.team || {}) : d.clients || []), selG = new Set(isCol0 ? Object.keys(d.team || {}) : d.groups || []);
   const cl = S.meta.clients.filter(c => !c.deletedAt).sort((a, b) => (sel.has(b.id) - sel.has(a.id)) || a.name.localeCompare(b.name, 'fr'));
   const m = modal(`<div class="modal-h"><h3>${x ? 'Fiche de ' + esc(x.name) : 'Nouvelle personne'}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b" style="display:grid;gap:10px">
@@ -6969,7 +7024,7 @@ function openPersonFiche(id, preset = {}) {
       <div class="fld-row"><label class="fld" style="flex:0 0 90px"><span>Civilité</span><select id="pf-civ"><option value=""></option>${['M.', 'Mme'].map(v => `<option ${d.civ === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label><label class="fld"><span>Prénom</span><input id="pf-first" value="${esc(d.first || '')}" autocomplete="off"></label><label class="fld"><span>Nom</span><input id="pf-last" value="${esc(d.last || '')}" autocomplete="off"></label></div>
       <div class="fld-row"><label class="fld" id="pf-role-w"></label></div>
       <div class="fld-row"><label class="fld"><span>E-mail</span><input id="pf-mail" type="email" value="${esc(d.email || '')}" autocomplete="off"></label><label class="fld"><span id="pf-tel-l">${kind === 'col' ? 'Ligne directe' : 'Téléphone'}</span><input id="pf-tel" inputmode="tel" value="${esc(d.phone || '')}" autocomplete="off"></label></div>
-      <div id="pf-cl-w" ${pLinked(kind) ? '' : 'hidden'}>${groupsAll().length ? `<div class="small" style="margin-bottom:4px">Groupes de dossiers <span class="muted">(rattaché à tous les dossiers du groupe, y compris ceux ajoutés plus tard)</span></div><div class="cc-list pf-gl" style="max-height:110px;margin-bottom:8px">${groupsAll().map(g => `<label class="chk"><input type="checkbox" data-pfg value="${esc(g.id)}" ${(d.groups || []).includes(g.id) ? 'checked' : ''}> ${grpTag(g)} <span class="muted small">${grpMembers(g).length} dossier${grpMembers(g).length > 1 ? 's' : ''}</span></label>`).join('')}</div>` : ''}<div class="small" style="margin-bottom:4px">Dossiers de cet interlocuteur</div><input id="pf-clq" placeholder="Filtrer les dossiers…" style="width:100%;margin-bottom:4px"><div class="cc-list" style="max-height:160px">${cl.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '')))}"><input type="checkbox" value="${c.id}" ${sel.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">' + esc(c.code) + '</span>' : ''}</label>`).join('')}</div></div>
+      <div id="pf-cl-w" ${pLinked(kind) || kind === 'col' ? '' : 'hidden'}>${groupsAll().length ? `<div class="small" style="margin-bottom:4px"><span id="pf-gl-l">${isCol0 ? 'Équipe des groupes de dossiers' : 'Groupes de dossiers'}</span> <span class="muted">(vaut pour tous les dossiers du groupe, y compris ceux ajoutés plus tard)</span></div><div class="cc-list pf-gl" style="max-height:110px;margin-bottom:8px">${groupsAll().map(g => `<label class="chk"><input type="checkbox" data-pfg value="${esc(g.id)}" ${selG.has(g.id) ? 'checked' : ''}> ${grpTag(g)} <span class="muted small">${grpMembers(g).length} dossier${grpMembers(g).length > 1 ? 's' : ''}</span></label>`).join('')}</div>` : ''}<div class="small" style="margin-bottom:4px" id="pf-cl-l">${isCol0 ? 'Équipe des dossiers (collègue qui intervient sur le dossier)' : 'Dossiers de cet interlocuteur'}</div><input id="pf-clq" placeholder="Rechercher un dossier (nom, n°, groupe)…" style="width:100%;margin-bottom:4px"><div class="pf-qb"><button type="button" class="btn sm ghost" data-pfq="mine">Cocher mon portefeuille</button><button type="button" class="btn sm ghost" data-pfq="shown">Cocher les dossiers affichés</button><button type="button" class="btn sm ghost" data-pfq="none">Tout décocher</button><span class="muted small" id="pf-cn"></span></div><div class="cc-list" style="max-height:160px">${cl.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '') + ' ' + (groupOf(c.group)?.name || '')))}" data-mine="${isMine(c) ? 1 : 0}"><input type="checkbox" value="${c.id}" ${sel.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">' + esc(c.code) + '</span>' : ''}</label>`).join('')}</div></div>
       <label class="fld"><span>Note</span><textarea id="pf-note" rows="2" placeholder="ex. joignable le matin, préfère l’e-mail…">${esc(d.note || '')}</textarea></label>
       ${x ? `<div class="fld"><span>Temps passé avec cette personne (saisies associées)</span><div>${pplTimeHTML(x.id)}</div></div>` : ''}
       <div class="muted small">🔒 Ne notez jamais d’identifiants ni de mots de passe ici.</div></div>
@@ -6977,10 +7032,15 @@ function openPersonFiche(id, preset = {}) {
   const q = s2 => m.el.querySelector(s2); let k = kind;
   const roleUI = () => { const w = q('#pf-role-w'), cur = d.kind === k ? d.role : '';
     w.innerHTML = k === 'col' ? `<span>Fonction au cabinet</span><select id="pf-role">${roleOpts(cur || 'paie')}</select>` : `<span>${k === 'org' ? 'Organisme / rôle' : 'Fonction'}</span><input id="pf-role" list="pf-role-dl" value="${esc(cur || '')}" autocomplete="off"><datalist id="pf-role-dl">${(P_ROLE_SUG[k] || []).map(v => `<option value="${esc(v)}">`).join('')}</datalist>`;
-    q('#pf-tel-l').textContent = k === 'col' ? 'Ligne directe' : 'Téléphone'; q('#pf-cl-w').hidden = !pLinked(k); };
+    q('#pf-tel-l').textContent = k === 'col' ? 'Ligne directe' : 'Téléphone'; q('#pf-cl-w').hidden = !(pLinked(k) || k === 'col');
+    const gl = q('#pf-gl-l'); if (gl) gl.textContent = k === 'col' ? 'Équipe des groupes de dossiers' : 'Groupes de dossiers'; q('#pf-cl-l').textContent = k === 'col' ? 'Équipe des dossiers (collègue qui intervient sur le dossier)' : 'Dossiers de cet interlocuteur'; };
+  const cnt = () => { const n = m.el.querySelectorAll('#pf-cl-w .cc-list:not(.pf-gl) input:checked').length; q('#pf-cn').textContent = n ? n + ' dossier' + (n > 1 ? 's' : '') + ' coché' + (n > 1 ? 's' : '') : ''; };
   roleUI();
   q('#pf-kind').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; k = b.dataset.v; q('#pf-kind').querySelectorAll('button').forEach(x2 => x2.classList.toggle('on', x2 === b)); roleUI(); });
   q('#pf-clq').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('#pf-cl-w label[data-n]').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
+  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-pfq]'); if (!b) return; const a = b.dataset.pfq;
+    m.el.querySelectorAll('#pf-cl-w label[data-n]').forEach(l => { const i = l.querySelector('input'); if (a === 'none') i.checked = false; else if (a === 'mine' && l.dataset.mine === '1') i.checked = true; else if (a === 'shown' && !l.hidden) i.checked = true; }); cnt(); });
+  m.el.addEventListener('change', ev => { if (ev.target.closest('#pf-cl-w')) cnt(); }); cnt();
   m.el.addEventListener('change', ev => { if (ev.target.id === 'pf-role' && ev.target.value === '__custom') { const v = prompt('Fonction :'); const sl = ev.target; if (v && v.trim()) { sl.insertAdjacentHTML('afterbegin', `<option value="${esc(v.trim())}" selected>${esc(v.trim())}</option>`); } else sl.value = 'paie'; } });
   q('#pf-ok').addEventListener('click', () => {
     const first = q('#pf-first').value.trim(), last = q('#pf-last').value.trim();
@@ -6988,8 +7048,10 @@ function openPersonFiche(id, preset = {}) {
     const mail = q('#pf-mail').value.trim(); if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { toast('Adresse e-mail non valide'); return; }
     const o = x || { id: 'p' + newId(), archived: false };
     Object.assign(o, { kind: k, civ: q('#pf-civ').value || '', first, last, name: [first, last.toUpperCase()].filter(Boolean).join(' '), role: q('#pf-role').value.trim(), email: mail, phone: q('#pf-tel').value.trim(), note: q('#pf-note').value.trim() });
-    o.clients = pLinked(k) ? [...m.el.querySelectorAll('#pf-cl-w input:checked:not([data-pfg])')].map(c => c.value) : [];
-    o.groups = pLinked(k) ? [...m.el.querySelectorAll('#pf-cl-w input[data-pfg]:checked')].map(c => c.value) : []; if (!o.groups.length) delete o.groups;
+    const chk = [...m.el.querySelectorAll('#pf-cl-w input:checked:not([data-pfg])')].map(c => c.value), chkG = [...m.el.querySelectorAll('#pf-cl-w input[data-pfg]:checked')].map(c => c.value);
+    if (k === 'col') { const old = (x && x.team) || d.team || {}, tm = {}; for (const id of [...chkG, ...chk]) tm[id] = old[id] || ''; if (Object.keys(tm).length) o.team = tm; else delete o.team; o.clients = []; o.groups = []; }
+    else { o.clients = pLinked(k) ? chk : []; o.groups = pLinked(k) ? chkG : []; delete o.team; }
+    if (!o.groups.length) delete o.groups;
     for (const f of ['civ', 'email', 'phone', 'note', 'role']) if (!o[f]) delete o[f]; if (!o.clients.length) delete o.clients;
     if (!x) S.meta.persons.push(o);
     touchMeta(); m.close(); toast(x ? 'Fiche enregistrée' : 'Personne ajoutée : ' + o.name);
