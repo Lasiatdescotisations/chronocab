@@ -725,6 +725,24 @@ a.btn:not(.primary){color:var(--ink)}
 .cb-gtext{white-space:pre-wrap;font-size:13.5px;line-height:1.45}
 .cb-saved{font-size:11.5px;color:var(--accent);opacity:0;transition:opacity .3s}
 .cb-saved.on{opacity:1}
+select[data-hxf]{width:auto;padding:3px 8px;font-size:12.5px;min-height:0;height:auto}
+.hx-list{display:grid;gap:2px;max-height:520px;overflow:auto;padding-right:2px}
+.hx-day{font-size:11.5px;font-weight:600;color:var(--muted);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.04em}
+.hx-day:first-child{margin-top:0}
+.hx-it{border-radius:7px;border:1px solid transparent}
+.hx-it[open]{border-color:var(--line);background:var(--surface-2)}
+.hx-it>summary{list-style:none;display:flex;gap:8px;align-items:baseline;padding:4px 6px;cursor:pointer;border-radius:7px;min-width:0}
+.hx-it>summary::-webkit-details-marker{display:none}
+.hx-it>summary:hover{background:var(--surface-2)}
+.hx-t{font-size:12px;color:var(--muted);flex:none}
+.hx-op{font-size:11px;font-weight:600;padding:1px 6px;border-radius:9px;flex:none;background:var(--accent-soft);color:var(--accent)}
+.hx-add .hx-op{background:var(--inv-soft);color:var(--s-inv)}.hx-del .hx-op{background:var(--stop-soft);color:var(--stop)}
+.hx-l{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.hx-s{font-size:11px;color:var(--muted);flex:none}
+.hx-ba{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:2px 8px 8px 8px;font-size:12.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.hx-ba>div:only-child{grid-column:1/-1}
+.hx-k{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+@media (max-width:700px){.hx-ba{grid-template-columns:1fr}.hx-s{display:none}}
 @media (max-width:700px){.cb-kv{grid-template-columns:1fr}.cb-kv dt{margin-top:4px}.cb-head h1{font-size:18px}}
 /* Blocs déplaçables et repliables */
 .fc-card{padding:14px 16px 12px}.fc-cal{padding:12px 14px}
@@ -1133,7 +1151,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.57.0';
+const APP_VERSION = '1.58.0';
 const APP_DATE = '15/11/2026';
 /* =========================================================
    Utilitaires
@@ -1666,6 +1684,7 @@ const Store = {
       if (!d || !Object.keys(d.entries || {}).length) return null;
       return d;
     }
+    if (key.startsWith('hx-')) { const L = S.hx && S.hx[key.slice(3)]; return L && L.length ? { e: L } : null; }
     if (key.startsWith('cy-')) {
       const c = S.cycles[key.slice(3)];
       if (!c || (!Object.keys(c.rows || {}).length && !c.closed)) return null;
@@ -1676,7 +1695,8 @@ const Store = {
   put(key) {
     const b = this.bodyFor(key);
     const body = b === null ? null : JSON.parse(JSON.stringify(b));
-    Journal.note(key, body);
+    if (!key.startsWith('hx-')) Journal.note(key, body);
+    if (key === 'meta') HX.onPut();
     if (key.startsWith('d-') && body === null) delete S.days[key.slice(2)];
     if (key.startsWith('cy-') && body === null) delete S.cycles[key.slice(3)];
     if (this.mode === 'local') {
@@ -1720,7 +1740,8 @@ const Store = {
 };
 function applyDoc(key, body) {
   Journal.snap[key] = JSON.stringify(body ?? null);
-  if (key === 'meta') S.meta = normalizeMeta(body);
+  if (key === 'meta') { S.meta = normalizeMeta(body); if (Journal.ready) HX.rebase(); }
+  else if (key.startsWith('hx-')) { const id = key.slice(3); S.hx ||= {}; if (body && Array.isArray(body.e)) S.hx[id] = body.e; else delete S.hx[id]; }
   else if (key === 'running') S.running = (body && body.entry) || null;
   else if (key.startsWith('d-')) {
     const k = key.slice(2);
@@ -2976,6 +2997,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.58.0', '16/11/2026', ['Carnet : « Historique du carnet » — chaque modification d’un dossier ou d’un groupe est notée automatiquement (identité, convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, salariés particuliers, points, journal, calendrier annuel, modèles, virements, relation client), avec l’avant et l’après ; plusieurs frappes rapprochées dans un même champ forment une seule ligne.', 'Filtre par rubrique, gardé 24 mois, synchronisé entre vos appareils ; option « Historique des modifications » dans l’export du carnet et dans la sauvegarde complète.']],
   ['1.57.0', '15/11/2026', ['Carnet : « Calendrier annuel » — événements récurrents du dossier ou du groupe (un ou plusieurs mois, date fixe, tous les N ans), choisis dans une liste d’événements courants ou saisis librement ; rappel dans À faire aujourd’hui, 📅 dans Mon cycle, comptés dans la charge à venir, nouvelle vue « Année » dans Mon cycle ; copie, export et copie de carnet.']],
   ['1.56.0', '15/11/2026', ['Salariés particuliers : « Copier vers… » d’autres dossiers (ajouter ou remplacer, remarque en option, raccourcis groupe et portefeuille) et « Appliquer à tout le groupe » depuis le carnet d’un dossier ; dans le carnet d’un groupe, cocher une case l’applique à tous ses dossiers.']],
   ['1.55.0', '15/11/2026', ['Carnet : nouveau bloc « Salariés particuliers » — 28 cases réparties en quatre thèmes (statuts, contrats, temps de travail, situations particulières) et une remarque libre ; abréviations sur les tuiles, filtre du Carnet, export et copie de carnet. Remplace la case forfait jours de la v1.54.0 (reprise automatiquement). v1.55.1 : bloc placé sous Pratiques et particularités.']],
@@ -3054,7 +3076,7 @@ function newsCheck() {
 const HELP = {
   chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.']],
   portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
-  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).']],
+  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
   facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
   referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages génériques, de groupe ou de dossier : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier (✉ Message : bascule Spécifiques / Génériques).']],
@@ -3367,6 +3389,113 @@ document.addEventListener('click', ev => {
   const t = ev.target.closest('[data-annt]'); if (!t) return; const [cid, ...k] = t.dataset.annt.split('|'), key = k.join('|'), c = clientOf(cid); if (!c) return;
   const was = annDone(c, key); annSetDone(c, key, !was); toast(was ? 'Remis à faire' : 'Noté comme fait', 'Annuler', () => annSetDone(c, key, !!was));
 });
+/* ---------- Historique du carnet (v1.58.0) ----------
+   Chaque modification locale des carnets (Store.put('meta')) est comparée à l'état précédent, rubrique par rubrique :
+   ajout, modification (avant → après) ou suppression. Une ligne par élément ; les frappes rapprochées (10 min) dans le
+   même champ forment une seule ligne. Conservé 24 mois, synchronisé : un document « hx-<id du dossier ou du groupe> »
+   = { e: [{ t, s: rubrique, k: élément, l: libellé, o: 'add' | 'mod' | 'del', b: avant, a: après }] } (le plus récent en dernier).
+   Les changements reçus d'un autre appareil ne sont pas notés ici (cet appareil-là les note). */
+const HX_SEC = { ident: 'Identité', ccn: 'Convention collective', cycle: 'Cycle de paie', alertes: 'Alertes salariés', interloc: 'Interlocuteurs', tarifs: 'Tarifs', pratiques: 'Pratiques', salaries: 'Salariés particuliers', points: 'Points en cours', journal: 'Journal', annuel: 'Calendrier annuel', modeles: 'Modèles de messages', virements: 'Virements', relation: 'Relation client', groupe: 'Groupe' };
+const HX_DAYS = 730, HX_MAX = 1500, HX_MERGE = 10 * 60000, HX_CUT = 1200;
+const HX_CY = { rec: 'Réception des variables', recDay: 'Jour d’envoi automatique', varDay: 'Réception habituelle des variables', envDelay: 'Alerte 1er envoi', valid: 'Validation par le client', valDelay: 'Délai de validation', vir: 'Virements', dep: 'Dépôt', depDay: 'Jour de dépôt', dsn: 'Date de DSN', bs: 'Nombre de bulletins' };
+const hxCut = v => { v = String(v ?? ''); return v.length > HX_CUT ? v.slice(0, HX_CUT) + '…' : v; };
+const hxD = v => v ? fmtDate(parseDay(v)) : '';
+function hxCyVal(k, v) {
+  if (v == null || v === '') return '';
+  if (k === 'rec') return CY_LBL.rec[v] || v; if (k === 'vir') return CY_LBL.vir[v] || v; if (k === 'dep') return CY_LBL.dep[v] || v;
+  if (k === 'valid') return v ? 'oui' : 'non'; if (k === 'envDelay') return +v === 0 ? 'pas d’alerte' : v + ' jours ouvrés'; if (k === 'valDelay') return v + ' jours';
+  if (k === 'dsn') return 'le ' + v + ' du mois suivant';
+  return typeof v === 'object' ? JSON.stringify(v) : String(v);
+}
+function hxView(o, isG) { // { clé: [rubrique, libellé, texte] } : une entrée par élément suivi du carnet
+  const V = {}, put = (k, s, l, t) => { t = t == null ? '' : String(t).trim(); if (t) V[k] = [s, l, t]; }, b = cbPeek(o);
+  if (!isG) {
+    const c = o, g = groupOf(c.group), own = !isMine(c) && c.owner ? personOf(c.owner) : null;
+    put('name', 'ident', 'Raison sociale', c.name); put('code', 'ident', 'N° de dossier', c.code); put('siret', 'ident', 'SIRET', c.siret);
+    put('group', 'ident', 'Groupe', g ? g.name : ''); put('pf', 'ident', 'Portefeuille', isMine(c) ? 'Mon portefeuille' : own ? 'Portefeuille de ' + own.name : 'Hors de mon portefeuille');
+    put('state', 'ident', 'État du dossier', c.deletedAt ? 'Dans la corbeille' : c.archived ? 'Archivé' : 'Actif');
+    put('ccn', 'ccn', 'Conventions collectives', (b.ccn || []).map(ccnTxt).join(' ; '));
+    const cy = c.cy || {}; for (const k of Object.keys(cy)) if (k !== 'notes') put('cy.' + k, 'cycle', HX_CY[k] || 'Paramètre du cycle (' + k + ')', hxCyVal(k, cy[k]));
+    put('cy.notes', 'cycle', 'Remarque permanente', cy.notes);
+    for (const a of c.alerts || []) put('al:' + a.id, 'alertes', 'Alerte salarié', [a.name + (a.tag ? ' (' + a.tag + ')' : ''), a.mode === 'validate' ? 'à valider' + (a.trig ? ' : ' + (typeof alTrigText === 'function' ? alTrigText(a) : a.trig) : '') : 'pour information', a.from ? 'à partir du cycle de ' + mkLabel(a.from) : '', a.until ? 'jusqu’au cycle de ' + mkLabel(a.until) : ''].filter(Boolean).join(' · '));
+    for (const x of S.meta.persons) if (!x.deletedAt && (x.clients || []).includes(c.id)) put('p:' + x.id, 'interloc', 'Interlocuteur', pplTxt(x) + (x.archived ? ' (archivé)' : '') + (x.note ? ' — ' + x.note : ''));
+    for (const [tid, r] of Object.entries(c.rates || {})) put('rt:' + tid, 'tarifs', 'Tarif : ' + (taskOf(tid)?.name || 'tâche supprimée'), rateTxt(r));
+    put('prat', 'pratiques', 'Pratiques du client', b.prat); put('part', 'pratiques', 'Particularités du cycle et des salariés', b.part);
+    put('sp', 'salaries', 'Salariés particuliers', spOf(b).map(k => SP_L[k] ? SP_L[k][1] : k).join(', ')); put('spNote', 'salaries', 'Remarque (salariés particuliers)', b.spNote);
+    for (const [m, v] of Object.entries(b.vir || {})) put('vir:' + m, 'virements', 'Virements de la paie de ' + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), hxD(v));
+    put('rel', 'relation', 'Niveau de la relation', (CB_REL.find(r => r[0] === ((b.rel || {}).lvl || 'neutre')) || [, 'Neutre'])[1]); put('relnote', 'relation', 'Commentaire sur la relation', (b.rel || {}).note);
+  } else {
+    const g = o;
+    put('gname', 'ident', 'Nom du groupe', g.name); put('gcol', 'ident', 'Couleur', GROUP_COLOR_NAMES[(g.color || 0) % GROUP_COLOR_NAMES.length]);
+    put('mother', 'ident', 'Société mère', g.mother && clientOf(g.mother) ? clientOf(g.mother).name : '');
+    put('gnotes', 'groupe', 'Notes du groupe', b.notes);
+    for (const x of S.meta.clients) if (x.group === g.id && !x.deletedAt) put('m:' + x.id, 'groupe', 'Dossier du groupe', x.name + (x.archived ? ' (archivé)' : ''));
+    for (const x of S.meta.persons) if (!x.deletedAt && (x.groups || []).includes(g.id)) put('p:' + x.id, 'interloc', 'Interlocuteur du groupe', pplTxt(x) + (x.archived ? ' (archivé)' : '') + (x.note ? ' — ' + x.note : ''));
+  }
+  for (const x of b.points || []) put('pt:' + x.id, 'points', 'Point en cours', x.t + (x.due ? ' · échéance le ' + hxD(x.due) : '') + (x.done ? ' · clos le ' + hxD(x.done) : ''));
+  for (const x of b.journal || []) put('jr:' + x.id, 'journal', 'Événement du journal', jrTxt(x));
+  for (const e of b.ann || []) put('ann:' + e.id, 'annuel', 'Événement annuel', e.t + ' · ' + annRecTxt(e) + (e.lead != null ? ' · rappel ' + e.lead + ' j avant' : '') + (e.note ? ' — ' + e.note : ''));
+  for (const t of tplList()) if (tplRefs(t).includes(o.id)) put('tpl:' + t.id, 'modeles', 'Modèle de message', t.n + (t.s ? ' — objet : ' + t.s : ''));
+  return V;
+}
+const HX = {
+  base: null, // Map id → { sig, v }
+  owners() { return [...S.meta.clients.map(c => [c, false]), ...S.meta.groups.map(g => [g, true])]; },
+  snap() { const M = new Map(); for (const [o, isG] of this.owners()) { const v = hxView(o, isG); M.set(o.id, { sig: JSON.stringify(v), v, nm: isG ? 'Groupe ' + o.name : o.name }); } return M; },
+  rebase() { try { this.base = this.snap(); } catch (e) { this.base = null; } },
+  onPut() {
+    if (!Journal.ready) return;
+    let nw; try { nw = this.snap(); } catch (e) { console.warn(e); return; }
+    const old = this.base; this.base = nw; if (!old || Journal.mute) return; // remise à zéro, restauration : pas d'historique
+    const now = Date.now();
+    for (const [id, cur] of nw) {
+      const prev = old.get(id);
+      if (!prev) { this.log(id, now, [{ s: 'ident', k: '_new', l: 'Création du carnet', o: 'add', b: '', a: cur.nm }]); continue; }
+      if (prev.sig === cur.sig) continue;
+      const ch = [];
+      for (const k of new Set([...Object.keys(prev.v), ...Object.keys(cur.v)])) {
+        const B = prev.v[k], A = cur.v[k];
+        if (B && A && B[2] === A[2]) continue;
+        const r = A || B; ch.push({ s: r[0], k, l: r[1], o: !B ? 'add' : !A ? 'del' : 'mod', b: B ? hxCut(B[2]) : '', a: A ? hxCut(A[2]) : '' });
+      }
+      if (ch.length) this.log(id, now, ch);
+    }
+  },
+  list(id) { return (S.hx && S.hx[id]) || []; },
+  log(id, now, ch) {
+    const L = ((S.hx ||= {})[id] ||= []);
+    for (const c of ch) {
+      let j = -1; for (let i = L.length - 1; i >= 0 && now - L[i].t < HX_MERGE; i--) if (L[i].k === c.k) { j = i; break; }
+      if (j >= 0 && L[j].o !== 'del' && c.o !== 'add') { // regroupement : même élément touché il y a moins de 10 minutes
+        const p = L[j];
+        if (c.o === 'del') { if (p.o === 'add') { L.splice(j, 1); continue; } p.o = 'del'; p.a = ''; }
+        else { p.a = c.a; p.l = c.l; }
+        p.t = now; if (p.o === 'mod' && p.b === p.a) L.splice(j, 1); else { L.splice(j, 1); L.push(p); }
+        continue;
+      }
+      L.push({ t: now, ...c });
+    }
+    const lim = now - HX_DAYS * 864e5; let i0 = 0; while (i0 < L.length && L[i0].t < lim) i0++;
+    if (i0) L.splice(0, i0); if (L.length > HX_MAX) L.splice(0, L.length - HX_MAX);
+    Store.put('hx-' + id);
+  },
+};
+const hxWhen = t => { const d = new Date(t); return fmtDate(t) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const HX_OP = { add: 'Ajout', mod: 'Modification', del: 'Suppression' };
+const hxLine = e => HX_OP[e.o] + ' · ' + e.l + (e.o === 'mod' ? ' : « ' + e.b + ' » → « ' + e.a + ' »' : ' : ' + (e.o === 'del' ? e.b : e.a));
+function hxCarnetHTML(o, isG) {
+  const all = HX.list(o.id), f = (UI.hxF ||= {})[o.id] || '', L = all.filter(e => !f || e.s === f).slice().reverse(), n = (UI.hxN ||= {})[o.id] || 25;
+  const secs = [...new Set(all.map(e => e.s))];
+  const one = e => { const bb = e.o === 'mod' ? `<div class="hx-ba"><div><span class="hx-k">Avant</span>${esc(e.b) || '<i class="muted">vide</i>'}</div><div><span class="hx-k">Après</span>${esc(e.a) || '<i class="muted">vide</i>'}</div></div>` : `<div class="hx-ba"><div>${esc(e.o === 'del' ? e.b : e.a)}</div></div>`;
+    const sh = (e.o === 'mod' ? e.a : e.o === 'del' ? e.b : e.a).replace(/\s+/g, ' ');
+    const ok = e.t + '|' + e.k;
+    return `<details class="hx-it hx-${e.o}" data-hxo="${esc(ok)}" ${(UI.hxOpen ||= new Set()).has(ok) ? 'open' : ''}><summary><span class="hx-t mono">${new Date(e.t).toTimeString().slice(0, 5)}</span><span class="hx-op">${HX_OP[e.o]}</span><span class="hx-l"><b>${esc(e.l)}</b> <span class="muted">${esc(sh.slice(0, 90))}${sh.length > 90 ? '…' : ''}</span></span><span class="hx-s">${esc(HX_SEC[e.s] || '')}</span></summary>${bb}</details>`; };
+  let html = '', last = '';
+  for (const e of L.slice(0, n)) { const d = fmtDate(e.t); if (d !== last) { html += `<div class="hx-day">${d === fmtDate(Date.now()) ? 'Aujourd’hui' : d}</div>`; last = d; } html += one(e); }
+  return `<i data-b="${isG ? 'ghistorique' : 'historique'}"></i><div class="toolbar"><h2>Historique du carnet (${all.length})</h2><span class="sp"></span>${secs.length > 1 ? `<select data-hxf="${esc(o.id)}" title="Filtrer par rubrique"><option value="">Toutes les rubriques</option>${secs.map(s => `<option value="${s}" ${s === f ? 'selected' : ''}>${esc(HX_SEC[s] || s)}</option>`).join('')}</select>` : ''}</div><div class="card cb-sec">
+    ${L.length ? `<div class="hx-list">${html}</div>${L.length > n ? `<button class="btn sm ghost" data-hxmore="${esc(o.id)}">Voir plus (${L.length - n} de plus)</button>` : ''}` : `<div class="cb-hint">${all.length ? 'Aucune modification dans cette rubrique.' : 'Aucune modification enregistrée pour l’instant. Les prochaines modifications de ce carnet (identité, convention, cycle, interlocuteurs, pratiques, points, journal…) apparaîtront ici, avec l’avant et l’après.'}</div>`}
+    <div class="cb-hint">Noté automatiquement, gardé 24 mois. Cliquez sur une ligne pour voir l’avant et l’après.</div></div>`;
+}
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
 const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['sp', 'Salariés particuliers', 1], ['ann', 'Calendrier annuel', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
@@ -3419,8 +3548,8 @@ function openCbCopy(dstId) {
 /* ---------- Export d'un carnet (v1.41.0) : PDF (impression), texte copié, fichier .txt ----------
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
 const CBX = {
-  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['annuel', 'Calendrier annuel'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours']],
-  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal']]
+  dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['annuel', 'Calendrier annuel'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours'], ['historique', 'Historique des modifications', 1]],
+  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal'], ['historique', 'Historique des modifications', 1]]
 };
 function cbxSel(kind) { // { sel: [...], all: [clés connues] } ; une rubrique ajoutée depuis le dernier choix prend sa valeur par défaut
   const def = CBX[kind].filter(x => !x[2]).map(x => x[0]);
@@ -3455,6 +3584,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     const rel = b.rel || {};
     add('relation', 'Relation client', [['Niveau', (CB_REL.find(r => r[0] === (rel.lvl || 'neutre')) || [, 'Neutre'])[1]], ['Commentaire', rel.note || '—'], ['Mise à jour', d(rel.d)]]);
     if (g) { const gb = cbPeek(g); add('gnotes', 'Groupe ' + g.name + ' : notes et points en cours', [['Notes', gb.notes || '—'], ...ptsOf(gb.points, 'Point')]); }
+    add('historique', 'Historique des modifications (24 derniers mois)', HX.list(c.id).slice().reverse().map(e => [hxWhen(e.t), hxLine(e)]), 'Aucune modification enregistrée');
     return { title: c.name, sub: [c.code ? 'Dossier n° ' + c.code : '', g ? 'Groupe ' + g.name : ''].filter(Boolean).join(' · '), sections: S2 };
   }
   const g = obj, b = cbPeek(g), mem = grpMembers(g);
@@ -3465,6 +3595,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
   add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && pInGroup(x, g.id)).map(x => ['', pplTxt(x) + ' — ' + pAttTxt(x).join(', ')]), 'Aucun interlocuteur');
   add('points', 'Points en cours', [...ptsOf(b.points, 'Groupe'), ...mem.flatMap(x => ptsOf(cbPeek(x).points, x.name))], 'Aucun point');
   add('journal', 'Journal du groupe', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]), 'Aucun événement');
+  add('historique', 'Historique des modifications (24 derniers mois)', HX.list(g.id).slice().reverse().map(e => [hxWhen(e.t), hxLine(e)]), 'Aucune modification enregistrée');
   return { title: 'Groupe ' + g.name, sub: mem.length + ' dossier' + (mem.length > 1 ? 's' : ''), sections: S2 };
 }
 function cbxText(M) {
@@ -3666,6 +3797,7 @@ function renderCarnetGroupe(body, g) {
   html += annCarnetHTML(g, true);
   html += spGroupHTML(g);
   html += tplCarnetHTML(g, true);
+  html += hxCarnetHTML(g, true);
   body.innerHTML = html;
   body.querySelectorAll('[data-ind]').forEach(i => { i.indeterminate = true; });
   blkify(body, 'carnetgroupe');
@@ -3746,6 +3878,7 @@ function renderCarnetDossier(body, c) {
     <div class="cb-rel" role="radiogroup" aria-label="Qualité de la relation">${CB_REL.map(([v, l]) => `<button data-rel="${v}" data-v="${v}" role="radio" aria-checked="${(rl.lvl || 'neutre') === v}" class="${(rl.lvl || 'neutre') === v ? 'on' : ''}">${l}</button>`).join('')}${rl.d ? `<span class="cb-hint" style="align-self:center">mis à jour le ${fmtDate(parseDay(rl.d))}</span>` : ''}</div>
     <label class="fld"><span>Commentaire factuel</span><textarea data-cbf="relnote" rows="2" placeholder="ex. Variables souvent incomplètes, relances nécessaires ; échanges cordiaux">${esc(rl.note || '')}</textarea></label>
     <div class="cb-hint">Restez professionnel et factuel : le client peut demander à consulter ce qui le concerne.</div></div>`;
+  html += hxCarnetHTML(c, false);
   body.innerHTML = html;
   blkify(body, 'carnet');
 }
@@ -3799,11 +3932,13 @@ function bindCarnet() {
     else if (q) addCcn(c, { i: null, t: q });
     $('#ccn-q').value = ''; $('#ccn-res').hidden = true; $('#ccn-q').blur();
   });
+  body.addEventListener('toggle', ev => { const d = ev.target; if (d.dataset && d.dataset.hxo) { const S2 = (UI.hxOpen ||= new Set()); d.open ? S2.add(d.dataset.hxo) : S2.delete(d.dataset.hxo); } }, true);
   body.addEventListener('focusout', ev => { if (ev.target.id === 'ccn-q') setTimeout(() => { const b = $('#ccn-res'); if (b) b.hidden = true; }, 150); });
   body.addEventListener('change', ev => {
     const t = ev.target;
     if (t.id === 'cb-grp') { lsSet('cbGroup', t.checked ? '1' : '0'); renderCarnet(); return; }
     if (t.id === 'cb-ff') { UI.cb.ff = t.value; renderCarnet(); return; }
+    if (t.dataset.hxf != null) { (UI.hxF ||= {})[t.dataset.hxf] = t.value; renderCarnet(); return; }
     if (t.id === 'cb-plink' && t.value) { const x = personOf(t.value), c0 = cur(); if (x && c0) { x.clients = [...new Set([...(x.clients || []), c0.id])]; touchMeta(); toast(x.name + ' rattaché au dossier'); } return; }
     if (t.id === 'cbg-name' && UI.cbG) { const g = groupOf(UI.cbG), v = t.value.trim().replace(/\s+/g, ' '); if (!v) { t.value = g.name; return; } if (S.meta.groups.some(x => x !== g && norm(x.name) === norm(v))) { toast('Un groupe porte déjà ce nom'); t.value = g.name; return; } g.name = v; touchMeta(); return; }
     if (t.id === 'cbg-add' && t.value && UI.cbG) { const x = clientOf(t.value), g = groupOf(UI.cbG), old = x.group; const og = groupOf(old); if (og && og.mother === x.id) delete og.mother; x.group = g.id; touchMeta(); toast(x.name + ' ajouté au groupe' + (og ? ' (retiré de « ' + og.name + ' »)' : ''), 'Annuler', () => { if (old) x.group = old; else delete x.group; touchMeta(); }); return; }
@@ -3825,6 +3960,7 @@ function bindCarnet() {
     const gb = ev.target.closest('[data-cbg]'); if (gb) { location.hash = 'carnet/groupe/' + encodeURIComponent(gb.dataset.cbg); window.scrollTo(0, 0); return; }
     const gf = ev.target.closest('[data-cbgfold]'); if (gf) { const f = cbFold(), k = gf.dataset.cbgfold; f.has(k) ? f.delete(k) : f.add(k); lsSet('cbFold', JSON.stringify([...f])); renderCarnet(); return; }
     if (ev.target.closest('[data-cbexp]')) { openCbExport(); return; }
+    { const hm = ev.target.closest('[data-hxmore]'); if (hm) { const id = hm.dataset.hxmore; (UI.hxN ||= {})[id] = ((UI.hxN[id]) || 25) + 50; renderCarnet(); return; } }
     if (ev.target.closest('[data-cbcopy]') && UI.cbId) { openCbCopy(UI.cbId); return; }
     if (ev.target.closest('[data-cba=newdos]')) { openNewDossier(); return; }
     if (ev.target.closest('[data-cba=newgrp]')) { askGroupName(id => { if (id) location.hash = 'carnet/groupe/' + encodeURIComponent(id); }); return; }
@@ -7006,7 +7142,7 @@ async function importCcnFile(file) {
   } catch (e) { toast(e.message || 'Fichier illisible'); }
 }
 function exportJSON() {
-  const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running }, null, 1);
+  const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running, hx: S.hx || {} }, null, 1);
   downloadText('antevorta_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
 }
 function openReset() {
@@ -7205,7 +7341,7 @@ function bindRefsOn(body) {
     else if (act === 'theme') { lsSet('theme', b.dataset.v); applyTheme(); renderSettings(); renderHeader(); }
     else if (act === 'ccn-reset') { try { localStorage.removeItem('chronocab:ccnList'); } catch (e) {} toast('Liste intégrée rétablie : rechargement…'); setTimeout(() => location.reload(), 900); }
     else if (act === 'export') {
-      const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running }, null, 1);
+      const data = JSON.stringify({ app: 'chronocab', version: 1, exportedAt: new Date().toISOString(), meta: S.meta, days: S.days, cycles: S.cycles, running: S.running, hx: S.hx || {} }, null, 1);
       downloadText('antevorta_sauvegarde_' + dayKey(Date.now()) + '.json', data, 'application/json');
     }
   });
@@ -7306,6 +7442,11 @@ function importFile(file) {
     S.meta.clients.forEach(c => { if (c.owner && remap[c.owner]) c.owner = remap[c.owner]; });
     const R = id => remap[id] || id;
     for (const f of m.favorites) { const g = { c: R(f.c), t: R(f.t) }; if (!S.meta.favorites.some(x => x.c === g.c && x.t === g.t)) S.meta.favorites.push(g); }
+    if (d.hx && typeof d.hx === 'object') for (const [id0, L0] of Object.entries(d.hx)) { // historique des carnets (v1.58.0) : fusion sans doublon
+      if (!Array.isArray(L0) || !L0.length) continue; const id = R(id0), L = ((S.hx ||= {})[id] ||= []), have = new Set(L.map(e => e.t + '|' + e.k + '|' + e.o));
+      let ch = false; for (const e of L0) if (e && e.t && !have.has(e.t + '|' + e.k + '|' + e.o)) { L.push(e); ch = true; }
+      if (ch) { L.sort((a, b) => a.t - b.t); Store.put('hx-' + id); }
+    }
     let n = 0;
     for (const k in d.days) {
       const en = d.days[k]?.entries || {};
@@ -7867,7 +8008,7 @@ async function boot() {
   setTimeout(checkForgotten, 800);
   setTimeout(cyDailyReminder, 1500);
   $('#hist-btn').onclick = ev => { ev.stopPropagation(); Journal.toggle(); };
-  Journal.load(); setTimeout(() => { Journal.ready = true; }, 2500);
+  Journal.load(); setTimeout(() => { Journal.ready = true; HX.rebase(); }, 2500);
   $('#call-btn').onclick = ev => { ev.stopPropagation(); callToggle(); }; callUI();
 }
 boot();
