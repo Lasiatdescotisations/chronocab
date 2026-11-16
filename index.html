@@ -747,6 +747,22 @@ table.cyx tr.has-x td:first-child a{font-weight:600}
 .team-r{font-size:12.5px;padding:2px 6px;max-width:230px}
 .team-pp.arch{opacity:.55}
 .pf-qb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.rp-card{padding:14px 16px;display:grid;gap:6px;min-width:0}
+.rp-card .rp-svg,.rp-fx .rp-svg{width:100%;height:auto;max-width:100%;display:block}
+.rp-scroll{overflow-x:auto}.rp-scroll .rp-svg{min-width:640px}
+.rp-facts{padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:6px 18px}
+.rp-fact{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;padding:6px 0}
+.rp-fi{flex:none;width:26px;height:26px;border-radius:8px;background:var(--accent-soft);display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+.rp-big{font-size:14px;line-height:1.5}
+.rp-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.rp-kv>div{display:flex;flex-direction:column;gap:1px;background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.rp-kv>div>span:first-child{font-size:11.5px;color:var(--muted)}
+.rp-kv b{font-size:18px;font-weight:600}
+.rp-sw{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px}
+.rp-tt{position:fixed;z-index:9999;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12px;line-height:1.45;padding:6px 9px;border-radius:7px;white-space:pre-line;max-width:320px;box-shadow:var(--shadow)}
+body.discret.dsc-time .rp-svg .rp-d,body.discret.dsc-time .rp-dv{filter:blur(5px)}
+body.discret.dsc-oth .rp-svg .rp-n{filter:blur(5px)}
+#print-area.rp-print svg{max-width:100%;height:auto}#print-area .rp-pfig{break-inside:avoid;page-break-inside:avoid}
 .lbl-w{display:flex;align-items:center;gap:4px;min-width:0}
 .lbl-w .lbl{flex:1;min-width:0}
 .ppl-b{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:3px 4px;border-radius:7px;display:inline-flex;align-items:center;flex:none;max-width:60%;overflow:hidden}
@@ -1197,7 +1213,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.62.0';
+const APP_VERSION = '1.63.0';
 const APP_DATE = '16/11/2026';
 /* =========================================================
    Utilitaires
@@ -3055,6 +3071,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.63.0', '16/11/2026', ['Rapports en tableau de bord : faits marquants en phrases (variations des dossiers, concentration, temps interne, exceptionnel à facturer, jour le plus chargé, appels), répartition du temps en anneau (client, groupe, catégorie, tâche, facturation ; clic = fiche du dossier ou filtre), concentration (« 4 dossiers font la moitié de votre temps »), temps par bulletin sur 12 mois, comparaison avec la période précédente, facturation et reste à facturer par ancienneté, interruptions et échanges.', 'Calendrier de l’année (une case par jour, clic = récap du jour), profil du cycle de paie (temps moyen selon le jour du mois, repères DSN, variables, virements), fiche express d’un dossier, export du tableau de bord en image ou en PDF.', 'Les tableaux détaillés (tableau croisé, 12 derniers mois, détail des saisies) restent disponibles, repliés en bas de l’onglet.']],
   ['1.62.0', '16/11/2026', ['Carnet : bloc « Équipe du dossier » (et « Équipe du groupe ») — les collègues qui interviennent sur le dossier, avec leur rôle (comptable du dossier, responsable, remplaçant(e) pendant mes absences, expert-comptable… ou saisie libre). L’équipe d’un groupe vaut pour tous ses dossiers.', 'L’équipe est proposée en premier dans les personnes associées (👤), reprise dans « Préparer une absence » et l’export du carnet ; filtre des tuiles « avec le collègue ».', 'Rattacher une personne existante en quelques clics : bouton « Rattacher… » dans les interlocuteurs du dossier et du groupe (recherche, plusieurs à la fois) ; dans la fiche d’une personne, recherche et « Cocher mon portefeuille » / « Cocher les dossiers affichés » / « Tout décocher », y compris pour les collègues (équipe).']],
   ['1.61.0', '16/11/2026', ['Personnes associées à une saisie : un collègue vous pose une question sur un dossier ? Bouton 👤 dans la barre du chrono (avant ou pendant : « Appliquer à la saisie en cours » ou « Nouvelle saisie avec ces personnes »), sur chaque ligne de saisie, dans la fin d’appel, la modification d’une saisie et la saisie rapide (« 20min Dupont question paie avec Paul »).', 'Les noms apparaissent dans le récap à reporter (libellé « avec … » et colonne « Avec » de la copie Excel ; une saisie avec d’autres personnes reste sur sa ligne), dans les Rapports (filtre « Avec », colonne du détail et de l’export) et dans la fiche de la personne (temps passé avec elle, par dossier).']],
   ['1.60.0', '16/11/2026', ['Carnet : « Calendrier de réception des variables » — une date attendue par mois de paie (règles de remplissage, dont « d’après la date habituelle ») ; elle remplace la date habituelle ce mois-là pour la relance, Mon cycle et la Charge à venir.', 'Cycle de paie du groupe : dans le carnet d’un groupe, paramètres du cycle, remarque permanente et calendriers (réception, virements) suivis automatiquement par tous ses dossiers ; ce qu’un dossier modifie lui-même devient une exception.', 'Exceptions d’un coup d’œil : tableau des dossiers du groupe (« = » s’il suit le groupe, valeur surlignée sinon, valeur du groupe au survol), boutons « Aligner » ; dans le carnet d’un dossier, ce qui lui est propre avec ↺ pour reprendre la valeur du groupe.']],
@@ -3139,7 +3156,7 @@ const HELP = {
   chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.', 'Bouton 👤 (barre du chrono et lignes de saisie) : associer une ou plusieurs personnes à une saisie, par exemple le collègue qui vous pose une question sur un dossier ; pendant le chrono, au choix sur la saisie en cours ou sur une nouvelle saisie.']],
   portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
   carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Équipe du dossier / du groupe : les collègues qui interviennent sur le dossier, avec leur rôle (remplaçant(e)…) ; « Rattacher… » pour ajouter des personnes déjà enregistrées.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
-  rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
+  rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'En haut, les faits marquants de la période ; puis les graphiques : répartition en anneau (clic sur un dossier = sa fiche express, sur une autre part = filtre), concentration, temps par bulletin, comparaison, facturation, échanges, calendrier de l’année (clic = récap du jour), profil du cycle. Survolez un graphique pour le détail ; « Exporter le tableau de bord » en image ou PDF.', 'En bas, repliés : le tableau croisé, les 12 derniers mois et le détail des saisies (cliquez sur le titre pour déplier).', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
   facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
   referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages génériques, de groupe ou de dossier : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier (✉ Message : bascule Spécifiques / Génériques).']],
   outils: ['Outils', ['Calculateurs du quotidien : dates, rupture conventionnelle, forfait jours, avantage véhicule, prorata…', '« Choisir mes outils » règle ceux qui s’affichent ; chaque calcul se copie en image ou en texte.', 'Calculs indicatifs : vérifiez toujours votre convention collective.']],
@@ -6587,8 +6604,8 @@ function periodRange() {
   }
   return [from, to];
 }
-function filtered() {
-  const r = UI.rep, [from, to] = periodRange(), q = norm(r.q);
+function filtered(rng) {
+  const r = UI.rep, [from, to] = rng || periodRange(), q = norm(r.q);
   return (lissOn() && r.liss !== 'real' ? lissedEntries() : allEntries()).filter(e => {
     if (e.start < from || e.start >= to) return false;
     if (r.client && e.client !== r.client) return false;
@@ -6651,6 +6668,8 @@ function renderReports() {
     ${lissOn() ? `<label>Temps<select data-r="liss"><option value="liss" ${r.liss !== 'real' ? 'selected' : ''}>Lissés</option><option value="real" ${r.liss === 'real' ? 'selected' : ''}>Réels</option></select></label>` : ''}
     <label style="flex:1;min-width:160px">Recherche<input data-r="q" value="${esc(r.q)}" placeholder="Libellé, client, tâche…"></label>
   </div>`;
+  const DASH = rpDashHTML(list);
+  html += DASH.facts;
   html += `<i data-b="synthese"></i><h2>Synthèse</h2><div class="stats">
     <div class="card stat"><div class="k">Temps total</div><div class="v">${fmtDur(t.all)}</div><div class="s">${list.length} saisie${list.length > 1 ? 's' : ''}</div></div>
     <div class="card stat"><div class="k">Facturable</div><div class="v">${fmtDur(t.bill)}</div><div class="s">${pct} % du temps${hasRates() ? ' · ' + eurS(sumAmt(list)) : ''}</div></div>
@@ -6673,10 +6692,11 @@ function renderReports() {
   html += `<i data-b="evolution"></i><div class="toolbar"><h2>Évolution ${byDay ? 'par jour' : 'par mois'}</h2></div>
     <div class="card chart-wrap"><div class="chart-head"><div class="legend"><span><i style="background:var(--s-inv)"></i>Facturé</span><span><i style="background:var(--s-todo)"></i>Reste à facturer</span><span><i style="background:var(--s-nobill)"></i>Non facturable</span></div></div>
     ${chartSVG(buckets)}<div class="tip" id="tip" hidden></div></div>`;
+  html += DASH.charts;
   // tableau croisé
   const multiMonth = months.length > 1;
   const cols = multiMonth && r.cols === 'month' ? 'month' : 'status';
-  html += `<i data-b="tableau"></i><div class="toolbar"><h2>Par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : r.group === 'grp' ? 'groupe puis client' : r.group === 'cat' ? 'catégorie puis tâche' : 'tâche puis client'}</h2><span class="sp"></span>
+  html += `<i data-b="tableau"></i><div class="toolbar"><h2>Tableau détaillé : par ${r.group === 'client' ? 'client puis tâche' : r.group === 'pf' ? 'portefeuille puis client' : r.group === 'grp' ? 'groupe puis client' : r.group === 'cat' ? 'catégorie puis tâche' : 'tâche puis client'}</h2><span class="sp"></span>
     <div class="seg" data-seg="group"><button data-v="client" class="${r.group === 'client' ? 'on' : ''}">Client › Tâche</button><button data-v="task" class="${r.group === 'task' ? 'on' : ''}">Tâche › Client</button><button data-v="cat" class="${r.group === 'cat' ? 'on' : ''}">Catégorie › Tâche</button><button data-v="pf" class="${r.group === 'pf' ? 'on' : ''}">Portefeuille › Client</button>${hasGroups() || r.group === 'grp' ? `<button data-v="grp" class="${r.group === 'grp' ? 'on' : ''}">Groupe › Client</button>` : ''}</div>
     ${multiMonth ? `<div class="seg" data-seg="cols"><button data-v="status" class="${cols === 'status' ? 'on' : ''}">Colonnes : statuts</button><button data-v="month" class="${cols === 'month' ? 'on' : ''}">Colonnes : mois</button></div>` : ''}
     <button class="btn sm" data-act="copy-pivot">${ICON.copy} Copier</button></div>`;
@@ -6700,6 +6720,7 @@ function renderReports() {
     </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
   const body = $('#rapports-body');
   body.innerHTML = html;
+  try { if (lsGet('repV2', '') !== '1') { const st = Blk.get('rapports'); st.o = []; st.f = [...new Set([...(st.f || []), 'tableau', 'douze', 'detail'])]; Blk.put('rapports', st); lsSet('repV2', '1'); } } catch (e) {}
   blkify(body, 'rapports');
   body._pivotTsv = pv.tsv;
   body._list = list;
@@ -6814,7 +6835,12 @@ function bindReports() {
   });
   let qT; body.addEventListener('input', ev => { if (ev.target.dataset.r === 'q') { clearTimeout(qT); UI.rep.q = ev.target.value; qT = setTimeout(() => { const pos = ev.target.selectionStart; renderReports(); const inp = body.querySelector('[data-r=q]'); inp.focus(); inp.setSelectionRange(pos, pos); }, 300); } });
   body.addEventListener('click', ev => {
-    const s = ev.target.closest('.seg button'); if (s) { UI.rep[s.parentElement.dataset.seg] = s.dataset.v; renderReports(); return; }
+    const cy = ev.target.closest('[data-act=caly]'); if (cy) { UI.rep.calY = (UI.rep.calY || new Date().getFullYear()) + +cy.dataset.d; renderReports(); return; }
+    const rk = ev.target.closest('[data-rpk]'); if (rk) { const [md, k] = rk.getAttribute('data-rpk').split('|'); document.getElementById('rp-tt')?.setAttribute('hidden', '');
+      if (md === 'client') { if (rpIsDos(k)) openRepFx(k); else { UI.rep.client = k; renderReports(); } } else { if (md === 'grp') UI.rep.grp = k || 'none'; else if (md === 'cat') UI.rep.cat = k; else if (md === 'task') UI.rep.task = k; else if (md === 'bill') UI.rep.bill = k; renderReports(); toast('Filtre appliqué à l’onglet'); } return; }
+    const cd = ev.target.closest('[data-cald]'); if (cd) { openRecap(cd.getAttribute('data-cald')); return; }
+    if (ev.target.closest('[data-act=rp-export]')) { openRpExport(); return; }
+    const s = ev.target.closest('.seg button'); if (s && s.parentElement.dataset.seg) { UI.rep[s.parentElement.dataset.seg] = s.dataset.v; renderReports(); return; }
     const b = ev.target.closest('[data-act],[data-bulk]'); if (!b) return;
     if (b.dataset.act === 'edit') openEdit(b.closest('tr').dataset.id);
     else if (b.dataset.act === 'copy-pivot') copyText(body._pivotTsv);
@@ -6833,6 +6859,250 @@ function bindReports() {
   });
 }
 
+/* ---------- Rapports : tableau de bord (v1.63.0) ----------
+   Faits marquants, répartition en anneau, concentration, temps par bulletin, comparaison avec la période précédente,
+   facturation, interruptions, calendrier de l'année, profil du cycle, fiche express d'un dossier, export en image ou PDF.
+   Graphiques en SVG aux couleurs résolues (exportables tels quels). */
+function rc() { const cs = getComputedStyle(document.documentElement), v = (n, d) => cs.getPropertyValue(n).trim() || d;
+  return { ink: v('--ink', '#17191c'), ink2: v('--ink-2', '#4f5157'), mut: v('--muted', '#878880'), line: v('--line', '#e2dfd8'), surf: v('--surface', '#ffffff'), s2: v('--surface-2', '#f0eee9'), acc: v('--accent', '#0d6656'), inv: v('--s-inv', '#2a78d6'), todo: v('--s-todo', '#eb6834'), no: v('--s-nobill', '#1baf7a'), font: 'IBM Plex Sans, system-ui, Segoe UI, sans-serif' }; }
+const rpCol = (C, c) => !c || String(c).startsWith('var(') ? C.mut : c;
+function rpT(C) { return (x, y, s, o = {}) => `<text x="${x.toFixed ? x.toFixed(1) : x}" y="${y.toFixed ? y.toFixed(1) : y}" font-family="${C.font}" font-size="${o.s || 12}" fill="${o.c || C.ink2}" text-anchor="${o.a || 'start'}"${o.w ? ` font-weight="${o.w}"` : ''}${o.cl ? ` class="${o.cl}"` : ''}>${esc(s)}</text>`; }
+const rpTt = s => esc(s).replace(/\n/g, '&#10;');
+const rpCut = (s, n) => (s = String(s || '')).length > n ? s.slice(0, n - 1) + '…' : s;
+const rpPct = (a, b) => b ? Math.round(a * 100 / b) : 0;
+const rpIsDos = id => !!id && !isPersonId(id) && !isInternalId(id) && id !== ABS_ID && !!clientOf(id);
+function rpPrevRange() { // période précédente ; si la période en cours n'est pas finie, comparée à la même durée écoulée
+  const r = UI.rep, [f, t] = periodRange(), mo = { month: 1, lastmonth: 1, quarter: 3, year: 12, '12m': 12 }[r.period], pf = mo ? addMonths(f, -mo) : f - (t - f), now = Date.now();
+  return t > now && now > f ? [pf, Math.min(f, pf + (now - f))] : [pf, f]; }
+const rpPrevTxt = () => { const [f, t] = periodRange(); return t > Date.now() && Date.now() > f ? 'la période précédente à la même date' : 'la période précédente'; };
+const rpSum = l => l.reduce((a, e) => a + dur(e), 0);
+function rpBy(list, key) { const m = new Map(); for (const e of list) { const k = key(e); m.set(k, (m.get(k) || 0) + dur(e)); } return m; }
+const rpName = id => !id ? 'Sans client' : isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? 'Temps avec ' + clientName(id) : cliLabel(id);
+// --- Répartition (anneau) ---
+const RP_MODES = [['client', 'Client'], ['grp', 'Groupe'], ['cat', 'Catégorie'], ['task', 'Tâche'], ['bill', 'Facturation']];
+function rpSlices(list, mode, C) {
+  const key = { client: e => e.client || '', grp: e => groupOfClient(e.client)?.id || '', cat: e => taskCat(e.task) || 'none', task: e => e.task || '', bill: e => statusOf(e) }[mode];
+  const nm = { client: rpName, grp: k => groupOf(k)?.name || 'Sans groupe', cat: k => CAT_L[k] || 'Non classées', task: k => taskName(k) || 'Sans tâche', bill: k => ({ inv: 'Facturé', todo: 'Reste à facturer', no: 'Non facturable' })[k] }[mode];
+  const arr = [...rpBy(list, key).entries()].filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+  const top = arr.slice(0, 8), rest = arr.slice(8), pal = GROUP_COLORS;
+  const col = (k, i) => mode === 'bill' ? C[k] : mode === 'grp' && groupOf(k) ? grpColor(groupOf(k)) : mode === 'cat' ? rpCol(C, catCol('t', k)) : pal[i % pal.length];
+  const out = top.map(([k, ms], i) => ({ k, ms, n: nm(k), c: col(k, i) }));
+  if (rest.length) out.push({ k: null, ms: rest.reduce((a, x) => a + x[1], 0), n: 'Autres (' + rest.length + ')', c: C.mut, rest: rest.map(x => nm(x[0]) + ' : ' + fmtDur(x[1])) });
+  return out;
+}
+function rpDonutSVG(sl, C, o = {}) {
+  const T = rpT(C), W = o.w || 560, H = Math.max(240, 30 + sl.length * 24), cx = 120, cy = H / 2, R = 104, r0 = 66, tot = sl.reduce((a, s) => a + s.ms, 0);
+  let s = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(o.label || 'Répartition du temps')}">`;
+  if (!tot) return s + T(cx, cy, 'Aucun temps', { a: 'middle', c: C.mut }) + '</svg>';
+  let a0 = -Math.PI / 2;
+  const P = (a, rr) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+  sl.forEach((x, i) => {
+    const a1 = a0 + 2 * Math.PI * x.ms / tot, big = a1 - a0 > Math.PI ? 1 : 0, tip = rpTt(x.n + '\n' + fmtDur(x.ms) + ' · ' + rpPct(x.ms, tot) + ' %' + (x.rest ? '\n' + x.rest.slice(0, 8).join('\n') : '') + (x.k != null && o.click ? '\n(cliquer : ' + o.click + ')' : ''));
+    const attrs = `fill="${x.c}" stroke="${C.surf}" stroke-width="2" data-tt="${tip}"${x.k != null && o.mode ? ` data-rpk="${esc(o.mode)}|${esc(x.k)}" style="cursor:pointer"` : ''}`;
+    if (sl.length === 1) s += `<circle cx="${cx}" cy="${cy}" r="${(R + r0) / 2}" fill="none" stroke="${x.c}" stroke-width="${R - r0}" data-tt="${tip}"${x.k != null && o.mode ? ` data-rpk="${esc(o.mode)}|${esc(x.k)}" style="cursor:pointer"` : ''}/>`;
+    else { const [x1, y1] = P(a0, R), [x2, y2] = P(a1, R), [x3, y3] = P(a1, r0), [x4, y4] = P(a0, r0);
+      s += `<path d="M${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${big} 1 ${x2.toFixed(2)},${y2.toFixed(2)} L${x3.toFixed(2)},${y3.toFixed(2)} A${r0},${r0} 0 ${big} 0 ${x4.toFixed(2)},${y4.toFixed(2)} Z" ${attrs}/>`; }
+    a0 = a1;
+  });
+  s += T(cx, cy + 2, fmtDur(tot), { a: 'middle', s: 20, c: C.ink, w: 600, cl: 'rp-d' }) + T(cx, cy + 20, o.center || 'sur la période', { a: 'middle', s: 11, c: C.mut });
+  const lx = 252; let ly = (H - sl.length * 24) / 2 + 14;
+  sl.forEach(x => { const k = x.k != null && o.mode ? ` data-rpk="${esc(o.mode)}|${esc(x.k)}" style="cursor:pointer"` : '';
+    s += `<g${k} data-tt="${rpTt(x.n + ' : ' + fmtDur(x.ms) + ' (' + rpPct(x.ms, tot) + ' %)')}"><rect x="${lx - 4}" y="${ly - 15}" width="${W - lx}" height="22" fill="transparent"/><rect x="${lx}" y="${ly - 9}" width="11" height="11" rx="3" fill="${x.c}"/>`
+      + T(lx + 18, ly, rpCut(x.n, 30), { c: C.ink, cl: 'rp-n' }) + T(W - 70, ly, fmtDur(x.ms), { a: 'end', c: C.ink2, cl: 'rp-d' }) + T(W - 4, ly, rpPct(x.ms, tot) + ' %', { a: 'end', c: C.mut }) + `</g>`;
+    ly += 24; });
+  return s + '</svg>';
+}
+// --- Concentration ---
+function rpConc(list) { const a = [...rpBy(list.filter(e => rpIsDos(e.client)), e => e.client).entries()].sort((x, y) => y[1] - x[1]); const tot = a.reduce((s, x) => s + x[1], 0); let c = 0; const cum = a.map(([id, ms]) => { c += ms; return { id, ms, p: tot ? c / tot : 0 }; }); const nAt = q => (cum.findIndex(x => x.p >= q - 1e-9) + 1) || cum.length; return { cum, tot, n50: nAt(0.5), n80: nAt(0.8), n: cum.length }; }
+function rpConcSVG(K, C) {
+  const T = rpT(C), W = 520, H = 230, L = 40, R = 14, Tp = 14, B = 30, n = K.n, X = i => L + (W - L - R) * (n <= 1 ? 1 : i / n), Y = p => Tp + (H - Tp - B) * (1 - p);
+  let s = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Part cumulée du temps selon le nombre de dossiers">`;
+  for (const p of [0, 0.5, 0.8, 1]) s += `<line x1="${L}" x2="${W - R}" y1="${Y(p)}" y2="${Y(p)}" stroke="${C.line}" stroke-width="1"${p === 0.5 || p === 0.8 ? ' stroke-dasharray="4 4"' : ''}/>` + T(L - 6, Y(p) + 4, Math.round(p * 100) + ' %', { a: 'end', s: 11, c: C.mut });
+  const pts = [[X(0), Y(0)], ...K.cum.map((x, i) => [X(i + 1), Y(x.p)])];
+  s += `<path d="M${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' L')} L${X(n).toFixed(1)},${Y(0).toFixed(1)} Z" fill="${C.acc}" fill-opacity=".10"/>`;
+  s += `<polyline points="${pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="${C.acc}" stroke-width="2"/>`;
+  K.cum.forEach((x, i) => { const key = i + 1 === K.n50 || i + 1 === K.n80; const names = K.cum.slice(0, i + 1).slice(0, 6).map(z => clientName(z.id)).join(', ') + (i + 1 > 6 ? '…' : '');
+    s += `<circle cx="${X(i + 1).toFixed(1)}" cy="${Y(x.p).toFixed(1)}" r="${key ? 5 : 3}" fill="${key ? C.acc : C.surf}" stroke="${C.acc}" stroke-width="2"/><circle cx="${X(i + 1).toFixed(1)}" cy="${Y(x.p).toFixed(1)}" r="10" fill="transparent" data-tt="${rpTt((i + 1) + ' dossier' + (i ? 's' : '') + ' : ' + Math.round(x.p * 100) + ' % du temps\n' + names)}"/>`; });
+  s += T(X(K.n50), Y(K.cum[K.n50 - 1].p) - 10, K.n50 + ' → 50 %', { a: 'middle', s: 11, c: C.ink, w: 600 });
+  if (K.n80 !== K.n50) s += T(X(K.n80), Y(K.cum[K.n80 - 1].p) - 10, K.n80 + ' → 80 %', { a: 'middle', s: 11, c: C.ink, w: 600 });
+  const every = Math.ceil(n / 10); for (let i = 1; i <= n; i++) if (i === 1 || i === n || i % every === 0) s += T(X(i), H - 10, String(i), { a: 'middle', s: 11, c: C.mut });
+  return s + T(W - R, H - 10, '', {}) + '</svg>';
+}
+// --- Temps par bulletin (12 mois) ---
+function rpTpb() { const mks = months12(), by = monthlyBy(e => rpIsDos(e.client) ? e.client : null);
+  const rows = Object.keys(by).map(cid => ({ c: clientOf(cid), ...cli12(cid, mks, by) })).filter(r => r.c && !r.c.deletedAt && r.avgBs != null);
+  const B = rows.reduce((a, r) => a + r.bs, 0), BT = rows.reduce((a, r) => a + r.avgBs * r.bs, 0); return { rows: rows.sort((a, b) => b.avgBs - a.avgBs), avg: B ? BT / B : null }; }
+function rpHBarsSVG(items, C, o = {}) { // items: [{ n, v (ms), c, tt, k }] ; o.ref = ligne de repère (ms), o.fmt
+  const T = rpT(C), W = o.w || 560, rh = 24, H = 16 + items.length * rh + (o.ref != null ? 18 : 0), L = o.lw || 190, R = 70, max = Math.max(1, ...items.map(x => x.v), o.ref || 0), X = v => L + (W - L - R) * v / max, f = o.fmt || fmtDur;
+  let s = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(o.label || '')}">`;
+  items.forEach((x, i) => { const y = 8 + i * rh, w = Math.max(2, X(x.v) - L);
+    s += `<g data-tt="${rpTt(x.tt || x.n + ' : ' + f(x.v))}"${x.k ? ` data-fx="${esc(x.k)}" style="cursor:pointer"` : ''}><rect x="0" y="${y}" width="${W}" height="${rh}" fill="transparent"/>` + T(L - 8, y + 16, rpCut(x.n, 28), { a: 'end', c: C.ink, cl: 'rp-n' })
+      + `<rect x="${L}" y="${y + 5}" width="${w.toFixed(1)}" height="${rh - 10}" rx="3" fill="${x.c || C.acc}"/>` + T(W - 4, y + 16, f(x.v), { a: 'end', c: C.ink2, cl: 'rp-d' }) + `</g>`; });
+  if (o.ref != null) { const xr = X(o.ref); s += `<line x1="${xr}" x2="${xr}" y1="4" y2="${H - 16}" stroke="${C.ink2}" stroke-width="1.5" stroke-dasharray="4 3"/>` + T(xr, H - 4, (o.refL || 'moyenne') + ' ' + f(o.ref), { a: 'middle', s: 11, c: C.ink2 }); }
+  return s + '</svg>';
+}
+// --- Comparaison avec la période précédente ---
+function rpCompar(list, prev) { const a = rpBy(list.filter(e => e.client), e => e.client), b = rpBy(prev.filter(e => e.client), e => e.client);
+  const ks = new Set([...a.keys(), ...b.keys()]); return [...ks].map(k => ({ k, cur: a.get(k) || 0, pre: b.get(k) || 0 })).map(x => ({ ...x, d: x.cur - x.pre })).filter(x => Math.abs(x.d) >= 15 * 60000).sort((x, y) => Math.abs(y.d) - Math.abs(x.d)).slice(0, 8); }
+function rpDivSVG(rows, C) {
+  const T = rpT(C), W = 560, rh = 24, H = 12 + rows.length * rh, L = 190, mid = L + (W - L) / 2, half = (W - L) / 2 - 60, max = Math.max(1, ...rows.map(r => Math.abs(r.d))), w = d => Math.max(2, half * Math.abs(d) / max);
+  let s = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Variation du temps par dossier"><line x1="${mid}" x2="${mid}" y1="2" y2="${H - 2}" stroke="${C.line}" stroke-width="1.5"/>`;
+  rows.forEach((r, i) => { const y = 6 + i * rh, up = r.d > 0, sg = (up ? '+' : '−') + fmtDur(Math.abs(r.d)), pc = r.pre ? ' (' + (up ? '+' : '−') + Math.abs(Math.round(r.d * 100 / r.pre)) + ' %)' : ' (nouveau)';
+    s += `<g data-tt="${rpTt(rpName(r.k) + '\n' + fmtDur(r.cur) + ' contre ' + fmtDur(r.pre) + ' : ' + sg + pc)}"${rpIsDos(r.k) ? ` data-fx="${esc(r.k)}" style="cursor:pointer"` : ''}><rect x="0" y="${y}" width="${W}" height="${rh}" fill="transparent"/>` + T(L - 8, y + 16, rpCut(rpName(r.k), 28), { a: 'end', c: C.ink, cl: 'rp-n' })
+      + `<rect x="${(up ? mid : mid - w(r.d)).toFixed(1)}" y="${y + 5}" width="${w(r.d).toFixed(1)}" height="${rh - 10}" rx="3" fill="${up ? C.todo : C.inv}"/>` + T(up ? mid + w(r.d) + 6 : mid - w(r.d) - 6, y + 16, sg, { a: up ? 'start' : 'end', c: C.ink2, cl: 'rp-d' }) + '</g>'; });
+  return s + '</svg>';
+}
+// --- Calendrier de l'année ---
+function rpCalSVG(year, C) {
+  const T = rpT(C), f = new Date(year, 0, 1).getTime(), t = new Date(year + 1, 0, 1).getTime(), by = rpBy(filtered([f, t]), e => dayKey(e.start)), today = dayKey(Date.now());
+  const cs = 14, g = 3, L = 30, Tp = 22, start = startOfWeek(f), weeks = Math.ceil((t - start) / (7 * DAY)), W = L + weeks * (cs + g) + 4, H = Tp + 7 * (cs + g) + 34;
+  const lv = ms => { const h = ms / 3600000; return !ms ? 0 : h < 2 ? 1 : h < 4 ? 2 : h < 6 ? 3 : h < 8 ? 4 : 5; }, op = [0, .22, .4, .6, .8, 1];
+  let s = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Heures saisies par jour en ${year}">`;
+  ['lun', '', 'mer', '', 'ven', '', 'dim'].forEach((d, i) => { if (d) s += T(L - 6, Tp + i * (cs + g) + 11, d, { a: 'end', s: 10, c: C.mut }); });
+  let lastM = -1;
+  for (let w = 0; w < weeks; w++) for (let d = 0; d < 7; d++) {
+    const day = addDays(start, w * 7 + d); if (day < f || day >= t) continue; const k = dayKey(day), ms = by.get(k) || 0, x = L + w * (cs + g), y = Tp + d * (cs + g), m = new Date(day).getMonth();
+    if (m !== lastM && d === 0 || (m !== lastM && w === 0)) { if (new Date(day).getDate() <= 7) { s += T(x, Tp - 8, MON_S[m], { s: 10, c: C.mut }); lastM = m; } }
+    const abs = (typeof dayAllday === 'function' ? dayAllday(k) : []).filter(isAbs), hol = holidayOn(k);
+    const tip = fmtDayLong(k) + '\n' + (ms ? fmtDur(ms) + ' saisies' : 'Aucune saisie') + (abs.length ? '\n' + abs.map(e => absLabel(e.abs)).join(', ') : '') + (hol ? '\nJour férié' : '');
+    s += `<rect x="${x}" y="${y}" width="${cs}" height="${cs}" rx="3" fill="${ms ? C.acc : C.s2}" fill-opacity="${ms ? op[lv(ms)] : 1}"${k === today ? ` stroke="${C.ink}" stroke-width="1.5"` : ''} data-tt="${rpTt(tip)}" data-cald="${k}" style="cursor:pointer"/>`;
+    if (abs.length || hol) s += `<circle cx="${x + cs / 2}" cy="${y + cs / 2}" r="2" fill="${C.mut}" pointer-events="none"/>`;
+  }
+  const ly = H - 12; s += T(L, ly, 'Moins', { s: 10, c: C.mut });
+  [0, 1, 2, 3, 4, 5].forEach((l, i) => { s += `<rect x="${L + 36 + i * 17}" y="${ly - 10}" width="${cs}" height="${cs}" rx="3" fill="${l ? C.acc : C.s2}" fill-opacity="${l ? op[l] : 1}"/>`; });
+  s += T(L + 36 + 6 * 17 + 4, ly, 'Plus  (moins de 2 h, 4 h, 6 h, 8 h, 8 h et plus)  ·  point : absence ou férié', { s: 10, c: C.mut });
+  return s + '</svg>';
+}
+// --- Profil du cycle : temps moyen selon le jour du mois (12 derniers mois) ---
+function rpProfil() { const mks = months12(), f = monthStart(mks[0]), t = addMonths(monthStart(mks[11]), 1), l = filtered([f, t]), sum = Array(32).fill(0), cnt = Array(32).fill(0);
+  for (const mk of mks) { const n = new Date(+mk.slice(0, 4), +mk.slice(5), 0).getDate(); for (let d = 1; d <= n; d++) cnt[d]++; }
+  for (const e of l) sum[new Date(e.start).getDate()] += dur(e);
+  const avg = sum.map((v, d) => cnt[d] ? v / cnt[d] : 0); const mine = cyClients(), med = a => { a = a.filter(x => x).sort((x, y) => x - y); return a.length ? a[Math.floor(a.length / 2)] : null; };
+  const dsn = [...new Set(mine.map(c => +cyOf(c).dsn || 15))], rec = med(mine.map(c => { const m = /^m(\d+)$/.exec(cyOf(c).varDay || ''); return m ? +m[1] : null; })), pm = prevMk(monthKey(Date.now())), vir = med(mine.filter(c => !['client', 'nc'].includes(cyOf(c).vir)).map(c => { const d = cyDue(pm, c, {}).vir; return d ? new Date(d).getDate() : null; }));
+  return { avg, marks: [...dsn.map(d => [d, 'DSN (' + mine.filter(c => (+cyOf(c).dsn || 15) === d).length + ')']), ...(rec ? [[rec, 'Variables']] : []), ...(vir ? [[vir, 'Virements']] : [])], n: l.length };
+}
+function rpProfilSVG(P, C) {
+  const T = rpT(C), W = 1000, H = 230, L = 44, R = 10, Tp = 34, B = 24, max = Math.max(...P.avg.slice(1)), mh = max / 3600000, step = mh <= 1 ? 0.25 : mh <= 2 ? 0.5 : mh <= 5 ? 1 : 2, top = Math.max(step, Math.ceil(mh / step) * step), Y = h => Tp + (H - Tp - B) * (1 - h / top), slot = (W - L - R) / 31, bw = Math.min(20, slot * .64);
+  let s = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Temps moyen selon le jour du mois">`;
+  for (let v = 0; v <= top + 1e-9; v += step) s += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.line}" stroke-width="1"/>` + T(L - 6, Y(v) + 4, fmtDur(v * 3600000), { a: 'end', s: 10, c: C.mut });
+  for (let d = 1; d <= 31; d++) { const cx = L + slot * (d - 0.5), h = P.avg[d] / 3600000, y0 = Y(0), y1 = Y(h);
+    if (h > 0) s += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, y0 - y1).toFixed(1)}" rx="3" fill="${C.acc}" fill-opacity=".85"/>`;
+    s += `<rect x="${(cx - slot / 2).toFixed(1)}" y="${Tp}" width="${slot.toFixed(1)}" height="${H - Tp - B}" fill="transparent" data-tt="${rpTt('Le ' + d + ' du mois : ' + fmtDur(P.avg[d]) + ' en moyenne')}"/>`;
+    if (d === 1 || d % 5 === 0) s += T(cx, H - 8, String(d), { a: 'middle', s: 11, c: C.mut }); }
+  const used = []; P.marks.sort((a, b) => a[0] - b[0]).forEach(([d, l]) => { const x = L + slot * (d - 0.5); let row = 0; while (used.some(u => u.row === row && Math.abs(u.x - x) < 80)) row++; used.push({ x, row });
+    s += `<line x1="${x}" x2="${x}" y1="${Tp - 2}" y2="${H - B}" stroke="${C.todo}" stroke-width="1.5" stroke-dasharray="4 3"/>` + T(x, 12 + row * 12, l + ' · le ' + d, { a: 'middle', s: 10.5, c: C.ink2, w: 600 }); });
+  return s + '</svg>';
+}
+// --- Faits marquants ---
+function rpFacts(list, prev) {
+  const out = [], tot = rpSum(list), ptot = rpSum(prev), [f, t] = periodRange();
+  if (!tot) return out;
+  if (ptot) { const d = tot - ptot, p = Math.round(d * 100 / ptot); if (Math.abs(p) >= 5) out.push({ ic: d > 0 ? '↗' : '↘', h: `Temps total : <b>${fmtDur(tot)}</b>, ${d > 0 ? '+' : '−'}${Math.abs(p)} % par rapport à ${rpPrevTxt()} (${fmtDur(ptot)}).` }); }
+  const cmp = rpCompar(list, prev).filter(x => rpIsDos(x.k) && x.pre && Math.abs(x.d) >= 30 * 60000 && Math.abs(x.d) / x.pre >= 0.25);
+  const up = cmp.filter(x => x.d > 0)[0], dn = cmp.filter(x => x.d < 0)[0];
+  if (up) out.push({ ic: '📈', h: `<button class="linkish" data-fx="${esc(up.k)}">${esc(clientName(up.k))}</button> : <b>+${fmtDur(up.d)}</b> par rapport à ${rpPrevTxt()} (+${Math.round(up.d * 100 / up.pre)} %).` });
+  if (dn) out.push({ ic: '📉', h: `<button class="linkish" data-fx="${esc(dn.k)}">${esc(clientName(dn.k))}</button> : <b>−${fmtDur(-dn.d)}</b> par rapport à ${rpPrevTxt()}.` });
+  const K = rpConc(list); if (K.n >= 4) out.push({ ic: '🎯', h: `<b>${K.n50} dossier${K.n50 > 1 ? 's' : ''}</b> sur ${K.n} font la moitié de votre temps de dossiers.` });
+  const inter = rpSum(list.filter(e => isInternalId(e.client))); if (inter) out.push({ ic: '🏢', h: `Le temps interne représente <b>${rpPct(inter, tot)} %</b> de votre temps (${fmtDur(inter)}).` });
+  const exc = list.filter(e => taskCat(e.task) === 'exc' && statusOf(e) === 'todo'); if (exc.length) out.push({ ic: '💶', h: `<b>${fmtDur(rpSum(exc))}</b> d’exceptionnel reste à facturer (${exc.length} saisie${exc.length > 1 ? 's' : ''}).` });
+  const days = new Map(); list.forEach(e => { const k = dayKey(e.start); days.set(k, (days.get(k) || 0) + dur(e)); });
+  if (days.size >= 8) { const wd = Array(7).fill(0), wn = Array(7).fill(0); days.forEach((ms, k) => { const w = new Date(parseDay(k)).getDay(); wd[w] += ms; wn[w]++; }); let best = -1, bv = 0; for (let i = 1; i <= 5; i++) if (wn[i] && wd[i] / wn[i] > bv) { bv = wd[i] / wn[i]; best = i; } if (best > 0) out.push({ ic: '📅', h: `Le <b>${['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'][best]}</b> est votre jour le plus chargé (${fmtDur(bv)} en moyenne).` }); }
+  const I = rpInterr(list); if (I.calls.ms + I.soll.ms > 0 && tot) out.push({ ic: '📞', h: `Appels et sollicitations : <b>${fmtDur(I.calls.ms + I.soll.ms)}</b> (${rpPct(I.calls.ms + I.soll.ms, tot)} % du temps).` });
+  return out.slice(0, 6);
+}
+function rpInterr(list) {
+  const isCall = e => norm(taskName(e.task)) === norm(CALL_TASK), calls = list.filter(isCall), soll = list.filter(e => !isCall(e) && isPersonId(e.client)), asc = list.filter(e => (e.ppl || []).length);
+  const per = new Map(); list.forEach(e => { const ids = new Set([...(isPersonId(e.client) ? [e.client] : []), ...(e.ppl || [])]); ids.forEach(id => { if (personOf(id)) per.set(id, (per.get(id) || 0) + dur(e)); }); });
+  return { calls: { n: calls.length, ms: rpSum(calls) }, soll: { n: soll.length, ms: rpSum(soll) }, asc: { n: asc.length, ms: rpSum(asc) }, per: [...per.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6) };
+}
+// --- Rendu des blocs du tableau de bord ---
+function rpDashHTML(list) {
+  const r = UI.rep, C = rc(), prev = filtered(rpPrevRange()), tot = rpSum(list); UI._rpSvg = {};
+  const keep = (k, t, svg) => { UI._rpSvg[k] = { t, svg }; return svg; };
+  let h = '';
+  const facts = rpFacts(list, prev); UI._rpFacts = facts;
+  let hf = `<i data-b="faits"></i><div class="toolbar"><h2>Faits marquants</h2><span class="sp"></span><button class="btn sm" data-act="rp-export" title="Exporter le tableau de bord en image ou en PDF">${ICON.down} Exporter le tableau de bord</button></div><div class="card rp-facts">${facts.length ? facts.map(x => `<div class="rp-fact"><span class="rp-fi">${x.ic}</span><span>${x.h}</span></div>`).join('') : '<div class="muted small">Pas assez de saisies sur la période pour en tirer des enseignements.</div>'}</div>`;
+  const mode = RP_MODES.some(m => m[0] === r.rpm) ? r.rpm : 'client', sl = rpSlices(list, mode, C);
+  h += `<i data-b="repart" data-half="1"></i><div class="toolbar"><h2>Répartition du temps</h2><span class="sp"></span><div class="seg" data-seg="rpm">${RP_MODES.map(([k, l]) => `<button data-v="${k}" class="${mode === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+    <div class="card rp-card">${keep('repart', 'Répartition du temps par ' + RP_MODES.find(m => m[0] === mode)[1].toLowerCase(), rpDonutSVG(sl, C, { mode, click: mode === 'client' ? 'fiche du dossier' : 'filtrer l’onglet', label: 'Répartition du temps par ' + mode }))}<div class="cb-hint">${mode === 'client' ? 'Clic sur un dossier : sa fiche express.' : 'Clic sur une part : filtre tout l’onglet.'}</div></div>`;
+  const K = rpConc(list);
+  h += `<i data-b="concentration" data-half="1"></i><h2>Concentration</h2><div class="card rp-card">${K.n >= 2 ? `<div class="rp-big"><b>${K.n50}</b> dossier${K.n50 > 1 ? 's' : ''} sur ${K.n} font la moitié de votre temps de dossiers ; <b>${K.n80}</b> en font 80 %.</div>${keep('concentration', 'Concentration du temps', rpConcSVG(K, C))}` : '<div class="muted small">Il faut au moins deux dossiers sur la période.</div>'}</div>`;
+  const P = rpTpb(), items = P.rows.slice(0, 12).map(x => ({ n: x.c.name, v: x.avgBs, k: x.c.id, c: P.avg && x.avgBs > P.avg * 1.3 ? C.todo : C.acc, tt: x.c.name + '\n' + fmtDur(x.avgBs) + ' par bulletin (' + x.bs + ' bulletins, ' + fmtDur(x.tot) + ' sur 12 mois)' + (P.avg && x.avgBs > P.avg * 1.3 ? '\nNettement au-dessus de la moyenne' : '') }));
+  h += `<i data-b="tpb" data-half="1"></i><div class="toolbar"><h2>Temps par bulletin</h2><span class="muted small">12 derniers mois, tous les temps</span></div><div class="card rp-card">${items.length ? keep('tpb', 'Temps par bulletin (12 derniers mois)', rpHBarsSVG(items, C, { ref: P.avg, refL: 'moyenne', label: 'Temps par bulletin par dossier' })) + '<div class="cb-hint">En orange : plus de 30 % au-dessus de la moyenne. Bulletins d’après Mon cycle. Clic : fiche du dossier.</div>' : '<div class="muted small">Renseignez le nombre de bulletins dans Mon cycle pour voir cet indicateur.</div>'}</div>`;
+  const cmp = rpCompar(list, prev), ptot = rpSum(prev);
+  h += `<i data-b="compar" data-half="1"></i><h2>Comparaison avec la période précédente</h2><div class="card rp-card"><div class="muted small">Comparé à ${rpPrevTxt()} (${(([a, b]) => fmtDate(a) + ' → ' + fmtDate(b - 1))(rpPrevRange())}).</div><div class="rp-big">Temps total : <b class="rp-dv">${fmtDur(tot)}</b> contre <span class="rp-dv">${fmtDur(ptot)}</span>${ptot ? ` (${tot >= ptot ? '+' : '−'}${Math.abs(Math.round((tot - ptot) * 100 / ptot))} %)` : ''}</div>${cmp.length ? keep('compar', 'Variation par dossier', rpDivSVG(cmp, C)) + `<div class="cb-hint"><span class="rp-sw" style="background:${C.todo}"></span> en hausse · <span class="rp-sw" style="background:${C.inv}"></span> en baisse ; écarts de 15 min et plus.</div>` : '<div class="muted small">Pas d’écart notable par dossier.</div>'}</div>`;
+  const tt = totals(list), fsl = [['inv', 'Facturé'], ['todo', 'Reste à facturer'], ['no', 'Non facturable']].map(([k, n]) => ({ k, n, ms: tt[k], c: C[k] })).filter(x => x.ms > 0);
+  const old = allEntries().filter(e => statusOf(e) === 'todo'), now = Date.now(), ages = [['Moins d’un mois', 0, 30], ['1 à 3 mois', 30, 90], ['3 à 6 mois', 90, 180], ['Plus de 6 mois', 180, 1e9]].map(([n, a, b]) => { const l = old.filter(e => (now - e.start) / DAY >= a && (now - e.start) / DAY < b); return { n, v: rpSum(l), c: b > 90 ? C.todo : C.acc, tt: n + ' : ' + fmtDur(rpSum(l)) + ' (' + l.length + ' saisie' + (l.length > 1 ? 's' : '') + ')' + (hasRates() ? ' · ' + eurS(sumAmt(l)) : '') }; });
+  h += `<i data-b="factu" data-half="1"></i><h2>Facturation</h2><div class="card rp-card">${keep('factu', 'Facturation de la période', rpDonutSVG(fsl, C, { mode: 'bill', click: 'filtrer l’onglet', center: tt.all ? rpPct(tt.bill, tt.all) + ' % facturable' : '' }))}${hasRates() ? `<div class="small">Montant estimé de la période : <b class="rp-dv">${eurS(sumAmt(list))}</b> · reste à facturer : <b class="rp-dv">${eurS(sumAmt(list.filter(e => statusOf(e) === 'todo')))}</b></div>` : ''}
+    <div class="small" style="margin-top:8px"><b>Reste à facturer par ancienneté</b> <span class="muted">(toutes périodes)</span></div>${ages.some(a => a.v) ? keep('anciennete', 'Reste à facturer par ancienneté', rpHBarsSVG(ages, C, { lw: 150 })) : '<div class="muted small">Rien à facturer. 🎉</div>'}</div>`;
+  const I = rpInterr(list);
+  h += `<i data-b="interr" data-half="1"></i><h2>Interruptions et échanges</h2><div class="card rp-card"><div class="rp-kv"><div><span>Appels</span><b class="rp-dv">${fmtDur(I.calls.ms)}</b><span class="muted small">${I.calls.n} appel${I.calls.n > 1 ? 's' : ''}</span></div><div><span>Temps avec une personne</span><b class="rp-dv">${fmtDur(I.soll.ms)}</b><span class="muted small">${I.soll.n} saisie${I.soll.n > 1 ? 's' : ''}</span></div><div><span>Saisies avec personnes associées</span><b class="rp-dv">${fmtDur(I.asc.ms)}</b><span class="muted small">${I.asc.n} saisie${I.asc.n > 1 ? 's' : ''}</span></div><div><span>Part du temps</span><b>${rpPct(I.calls.ms + I.soll.ms, tot)} %</b><span class="muted small">appels et sollicitations</span></div></div>
+    ${I.per.length ? `<div class="small" style="margin-top:8px"><b>Avec qui</b></div>` + keep('interr', 'Temps avec chaque personne', rpHBarsSVG(I.per.map(([id, ms]) => ({ n: personOf(id).name, v: ms, c: rpCol(C, catCol('p', pKind(personOf(id)))) })), C, { lw: 190 })) : ''}<div class="cb-hint">Pour vous organiser, jamais un contrôle : ces chiffres restent sur votre compte.</div></div>`;
+  const y = r.calY || new Date().getFullYear();
+  h += `<i data-b="calan"></i><div class="toolbar"><h2>Calendrier de l’année</h2><span class="sp"></span><div class="seg"><button data-act="caly" data-d="-1" title="Année précédente">‹</button><button disabled style="opacity:1;font-weight:600">${y}</button><button data-act="caly" data-d="1" title="Année suivante">›</button></div></div><div class="card rp-card rp-scroll">${keep('calan', 'Calendrier ' + y, rpCalSVG(y, C))}<div class="cb-hint">Une case par jour, d’autant plus foncée que la journée est remplie (filtres de l’onglet appliqués, hors période). Clic : récap à reporter du jour.</div></div>`;
+  const PF = rpProfil();
+  h += `<i data-b="profil"></i><div class="toolbar"><h2>Profil du cycle de paie</h2><span class="muted small">temps moyen selon le jour du mois, 12 derniers mois</span></div><div class="card rp-card rp-scroll">${PF.n ? keep('profil', 'Profil du cycle (temps moyen selon le jour du mois)', rpProfilSVG(PF, C)) + '<div class="cb-hint">Repères d’après vos dossiers : DSN (nombre de dossiers), date habituelle des variables et des virements (médianes).</div>' : '<div class="muted small">Pas encore de saisies sur les 12 derniers mois.</div>'}</div>`;
+  return { facts: hf, charts: h };
+}
+// --- Fiche express d'un dossier ---
+function openRepFx(cid) {
+  const c = clientOf(cid); if (!c) return; const C = rc(), mks = months12(), by = monthlyBy(e => e.client === cid ? cid : null), R12 = cli12(cid, mks, by), l12 = allEntries().filter(e => e.client === cid && e.start >= monthStart(mks[0]));
+  const items = mks.map((mk, i) => ({ n: MON_S[+mk.slice(5) - 1] + ' ' + mk.slice(2, 4), v: R12.m[i], tt: MONTHS_L[+mk.slice(5) - 1] + ' ' + mk.slice(0, 4) + ' : ' + fmtDur(R12.m[i]) + (effBs(mk, cid).n ? ' · ' + effBs(mk, cid).n + ' bulletins' : '') }));
+  const T = rpT(C), W = 860, H = 210, L = 40, B = 24, Tp = 10, max = Math.max(1, ...R12.m), mh = max / 3600000, step = mh <= 2 ? 0.5 : mh <= 5 ? 1 : mh <= 12 ? 2 : 5, top = Math.max(step, Math.ceil(mh / step) * step), Y = h => Tp + (H - Tp - B) * (1 - h / top), slot = (W - L - 8) / 12, bw = slot * .6;
+  let bars = `<svg class="rp-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Temps par mois sur 12 mois">`;
+  for (let v = 0; v <= top + 1e-9; v += step) bars += `<line x1="${L}" x2="${W - 8}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.line}"/>` + T(L - 6, Y(v) + 4, v + ' h', { a: 'end', s: 10, c: C.mut });
+  items.forEach((x, i) => { const cx = L + slot * (i + .5), y1 = Y(x.v / 3600000); if (x.v) bars += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, Y(0) - y1).toFixed(1)}" rx="3" fill="${C.acc}"/>`; bars += `<rect x="${(cx - slot / 2).toFixed(1)}" y="${Tp}" width="${slot.toFixed(1)}" height="${H - Tp - B}" fill="transparent" data-tt="${rpTt(x.tt)}"/>` + T(cx, H - 8, x.n, { a: 'middle', s: 10, c: C.mut }); });
+  bars += '</svg>';
+  const tk = [...rpBy(l12, e => e.task || '').entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, ms], i) => ({ n: taskName(k) || 'Sans tâche', v: ms, c: rpCol(C, catCol('t', taskCat(k))) }));
+  const avgM = R12.tot / Math.max(1, R12.m.filter(x => x).length), cur = R12.m[11], ppl = rpInterr(l12).per.slice(0, 4);
+  const m = modal(`<div class="modal-h"><h3>${cliIc(cid)} ${cnoHTML(cid)}${esc(c.name)}${groupOf(c.group) ? ' ' + grpTag(groupOf(c.group)) : ''}</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b rp-fx"><div class="rp-kv"><div><span>12 derniers mois</span><b class="rp-dv">${fmtDur(R12.tot)}</b></div><div><span>Ce mois-ci</span><b class="rp-dv">${fmtDur(cur)}</b></div><div><span>Moyenne par mois travaillé</span><b class="rp-dv">${fmtDur(avgM)}</b></div><div><span>Temps par bulletin</span><b class="rp-dv">${R12.avgBs != null ? fmtDur(R12.avgBs) : '—'}</b><span class="muted small">${R12.bs ? R12.bs + ' bulletins' : 'bulletins non renseignés'}</span></div></div>
+    <div class="small" style="margin:10px 0 2px"><b>Temps par mois</b></div><div class="rp-scroll">${bars}</div>
+    ${tk.length ? `<div class="small" style="margin:10px 0 2px"><b>Répartition par tâche</b> <span class="muted">(12 mois)</span></div>${rpHBarsSVG(tk, C, { w: 860, lw: 230 })}` : ''}
+    ${ppl.length ? `<div class="small" style="margin-top:8px">Échanges avec : ${ppl.map(([id, ms]) => esc(personOf(id).name) + ' <span class="muted">(' + fmtDur(ms) + ')</span>').join(', ')}</div>` : ''}</div>
+    <div class="modal-f"><a class="btn sm ghost" href="#carnet/${encodeURIComponent(cid)}" data-close>📖 Carnet de bord</a><span class="sp"></span><button class="btn" data-close>Fermer</button><button class="btn primary" id="fx-flt">Filtrer les Rapports sur ce dossier</button></div>`, 'wide');
+  m.el.querySelector('#fx-flt').addEventListener('click', () => { UI.rep.client = cid; m.close(); if (location.hash !== '#rapports') location.hash = 'rapports'; renderReports(); });
+}
+// --- Info-bulles des graphiques (toute l'application) ---
+(() => { let tip = null; const hide = () => { if (tip) tip.hidden = true; };
+  document.addEventListener('mouseover', ev => { const t = ev.target.closest && ev.target.closest('[data-tt]'); if (!t || !t.closest('.rp-svg')) return; if (!tip) { tip = document.createElement('div'); tip.id = 'rp-tt'; tip.className = 'rp-tt'; document.body.appendChild(tip); } tip.textContent = t.getAttribute('data-tt'); tip.hidden = false; });
+  document.addEventListener('mousemove', ev => { if (!tip || tip.hidden) return; const w = tip.offsetWidth; let x = ev.clientX + 14; if (x + w > innerWidth - 8) x = ev.clientX - w - 14; tip.style.left = x + 'px'; tip.style.top = (ev.clientY + 14) + 'px'; });
+  document.addEventListener('mouseout', ev => { const t = ev.target.closest && ev.target.closest('[data-tt]'); if (t && !t.contains(ev.relatedTarget)) hide(); });
+  document.addEventListener('scroll', hide, true);
+  document.addEventListener('click', ev => { const fx = ev.target.closest('[data-fx]'); if (fx) { hide(); openRepFx(fx.getAttribute('data-fx')); } });
+})();
+// --- Export du tableau de bord ---
+function rpExportModel() { const [f, t] = periodRange(), list = filtered(), tt = totals(list);
+  return { title: 'Tableau de bord du temps', sub: fmtDate(f) + ' → ' + fmtDate(t - 1) + ' · ' + list.length + ' saisies', syn: `Temps total ${fmtDur(tt.all)} · facturable ${fmtDur(tt.bill)} (${rpPct(tt.bill, tt.all)} %) · facturé ${fmtDur(tt.inv)} · reste à facturer ${fmtDur(tt.todo)} · non facturable ${fmtDur(tt.no)}`,
+    facts: (UI._rpFacts || []).map(x => x.h.replace(/<[^>]+>/g, '')), charts: Object.values(UI._rpSvg || {}) }; }
+function openRpExport() {
+  const m = modal(`<div class="modal-h"><h3>Exporter le tableau de bord</h3><button class="icon" data-close>${ICON.close}</button></div>
+    <div class="modal-b" style="display:grid;gap:8px"><div class="small muted">Période et filtres actuels de l’onglet : synthèse, faits marquants et graphiques (les tableaux détaillés ont leurs propres boutons « Copier »).</div>
+      <button class="btn" data-x="img">🖼 Copier en image</button><button class="btn" data-x="png">${ICON.down} Télécharger l’image (PNG)</button><button class="btn" data-x="pdf">📄 PDF (impression)</button></div>
+    <div class="modal-f"><span class="sp"></span><button class="btn" data-close>Fermer</button></div>`);
+  m.el.addEventListener('click', ev => { const b = ev.target.closest('[data-x]'); if (!b) return; const x = b.dataset.x; m.close(); if (x === 'pdf') rpPrint(); else rpImage(x === 'img'); });
+}
+function rpPrint() { const M = rpExportModel(); document.getElementById('print-area')?.remove();
+  const el = document.createElement('div'); el.id = 'print-area'; el.className = 'pa-styled rp-print'; el.style.setProperty('--pa', THEMES[themeKey()].a);
+  el.innerHTML = `<h1>${esc(M.title)}</h1><div class="pa-sub">${esc(M.sub)}</div><p>${esc(M.syn)}</p>${M.facts.length ? `<h2>Faits marquants</h2><ul>${M.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}${M.charts.map(c => `<div class="rp-pfig"><h2>${esc(c.t)}</h2>${c.svg}</div>`).join('')}`;
+  document.body.appendChild(el); document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); el.remove(); window.removeEventListener('afterprint', done); }; window.addEventListener('afterprint', done);
+  setTimeout(() => { try { window.print(); } catch (e) { toast('Impression impossible ici : utilisez l’image'); } setTimeout(() => { if (document.body.classList.contains('printing')) done(); }, 60000); }, 50); }
+async function rpImage(copy) {
+  const M = rpExportModel(), C = rc(), S2 = 2, W = 1080, pad = 28, cv = document.createElement('canvas'), ctx = cv.getContext('2d');
+  const imgs = await Promise.all(M.charts.map(c => new Promise(res => { const im = new Image(); im.onload = () => res({ c, im }); im.onerror = () => res(null); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(c.svg); })));
+  const ok = imgs.filter(Boolean), lines = M.facts, fit = im => { const w = Math.min(W - 2 * pad, im.width), h = im.height * w / im.width; return [w, h]; };
+  let H = pad + 34 + 22 + 30 + (lines.length ? 30 + lines.length * 22 : 0) + 10; ok.forEach(x => { H += 34 + fit(x.im)[1] + 16; }); H += 30;
+  cv.width = W * S2; cv.height = H * S2; ctx.scale(S2, S2); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  let y = pad + 24; ctx.fillStyle = C.acc; ctx.fillRect(pad, pad - 6, 6, 30); ctx.fillStyle = '#17191c'; ctx.font = '600 22px ' + C.font; ctx.fillText(M.title, pad + 16, y);
+  y += 24; ctx.font = '13px ' + C.font; ctx.fillStyle = '#4f5157'; ctx.fillText(M.sub, pad + 16, y); y += 26; ctx.fillText(M.syn, pad, y); y += 10;
+  if (lines.length) { y += 26; ctx.font = '600 15px ' + C.font; ctx.fillStyle = '#17191c'; ctx.fillText('Faits marquants', pad, y); ctx.font = '13px ' + C.font; ctx.fillStyle = '#333'; lines.forEach(l => { y += 22; ctx.fillText('• ' + l, pad, y, W - 2 * pad); }); }
+  y += 14; for (const x of ok) { y += 28; ctx.font = '600 15px ' + C.font; ctx.fillStyle = '#17191c'; ctx.fillText(x.c.t, pad, y); y += 8; const [w, h] = fit(x.im); ctx.drawImage(x.im, pad, y, w, h); y += h + 8; }
+  ctx.font = '11px ' + C.font; ctx.fillStyle = '#878880'; ctx.fillText('Antevorta · ' + fmtDate(Date.now()), pad, H - 12);
+  const blob = await new Promise(res => cv.toBlob(res, 'image/png')), name = 'tableau_de_bord_' + dayKey(Date.now()) + '.png';
+  const dl = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast(copy ? 'Copie d’image impossible ici : image téléchargée' : 'Image téléchargée'); };
+  if (copy) { try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); toast('Tableau de bord copié en image : collez-le dans un mail ou un document'); } catch (e) { dl(); } } else dl();
+}
 /* ---------- Vue À facturer ---------- */
 function renderBilling() {
   const f = UI.fac;
