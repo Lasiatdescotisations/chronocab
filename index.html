@@ -726,6 +726,23 @@ a.btn:not(.primary){color:var(--ink)}
 .cb-saved{font-size:11.5px;color:var(--accent);opacity:0;transition:opacity .3s}
 .cb-saved.on{opacity:1}
 select[data-hxf]{width:auto;padding:3px 8px;font-size:12.5px;min-height:0;height:auto}
+.cno{font-family:var(--mono);font-size:.86em;color:var(--muted);white-space:nowrap;flex:none;overflow:visible!important;text-overflow:clip!important}
+.cno::after{content:'\00a0·\00a0'}
+.chip .lab .cno::after,.what .cno::after{content:'\00a0·'}
+.cal-g{display:block;font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
+.cb-cal label.cal-inh input{color:var(--muted)}
+.cb-cal label.cal-exc input{border-color:var(--s-todo);background:var(--todo-soft)}
+.cb-cal label.cal-exc .cal-g,.cal-x{color:var(--s-todo)}
+.linkish{border:0;background:none;color:var(--accent);cursor:pointer;padding:0 2px;font:inherit}
+.cy-own{font-size:10.5px;font-weight:600;color:var(--s-todo);background:var(--todo-soft);border-radius:8px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.cyx-head{display:flex;align-items:center;gap:8px;margin:6px 0 4px}
+table.cyx td,table.cyx th{font-size:12.5px;white-space:nowrap}
+table.cyx td.cyx-ok{color:var(--muted);text-align:center}
+table.cyx td.cyx-exc{background:var(--todo-soft);color:var(--ink);font-weight:500;max-width:220px;overflow:hidden;text-overflow:ellipsis;cursor:help}
+table.cyx tr.has-x td:first-child a{font-weight:600}
+.cyx-dos{font-size:13px;line-height:1.9;padding:6px 8px;border-radius:8px;background:var(--surface-2)}
+.cyx-chip{display:inline-flex;align-items:center;gap:3px;background:var(--todo-soft);color:var(--ink);border-radius:10px;padding:0 4px 0 8px;font-size:12px;white-space:nowrap}
+.cyx-chip button{border:0;background:none;cursor:pointer;color:var(--accent);padding:0 3px;font:inherit}
 .hx-list{display:grid;gap:2px;max-height:520px;overflow:auto;padding-right:2px}
 .hx-day{font-size:11.5px;font-weight:600;color:var(--muted);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.04em}
 .hx-day:first-child{margin-top:0}
@@ -1151,8 +1168,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.58.0';
-const APP_DATE = '15/11/2026';
+const APP_VERSION = '1.60.0';
+const APP_DATE = '16/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -1307,6 +1324,10 @@ const entityOf = id => id === ABS_ID ? { id, name: ABS_NAME } : isInternalId(id)
 const ROLES = { paie: 'Collaborateur paie', compta: 'Collaborateur comptable', resp_paie: 'Responsable paie', resp_compta: 'Responsable comptable', app_paie: 'Apprenti paie', app_compta: 'Apprenti comptable', ec: 'Expert-comptable', autre: 'Autre' };
 const roleLabel = r => ROLES[r] || (r || ''); // fonction standard ou saisie libre
 const isMine = c => !!c && c.mine !== false;
+// N° de dossier devant le nom (v1.59.0) : saisies, récap, Ma semaine, Rapports, À facturer, chrono
+const cliCode = id => { if (!id || isPersonId(id) || isInternalId(id) || id === ABS_ID) return ''; const c = clientOf(id); return c && c.code ? String(c.code).trim() : ''; };
+const cnoHTML = id => { const k = cliCode(id); return k ? `<span class="cno">${esc(k)}</span>` : ''; };
+const cliLabel = id => { const k = cliCode(id); return (k ? k + ' · ' : '') + clientName(id); };
 
 /* ---------- Groupes de dossiers ----------
    meta.groups = [{ id, name, color: index dans GROUP_COLORS }] ; client.group = id du groupe (un seul groupe par dossier) */
@@ -2214,7 +2235,7 @@ function onPick() {
 }
 function initTimerBar() {
   cbClient = Combo($('#cb-client'), {
-    options: q => clientOptions(q), labelOf: id => clientName(id), emptyText: 'Aucun client : tapez un nom pour le créer (les personnes se créent dans Références)',
+    options: q => clientOptions(q), labelOf: id => cliLabel(id), emptyText: 'Aucun client : tapez un nom pour le créer (les personnes se créent dans Références)',
     onCreate: name => addClient(name), createLabel: q => '+ Créer le client « ' + q + ' »',
     onSelect: id => { setSpec({ client: id }); onPick(); if (id) cbTask.focus(); },
   });
@@ -2408,7 +2429,7 @@ function renderPill() {
   if (!S.running || UI.view === 'chrono' || !tabOn('chrono')) { p.hidden = true; return; }
   p.hidden = false;
   const r = S.running;
-  p.innerHTML = `<span class="what">${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span>${runCli() ? '<button type="button" class="pill-msg" data-runmsg title="Préparer un message pour ce dossier">✉</button><button type="button" class="pill-msg" data-runppl title="Interlocuteurs du dossier">👥</button>' : ''}${runPers() ? '<button type="button" class="pill-msg" data-runfiche title="Fiche de la personne">👤</button>' : ''}<button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
+  p.innerHTML = `<span class="what">${cnoHTML(r.client)}${esc(clientName(r.client) || 'Sans client')}${r.task ? ' › ' + esc(taskName(r.task)) : ''}</span><span class="num" data-live="clock">${fmtClock(Date.now() - r.start)}</span>${runCli() ? '<button type="button" class="pill-msg" data-runmsg title="Préparer un message pour ce dossier">✉</button><button type="button" class="pill-msg" data-runppl title="Interlocuteurs du dossier">👥</button>' : ''}${runPers() ? '<button type="button" class="pill-msg" data-runfiche title="Fiche de la personne">👤</button>' : ''}<button title="Arrêter" id="pill-stop">${ICON.stop}</button>`;
   $('#pill-stop').onclick = () => stopTimer();
 }
 
@@ -2479,7 +2500,7 @@ function whatHTML(c, t) {
   if (isInternalId(c)) return `<span class="int-ic" title="Temps interne">${ICON.building}</span><span class="cl">${esc(INTERNAL_NAME)}</span>${tk}`;
   if (isPersonId(c)) { const p = personOf(c); return `${persIc(p)}<span class="cl">${esc(clientName(c))}</span>${p && pRoleTxt(p) ? `<span class="role">${esc(pRoleTxt(p))}</span>` : ''}${tk}`; }
   const oc = c && clientOf(c), ext = oc && !isMine(oc) ? `<span class="ext" title="Hors de mon portefeuille">${esc(oc.owner && personOf(oc.owner) ? personOf(oc.owner).name : 'hors portef.')}</span>` : '';
-  return `${cliIc(c)}${c ? `<span class="cl dsc-n">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${tk}`;
+  return `${cliIc(c)}${c ? `${cnoHTML(c)}<span class="cl dsc-n">${esc(clientName(c))}</span>${grpDot(groupOfClient(c))}${ext}` : `<span class="none">Sans client</span>`}${tk}`;
 }
 function recents() {
   const seen = new Set(), out = [];
@@ -2800,9 +2821,9 @@ const CB_REL = [['neutre', 'Neutre'], ['fluide', 'Fluide'], ['surveiller', 'À s
 const isGroupObj = o => !!o && S.meta.groups.includes(o);
 const cbOf = c => { const b = (c.cb ||= {}); b.points ||= []; b.journal ||= []; if (!isGroupObj(c)) { b.ccn ||= []; b.vir ||= {}; b.rel ||= { lvl: 'neutre' }; } return b; };
 const cbPeek = c => (c && c.cb) || {};
-function cbVirDate(c, mk) { const v = c && c.cb && c.cb.vir && c.cb.vir[mk]; return v ? parseDay(v) : null; }
+function cbVirDate(c, mk) { const v = calDate(c, 'vir', mk); return v ? parseDay(v) : null; }
 function cbPointDone(cid, pid, on) { const c = clientOf(cid) || groupOf(cid); if (!c) return; const pt = cbOf(c).points.find(x => x.id === pid); if (!pt) return; if (on) pt.done = isoDay(Date.now()); else delete pt.done; touchMeta(); }
-function cbNextVir(c) { const v = cbPeek(c).vir || {}, today = dayKey(Date.now()); return Object.values(v).filter(d => d >= today).sort()[0] || null; }
+function cbNextVir(c) { const v = { ...calGrp(c, 'vir'), ...(cbPeek(c).vir || {}) }, today = dayKey(Date.now()); return Object.values(v).filter(d => d >= today).sort()[0] || null; }
 const CY_LBL = { rec: { var: 'Avec variables', auto: 'Automatique (sans variables)', robot: 'Automate Silae' }, vir: { file: 'Fichier de virement envoyé', odep: 'OD + état des paiements', client: 'Client autonome', nc: 'Non concerné' }, dep: { next: 'Le lendemain des virements', valid: 'Le jour de la validation de la paie', fixed: 'Un jour fixe', nc: 'Non concerné (MySilae…)' } };
 UI.cb = { f: 'mine', q: '' };
 function cbTileHTML(x, mk, today) {
@@ -2997,6 +3018,8 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.60.0', '16/11/2026', ['Carnet : « Calendrier de réception des variables » — une date attendue par mois de paie (règles de remplissage, dont « d’après la date habituelle ») ; elle remplace la date habituelle ce mois-là pour la relance, Mon cycle et la Charge à venir.', 'Cycle de paie du groupe : dans le carnet d’un groupe, paramètres du cycle, remarque permanente et calendriers (réception, virements) suivis automatiquement par tous ses dossiers ; ce qu’un dossier modifie lui-même devient une exception.', 'Exceptions d’un coup d’œil : tableau des dossiers du groupe (« = » s’il suit le groupe, valeur surlignée sinon, valeur du groupe au survol), boutons « Aligner » ; dans le carnet d’un dossier, ce qui lui est propre avec ↺ pour reprendre la valeur du groupe.']],
+  ['1.59.0', '16/11/2026', ['Le n° de dossier s’affiche devant le nom (« 1234 · Dupont SAS ») quand il est renseigné : saisies de Ma journée, récap à reporter, Ma semaine, Rapports (tableau et détail), À facturer, barre et pastille du chrono.']],
   ['1.58.0', '16/11/2026', ['Carnet : « Historique du carnet » — chaque modification d’un dossier ou d’un groupe est notée automatiquement (identité, convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, salariés particuliers, points, journal, calendrier annuel, modèles, virements, relation client), avec l’avant et l’après ; plusieurs frappes rapprochées dans un même champ forment une seule ligne.', 'Filtre par rubrique, gardé 24 mois, synchronisé entre vos appareils ; option « Historique des modifications » dans l’export du carnet et dans la sauvegarde complète.']],
   ['1.57.0', '15/11/2026', ['Carnet : « Calendrier annuel » — événements récurrents du dossier ou du groupe (un ou plusieurs mois, date fixe, tous les N ans), choisis dans une liste d’événements courants ou saisis librement ; rappel dans À faire aujourd’hui, 📅 dans Mon cycle, comptés dans la charge à venir, nouvelle vue « Année » dans Mon cycle ; copie, export et copie de carnet.']],
   ['1.56.0', '15/11/2026', ['Salariés particuliers : « Copier vers… » d’autres dossiers (ajouter ou remplacer, remarque en option, raccourcis groupe et portefeuille) et « Appliquer à tout le groupe » depuis le carnet d’un dossier ; dans le carnet d’un groupe, cocher une case l’applique à tous ses dossiers.']],
@@ -3076,7 +3099,7 @@ function newsCheck() {
 const HELP = {
   chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.']],
   portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
-  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.']],
+  carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
   facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
   referentiel: ['Références', ['Groupes de dossiers, tâches, personnes et modèles de messages.', 'Tâches : catégorie, tarif et facturation par défaut ; « Gérer les catégories » pour ajouter, renommer, ordonner, colorer.', 'Personnes : fiche complète (jamais d’identifiants ni de mots de passe).', 'Modèles de messages génériques, de groupe ou de dossier : zones automatiques {formule}, {dossier}, {mois de paie}… remplies depuis le carnet d’un dossier (✉ Message : bascule Spécifiques / Génériques).']],
@@ -3395,7 +3418,7 @@ document.addEventListener('click', ev => {
    même champ forment une seule ligne. Conservé 24 mois, synchronisé : un document « hx-<id du dossier ou du groupe> »
    = { e: [{ t, s: rubrique, k: élément, l: libellé, o: 'add' | 'mod' | 'del', b: avant, a: après }] } (le plus récent en dernier).
    Les changements reçus d'un autre appareil ne sont pas notés ici (cet appareil-là les note). */
-const HX_SEC = { ident: 'Identité', ccn: 'Convention collective', cycle: 'Cycle de paie', alertes: 'Alertes salariés', interloc: 'Interlocuteurs', tarifs: 'Tarifs', pratiques: 'Pratiques', salaries: 'Salariés particuliers', points: 'Points en cours', journal: 'Journal', annuel: 'Calendrier annuel', modeles: 'Modèles de messages', virements: 'Virements', relation: 'Relation client', groupe: 'Groupe' };
+const HX_SEC = { ident: 'Identité', ccn: 'Convention collective', cycle: 'Cycle de paie', alertes: 'Alertes salariés', interloc: 'Interlocuteurs', tarifs: 'Tarifs', pratiques: 'Pratiques', salaries: 'Salariés particuliers', points: 'Points en cours', journal: 'Journal', annuel: 'Calendrier annuel', modeles: 'Modèles de messages', virements: 'Calendriers', relation: 'Relation client', groupe: 'Groupe' };
 const HX_DAYS = 730, HX_MAX = 1500, HX_MERGE = 10 * 60000, HX_CUT = 1200;
 const HX_CY = { rec: 'Réception des variables', recDay: 'Jour d’envoi automatique', varDay: 'Réception habituelle des variables', envDelay: 'Alerte 1er envoi', valid: 'Validation par le client', valDelay: 'Délai de validation', vir: 'Virements', dep: 'Dépôt', depDay: 'Jour de dépôt', dsn: 'Date de DSN', bs: 'Nombre de bulletins' };
 const hxCut = v => { v = String(v ?? ''); return v.length > HX_CUT ? v.slice(0, HX_CUT) + '…' : v; };
@@ -3415,14 +3438,11 @@ function hxView(o, isG) { // { clé: [rubrique, libellé, texte] } : une entrée
     put('group', 'ident', 'Groupe', g ? g.name : ''); put('pf', 'ident', 'Portefeuille', isMine(c) ? 'Mon portefeuille' : own ? 'Portefeuille de ' + own.name : 'Hors de mon portefeuille');
     put('state', 'ident', 'État du dossier', c.deletedAt ? 'Dans la corbeille' : c.archived ? 'Archivé' : 'Actif');
     put('ccn', 'ccn', 'Conventions collectives', (b.ccn || []).map(ccnTxt).join(' ; '));
-    const cy = c.cy || {}; for (const k of Object.keys(cy)) if (k !== 'notes') put('cy.' + k, 'cycle', HX_CY[k] || 'Paramètre du cycle (' + k + ')', hxCyVal(k, cy[k]));
-    put('cy.notes', 'cycle', 'Remarque permanente', cy.notes);
     for (const a of c.alerts || []) put('al:' + a.id, 'alertes', 'Alerte salarié', [a.name + (a.tag ? ' (' + a.tag + ')' : ''), a.mode === 'validate' ? 'à valider' + (a.trig ? ' : ' + (typeof alTrigText === 'function' ? alTrigText(a) : a.trig) : '') : 'pour information', a.from ? 'à partir du cycle de ' + mkLabel(a.from) : '', a.until ? 'jusqu’au cycle de ' + mkLabel(a.until) : ''].filter(Boolean).join(' · '));
     for (const x of S.meta.persons) if (!x.deletedAt && (x.clients || []).includes(c.id)) put('p:' + x.id, 'interloc', 'Interlocuteur', pplTxt(x) + (x.archived ? ' (archivé)' : '') + (x.note ? ' — ' + x.note : ''));
     for (const [tid, r] of Object.entries(c.rates || {})) put('rt:' + tid, 'tarifs', 'Tarif : ' + (taskOf(tid)?.name || 'tâche supprimée'), rateTxt(r));
     put('prat', 'pratiques', 'Pratiques du client', b.prat); put('part', 'pratiques', 'Particularités du cycle et des salariés', b.part);
     put('sp', 'salaries', 'Salariés particuliers', spOf(b).map(k => SP_L[k] ? SP_L[k][1] : k).join(', ')); put('spNote', 'salaries', 'Remarque (salariés particuliers)', b.spNote);
-    for (const [m, v] of Object.entries(b.vir || {})) put('vir:' + m, 'virements', 'Virements de la paie de ' + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), hxD(v));
     put('rel', 'relation', 'Niveau de la relation', (CB_REL.find(r => r[0] === ((b.rel || {}).lvl || 'neutre')) || [, 'Neutre'])[1]); put('relnote', 'relation', 'Commentaire sur la relation', (b.rel || {}).note);
   } else {
     const g = o;
@@ -3432,6 +3452,10 @@ function hxView(o, isG) { // { clé: [rubrique, libellé, texte] } : une entrée
     for (const x of S.meta.clients) if (x.group === g.id && !x.deletedAt) put('m:' + x.id, 'groupe', 'Dossier du groupe', x.name + (x.archived ? ' (archivé)' : ''));
     for (const x of S.meta.persons) if (!x.deletedAt && (x.groups || []).includes(g.id)) put('p:' + x.id, 'interloc', 'Interlocuteur du groupe', pplTxt(x) + (x.archived ? ' (archivé)' : '') + (x.note ? ' — ' + x.note : ''));
   }
+  { const cy = o.cy || {}, sfx = isG ? ' (groupe)' : ' (propre au dossier)'; for (const k of Object.keys(cy)) if (k !== 'notes') put('cy.' + k, 'cycle', (HX_CY[k] || 'Paramètre du cycle (' + k + ')') + (isG || groupOf(o.group) ? sfx : ''), hxCyVal(k, cy[k]));
+    put('cy.notes', 'cycle', 'Remarque permanente' + (isG ? ' du groupe' : ''), cy.notes); }
+  for (const [m, v] of Object.entries(b.rec || {})) put('rec:' + m, 'virements', 'Réception des variables de la paie de ' + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), hxD(v));
+  for (const [m, v] of Object.entries(b.vir || {})) put('vir:' + m, 'virements', 'Virements de la paie de ' + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), hxD(v));
   for (const x of b.points || []) put('pt:' + x.id, 'points', 'Point en cours', x.t + (x.due ? ' · échéance le ' + hxD(x.due) : '') + (x.done ? ' · clos le ' + hxD(x.done) : ''));
   for (const x of b.journal || []) put('jr:' + x.id, 'journal', 'Événement du journal', jrTxt(x));
   for (const e of b.ann || []) put('ann:' + e.id, 'annuel', 'Événement annuel', e.t + ' · ' + annRecTxt(e) + (e.lead != null ? ' · rappel ' + e.lead + ' j avant' : '') + (e.note ? ' — ' + e.note : ''));
@@ -3496,9 +3520,87 @@ function hxCarnetHTML(o, isG) {
     ${L.length ? `<div class="hx-list">${html}</div>${L.length > n ? `<button class="btn sm ghost" data-hxmore="${esc(o.id)}">Voir plus (${L.length - n} de plus)</button>` : ''}` : `<div class="cb-hint">${all.length ? 'Aucune modification dans cette rubrique.' : 'Aucune modification enregistrée pour l’instant. Les prochaines modifications de ce carnet (identité, convention, cycle, interlocuteurs, pratiques, points, journal…) apparaîtront ici, avec l’avant et l’après.'}</div>`}
     <div class="cb-hint">Noté automatiquement, gardé 24 mois. Cliquez sur une ligne pour voir l’avant et l’après.</div></div>`;
 }
+/* ---------- Calendriers du cycle et exceptions de groupe (v1.60.0) ----------
+   cb.rec = { 'AAAA-MM': 'AAAA-MM-JJ' } : réception attendue des variables (remplace la date habituelle ce mois-là) ;
+   cb.vir = idem pour les virements. Un dossier reprend le calendrier de son groupe pour les mois qu'il ne renseigne pas. */
+const CAL_K = {
+  rec: { t: 'Calendrier de réception des variables', b: 'calrec', gb: 'gcalrec', hint: 'Date à laquelle les variables sont attendues pour la paie de chaque mois. Elle remplace la date habituelle des paramètres ce mois-là : relance le jour ouvré suivant, Charge à venir, Mon cycle.',
+    rules: [['hab', 'D’après la date habituelle (paramètres)'], ...[15, 18, 20, 22, 25, 27].map(d => ['d' + d, 'Le ' + d + ' (jour ouvré précédent si week-end)']), ['l0', 'Dernier jour ouvré du mois'], ['l2', '3e jour ouvré avant la fin du mois'], ['l4', '5e jour ouvré avant la fin du mois'], ['n1', '1er jour ouvré du mois suivant'], ['n3', 'Le 3 du mois suivant']] },
+  vir: { t: 'Calendrier des virements', b: 'calendrier', gb: 'gcalvir', hint: 'Date de virement des salaires pour la paie de chaque mois, souvent communiquée par le client en début d’année. Elle devient l’échéance « Virements » du cycle (à la place du calcul par défaut, l’avant-veille de la fin du mois).',
+    rules: [['l0', 'Dernier jour ouvré du mois'], ['l1', 'Avant-dernier jour ouvré'], ['l2', '3e jour ouvré avant la fin du mois'], ...[25, 26, 27, 28, 30].map(d => ['d' + d, 'Le ' + d + ' (jour ouvré précédent si week-end)']), ['n1', '1er jour ouvré du mois suivant'], ['n5', 'Le 5 du mois suivant']] },
+};
+const calOwn = (o, k) => (o && o.cb && o.cb[k]) || {};
+const calGrp = (c, k) => !c || isGroupObj(c) ? {} : calOwn(groupOf(c.group), k);
+const calDate = (c, k, mk) => calOwn(c, k)[mk] || calGrp(c, k)[mk] || '';
+const calExc = (c, k) => { const G = calGrp(c, k), O = calOwn(c, k); return Object.keys(O).filter(m => O[m] && G[m] && O[m] !== G[m]).sort(); }; // mois où le dossier s'écarte du groupe
+function calRule(o, k, mk, rule) {
+  if (rule === 'hab') { const d = cyVarDate(mk, cyOf(o).varDay); if (!d) return null; let x = d; while (!isWorkday(x) || holidayOn(dayKey(x))) x = addDays(x, -1); return dayKey(x); }
+  return cbVirRule(mk, rule);
+}
+function calBlockHTML(o, k, isG) {
+  const K = CAL_K[k], year = UI.cbYear || new Date().getFullYear(), O = calOwn(o, k), G = isG ? {} : calGrp(o, k), g = isG ? null : groupOf(o.group), now = monthKey(Date.now()), p = cyOf(o);
+  const months = Array.from({ length: 12 }, (_, i) => year + '-' + pad(i + 1));
+  const sd = v => v ? fmtDate(parseDay(v)).slice(0, 5) : '';
+  const off = k === 'vir' ? (p.vir === 'client' || p.vir === 'nc') : p.rec !== 'var';
+  const cell = m => { const own = O[m] || '', gv = G[m] || '', exc = own && gv && own !== gv, inh = !own && gv;
+    return `<label class="${m < now ? 'past' : ''} ${exc ? 'cal-exc' : ''} ${inh ? 'cal-inh' : ''}">Paie de ${MONTHS_L[+m.slice(5) - 1]}<input type="date" data-cal="${k}" data-calm="${m}" value="${esc(own)}">${inh ? `<span class="cal-g">groupe : ${sd(gv)}</span>` : exc ? `<span class="cal-g">≠ groupe ${sd(gv)} <button type="button" class="linkish" data-cba="calrev" data-k="${k}" data-m="${m}" title="Reprendre la date du groupe">↺</button></span>` : ''}</label>`; };
+  const nInh = isG ? 0 : months.filter(m => !O[m] && G[m]).length, nExc = isG ? 0 : months.filter(m => O[m] && G[m] && O[m] !== G[m]).length;
+  return `<i data-b="${isG ? K.gb : K.b}"></i><div class="toolbar"><h2>${K.t}${isG ? ' du groupe' : ''}</h2><span class="sp"></span><div class="seg"><button data-cba="yprev" title="Année précédente">‹</button><button disabled style="opacity:1;font-weight:600">${year}</button><button data-cba="ynext" title="Année suivante">›</button></div></div><div class="card cb-sec">
+    <div class="cb-hint">${K.hint}${isG ? ' Chaque dossier du groupe reprend ces dates, sauf les mois qu’il renseigne lui-même.' : ''}${off ? ` — <b>inactif tant que ${k === 'vir' ? 'les virements sont « ' + esc(CY_LBL.vir[p.vir]) + ' »' : 'la réception est « ' + esc(CY_LBL.rec[p.rec]) + ' »'}</b>` : ''}</div>
+    ${g && (nInh || nExc) ? `<div class="cb-hint">${nInh ? `${nInh} mois repris du groupe <b>${esc(g.name)}</b>` : ''}${nInh && nExc ? ' · ' : ''}${nExc ? `<b class="cal-x">${nExc} mois propre${nExc > 1 ? 's' : ''} à ce dossier</b>` : ''}</div>` : ''}
+    <div class="cb-cal">${months.map(cell).join('')}</div>
+    <div class="cb-add"><span class="cb-hint">Remplir l’année :</span><select id="cal-rule-${k}"><option value="">Choisir une règle…</option>${K.rules.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select><button class="btn sm" data-cba="calfill" data-k="${k}">Appliquer aux mois vides</button><button class="btn sm ghost" data-cba="calclear" data-k="${k}">Effacer l’année</button></div></div>`;
+}
+function calSet(o, k, mk, v) { // une date égale à celle du groupe n'est pas gardée (le dossier suit le groupe)
+  const b = (o.cb ||= {}), C = (b[k] ||= {});
+  if (v && !(calGrp(o, k)[mk] === v)) C[mk] = v; else delete C[mk];
+}
+// Colonnes du tableau des exceptions et résumé des paramètres
+const CYX_COLS = [['rec', 'Réception', ['rec', 'recDay', 'varDay']], ['env', '1er envoi', ['envDelay']], ['val', 'Validation', ['valid', 'valDelay']], ['vir', 'Virements', ['vir']], ['dep', 'Dépôt', ['dep', 'depDay']], ['dsn', 'DSN', ['dsn']], ['notes', 'Remarque', ['notes']]];
+function cyColTxt(p, col) {
+  if (col === 'rec') return (CY_LBL.rec[p.rec] || p.rec) + (p.rec === 'var' ? (p.varDay ? ', ' + cyVarLabel(p.varDay) : ', date habituelle non renseignée') : p.recDay ? ', vers le ' + p.recDay : '');
+  if (col === 'env') return +p.envDelay === 0 && p.envDelay != null ? 'pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' j ouvrés après la réception';
+  if (col === 'val') return p.valid ? 'demandée, relance à ' + (p.valDelay == null ? CY_VAL_DEF : p.valDelay) + ' j' : 'non demandée';
+  if (col === 'vir') return CY_LBL.vir[p.vir] || p.vir;
+  if (col === 'dep') return (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : '');
+  if (col === 'dsn') return 'le ' + (p.dsn || 15) + ' du mois suivant';
+  if (col === 'notes') return p.notes || '—';
+  return '';
+}
+const cyxOf = c => { const ex = new Set(cyExc(c)); return { cols: CYX_COLS.filter(([, , ks]) => ks.some(k => ex.has(k))).map(x => x[0]), rec: calExc(c, 'rec'), vir: calExc(c, 'vir') }; };
+const cyxAny = x => x.cols.length || x.rec.length || x.vir.length;
+const cyxDates = x => x.cols.some(k => k !== 'notes') || x.rec.length || x.vir.length;
+function grpCycleHTML(g) {
+  const p = cyOf(g), mem = grpMembers(g), X = mem.map(c => ({ c, x: cyxOf(c) })), withX = X.filter(r => cyxDates(r.x)), nNote = X.filter(r => r.x.cols.includes('notes')).length;
+  const mFmt = ms => ms.map(m => MON_S[+m.slice(5) - 1] + ' ' + m.slice(2, 4)).join(', ');
+  const td = (r, col) => { const on = r.x.cols.includes(col); return on ? `<td class="cyx-exc" title="${esc('Groupe : ' + cyColTxt(p, col))}">${esc(cyColTxt(cyOf(r.c), col))}</td>` : `<td class="cyx-ok" title="Suit le groupe">=</td>`; };
+  const tdc = (r, k) => r.x[k].length ? `<td class="cyx-exc" title="${esc('Mois propres au dossier : ' + mFmt(r.x[k]))}">${r.x[k].length} mois</td>` : `<td class="cyx-ok" title="Suit le groupe">=</td>`;
+  return `<i data-b="gcycle"></i><div class="toolbar"><h2>Cycle de paie du groupe</h2><span class="sp"></span><button class="btn sm" data-cba="params">Modifier les paramètres du groupe</button></div><div class="card cb-sec">
+    <div class="cb-hint">Ces paramètres s’appliquent à tous les dossiers du groupe, y compris ceux ajoutés plus tard. Un dossier qui modifie un champ dans ses propres paramètres garde sa valeur : c’est une exception, surlignée ci-dessous.</div>
+    <dl class="cb-kv">${CYX_COLS.filter(x => x[0] !== 'notes').map(([k, l]) => `<dt>${l}</dt><dd>${esc(cyColTxt(p, k))}</dd>`).join('')}</dl>
+    <label class="fld"><span>Remarque permanente du groupe (colonne Remarques de Mon cycle, pour les dossiers sans remarque propre)</span><textarea data-cbf="notes" rows="2" placeholder="ex. Virements centralisés par la holding">${esc((g.cy || {}).notes || '')}</textarea></label>
+    ${mem.length ? `<div class="cyx-head"><b>${withX.length ? `${withX.length} dossier${withX.length > 1 ? 's' : ''} sur ${mem.length} avec des exceptions` : `Les ${mem.length} dossiers suivent les dates du groupe ✓`}</b>${nNote ? `<span class="muted small">· ${nNote} remarque${nNote > 1 ? 's' : ''} propre${nNote > 1 ? 's' : ''} à un dossier</span>` : ''}${withX.length ? `<span class="sp" style="flex:1"></span><button class="btn sm ghost" data-cba="cyalignall" title="Retirer les exceptions de dates et de calendriers de tous les dossiers (les remarques propres sont gardées)">Tout aligner sur le groupe</button>` : ''}</div>
+    <div class="tbl-wrap"><table class="t cyx"><thead><tr><th>Dossier</th>${CYX_COLS.map(x => `<th>${x[1]}</th>`).join('')}<th>Cal. réception</th><th>Cal. virements</th><th></th></tr></thead><tbody>
+    ${X.map(r => `<tr class="${cyxAny(r.x) ? 'has-x' : ''}"><td><a href="#carnet/${encodeURIComponent(r.c.id)}">${cnoHTML(r.c.id)}${esc(r.c.name)}</a></td>${CYX_COLS.map(x => td(r, x[0])).join('')}${tdc(r, 'rec')}${tdc(r, 'vir')}<td>${cyxDates(r.x) ? `<button class="btn sm ghost" data-cba="cyalign" data-cid="${r.c.id}" title="Retirer les exceptions de dates et de calendriers de ce dossier">Aligner</button>` : ''}</td></tr>`).join('')}
+    </tbody></table></div><div class="cb-hint">« = » : suit le groupe. Valeur surlignée : propre au dossier (valeur du groupe au survol).</div>` : '<div class="cb-hint">Aucun dossier dans ce groupe.</div>'}</div>`;
+}
+function cyAlign(c) { // retire les exceptions de dates (pas la remarque) et les mois de calendrier propres ; retourne l'annulation
+  const snap = JSON.stringify({ cy: c.cy || null, rec: (c.cb || {}).rec || null, vir: (c.cb || {}).vir || null });
+  const n = (c.cy && c.cy.notes) || ''; if (n) c.cy = { notes: n }; else delete c.cy;
+  if (c.cb) { for (const k of ['rec', 'vir']) { const G = calGrp(c, k); if (c.cb[k]) for (const m of Object.keys(c.cb[k])) if (G[m]) delete c.cb[k][m]; } }
+  return () => { const s = JSON.parse(snap); if (s.cy) c.cy = s.cy; else delete c.cy; c.cb ||= {}; if (s.rec) c.cb.rec = s.rec; else delete c.cb.rec; if (s.vir) c.cb.vir = s.vir; else delete c.cb.vir; };
+}
+function cyDosGrpHTML(c) { // carnet d'un dossier : ce qui est propre au dossier par rapport au groupe
+  const g = groupOf(c.group); if (!g) return '';
+  const x = cyxOf(c), gp = cyOf(g);
+  if (!cyxAny(x)) return `<div class="cb-hint">✓ Suit le cycle du groupe <a href="#carnet/groupe/${encodeURIComponent(g.id)}">${esc(g.name)}</a> (paramètres et calendriers).</div>`;
+  const chips = [...x.cols.map(k => `<span class="cyx-chip" title="${esc('Groupe : ' + cyColTxt(gp, k))}">${esc(CYX_COLS.find(z => z[0] === k)[1])}${k === 'notes' ? '' : ' : ' + esc(cyColTxt(cyOf(c), k))}<button type="button" data-cba="cyrev" data-col="${k}" title="Reprendre la valeur du groupe">↺</button></span>`),
+    ...['rec', 'vir'].filter(k => x[k].length).map(k => `<span class="cyx-chip">${k === 'rec' ? 'Calendrier de réception' : 'Calendrier des virements'} : ${x[k].length} mois</span>`)];
+  return `<div class="cyx-dos">Suit le cycle du groupe <a href="#carnet/groupe/${encodeURIComponent(g.id)}">${esc(g.name)}</a>, <b>sauf</b> : ${chips.join(' ')}${cyxDates(x) ? ` <button class="btn sm ghost" data-cba="cyalign" data-cid="${c.id}">Tout aligner sur le groupe</button>` : ''}</div>`;
+}
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
-const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['sp', 'Salariés particuliers', 1], ['ann', 'Calendrier annuel', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendrier des virements', 1],
+const CBCP = [['grp', 'Groupe', 1], ['ccn', 'Convention collective', 1], ['cycle', 'Paramètres du cycle de paie', 1], ['prat', 'Pratiques et particularités', 1], ['sp', 'Salariés particuliers', 1], ['ann', 'Calendrier annuel', 1], ['tarifs', 'Tarifs particuliers et facturation par défaut', 1], ['vir', 'Calendriers de réception et des virements', 1],
   ['notes', 'Remarque permanente', 0], ['interloc', 'Interlocuteurs (rattachés aux deux dossiers)', 0], ['points', 'Points en cours', 0], ['journal', 'Journal', 0], ['rel', 'Relation client', 0], ['alertes', 'Alertes salariés', 0]];
 function cbCopyFields(dstId) {
   const cs = S.meta.clients.filter(c => !c.deletedAt && c.id !== dstId).sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0) || a.name.localeCompare(b.name, 'fr'));
@@ -3517,13 +3619,13 @@ function cbCopy(dst, src, keys) { // retourne le nombre d'éléments copiés
   const K = new Set(keys), sb = cbPeek(src), clone = v => JSON.parse(JSON.stringify(v)); let n = 0; const db = () => cbOf(dst), today = dayKey(Date.now());
   if (K.has('grp') && !dst.group && src.group && groupOf(src.group)) { dst.group = src.group; n++; }
   if (K.has('ccn') && (sb.ccn || []).length && !db().ccn.length) { db().ccn = clone(sb.ccn); n++; }
-  if (K.has('cycle') && src.cy) { const sp = cyOf(src), cy = { ...(dst.cy || {}) }; let k2 = 0; for (const k of CY_COPY_KEYS) if (cy[k] == null || cy[k] === '') { if (sp[k] != null && sp[k] !== '') { cy[k] = sp[k]; k2++; } } if (k2) { dst.cy = cy; n++; } }
+  if (K.has('cycle') && src.cy && !(groupOf(dst.group) || {}).cy) { const sp = cyOf(src), own = dst.cy || {}, full = cyOf(dst); let k2 = 0; for (const k of CY_COPY_KEYS) if ((own[k] == null || own[k] === '') && sp[k] != null && sp[k] !== '' && !jEq(sp[k], full[k])) { full[k] = sp[k]; k2++; } if (k2) { cyPut(dst, full); n++; } }
   if (K.has('notes') && src.cy && src.cy.notes && !(dst.cy && dst.cy.notes)) { dst.cy = { ...(dst.cy || {}), notes: src.cy.notes }; n++; }
   if (K.has('ann') && annOwn(src).length && !annOwn(dst).length) { db().ann = annOwn(src).map(e => ({ ...clone(e), id: newId() })); n++; }
   if (K.has('sp')) { const L = spOf(sb); if (L.length && !spOf(cbPeek(dst)).length) { db().sp = [...L]; n++; } if (sb.spNote && !cbPeek(dst).spNote) { db().spNote = sb.spNote; n++; } }
   if (K.has('prat')) for (const f of ['prat', 'part']) if (sb[f] && !db()[f]) { db()[f] = sb[f]; n++; }
   if (K.has('tarifs')) { if (src.rates) { const r = { ...(dst.rates || {}) }; let k2 = 0; for (const [t, v] of Object.entries(src.rates)) if (!r[t]) { r[t] = clone(v); k2++; } if (k2) { dst.rates = r; n++; } } if (src.billing && !dst.billing) { dst.billing = src.billing; n++; } }
-  if (K.has('vir') && sb.vir) { const v = db().vir; let k2 = 0; for (const [mk, d] of Object.entries(sb.vir)) if (!v[mk]) { v[mk] = d; k2++; } if (k2) n++; }
+  if (K.has('vir')) for (const ck of ['vir', 'rec']) if (sb[ck]) { const v = (db()[ck] ||= {}); let k2 = 0; for (const [mk, d] of Object.entries(sb[ck])) if (!v[mk] && calGrp(dst, ck)[mk] !== d) { v[mk] = d; k2++; } if (k2) n++; }
   if (K.has('interloc')) for (const x of S.meta.persons) if (!x.deletedAt && (x.clients || []).includes(src.id) && !x.clients.includes(dst.id)) { x.clients = [...x.clients, dst.id]; n++; }
   if (K.has('points')) for (const x of (sb.points || []).filter(x => !x.done)) { db().points.push({ ...clone(x), id: newId(), open: today }); n++; }
   if (K.has('journal')) for (const x of (sb.journal || [])) { db().journal.push({ ...clone(x), id: newId() }); n++; }
@@ -3549,7 +3651,7 @@ function openCbCopy(dstId) {
    Rubriques au choix (mémorisées par appareil) ; relation client, tarifs et interlocuteurs décochés par défaut. */
 const CBX = {
   dossier: [['ident', 'Identité et convention collective'], ['cycle', 'Cycle de paie (paramètres)'], ['suivi', 'Suivi du cycle du mois'], ['alertes', 'Alertes salariés'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['tarifs', 'Tarifs de facturation', 1], ['salaries', 'Salariés particuliers'], ['annuel', 'Calendrier annuel'], ['pratiques', 'Pratiques et particularités'], ['points', 'Points en cours'], ['journal', 'Journal'], ['vir', 'Calendrier des virements'], ['relation', 'Relation client', 1], ['gnotes', 'Groupe : notes et points en cours'], ['historique', 'Historique des modifications', 1]],
-  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal'], ['historique', 'Historique des modifications', 1]]
+  groupe: [['ident', 'Le groupe'], ['notes', 'Notes du groupe'], ['gcycle', 'Cycle de paie du groupe et exceptions'], ['gcal', 'Calendriers de réception et des virements'], ['annuel', 'Calendrier annuel du groupe'], ['dossiers', 'Dossiers et conventions collectives'], ['interloc', 'Interlocuteurs (coordonnées)', 1], ['points', 'Points en cours'], ['journal', 'Journal'], ['historique', 'Historique des modifications', 1]]
 };
 function cbxSel(kind) { // { sel: [...], all: [clés connues] } ; une rubrique ajoutée depuis le dernier choix prend sa valeur par défaut
   const def = CBX[kind].filter(x => !x[2]).map(x => x[0]);
@@ -3580,7 +3682,8 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     add('pratiques', 'Pratiques et particularités', [['Pratiques du client', b.prat || '—'], ['Particularités du cycle et des salariés', b.part || '—']]);
     add('points', 'Points en cours', ptsOf(b.points), 'Aucun point');
     add('journal', 'Journal', (b.journal || []).slice().sort((x, y) => y.d.localeCompare(x.d)).map(x => ['', jrTxt(x)]), 'Aucun événement');
-    add('vir', 'Calendrier des virements', Object.entries(b.vir || {}).sort().map(([m, v]) => [MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), d(v)]), 'Aucune date');
+    { const cal = k => { const O = b[k] || {}, G = calGrp(c, k); return [...new Set([...Object.keys(O), ...Object.keys(G)])].sort().map(m => [(k === 'rec' ? 'Réception · ' : 'Virements · ') + MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), d(O[m] || G[m]) + (!O[m] ? ' (groupe)' : '')]); };
+      add('vir', 'Calendriers de réception et des virements', [...cal('rec'), ...cal('vir')], 'Aucune date'); }
     const rel = b.rel || {};
     add('relation', 'Relation client', [['Niveau', (CB_REL.find(r => r[0] === (rel.lvl || 'neutre')) || [, 'Neutre'])[1]], ['Commentaire', rel.note || '—'], ['Mise à jour', d(rel.d)]]);
     if (g) { const gb = cbPeek(g); add('gnotes', 'Groupe ' + g.name + ' : notes et points en cours', [['Notes', gb.notes || '—'], ...ptsOf(gb.points, 'Point')]); }
@@ -3590,6 +3693,8 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
   const g = obj, b = cbPeek(g), mem = grpMembers(g);
   add('ident', 'Le groupe', [['Nom', g.name], ['Société mère', g.mother && clientOf(g.mother) ? clientOf(g.mother).name : '—'], ['Nombre de dossiers', String(mem.length)], ['Bulletins (cycle de ' + mkLabel(mk) + ')', String(mem.reduce((a2, x) => a2 + (effBs(mk, x.id).n || 0), 0) || '—')]]);
   add('notes', 'Notes du groupe', [['', b.notes || '—']]);
+  { const p = cyOf(g); add('gcycle', 'Cycle de paie du groupe', [...CYX_COLS.map(([k, l]) => [l, cyColTxt(p, k)]), ...mem.map(x => { const X = cyxOf(x); return cyxAny(X) ? ['Exceptions · ' + x.name, [...X.cols.map(k => CYX_COLS.find(z => z[0] === k)[1] + ' : ' + cyColTxt(cyOf(x), k)), X.rec.length ? 'calendrier de réception (' + X.rec.length + ' mois)' : '', X.vir.length ? 'calendrier des virements (' + X.vir.length + ' mois)' : ''].filter(Boolean).join(' ; ')] : null; }).filter(Boolean)]);
+    for (const k of ['rec', 'vir']) add('gcal', k === 'rec' ? 'Calendrier de réception du groupe' : 'Calendrier des virements du groupe', Object.entries(b[k] || {}).sort().map(([m, v]) => [MONTHS_L[+m.slice(5) - 1] + ' ' + m.slice(0, 4), d(v)]), 'Aucune date'); }
   add('annuel', 'Calendrier annuel du groupe', annOwn(g).map(e => [e.t, annRecTxt(e) + (e.note ? ' — ' + e.note : '')]), 'Aucun événement');
   add('dossiers', 'Dossiers et conventions collectives', mem.map(x => [x.name + (x.code ? ' (n° ' + x.code + ')' : '') + (isMother(x) ? ' — société mère' : ''), ((cbPeek(x).ccn || []).map(ccnTxt).join(' ; ') || 'convention non renseignée') + (isMine(x) ? '' : ' · hors de mon portefeuille')]), 'Aucun dossier');
   add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && pInGroup(x, g.id)).map(x => ['', pplTxt(x) + ' — ' + pAttTxt(x).join(', ')]), 'Aucun interlocuteur');
@@ -3792,6 +3897,7 @@ function renderCarnetGroupe(body, g) {
     <dt>Conventions collectives</dt><dd>${ccnMap.size ? [...ccnMap.values()].map(({ k, ds }) => `<div>${k.i != null ? `<b class="mono">${idccStr(k.i)}</b> ` : ''}${esc(ccnShort(k))} <span class="muted">— ${ds.map(x => esc(x.name)).join(', ')}</span></div>`).join('') : '—'}${noCcn.length && ccnMap.size ? `<div class="muted small">Non renseignée : ${noCcn.map(x => esc(x.name)).join(', ')}</div>` : ''}</dd>
     <dt>Relation client</dt><dd>${rels.length ? rels.map(x => `${esc(x.name)} : <b>${esc(CB_REL.find(r => r[0] === cbPeek(x).rel.lvl)[1])}</b>`).join(' · ') : 'Neutre ou fluide pour tous les dossiers'}</dd></dl>
     ${pts.length ? `<div><div class="cb-hint" style="margin-bottom:4px">Points en cours des dossiers (${pts.length})</div><div class="cb-list">${pts.map(({ p, x }) => `<div class="cb-it"><a class="d" href="#carnet/${encodeURIComponent(x.id)}" style="min-width:120px">${esc(x.name)}</a><span class="x">${esc(p.t)}</span>${p.due ? `<span class="due ${p.due < today ? 'late' : ''}">⏰ ${fmtDate(parseDay(p.due)).slice(0, 5)}</span>` : ''}</div>`).join('')}</div></div>` : ''}</div>`;
+  html += grpCycleHTML(g) + calBlockHTML(g, 'rec', true) + calBlockHTML(g, 'vir', true);
   html += `<i data-b="gpoints" data-half="1"></i><h2>Points en cours du groupe (${b.points.filter(x => !x.done).length})</h2><div class="card cb-sec">${cbPointsHTML(b.points, today, ' du groupe')}</div>`;
   html += `<i data-b="gjournal" data-half="1"></i><h2>Journal du groupe (${b.journal.length})</h2><div class="card cb-sec">${cbJournalHTML(b.journal, today)}</div>`;
   html += annCarnetHTML(g, true);
@@ -3834,7 +3940,8 @@ function renderCarnetDossier(body, c) {
   html += `<i data-b="cycle" data-half="1"></i><div class="toolbar"><h2>Cycle de paie</h2><span class="sp"></span><button class="btn sm" data-cba="params">Modifier les paramètres</button></div><div class="card cb-sec">
     <dl class="cb-kv"><dt>Réception des variables</dt><dd>${esc(recTxt)}</dd><dt>Alerte 1er envoi</dt><dd>${p.envDelay === 0 ? 'Pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception'}</dd><dt>Validation client</dt><dd>${p.valid ? 'Demandée' + (cyValDelay(c) ? ' · relance ' + cyValDelay(c) + ' jours ouvrés après l’envoi' : ' · pas de relance') : 'Non demandée'}</dd><dt>Virements</dt><dd>${esc(CY_LBL.vir[p.vir] || p.vir)}${Object.keys(b.vir).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier ci-dessous' : ''}</dd><dt>Dépôt des bulletins</dt><dd>${esc(CY_LBL.dep[p.dep] || p.dep)}${p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : ''}</dd><dt>Échéance DSN</dt><dd>${dsnTxt}</dd></dl>
     ${(() => { const a = cliAvg(c.id), mks = months12(), r = cli12(c.id, mks, monthlyBy(e => e.client === c.id ? c.id : null)); const parts = []; if (a) parts.push(`Temps moyen : <b>${fmtDur(a.avg)}</b> par mois (3 derniers mois) · ce mois-ci : <b>${fmtDur(a.cur)}</b>`); if (r.avgBs != null) parts.push(`par bulletin : <b>${fmtDur(r.avgBs)}</b> (12 derniers mois, ${r.bs} bulletins)`); else if (r.tot) parts.push(`12 derniers mois : <b>${fmtDur(r.tot)}</b>`); return parts.length ? `<div class="cb-hint">⏱ ${parts.join(' · ')}</div>` : ''; })()}
-    <label class="fld"><span>Remarque permanente (colonne Remarques de Mon cycle)</span><textarea data-cbf="notes" rows="3" placeholder="ex. Paies sur quel RIB ? · MySilae uniquement">${esc(p.notes || '')}</textarea></label></div>`;
+    ${cyDosGrpHTML(c)}
+    <label class="fld"><span>Remarque permanente (colonne Remarques de Mon cycle)</span><textarea data-cbf="notes" rows="3" placeholder="${g && (g.cy || {}).notes ? esc('Remarque du groupe : ' + g.cy.notes) : 'ex. Paies sur quel RIB ? · MySilae uniquement'}">${esc((c.cy || {}).notes || '')}</textarea></label>${g && (g.cy || {}).notes ? `<div class="cb-hint">Vide : la remarque du groupe s’applique (« ${esc(g.cy.notes)} »).</div>` : ''}</div>`;
   // Alertes salariés
   html += `<i data-b="alertes" data-half="1"></i><div class="toolbar"><h2>Alertes salariés</h2><span class="sp"></span><button class="btn sm" data-cba="alerts">Gérer les alertes</button></div><div class="card cb-sec">
     ${al.length ? `<div class="cb-list">${al.map(a => { const st = alState(mk, c, row, a).st; return `<div class="cb-it"><span class="x"><b>${esc(a.name)}</b>${a.tag ? ' · ' + esc(a.tag) : ''}<span class="ref">${a.mode === 'validate' ? 'À valider : ' + esc(alTrigText(a)) + (st === 'ok' ? ' · ✓ validée pour ce cycle' : st === 'due' ? ' · à valider maintenant' : '') : 'Neutre (pour information)'}${a.until ? ' · jusqu’au cycle de ' + esc(mkLabel(a.until)) : ''}</span></span></div>`; }).join('')}</div>` : '<div class="cb-hint">Aucune alerte active pour le cycle de ' + esc(mkLabel(mk)) + '.</div>'}</div>`;
@@ -3866,12 +3973,8 @@ function renderCarnetDossier(body, c) {
     ${jr.length ? `<div class="cb-list">${jr.map(x => `<div class="cb-it" data-jr="${x.id}"><span class="d">${fmtDate(parseDay(x.d))}</span><span class="x">${esc(x.t)}${x.ref ? `<span class="ref">📎 ${esc(x.ref)}</span>` : ''}</span><button class="icon xs" data-cba="jrdel" title="Supprimer">${ICON.trash}</button></div>`).join('')}</div>` : '<div class="cb-hint">Aucun événement noté. Texte seul : pour un document, notez sa référence dans la GED du cabinet.</div>'}</div>`;
   html += annCarnetHTML(c, false);
   html += tplCarnetHTML(c, false);
-  // Calendrier des virements
-  const months = Array.from({ length: 12 }, (_, i) => year + '-' + pad(i + 1));
-  html += `<i data-b="calendrier"></i><div class="toolbar"><h2>Calendrier des virements</h2><span class="sp"></span><div class="seg"><button data-cba="yprev" title="Année précédente">‹</button><button disabled style="opacity:1;font-weight:600">${year}</button><button data-cba="ynext" title="Année suivante">›</button></div></div><div class="card cb-sec">
-    <div class="cb-hint">Date de virement des salaires pour la paie de chaque mois, souvent communiquée par le client en début d’année. Elle devient l’échéance « Virements » du cycle (à la place du calcul par défaut, l’avant-veille de la fin du mois)${p.vir === 'client' || p.vir === 'nc' ? ' — <b>inactif tant que les virements sont « ' + esc(CY_LBL.vir[p.vir]) + ' »</b>' : ''}.</div>
-    <div class="cb-cal">${months.map(m => `<label class="${m < monthKey(Date.now()) ? 'past' : ''}">Paie de ${MONTHS_L[+m.slice(5) - 1]}<input type="date" data-vir="${m}" value="${esc(b.vir[m] || '')}"></label>`).join('')}</div>
-    <div class="cb-add"><span class="cb-hint">Remplir l’année :</span><select id="vir-rule"><option value="">Choisir une règle…</option><option value="l0">Dernier jour ouvré du mois</option><option value="l1">Avant-dernier jour ouvré</option><option value="l2">3e jour ouvré avant la fin du mois</option>${[25, 26, 27, 28, 30].map(d => `<option value="d${d}">Le ${d} (jour ouvré précédent si week-end)</option>`).join('')}<option value="n1">1er jour ouvré du mois suivant</option><option value="n5">Le 5 du mois suivant</option></select><button class="btn sm" data-cba="virfill">Appliquer aux mois vides</button><button class="btn sm ghost" data-cba="virclear">Effacer l’année</button></div></div>`;
+  // Calendriers de réception des variables et des virements (v1.60.0 : repris du groupe pour les mois non renseignés)
+  html += calBlockHTML(c, 'rec', false) + calBlockHTML(c, 'vir', false);
   // Relation client
   const rl = b.rel || { lvl: 'neutre' };
   html += `<i data-b="relation"></i><h2>Relation client</h2><div class="card cb-sec">
@@ -3889,8 +3992,7 @@ function cbVirRule(mk, rule) {
   const fwd = d => { while (!isWorkday(d) || holidayOn(dayKey(d))) d = addDays(d, 1); return d; };
   if (rule[0] === 'l') { let d = back(e0); for (let i = 0; i < +rule.slice(1); i++) d = back(addDays(d, -1)); return dayKey(d); }
   if (rule[0] === 'd') return dayKey(back(dayIn(mk, +rule.slice(1))));
-  if (rule === 'n1') return dayKey(fwd(monthStart(nextMk(mk))));
-  if (rule === 'n5') return dayKey(fwd(dayIn(nextMk(mk), 5)));
+  if (rule[0] === 'n') return dayKey(fwd(dayIn(nextMk(mk), +rule.slice(1) || 1)));
   return null;
 }
 function bindCarnet() {
@@ -3946,12 +4048,13 @@ function bindCarnet() {
     if (t.dataset.cbf) {
       const v = t.value.replace(/\s+$/, ''), b = cbOf(c);
       if (t.dataset.cbf === 'gnotes') b.notes = v;
-      else if (t.dataset.cbf === 'notes') c.cy = { ...cyOf(c), notes: v };
+      else if (t.dataset.cbf === 'notes') cyPut(c, { ...cyOf(c), notes: v });
       else if (t.dataset.cbf === 'relnote') b.rel = { ...b.rel, note: v, d: isoDay(Date.now()) };
       else b[t.dataset.cbf] = v;
       touchMeta(); cbSaved(); return;
     }
     if (t.dataset.cbsp) { const b = cbOf(c), set = new Set(spOf(b)); if (t.checked) set.add(t.dataset.cbsp); else set.delete(t.dataset.cbsp); delete b.fj; b.sp = [...set]; if (!b.sp.length) delete b.sp; touchMeta(); cbSaved(); return; }
+    if (t.dataset.cal && c) { calSet(c, t.dataset.cal, t.dataset.calm, t.value); touchMeta(); cbSaved(); return; }
     if (t.dataset.vir) { const b = cbOf(c); if (t.value) b.vir[t.dataset.vir] = t.value; else delete b.vir[t.dataset.vir]; touchMeta(); cbSaved(); return; }
     if (t.dataset.cba === 'ptdone') { const id = t.closest('[data-pt]').dataset.pt; cbPointDone(c.id, id, t.checked); return; }
   });
@@ -3990,6 +4093,15 @@ function bindCarnet() {
     else if (act === 'ptdel') { const id = a.closest('[data-pt]').dataset.pt, i = b.points.findIndex(x => x.id === id), old = b.points[i]; b.points.splice(i, 1); touchMeta(); toast('Point supprimé', 'Annuler', () => { cbOf(c).points.splice(i, 0, old); touchMeta(); }); }
     else if (act === 'jradd') { const tx = $('#jr-t').value.trim(); if (!tx) { $('#jr-t').focus(); return; } b.journal.push({ id: newId(), d: $('#jr-d').value || isoDay(Date.now()), t: tx, ref: $('#jr-ref').value.trim() || undefined }); touchMeta(); setTimeout(() => $('#jr-t')?.focus(), 30); }
     else if (act === 'jrdel') { const id = a.closest('[data-jr]').dataset.jr, i = b.journal.findIndex(x => x.id === id), old = b.journal[i]; b.journal.splice(i, 1); touchMeta(); toast('Événement supprimé', 'Annuler', () => { cbOf(c).journal.splice(i, 0, old); touchMeta(); }); }
+    else if (act === 'calfill') { const k = a.dataset.k, sel = $('#cal-rule-' + k), rule = sel && sel.value; if (!rule) { sel?.focus(); toast('Choisissez d’abord une règle'); return; }
+      const y = UI.cbYear || new Date().getFullYear(), C = ((c.cb ||= {})[k] ||= {}), G = calGrp(c, k); let n = 0, miss = 0;
+      for (let i = 1; i <= 12; i++) { const m = y + '-' + pad(i); if (C[m] || G[m]) continue; const d = calRule(c, k, m, rule); if (d) { C[m] = d; n++; } else miss++; }
+      touchMeta(); toast(n ? n + ' date' + (n > 1 ? 's' : '') + ' ajoutée' + (n > 1 ? 's' : '') + ' (jours fériés évités) : modifiez-les si besoin' : miss ? 'Renseignez d’abord la date habituelle dans les paramètres du cycle' : 'Tous les mois sont déjà renseignés'); }
+    else if (act === 'calclear') { const k = a.dataset.k, y = UI.cbYear || new Date().getFullYear(), C = (c.cb || {})[k] || {}, old = { ...C }; Object.keys(C).filter(m => m.startsWith(y + '-')).forEach(m => delete C[m]); touchMeta(); toast('Calendrier ' + y + ' effacé', 'Annuler', () => { (c.cb ||= {})[k] = old; touchMeta(); }); }
+    else if (act === 'calrev') { const C = (c.cb || {})[a.dataset.k]; if (C) delete C[a.dataset.m]; touchMeta(); }
+    else if (act === 'cyrev') { const col = CYX_COLS.find(x => x[0] === a.dataset.col); if (col && c.cy) { const old = JSON.stringify(c.cy); col[2].forEach(k => delete c.cy[k]); if (!Object.keys(c.cy).length) delete c.cy; touchMeta(); toast(col[1] + ' : valeur du groupe reprise', 'Annuler', () => { c.cy = JSON.parse(old); touchMeta(); }); } }
+    else if (act === 'cyalign') { const x = clientOf(a.dataset.cid); if (x) { const und = cyAlign(x); touchMeta(); toast(x.name + ' : aligné sur le groupe', 'Annuler', () => { und(); touchMeta(); }); } }
+    else if (act === 'cyalignall') { const g0 = c, und = grpMembers(g0).map(cyAlign); touchMeta(); toast('Tous les dossiers suivent le groupe ' + g0.name, 'Annuler', () => { und.forEach(f => f()); touchMeta(); }); }
     else if (act === 'yprev' || act === 'ynext') { UI.cbYear = (UI.cbYear || new Date().getFullYear()) + (act === 'yprev' ? -1 : 1); renderCarnet(); }
     else if (act === 'virfill') {
       const rule = $('#vir-rule').value; if (!rule) { $('#vir-rule').focus(); toast('Choisissez d’abord une règle'); return; }
@@ -4534,7 +4646,7 @@ function weekGridHTML() {
   const plan = shown.map(x => plannedOn(x.k)), wTot = shown.reduce((a, x) => a + (tot[x.k] || 0), 0), wPlan = plan.reduce((a, b) => a + b, 0);
   return `<i data-b="semaine" data-t="Ma semaine"></i><div class="toolbar"><h2>Ma semaine</h2><span class="sp"></span><button class="icon" data-act="wk" data-d="-1" title="Semaine précédente">‹</button><span class="small" style="min-width:120px;text-align:center">${esc(lbl)}</span><button class="icon" data-act="wk" data-d="1" title="Semaine suivante" ${off >= 0 ? 'disabled' : ''}>›</button>${off ? '<button class="btn sm ghost" data-act="wk" data-d="0">Cette semaine</button>' : ''}</div>
   <div class="card tbl-wrap"><table class="t wk-grid"><thead><tr><th>Dossier</th>${shown.map(x => `<th class="n ${x.k === today ? 'today' : ''}"><button class="wk-day" data-act="wkday" data-k="${x.k}" title="Récap à reporter de ce jour">${WD_S[new Date(x.d).getDay()]} ${new Date(x.d).getDate()}</button></th>`).join('')}<th class="n">Total</th></tr></thead><tbody>
-  ${list.map(([id, r, t]) => `<tr><td class="wk-who">${id ? (isInternalId(id) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(id) ? persIc(id) + ' ' : cliIc(id) + ' ') + esc(clientName(id)) : '<span class="muted">Sans dossier</span>'}</td>${shown.map(x => `<td class="n ${r[x.k] ? 'has' : ''}" ${r[x.k] ? `data-act="wkday" data-k="${x.k}"` : ''}>${f(r[x.k])}</td>`).join('')}<td class="n"><b>${f(t)}</b></td></tr>`).join('') || `<tr><td colspan="${shown.length + 2}" class="empty">Aucun temps saisi cette semaine.</td></tr>`}
+  ${list.map(([id, r, t]) => `<tr><td class="wk-who">${id ? (isInternalId(id) ? `<span class="int-ic">${ICON.building}</span> ` : isPersonId(id) ? persIc(id) + ' ' : cliIc(id) + ' ') + cnoHTML(id) + esc(clientName(id)) : '<span class="muted">Sans dossier</span>'}</td>${shown.map(x => `<td class="n ${r[x.k] ? 'has' : ''}" ${r[x.k] ? `data-act="wkday" data-k="${x.k}"` : ''}>${f(r[x.k])}</td>`).join('')}<td class="n"><b>${f(t)}</b></td></tr>`).join('') || `<tr><td colspan="${shown.length + 2}" class="empty">Aucun temps saisi cette semaine.</td></tr>`}
   <tr class="tot"><td>Total</td>${shown.map((x, i) => { const st = x.k > today || !plan[i] ? '' : (tot[x.k] || 0) >= plan[i] ? 'ok' : 'inc'; return `<td class="n wk-t ${st}" title="${plan[i] ? 'Prévu : ' + fmtDur(plan[i]) : 'Pas de temps prévu'}">${f(tot[x.k]) || (plan[i] && x.k <= today ? '0h00' : '')}</td>`; }).join('')}<td class="n">${f(wTot)}</td></tr>
   <tr class="wk-plan"><td>Prévu</td>${plan.map(p => `<td class="n">${p ? fmtDur(p) : '—'}</td>`).join('')}<td class="n">${fmtDur(wPlan)}</td></tr></tbody></table>${(() => {
     const byCat = {}; for (const e of allEntries()) { const k = dayKey(e.start); if (k < days[0].k || k > days[6].k) continue; const c = (isInternalId(e.client) ? 'int' : taskCat(e.task)) || ''; byCat[c] = (byCat[c] || 0) + dur(e); }
@@ -5132,7 +5244,7 @@ function openRecap(k, useLiss = true) {
     <div class="modal-b"><div class="muted small">Totaux regroupés par client et tâche, prêts à recopier dans le logiciel de gestion des temps du cabinet.${rounding ? ' Arrondi appliqué : ' + S.meta.settings.roundStep + ' min (' + (S.meta.settings.roundMode === 'up' ? 'au supérieur' : 'au plus proche') + ').' : ''}</div>
     ${lz ? `<label class="chk liss-sw"><input type="checkbox" id="rc-liss" ${lv ? 'checked' : ''}> Temps lissés sur la journée prévue (${fmtDur(lz.T, 'hm')} ; saisi : ${fmtDur(lz.real, 'hm')}) — ${lz.mode === 'coef' ? 'coefficient ' + (lz.T / lz.real).toLocaleString('fr-FR', { maximumFractionDigits: 3 }) + ' sur les saisies' : 'complément en temps interne'}</label>` : ''}
     <div class="tbl-wrap card"><table class="t"><thead><tr><th>Client</th><th>Tâche</th><th>Libellés</th><th class="n">Durée</th>${rounding ? '<th class="n">Arrondi</th>' : ''}${lv ? '<th class="n">Lissé</th>' : ''}<th class="n">Heures</th><th>Facturation</th><th>Reporté</th></tr></thead><tbody>
-    ${groups.map((g, i) => `<tr class="${g.fill ? 'liss-row' : ''}"><td>${cliIc(g.client)} ${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${g.fill ? '—' : fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${g.fill ? '—' : fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}${lv ? `<td class="n"><b>${fmtDur(g.lms, 'hm')}</b></td>` : ''}<td class="n">${hoursDec(fin(g))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td>${g.fill ? '' : `<input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}>`}</td></tr>`).join('')}
+    ${groups.map((g, i) => `<tr class="${g.fill ? 'liss-row' : ''}"><td>${cliIc(g.client)} ${cnoHTML(g.client)}${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${g.fill ? '—' : fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${g.fill ? '—' : fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}${lv ? `<td class="n"><b>${fmtDur(g.lms, 'hm')}</b></td>` : ''}<td class="n">${hoursDec(fin(g))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td>${g.fill ? '' : `<input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}>`}</td></tr>`).join('')}
     <tr class="tot"><td colspan="3">Total</td><td class="n">${fmtDur(tot, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(totR, 'hm')}</td>` : ''}${lv ? `<td class="n">${fmtDur(totF, 'hm')}</td>` : ''}<td class="n">${hoursDec(lv ? totF : rounding ? totR : tot)}</td><td colspan="2"></td></tr></tbody></table></div>
     <textarea class="copy" id="rc-txt" hidden readonly></textarea></div>
     <div class="modal-f"><button class="btn" id="rc-copy">${ICON.copy} Copier pour Excel</button><span class="sp"></span><button class="btn primary" id="rc-all">Tout marquer comme reporté</button></div>`, 'wide');
@@ -5168,7 +5280,17 @@ async function downloadText(filename, txt, mime) {
    Données du mois : S.cycles['AAAA-MM'] = { rows: { idClient: { rec, rel, prep, env, corr: [dates], bs, vir, dep, dsn, alOk: [ids d'alertes traitées], doeth, tal } } }
    Les dates sont stockées au format 'AAAA-MM-JJ'. */
 const CY_DEF = { rec: 'var', recDay: null, varDay: null, envDelay: null, valid: false, valDelay: null, vir: 'file', dep: 'next', depDay: null, dsn: 15, notes: '' };
-const cyOf = c => ({ ...CY_DEF, ...(c && c.cy || {}) });
+/* Cycle de paie d'un groupe (v1.60.0) : group.cy = paramètres du groupe ; chaque dossier les suit, sauf ses propres valeurs
+   (client.cy ne garde que les champs qui diffèrent du groupe = exceptions). Remarque permanente : celle du dossier remplace
+   celle du groupe ; vide = celle du groupe. */
+const cyBase = c => { const g = c && !isGroupObj(c) ? groupOf(c.group) : null; return { ...CY_DEF, ...((g && g.cy) || {}) }; };
+const cyOf = c => ({ ...cyBase(c), ...(c && c.cy || {}) });
+function cyPut(o, full) { // enregistre les valeurs voulues en ne gardant que les écarts au groupe (ou aux valeurs par défaut)
+  const base = cyBase(o), own = {};
+  for (const k of Object.keys(full)) { const v = full[k]; if (k === 'notes' && !v) continue; if (!jEq(v, base[k])) own[k] = v; }
+  if (Object.keys(own).length) o.cy = own; else delete o.cy;
+}
+const cyExc = c => { if (!c || isGroupObj(c)) return []; const base = cyBase(c), own = c.cy || {}; return Object.keys(own).filter(k => !(k === 'notes' && !own[k]) && !jEq(own[k], base[k])); };
 const cyClients = () => S.meta.clients.filter(c => !c.deletedAt && !c.archived && isMine(c)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 const cyRow = (mk, cid) => (S.cycles[mk] && S.cycles[mk].rows && S.cycles[mk].rows[cid]) || {};
 const isoDay = ms => dayKey(ms);
@@ -5200,7 +5322,7 @@ function cyVarDate(mk, code) {
 const cyVarLabel = code => { const m = /^([mn])(\d{1,2})$/.exec(code || ''); return m ? 'le ' + (+m[2] === 1 ? '1er' : m[2]) + (m[1] === 'n' ? ' du mois suivant' : '') : ''; };
 // Relance : lendemain (ouvré) de la date habituelle ; par défaut le 28. Retard : 2 jours ouvrés après la relance prévue.
 function cyRelDates(mk, c) {
-  const p = cyOf(c), v = cyVarDate(mk, p.varDay);
+  const p = cyOf(c), cal = calDate(c, 'rec', mk), v = cal ? parseDay(cal) : cyVarDate(mk, p.varDay);
   let rel = v ? nextWorkday(v) : dayIn(mk, CY_REL_DEF);
   if (!isWorkday(rel)) rel = nextWorkday(rel);
   return { usual: v, rel, late: addWorkdays(rel, 2) };
@@ -5258,7 +5380,7 @@ function cyState(mk, c, row, f) {
   if (f === 'rec' && p.rec !== 'var' && !val) return { st: 'auto', label: p.rec === 'robot' ? 'Automate' + (p.recDay ? ' ' + p.recDay : '') : 'Auto' + (p.recDay ? ' ' + p.recDay : '') };
   if (val) return { st: 'done', label: null };
   if (f === 'rec' && p.rec === 'var') {
-    const rd = cyRelDates(mk, c), hab = p.varDay ? 'Variables habituellement ' + cyVarLabel(p.varDay) + ' · ' : '';
+    const rd = cyRelDates(mk, c), cal = calDate(c, 'rec', mk), hab = cal ? 'Variables attendues le ' + fmtDate(parseDay(cal)) + ' (calendrier de réception) · ' : p.varDay ? 'Variables habituellement ' + cyVarLabel(p.varDay) + ' · ' : '';
     const st = today > rd.late ? 'late' : today >= rd.rel ? 'warn' : row.rel ? 'rel' : 'todo';
     if (row.rel) return { st, label: 'R', tip: 'Relancé le ' + fmtDate(dOf(row.rel)) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') + ' — variables pas encore reçues' + (st === 'late' ? ' · en retard depuis le ' + fmtDate(rd.late) : '') };
     return { st, label: '', tip: hab + (st === 'late' ? 'Variables en retard (relance prévue le ' + fmtDate(rd.rel) + ')' : st === 'warn' ? 'Relance à faire (prévue le ' + fmtDate(rd.rel) + ')' : 'Relance prévue le ' + fmtDate(rd.rel)) };
@@ -5549,12 +5671,12 @@ function absPrepModel(from, to, pres, late, prat) {
     const days = [...new Set(list.map(x => x.d))];
     for (const d of days) { const xs = list.filter(x => x.d === d), ks = FC_STEPS.filter(s2 => xs.some(x => x.k === s2[0]));
       sections.push({ t: fmtDayLong(dayKey(d)).replace(/^./, c => c.toUpperCase()), items: ks.flatMap(([k, l]) => k === 'pt' ? xs.filter(x => x.k === k).map(x => [l, x.nm + ' : ' + x.t]) : [[l, xs.filter(x => x.k === k).map(x => x.nm).join(', ')]]) }); }
-    if (prat) for (const id of ids) { const c = clientOf(id); if (!c) continue; const b = cbPeek(c), it = [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', (c.cy || {}).notes]].filter(x => x[1]); if (it.length) sections.push({ t: 'Mémo · ' + c.name + (c.code ? ' (n° ' + c.code + ')' : ''), items: it }); }
+    if (prat) for (const id of ids) { const c = clientOf(id); if (!c) continue; const b = cbPeek(c), it = [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', cyOf(c).notes]].filter(x => x[1]); if (it.length) sections.push({ t: 'Mémo · ' + c.name + (c.code ? ' (n° ' + c.code + ')' : ''), items: it }); }
   } else {
     const order = [...ids].map(id => ({ id, d: Math.min(...[...list, ...lt].filter(x => x.cid === id).map(x => x.d)) })).sort((a, b) => a.d - b.d);
     for (const { id } of order) { const xs = list.filter(x => x.cid === id); if (!xs.length && !prat) continue; const c = clientOf(id), g = !c && groupOf(id), b = cbPeek(c || g || {});
       const it = xs.map(x => [fd(x), lbl(x)]); if (!it.length) it.push(['', 'Rien d’attendu pendant l’absence (voir les retards ci-dessus)']);
-      if (prat && c) for (const [l, v] of [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', (c.cy || {}).notes]]) if (v) it.push([l, v]);
+      if (prat && c) for (const [l, v] of [['Pratiques', b.prat], ['Particularités', b.part], ['Remarque permanente', cyOf(c).notes]]) if (v) it.push([l, v]);
       if (prat && c) { const pp = S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(id)); if (pp.length) it.push(['Interlocuteurs', pp.map(x => x.name + (pRoleTxt(x) ? ' (' + pRoleTxt(x) + ')' : '')).join(', ')]); }
       sections.push({ t: (c ? c.name + (c.code ? ' (n° ' + c.code + ')' : '') : g ? grpTitle(g) : '?'), items: it }); }
   }
@@ -5753,19 +5875,20 @@ function openCyCopy(c, src) {
   q('#cc-q').addEventListener('input', ev => { const v = norm(ev.target.value); m.el.querySelectorAll('.cc-list label').forEach(l => { l.hidden = v && !l.dataset.n.includes(v); }); });
   q('#cc-ok').addEventListener('click', () => {
     const ids = boxes().filter(b => b.checked).map(b => b.value), before = ids.map(id => [id, clientOf(id).cy ? JSON.parse(JSON.stringify(clientOf(id).cy)) : null]);
-    for (const id of ids) { const x = clientOf(id); x.cy = { ...cyOf(x), ...Object.fromEntries(CY_COPY_KEYS.map(k => [k, src[k]])) }; }
+    for (const id of ids) { const x = clientOf(id); cyPut(x, { ...cyOf(x), ...Object.fromEntries(CY_COPY_KEYS.map(k => [k, src[k]])) }); }
     touchMeta(); m.close();
     toast('Paramètres copiés vers ' + ids.length + ' dossier' + (ids.length > 1 ? 's' : ''), 'Annuler', () => { for (const [id, cy] of before) { const x = clientOf(id); if (cy) x.cy = cy; else delete x.cy; } touchMeta(); });
   });
 }
 function openCyParams(cid) {
-  const c = clientOf(cid); if (!c) return;
-  const p = cyOf(c);
+  const c = clientOf(cid) || groupOf(cid); if (!c) return;
+  const isG = isGroupObj(c), p = cyOf(c), gg = isG ? null : groupOf(c.group), exc = new Set(cyExc(c));
   const opt = (v, l, cur) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${l}</option>`;
-  const m = modal(`<div class="modal-h"><h3>Cycle de paie — ${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
+  const m = modal(`<div class="modal-h"><h3>${isG ? 'Cycle de paie du groupe — ' : 'Cycle de paie — '}${esc(c.name)}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b">
-      <label class="fld"><span>Groupe de dossiers</span><select id="cp-grp">${groupSelOpts(c.group)}</select></label>
+      ${isG ? `<div class="cb-hint" style="margin-bottom:8px">S’applique aux ${grpMembers(c).length} dossiers du groupe (et à ceux ajoutés plus tard), sauf aux champs qu’un dossier a modifiés dans ses propres paramètres.</div>` : `<label class="fld"><span>Groupe de dossiers</span><select id="cp-grp">${groupSelOpts(c.group)}</select></label>
       <label class="chk" id="cp-mother-w" ${c.group ? '' : 'hidden'}><input type="checkbox" id="cp-mother" ${isMother(c) ? 'checked' : ''}> <span class="g-mere" style="margin:0">${CROWN}</span> Société mère du groupe</label>
+      ${gg ? `<div class="cb-hint" style="margin-bottom:8px">Valeurs du groupe <b>${esc(gg.name)}</b> par défaut ; un champ modifié ici devient propre à ce dossier${exc.size ? ' (marqué « propre au dossier »)' : ''}.</div>` : ''}`}
       <div class="fld-row"><label class="fld"><span>Réception des variables</span><select id="cp-rec">${opt('var', 'Avec variables', p.rec)}${opt('auto', 'Automatique (sans variables)', p.rec)}${opt('robot', 'Automate Silae', p.rec)}</select></label>
       <label class="fld"><span>Jour d’envoi prévu (auto)</span><select id="cp-recday">${opt('', '—', p.recDay || '')}${[16, 19, 20, 25, 30].map(d => opt(d, 'vers le ' + d, p.recDay || '')).join('')}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Réception habituelle des variables</span><select id="cp-varday">${opt('', '— (relance le ' + CY_REL_DEF + ')', p.varDay || '')}${Array.from({ length: 21 }, (_, i) => i + 10).map(d => opt('m' + d, 'Vers le ' + d, p.varDay || '')).join('')}${opt('m31', 'Fin de mois', p.varDay || '')}${Array.from({ length: 10 }, (_, i) => i + 1).map(d => opt('n' + d, 'Le ' + (d === 1 ? '1er' : d) + ' du mois suivant', p.varDay || '')).join('')}</select></label>
@@ -5780,7 +5903,7 @@ function openCyParams(cid) {
       <label class="fld"><span>Jour fixe de dépôt</span><input id="cp-depday" inputmode="numeric" value="${esc(p.depDay || '')}" placeholder="ex. 30"></label></div>
       <label class="fld"><span>Remarque permanente (colonne Remarques)</span><textarea id="cp-notes" rows="3" placeholder="ex. Paies sur quel RIB ? · Virement au DJM-2 · MySilae uniquement">${esc(p.notes || '')}</textarea></label>
     </div>
-    <div class="modal-f"><span class="muted small">N° ${esc(c.code || '—')}</span><a class="btn sm ghost" href="#carnet/${encodeURIComponent(c.id)}" data-close>📖 Carnet de bord</a><button class="btn sm ghost" id="cp-copyto" title="Appliquer les dates et échéances de ce dossier à d’autres dossiers">Copier vers…</button><span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
+    <div class="modal-f">${isG ? `<a class="btn sm ghost" href="#carnet/groupe/${encodeURIComponent(c.id)}" data-close>📖 Carnet du groupe</a>` : `<span class="muted small">N° ${esc(c.code || '—')}</span><a class="btn sm ghost" href="#carnet/${encodeURIComponent(c.id)}" data-close>📖 Carnet de bord</a><button class="btn sm ghost" id="cp-copyto" title="Appliquer les dates et échéances de ce dossier à d’autres dossiers">Copier vers…</button>`}<span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
   const q = s => m.el.querySelector(s);
   const sug = cyVarSuggest(cid);
   const hint = () => {
@@ -5790,20 +5913,28 @@ function openCyParams(cid) {
     const u = q('#cp-usesug'); if (u) u.onclick = () => { q('#cp-varday').value = sug.code; hint(); };
   };
   q('#cp-varday').addEventListener('change', hint); hint();
-  q('#cp-grp').addEventListener('change', ev => { q('#cp-mother-w').hidden = !ev.target.value || ev.target.value === '__newgrp'; });
-  q('#cp-grp').addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || c.group); }); });
+  { const CPF = { rec: '#cp-rec', recDay: '#cp-recday', varDay: '#cp-varday', envDelay: '#cp-envdelay', valid: '#cp-valid', valDelay: '#cp-valdelay', vir: '#cp-vir', dsn: '#cp-dsn', dep: '#cp-dep', depDay: '#cp-depday', notes: '#cp-notes' }, gp = gg && cyOf(gg);
+    for (const k of exc) { const sp = q(CPF[k])?.closest('label')?.querySelector('span'); if (sp) sp.insertAdjacentHTML('beforeend', ` <b class="cy-own" title="${esc('Groupe : ' + hxCyVal(k, gp[k]) || '—')}">propre au dossier</b>`); } }
+  q('#cp-grp')?.addEventListener('change', ev => { q('#cp-mother-w').hidden = !ev.target.value || ev.target.value === '__newgrp'; });
+  q('#cp-grp')?.addEventListener('change', ev => { const sl = ev.target; if (sl.value !== '__newgrp') return; askGroupName(id => { sl.innerHTML = groupSelOpts(id || c.group); }); });
   const readCp = () => {
     const dd = parseInt(q('#cp-depday').value, 10);
     const o = { rec: q('#cp-rec').value, recDay: +q('#cp-recday').value || null, varDay: q('#cp-varday').value || null, envDelay: q('#cp-envdelay').value === '' ? null : +q('#cp-envdelay').value, valid: q('#cp-valid').value === '1', valDelay: q('#cp-valdelay').value === '' ? null : +q('#cp-valdelay').value, vir: q('#cp-vir').value, dep: q('#cp-dep').value, depDay: dd >= 1 && dd <= 31 ? dd : null, dsn: +q('#cp-dsn').value || 15, notes: q('#cp-notes').value.trim() };
     if (o.dep === 'fixed' && !o.depDay) o.dep = 'next';
     return o;
   };
-  q('#cp-copyto').addEventListener('click', () => { const { notes, ...src } = readCp(); openCyCopy(c, src); });
+  q('#cp-copyto')?.addEventListener('click', () => { const { notes, ...src } = readCp(); openCyCopy(c, src); });
   q('#cp-ok').addEventListener('click', () => {
-    c.cy = readCp();
+    const want = readCp();
+    if (isG) { // les dossiers qui suivaient l'ancienne valeur du groupe suivent la nouvelle ; leurs écarts restent des exceptions
+      const oldB = cyOf(c), mem = S.meta.clients.filter(x => x.group === c.id); cyPut(c, want);
+      for (const x of mem) if (x.cy) { for (const k of Object.keys(x.cy)) if (k !== 'notes' && jEq(x.cy[k], oldB[k])) delete x.cy[k]; cyPut(x, cyOf(x)); }
+      touchMeta(); m.close(); return;
+    }
     const gv = q('#cp-grp').value, wasM = isMother(c), oldG = c.group; if (gv && gv !== '__newgrp') c.group = gv; else if (!gv) delete c.group;
     if (wasM && oldG !== c.group) { const og = groupOf(oldG); if (og) delete og.mother; }
-    if (c.group) { const ng = groupOf(c.group), want = q('#cp-mother').checked; if (want) ng.mother = c.id; else if (ng.mother === c.id) delete ng.mother; }
+    if (c.group) { const ng = groupOf(c.group), wm = q('#cp-mother').checked; if (wm) ng.mother = c.id; else if (ng.mother === c.id) delete ng.mother; }
+    cyPut(c, want);
     touchMeta(); m.close();
   });
 }
@@ -6086,7 +6217,7 @@ function openNoteEditor(inp, mk, cid) {
   const box = document.createElement('div'); box.id = 'cy-note-pop';
   box.innerHTML = `<textarea rows="3" maxlength="500" placeholder="Remarque permanente pour ce dossier (conservée de mois en mois)…"></textarea><div class="cnp-h">${canHover() ? 'Entrée pour valider · Maj+Entrée pour aller à la ligne · Échap pour annuler' : 'Touchez ailleurs pour enregistrer'}</div>`;
   document.body.appendChild(box);
-  const ta = box.querySelector('textarea'), cl = clientOf(cid); ta.value = (cl && cl.cy && cl.cy.notes) || '';
+  const ta = box.querySelector('textarea'), cl = clientOf(cid); ta.value = (cl && cl.cy && cl.cy.notes) || ''; { const gn = cl && !(cl.cy && cl.cy.notes) && (groupOf(cl.group)?.cy || {}).notes; if (gn) ta.placeholder = 'Remarque du groupe : ' + gn + ' (tapez pour la remplacer pour ce dossier)'; }
   box.style.width = w + 'px';
   box.style.left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8) + window.scrollX + 'px';
   box.style.top = r.top + window.scrollY - 4 + 'px';
@@ -6097,7 +6228,7 @@ function openNoteEditor(inp, mk, cid) {
   const finish = save => {
     if (done) return; done = true; box.remove();
     const v = ta.value.trim();
-    if (save && cl && v !== ((cl.cy && cl.cy.notes) || '')) { cl.cy = { ...(cl.cy || {}), notes: v }; touchMeta(); toast(v ? 'Remarque permanente enregistrée' : 'Remarque effacée'); }
+    if (save && cl && v !== ((cl.cy && cl.cy.notes) || '')) { cyPut(cl, { ...cyOf(cl), notes: v }); touchMeta(); toast(v ? 'Remarque permanente enregistrée' : 'Remarque effacée'); }
   };
   ta.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
@@ -6400,7 +6531,7 @@ function renderReports() {
       <button class="btn sm" data-bulk="nobill" ${sel.size ? '' : 'disabled'}>Passer non facturable</button>
       <span class="sp" style="flex:1"></span><button class="btn sm danger" data-bulk="del" ${sel.size ? '' : 'disabled'}>Supprimer</button></div>
     <div class="tbl-wrap"><table class="t"><thead><tr><th><input type="checkbox" data-selall ${shown.length && shown.every(e => sel.has(e.id)) ? 'checked' : ''}></th><th>Date</th><th>Client</th><th>Tâche</th><th>Libellé</th><th>Horaires</th><th class="n">Durée</th><th>Statut</th><th>Reporté</th><th></th></tr></thead><tbody>
-    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${catDot(taskCat(e.task))}${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
+    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${cnoHTML(e.client)}${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${catDot(taskCat(e.task))}${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
     </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
   const body = $('#rapports-body');
   body.innerHTML = html;
@@ -6410,7 +6541,7 @@ function renderReports() {
   bindChart(body, buckets);
 }
 function pivot(list, group, cols, months) {
-  const tgt = id => isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) || 'Sans client';
+  const tgt = id => isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? 'Temps avec ' + clientName(id) : clientName(id) ? cliLabel(id) : 'Sans client';
   const k1 = group === 'client' ? e => e.client || '' : group === 'pf' ? e => pfKey(e.client) : group === 'grp' ? e => groupOfClient(e.client)?.id || '' : group === 'cat' ? e => taskCat(e.task) || '' : e => e.task || '';
   const k2 = group === 'client' || group === 'cat' ? e => e.task || '' : e => e.client || '';
   const n1 = group === 'client' ? tgt : group === 'pf' ? pfName : group === 'grp' ? id => groupOf(id)?.name || 'Sans groupe' : group === 'cat' ? id => CAT_L[id] || 'Non classées' : id => taskName(id) || 'Sans tâche';
@@ -6550,7 +6681,7 @@ function renderBilling() {
     const byG = new Map();
     for (const e of list) { const g = groupOfClient(e.client), k = 'g:' + (g ? g.id : ''); if (!byG.has(k)) byG.set(k, []); byG.get(k).push(e); }
     groups = [...byG.entries()].map(([c, l]) => { const g = groupOf(c.slice(2)); return { c, l, g, isG: true, title: g ? g.name : 'Sans groupe', ms: l.reduce((s, e) => s + dur(e), 0) }; }).sort((a, b) => (a.g ? 0 : 1) - (b.g ? 0 : 1) || b.ms - a.ms);
-  } else groups = [...byC.entries()].map(([c, l]) => ({ c, l, title: clientName(c) || 'Sans client', ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
+  } else groups = [...byC.entries()].map(([c, l]) => ({ c, l, title: clientName(c) ? cliLabel(c) : 'Sans client', ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
   const tot = groups.reduce((s, g) => s + g.ms, 0);
   const lastMonthEnd = dayKey(startOfMonth(Date.now()) - 1);
   let html = `<div class="card filters"><div style="flex:1"><div style="font-weight:600;font-size:15px">Temps facturable pas encore facturé</div><div class="muted small">Quand la facture est émise, marquez le temps comme facturé : il sort de cette liste et reste dans les rapports.</div></div>
@@ -6573,7 +6704,7 @@ function renderBilling() {
       const byCl = new Map(); g.l.forEach(e => { const k = e.client || ''; if (!byCl.has(k)) byCl.set(k, []); byCl.get(k).push(e); });
       g.cls = [...byCl.entries()].map(([c, l]) => ({ c, l, ms: l.reduce((s, e) => s + dur(e), 0) })).sort((a, b) => b.ms - a.ms);
       html += `<div class="bclient-body tbl-wrap"><table class="t"><thead><tr><th>Client</th><th>Tâches</th><th class="n">Saisies</th><th class="n">Durée</th><th class="n">Heures</th><th></th></tr></thead><tbody>
-        ${g.cls.map((x, i) => `<tr><td>${cliIc(x.c)} ${esc(clientName(x.c) || 'Sans client')}</td><td class="lab">${esc([...new Set(x.l.map(e => taskName(e.task)).filter(Boolean))].join(' ; '))}</td><td class="n">${x.l.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td><td><button class="btn sm" data-act="inv-cli" data-i="${i}">Facturé</button></td></tr>`).join('')}
+        ${g.cls.map((x, i) => `<tr><td>${cliIc(x.c)} ${cnoHTML(x.c)}${esc(clientName(x.c) || 'Sans client')}</td><td class="lab">${esc([...new Set(x.l.map(e => taskName(e.task)).filter(Boolean))].join(' ; '))}</td><td class="n">${x.l.length}</td><td class="n">${fmtDur(x.ms)}</td><td class="n">${hoursDec(x.ms)}</td><td><button class="btn sm" data-act="inv-cli" data-i="${i}">Facturé</button></td></tr>`).join('')}
         </tbody></table></div>`;
     } else if (open) {
       const byT = aggregate(g.l);
