@@ -172,7 +172,7 @@ body.stick #carnet-body .cb-head{position:sticky;top:64px;z-index:16;box-shadow:
 }
 @media (max-width:700px){body.stick #carnet-body .cb-head{top:56px;padding:6px 10px;gap:6px}body.stick #carnet-body .cb-head h1{font-size:16px}}
 .timerbar{display:flex;align-items:stretch;gap:0;padding:8px;position:sticky;top:68px;z-index:20}
-.tb-fields{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.1fr) minmax(180px,1.7fr);gap:6px;flex:1;min-width:0}
+.tb-fields{display:grid;grid-template-columns:minmax(150px,1.05fr) minmax(150px,1.1fr) minmax(180px,1.7fr) auto;gap:6px;flex:1;min-width:0}
 .tb-fields input{border-color:transparent;background:var(--surface-2);height:44px;font-size:15px}
 .tb-fields input:focus{background:var(--surface)}
 .tb-side{display:flex;align-items:center;gap:8px;padding-left:10px}
@@ -743,6 +743,29 @@ table.cyx tr.has-x td:first-child a{font-weight:600}
 .cyx-dos{font-size:13px;line-height:1.9;padding:6px 8px;border-radius:8px;background:var(--surface-2)}
 .cyx-chip{display:inline-flex;align-items:center;gap:3px;background:var(--todo-soft);color:var(--ink);border-radius:10px;padding:0 4px 0 8px;font-size:12px;white-space:nowrap}
 .cyx-chip button{border:0;background:none;cursor:pointer;color:var(--accent);padding:0 3px;font:inherit}
+.lbl-w{display:flex;align-items:center;gap:4px;min-width:0}
+.lbl-w .lbl{flex:1;min-width:0}
+.ppl-b{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:3px 4px;border-radius:7px;display:inline-flex;align-items:center;flex:none;max-width:60%;overflow:hidden}
+.ppl-b:not(.on){opacity:0;transition:opacity .15s}
+.row:hover .ppl-b,.ppl-b:focus-visible{opacity:1}
+@media (hover:none){.ppl-b:not(.on){opacity:.6}}
+.ppl-b:hover{background:var(--surface-2);color:var(--accent)}
+.ppl-chips{display:inline-flex;gap:4px;align-items:center;min-width:0;overflow:hidden;vertical-align:middle}
+.ppl-c{display:inline-flex;align-items:center;gap:3px;font-size:12px;background:var(--surface-2);border-radius:10px;padding:1px 7px 1px 3px;white-space:nowrap;color:var(--ink-2)}
+.ppl-c .pers-ic{transform:scale(.85)}
+.ppl-c.more{padding:1px 6px}
+.tb-ppl{flex:none;height:44px;min-width:44px;justify-content:center;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:0 10px;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;max-width:220px;overflow:hidden}
+.tb-ppl.on{color:var(--ink);border-color:var(--accent)}
+.tb-ppl:hover{color:var(--accent)}
+.ppl-pop{width:320px;padding-bottom:0}
+.ppl-q{width:100%}
+.ppl-l{max-height:300px;overflow:auto;padding:0 4px 4px}
+.ppl-h{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:8px 6px 2px}
+.ppl-i{display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:7px;cursor:pointer;font-size:13px}
+.ppl-i:hover{background:var(--surface-2)}
+.ppl-f{display:flex;gap:6px;flex-wrap:wrap;padding:8px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface)}
+.ppl-top{display:grid;gap:2px;margin:6px 0;font-size:13px}
+.ppl-top>div{display:flex;justify-content:space-between;gap:10px}
 .hx-list{display:grid;gap:2px;max-height:520px;overflow:auto;padding-right:2px}
 .hx-day{font-size:11.5px;font-weight:600;color:var(--muted);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.04em}
 .hx-day:first-child{margin-top:0}
@@ -951,9 +974,9 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
 
 @media (max-width: 980px){
   .row{grid-template-columns:1fr auto;grid-auto-rows:auto}
-  .row .lbl{grid-column:1 / -1}
-  .tb-fields{grid-template-columns:1fr 1fr}
-  .tb-fields #tb-label{grid-column:1 / -1}
+  .row .lbl,.row .lbl-w{grid-column:1 / -1}
+  .tb-fields{grid-template-columns:1fr 1fr auto}
+  .tb-fields #tb-label{grid-column:1 / 3}
   .grid2{grid-template-columns:1fr}
   .top{gap:8px;padding:0 10px}
   .brand .txt{display:none}
@@ -1019,6 +1042,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
   .row>.what{flex:1 1 0;min-width:0;order:1;font-size:15px}
   .row>.dur-in,.row>.dur{order:2;width:78px;flex:none;font-size:17px}
   .row>.lbl{order:3;flex:1 1 100%;border-color:var(--line);font-size:15px}
+  .row>.lbl-w{order:3;flex:1 1 100%}.row>.lbl-w .lbl{border-color:var(--line);font-size:15px}
   .row>.bill{order:4}
   .row>label.chk{order:5;font-size:13px}
   .row>.times{order:6}
@@ -1109,6 +1133,7 @@ textarea.copy{width:100%;height:160px;font-family:var(--mono);font-size:12px}
         <div class="combo" id="cb-client"><input placeholder="Client, dossier ou personne" autocomplete="off" spellcheck="false"></div>
         <div class="combo" id="cb-task"><input placeholder="Tâche" autocomplete="off" spellcheck="false"></div>
         <input id="tb-label" placeholder="Libellé (ex. bulletins d'octobre, STC M. Durand…)" autocomplete="off">
+        <button id="tb-ppl" class="tb-ppl" type="button" title="Associer une ou plusieurs personnes"></button>
       </div>
       <div class="tb-side">
         <button id="tb-bill" class="bill" title="Cliquer pour basculer">À facturer</button>
@@ -1168,7 +1193,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.60.0';
+const APP_VERSION = '1.61.0';
 const APP_DATE = '16/11/2026';
 /* =========================================================
    Utilitaires
@@ -2081,9 +2106,9 @@ function addTask(name) {
 function startTimer(spec) {
   if (S.running) stopTimer(true);
   const billable = spec.billable ?? defaultBillable(spec.client, spec.task);
-  S.running = { id: 'e' + newId(), client: spec.client || null, task: spec.task || null, label: spec.label || '', billable, start: Date.now(), end: null, invoicedAt: 0, logged: false };
+  S.running = { id: 'e' + newId(), client: spec.client || null, task: spec.task || null, label: spec.label || '', billable, start: Date.now(), end: null, invoicedAt: 0, logged: false, ...((spec.ppl || []).length ? { ppl: [...spec.ppl] } : {}) };
   S.rev++; Store.put('running');
-  UI.draft = { client: null, task: null, label: '', billable: S.meta.settings.defaultBillable, billTouched: false };
+  UI.draft = { client: null, task: null, label: '', billable: S.meta.settings.defaultBillable, billTouched: false, ppl: [] };
   syncTimerBar(); scheduleRender();
   absWarn(dayKey(Date.now()));
   setTimeout(checkLaw, 1500);
@@ -2253,6 +2278,9 @@ function initTimerBar() {
     renderBillBtn();
   });
   $('#tb-go').addEventListener('click', () => { if (UI.mode === 'manual') addManual(); else goTimer(); });
+  $('#tb-ppl').addEventListener('click', ev => { const b = ev.currentTarget;
+    if (S.running) openPplPick(b, { sel: pplOf(S.running), cid: S.running.client, running: true });
+    else openPplPick(b, { sel: pplOf(UI.draft), cid: UI.draft.client, onChange: l => { UI.draft.ppl = l; renderPplBtn(); } }); });
   $$('.modes button[data-mode]').forEach(b => b.addEventListener('click', () => { UI.mode = b.dataset.mode; syncTimerBar(); }));
   $('#tb-abs').addEventListener('click', () => openAbsence(null, UI.mode === 'manual' && $('#mn-date').value ? $('#mn-date').value : null));
   $('#tb-clock').addEventListener('click', () => { if (S.running) { const i = $('#tb-start'); if (i) { i.focus(); i.showPicker?.(); } } });
@@ -2261,7 +2289,7 @@ function initTimerBar() {
 function goTimer() {
   if (S.running) { stopTimer(); return; }
   const d = UI.draft;
-  startTimer({ client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : undefined });
+  startTimer({ client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : undefined, ppl: d.ppl });
 }
 function addManual() {
   const d = UI.draft;
@@ -2269,7 +2297,7 @@ function addManual() {
   const s = timeOn(dayMs, $('#mn-start').value), e0 = timeOn(dayMs, $('#mn-end').value);
   if (s == null || e0 == null) { toast('Indiquez une heure de début et de fin.'); return; }
   let e = e0; if (e <= s) e += DAY;
-  saveEntry({ id: 'e' + newId(), client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : defaultBillable(d.client, d.task), start: s, end: e, invoicedAt: 0, logged: false });
+  saveEntry({ id: 'e' + newId(), client: d.client, task: d.task, label: d.label, billable: d.billTouched ? d.billable : defaultBillable(d.client, d.task), start: s, end: e, invoicedAt: 0, logged: false, ...((d.ppl || []).length ? { ppl: [...d.ppl] } : {}) });
   toast('Saisie ajoutée : ' + fmtDur(e - s));
   setTimeout(() => absWarn(dayKey(s)), 400);
   $('#mn-start').value = $('#mn-end').value;
@@ -2285,7 +2313,7 @@ function syncTimerBar() {
   if (document.activeElement !== cbClient.input) cbClient.set(sp.client);
   if (document.activeElement !== cbTask.input) cbTask.set(sp.task);
   if (document.activeElement !== $('#tb-label')) $('#tb-label').value = sp.label || '';
-  renderBillBtn();
+  renderBillBtn(); renderPplBtn();
   const manual = UI.mode === 'manual' && !S.running;
   if (S.running && UI.mode === 'manual') UI.mode = 'timer';
   $$('.modes button').forEach(b => b.classList.toggle('on', b.dataset.mode === UI.mode));
@@ -2714,6 +2742,7 @@ function callEndDialog() {
       <label class="fld" id="ce-who-w"><span id="ce-who-l">Client</span><select id="ce-who"></select></label>
       <label class="fld"><span>Tâche</span><select id="ce-task"></select></label>
       <label class="fld"><span>Libellé</span><input id="ce-lbl" maxlength="120" value="${esc(c.label || '')}" placeholder="Objet de l’appel (facultatif)"></label>
+      <div class="fld"><span>Personnes associées (qui appelait, qui participait)</span><div><button type="button" class="btn sm ce-ppl" id="ce-ppl"></button></div></div>
       <label class="chk"><input type="checkbox" id="ce-bill"> À facturer</label>
       ${c.intr ? `<label class="chk" style="white-space:normal"><input type="checkbox" id="ce-res" checked> Reprendre la tâche interrompue : <b>${esc(intrLabel(c.intr))}</b>${S.running ? ' <span class="muted">(arrête le chrono en cours)</span>' : ''}</label>` : ''}
     </div>
@@ -2721,6 +2750,8 @@ function callEndDialog() {
       <button class="btn ${short ? 'primary' : ''}" id="ce-skip">Ne pas enregistrer</button><button class="btn ${short ? '' : 'primary'}" id="ce-ok">${short ? 'Enregistrer quand même' : 'Enregistrer'}</button></div>`);
   const q = x => m.el.querySelector(x);
   const who = { client: kind === 'client' ? c.target : '', coll: kind === 'coll' ? c.target : '' };
+  let cppl = [...(c.ppl || [])]; const drawP = () => { q('#ce-ppl').innerHTML = cppl.length ? pplChipsHTML(cppl, 4) : ICON_PPL + ' Associer'; }; drawP();
+  q('#ce-ppl').addEventListener('click', ev => openPplPick(ev.currentTarget, { sel: cppl, cid: kind === 'client' ? who.client : null, onChange: l => { cppl = l; Call.patch({ ppl: l }); drawP(); } }));
   const defTask = k => k === 'client' ? (callTask ? callTask.id : '__call') : '';
   let task = defTask(kind), billTouched = false;
   const draw = () => {
@@ -2746,7 +2777,7 @@ function callEndDialog() {
       const client = kind === 'int' ? INTERNAL_ID : kind === 'coll' ? who.coll : who.client;
       if (!client) { q('#ce-who').focus(); toast(kind === 'coll' ? 'Choisissez le collègue' : 'Choisissez le client, ou « Interne / autre »'); return; }
       const tid = task === '__call' ? (S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm(CALL_TASK))?.id || addTask(CALL_TASK)) : (task || null);
-      saved = { id: 'e' + newId(), client, task: tid, label: q('#ce-lbl').value.trim(), billable: q('#ce-bill').checked, start: c.start, end, invoicedAt: 0, logged: false };
+      saved = { id: 'e' + newId(), client, task: tid, label: q('#ce-lbl').value.trim(), billable: q('#ce-bill').checked, start: c.start, end, invoicedAt: 0, logged: false, ...(cppl.filter(x => x !== client).length ? { ppl: cppl.filter(x => x !== client) } : {}) };
       saveEntry(saved);
     }
     Call.set(null); m.close(); callUI();
@@ -3018,6 +3049,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.61.0', '16/11/2026', ['Personnes associées à une saisie : un collègue vous pose une question sur un dossier ? Bouton 👤 dans la barre du chrono (avant ou pendant : « Appliquer à la saisie en cours » ou « Nouvelle saisie avec ces personnes »), sur chaque ligne de saisie, dans la fin d’appel, la modification d’une saisie et la saisie rapide (« 20min Dupont question paie avec Paul »).', 'Les noms apparaissent dans le récap à reporter (libellé « avec … » et colonne « Avec » de la copie Excel ; une saisie avec d’autres personnes reste sur sa ligne), dans les Rapports (filtre « Avec », colonne du détail et de l’export) et dans la fiche de la personne (temps passé avec elle, par dossier).']],
   ['1.60.0', '16/11/2026', ['Carnet : « Calendrier de réception des variables » — une date attendue par mois de paie (règles de remplissage, dont « d’après la date habituelle ») ; elle remplace la date habituelle ce mois-là pour la relance, Mon cycle et la Charge à venir.', 'Cycle de paie du groupe : dans le carnet d’un groupe, paramètres du cycle, remarque permanente et calendriers (réception, virements) suivis automatiquement par tous ses dossiers ; ce qu’un dossier modifie lui-même devient une exception.', 'Exceptions d’un coup d’œil : tableau des dossiers du groupe (« = » s’il suit le groupe, valeur surlignée sinon, valeur du groupe au survol), boutons « Aligner » ; dans le carnet d’un dossier, ce qui lui est propre avec ↺ pour reprendre la valeur du groupe.']],
   ['1.59.0', '16/11/2026', ['Le n° de dossier s’affiche devant le nom (« 1234 · Dupont SAS ») quand il est renseigné : saisies de Ma journée, récap à reporter, Ma semaine, Rapports (tableau et détail), À facturer, barre et pastille du chrono.']],
   ['1.58.0', '16/11/2026', ['Carnet : « Historique du carnet » — chaque modification d’un dossier ou d’un groupe est notée automatiquement (identité, convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, salariés particuliers, points, journal, calendrier annuel, modèles, virements, relation client), avec l’avant et l’après ; plusieurs frappes rapprochées dans un même champ forment une seule ligne.', 'Filtre par rubrique, gardé 24 mois, synchronisé entre vos appareils ; option « Historique des modifications » dans l’export du carnet et dans la sauvegarde complète.']],
@@ -3097,7 +3129,7 @@ function newsCheck() {
   if ((old || seen) && NEWS.some(n => n[0] === APP_VERSION) && !document.querySelector('.overlay')) openNews(seen || '1.44.0');
 }
 const HELP = {
-  chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.']],
+  chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.', 'Bouton 👤 (barre du chrono et lignes de saisie) : associer une ou plusieurs personnes à une saisie, par exemple le collègue qui vous pose une question sur un dossier ; pendant le chrono, au choix sur la saisie en cours ou sur une nouvelle saisie.']],
   portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
   carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'Le tableau croisé regroupe les temps (dossier, tâche, catégorie, groupe…) ; le détail liste les saisies.', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
@@ -3597,6 +3629,76 @@ function cyDosGrpHTML(c) { // carnet d'un dossier : ce qui est propre au dossier
   const chips = [...x.cols.map(k => `<span class="cyx-chip" title="${esc('Groupe : ' + cyColTxt(gp, k))}">${esc(CYX_COLS.find(z => z[0] === k)[1])}${k === 'notes' ? '' : ' : ' + esc(cyColTxt(cyOf(c), k))}<button type="button" data-cba="cyrev" data-col="${k}" title="Reprendre la valeur du groupe">↺</button></span>`),
     ...['rec', 'vir'].filter(k => x[k].length).map(k => `<span class="cyx-chip">${k === 'rec' ? 'Calendrier de réception' : 'Calendrier des virements'} : ${x[k].length} mois</span>`)];
   return `<div class="cyx-dos">Suit le cycle du groupe <a href="#carnet/groupe/${encodeURIComponent(g.id)}">${esc(g.name)}</a>, <b>sauf</b> : ${chips.join(' ')}${cyxDates(x) ? ` <button class="btn sm ghost" data-cba="cyalign" data-cid="${c.id}">Tout aligner sur le groupe</button>` : ''}</div>`;
+}
+/* ---------- Personnes associées à une saisie (v1.61.0) ----------
+   entry.ppl = [id de personne] (collègue qui pose une question, interlocuteur au téléphone…) : information seulement,
+   le temps reste celui du dossier. Barre du chrono, ligne de saisie, fin d'appel, saisie manuelle, saisie rapide « avec … ». */
+const pplOf = e => ((e && e.ppl) || []).filter(id => personOf(id));
+const pplShort = id => { const x = personOf(id); if (!x) return ''; return x.first ? titleCase(x.first) + (x.last ? ' ' + String(x.last).trim()[0].toUpperCase() + '.' : '') : x.name; };
+const pplNames = l => (l || []).map(id => personOf(id)?.name).filter(Boolean).join(', ');
+function pplChipsHTML(l, max = 2) {
+  const L = (l || []).filter(id => personOf(id)); if (!L.length) return '';
+  return `<span class="ppl-chips" title="${esc('Avec ' + pplNames(L))}">${L.slice(0, max).map(id => `<span class="ppl-c">${persIc(id)}${esc(pplShort(id))}</span>`).join('')}${L.length > max ? `<span class="ppl-c more">+${L.length - max}</span>` : ''}</span>`;
+}
+function pplCands(cid) { // collègues d'abord, puis interlocuteurs du dossier (et de son groupe), puis les autres
+  const c = cid && !isPersonId(cid) ? clientOf(cid) : null, g = c ? groupOf(c.group) : null;
+  const rk = x => pKind(x) === 'col' ? 0 : c && ((x.clients || []).includes(c.id) || (g && pInGroup(x, g.id))) ? 1 : 2;
+  return S.meta.persons.filter(x => !x.deletedAt && !x.archived && x.id !== cid).sort((a, b) => rk(a) - rk(b) || a.name.localeCompare(b.name, 'fr')).map(x => ({ x, rk: rk(x) }));
+}
+// Fenêtre de choix : o = { sel, cid, onChange(list) } (application immédiate) ou { running: true } (deux boutons de validation)
+function openPplPick(anchor, o) {
+  document.getElementById('ppl-pop')?.remove();
+  let sel = [...(o.sel || [])];
+  const pop = document.createElement('div'); pop.id = 'ppl-pop'; pop.className = 'cy-pop ppl-pop';
+  const RK = ['Collègues', 'Interlocuteurs du dossier', 'Autres personnes'];
+  const draw = (q = '') => {
+    const n = norm(q), C = pplCands(o.cid).filter(r => !n || norm(r.x.name + ' ' + pRoleTxt(r.x)).includes(n));
+    let last = -1, h = '';
+    for (const r of C) { if (r.rk !== last) { h += `<div class="ppl-h">${RK[r.rk]}</div>`; last = r.rk; } h += `<label class="ppl-i"><input type="checkbox" value="${r.x.id}" ${sel.includes(r.x.id) ? 'checked' : ''}>${persIc(r.x)}<span>${esc(r.x.name)}<span class="muted small"> ${esc(pRoleTxt(r.x))}</span></span></label>`; }
+    pop.querySelector('.ppl-l').innerHTML = h || `<div class="muted small" style="padding:8px">Aucune personne${n ? ' ne correspond' : ' : créez-les dans Références › Personnes'}.</div>`;
+  };
+  pop.innerHTML = `<div class="cy-pop-h">Personnes associées</div><div style="padding:4px 6px"><input class="ppl-q" placeholder="Rechercher une personne…" autocomplete="off"></div><div class="ppl-l"></div>
+    <div class="ppl-f">${o.running ? `<button class="btn sm" data-pp="add">Ajouter à la saisie en cours</button><button class="btn sm primary" data-pp="new" title="Arrête la saisie en cours et en démarre une nouvelle sur le même dossier, la même tâche et le même libellé">Nouvelle saisie avec ces personnes</button>` : `${sel.length ? '<button class="btn sm ghost" data-pp="clear">Tout retirer</button>' : ''}<span class="sp" style="flex:1"></span><button class="btn sm primary" data-pp="ok">OK</button>`}</div>`;
+  document.body.appendChild(pop); draw();
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth;
+  let left = Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - pw - 8);
+  pop.style.left = Math.max(8, left) + 'px'; pop.style.top = (r.bottom + window.scrollY + 4) + 'px';
+  const close = () => { pop.remove(); document.removeEventListener('mousedown', out, true); document.removeEventListener('keydown', key, true); };
+  const out = e => { if (!pop.contains(e.target)) close(); }, key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  setTimeout(() => { document.addEventListener('mousedown', out, true); document.addEventListener('keydown', key, true); pop.querySelector('.ppl-q').focus(); }, 0);
+  pop.querySelector('.ppl-q').addEventListener('input', ev => draw(ev.target.value));
+  pop.addEventListener('change', ev => { const i = ev.target; if (i.type !== 'checkbox') return; sel = i.checked ? [...new Set([...sel, i.value])] : sel.filter(x => x !== i.value); if (!o.running) o.onChange(sel); });
+  pop.addEventListener('click', ev => { const b = ev.target.closest('[data-pp]'); if (!b) return; const a = b.dataset.pp;
+    if (a === 'clear') { sel = []; o.onChange(sel); draw(pop.querySelector('.ppl-q').value); b.remove(); return; }
+    if (a === 'add') pplRunAdd(sel); else if (a === 'new') pplRunNew(sel);
+    close(); });
+}
+function pplRunAdd(sel) { if (!S.running) return; updateRunning({ ppl: sel }); syncTimerBar(); scheduleRender(); }
+function pplRunNew(sel) { // le collègue arrive pendant le chrono : nouvelle saisie sur le même dossier avec lui
+  const r = S.running; if (!r) return; const keep = { client: r.client, task: r.task, label: r.label, billable: r.billable };
+  startTimer({ ...keep, ppl: sel }); toast('Nouvelle saisie avec ' + pplNames(sel) + ' (la précédente est enregistrée)');
+}
+function pplBtnHTML(l) { return l.length ? pplChipsHTML(l, 2) : `<span class="ppl-ic">${ICON_PPL}</span>`; }
+const ICON_PPL = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M16 11h6"/></svg>';
+function renderPplBtn() { const b = $('#tb-ppl'); if (!b) return; const l = pplOf(curSpec()); b.innerHTML = pplBtnHTML(l); b.classList.toggle('on', !!l.length); b.title = l.length ? 'Avec ' + pplNames(l) + ' — cliquer pour modifier' : 'Associer une ou plusieurs personnes (ex. collègue qui vous pose une question)'; }
+// Saisie rapide : « 20min Dupont question paie avec Paul et Anne »
+function pplParse(words) { // retourne { words restants, ppl }
+  const i = words.findIndex(w => norm(w) === 'avec'); if (i < 0) return { words, ppl: [] };
+  const tail = words.slice(i + 1).join(' ').split(/\s*(?:,|\bet\b)\s*/i).map(s => s.trim()).filter(Boolean), ppl = [], left = [];
+  for (const t of tail) { const ws = norm(t).split(/\s+/); const c = S.meta.persons.filter(x => !x.deletedAt && !x.archived && ws.every(w => norm(x.name).includes(w))); if (c.length) ppl.push(c.sort((a, b) => (pKind(a) === 'col' ? 0 : 1) - (pKind(b) === 'col' ? 0 : 1) || a.name.length - b.name.length)[0].id); else left.push(t); }
+  if (!ppl.length) return { words, ppl: [] };
+  return { words: [...words.slice(0, i), ...(left.length ? ['avec', ...left.join(' ').split(/\s+/)] : [])], ppl: [...new Set(ppl)] };
+}
+// Fiche d'une personne : temps passé avec elle sur les dossiers
+function pplTimeHTML(pid) {
+  const all = allEntries().filter(e => (e.ppl || []).includes(pid)); if (!all.length) return '<div class="muted small">Aucune saisie associée pour l’instant. Associez cette personne à une saisie (bouton 👤 de la barre du chrono ou d’une ligne).</div>';
+  const mk = monthKey(Date.now()), y0 = Date.now() - 365 * DAY, sum = l => l.reduce((a, e) => a + dur(e), 0);
+  const m = all.filter(e => monthKey(e.start) === mk), y = all.filter(e => e.start >= y0);
+  const byC = new Map(); y.forEach(e => byC.set(e.client || '', (byC.get(e.client || '') || 0) + dur(e)));
+  const top = [...byC.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  return `<div class="small"><b>${fmtDur(sum(m))}</b> ce mois-ci (${m.length} saisie${m.length > 1 ? 's' : ''}) · <b>${fmtDur(sum(y))}</b> sur 12 mois (${y.length})</div>
+    ${top.length ? `<div class="ppl-top">${top.map(([c, ms]) => `<div><span>${c ? cnoHTML(c) + esc(clientName(c) || '—') : '<span class="muted">Sans dossier</span>'}</span><span class="mono">${fmtDur(ms)}</span></div>`).join('')}</div>` : ''}
+    <div class="muted small">Dernière : ${fmtDate(Math.max(...all.map(e => e.start)))}. Information pour vous organiser, jamais un contrôle.</div>`;
 }
 /* ---------- Copie d'un carnet (v1.44.0) : à la création d'un dossier ou depuis un carnet existant ----------
    Seuls les champs vides du dossier de destination sont complétés ; listes (points, journal) ajoutées ; interlocuteurs rattachés aux deux dossiers. */
@@ -4759,7 +4861,7 @@ document.addEventListener('click', ev => {
 });
 /* Regroupement d'affichage des lignes identiques d'une journée (v1.27.0) : même client / personne / interne, même tâche,
    même libellé et mêmes statuts (facturable, facturé, reporté). Les saisies d'origine restent intactes. */
-const grpKeyE = e => [e.client || '', e.task || '', norm(e.label || '').trim(), e.billable ? 1 : 0, e.invoicedAt ? 1 : 0, e.logged ? 1 : 0].join('|');
+const grpKeyE = e => [e.client || '', e.task || '', norm(e.label || '').trim(), e.billable ? 1 : 0, e.invoicedAt ? 1 : 0, e.logged ? 1 : 0, pplOf(e).slice().sort().join(',')].join('|');
 UI.chOpen ||= new Set();
 function groupRowsHTML(day, list) {
   const out = [], seen = new Map();
@@ -4774,7 +4876,7 @@ function groupRowHTML(day, g) {
   const l = g.l.slice().sort((a, b) => a.start - b.start), e = l[0], tot = l.reduce((a, x) => a + dur(x), 0), key = day + '|' + g.k, open = UI.chOpen.has(key), ids = l.map(x => x.id).join(',');
   return `<div class="row grp-row ${open ? 'open' : ''}" data-gids="${ids}" data-gkey="${esc(key)}">
     <button class="what" data-act="gtoggle" title="${open ? 'Replier' : 'Voir les ' + l.length + ' saisies'}"><span class="g-car">${ICON.chev}</span>${whatHTML(e.client, e.task)}<span class="g-n">×${l.length}</span></button>
-    <span class="lbl lbl-ro" title="${esc(e.label)}">${esc(e.label) || '<span class="muted">Sans libellé</span>'}</span>
+    <span class="lbl lbl-ro" title="${esc(e.label)}">${esc(e.label) || (pplOf(e).length ? '' : '<span class="muted">Sans libellé</span>')} ${pplChipsHTML(pplOf(e))}</span>
     <button class="bill ${e.billable ? '' : 'no'}" data-act="gbill" title="Basculer facturable / non facturable (toutes les saisies du groupe)">${e.billable ? 'À facturer' : 'Non facturable'}</button>
     <label class="chk ${e.billable ? '' : 'dis'}"><input type="checkbox" data-gf="invoiced" ${e.invoicedAt ? 'checked' : ''} ${e.billable ? '' : 'disabled'}>Facturé</label>
     <label class="chk"><input type="checkbox" data-gf="logged" ${e.logged ? 'checked' : ''}>Reporté</label>
@@ -4788,7 +4890,7 @@ function rowHTML(e) {
   const st = statusOf(e);
   return `<div class="row" data-id="${e.id}">
     <button class="what" data-act="edit" title="${esc((clientName(e.client) || 'Sans client') + (e.task ? ' › ' + taskName(e.task) : ''))} — cliquer pour modifier">${whatHTML(e.client, e.task)}</button>
-    <input class="lbl" data-f="label" value="${esc(e.label)}" placeholder="Ajouter un libellé">
+    <div class="lbl-w"><input class="lbl" data-f="label" value="${esc(e.label)}" placeholder="Ajouter un libellé"><button type="button" class="ppl-b ${pplOf(e).length ? 'on' : ''}" data-act="ppl" title="${pplOf(e).length ? esc('Avec ' + pplNames(pplOf(e))) + ' — modifier' : 'Associer une ou plusieurs personnes'}">${pplBtnHTML(pplOf(e))}</button></div>
     <button class="bill ${e.billable ? '' : 'no'}" data-act="bill" title="Basculer facturable / non facturable">${e.billable ? 'À facturer' : 'Non facturable'}</button>
     <label class="chk ${e.billable ? '' : 'dis'}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : 'Cocher quand ce temps a été facturé'}"><input type="checkbox" data-f="invoiced" ${e.invoicedAt ? 'checked' : ''} ${e.billable ? '' : 'disabled'}>Facturé</label>
     <label class="chk" title="Reporté dans le logiciel de gestion des temps du cabinet"><input type="checkbox" data-f="logged" ${e.logged ? 'checked' : ''}>Reporté</label>
@@ -4811,6 +4913,7 @@ function bindEntryEvents(container) {
     const row = b.closest('[data-id]'); const id = row?.dataset.id;
     const act = b.dataset.act;
     if (act === 'edit' && id) openEdit(id);
+    else if (act === 'ppl' && id) { const e = findEntry(id); if (e) openPplPick(b, { sel: pplOf(e), cid: e.client, onChange: l => updateEntries([id], x => { if (l.length) x.ppl = l; else delete x.ppl; }) }); }
     else if (act === 'bill' && id) updateEntries([id], e => { e.billable = !e.billable; if (!e.billable) e.invoicedAt = 0; });
     else if (act === 'resume' && id) { const e = findEntry(id); if (e) startTimer({ client: e.client, task: e.task, label: e.label, billable: e.billable }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     else if (act === 'del' && id) deleteEntries([id]);
@@ -5033,6 +5136,7 @@ function openEdit(id) {
       <div class="fld-row"><label class="fld"><span>Client ou personne</span><select id="ed-c">${targetOpts(e.client, '— Sans client —')}</select></label>
       <label class="fld"><span>Tâche</span><select id="ed-t">${selectOpts(S.meta.tasks, e.task, '— Sans tâche —')}</select></label></div>
       <label class="fld"><span>Libellé</span><input id="ed-l" value="${esc(e.label)}"></label>
+      <div class="fld"><span>Personnes associées</span><div><button type="button" class="btn sm" id="ed-p"></button></div></div>
       <div class="fld-row"><label class="fld"><span>Date</span><input type="date" id="ed-d" value="${dayKey(e.start)}"></label>
       <label class="fld"><span>Début</span><input id="ed-s" class="mono" inputmode="numeric" value="${hhmm(e.start)}"></label>
       <label class="fld"><span>Fin</span><input id="ed-e" class="mono" inputmode="numeric" value="${hhmm(e.end)}"></label>
@@ -5053,6 +5157,8 @@ function openEdit(id) {
     if (mins != null && s != null) q('#ed-e').value = hhmm(s + mins * 60000);
   });
   q('#ed-i').addEventListener('change', () => { if (q('#ed-i').checked && !q('#ed-id').value) q('#ed-id').value = dayKey(Date.now()); });
+  let eppl = pplOf(e); const drawEP = () => { q('#ed-p').innerHTML = eppl.length ? pplChipsHTML(eppl, 4) : ICON_PPL + ' Associer'; }; drawEP();
+  q('#ed-p').addEventListener('click', ev => openPplPick(ev.currentTarget, { sel: eppl, cid: q('#ed-c').value, onChange: l => { eppl = l; drawEP(); } }));
   q('#ed-ok').addEventListener('click', () => {
     const dayMs = parseDay(q('#ed-d').value || dayKey(e.start));
     const s = timeOn(dayMs, q('#ed-s').value); let en = timeOn(dayMs, q('#ed-e').value);
@@ -5060,7 +5166,9 @@ function openEdit(id) {
     if (en <= s) en += DAY;
     const billable = m.el.querySelector('input[name=ed-b]:checked').value === '1';
     const inv = billable && q('#ed-i').checked ? (q('#ed-id').value ? parseDay(q('#ed-id').value) + 12 * 3600000 : Date.now()) : 0;
-    saveEntry({ ...e, client: q('#ed-c').value || null, task: q('#ed-t').value || null, label: q('#ed-l').value, start: s, end: en, billable, invoicedAt: inv, logged: q('#ed-g').checked });
+    const ne = { ...e, client: q('#ed-c').value || null, task: q('#ed-t').value || null, label: q('#ed-l').value, start: s, end: en, billable, invoicedAt: inv, logged: q('#ed-g').checked, ppl: eppl.filter(x => x !== q('#ed-c').value) };
+    if (!ne.ppl.length) delete ne.ppl;
+    saveEntry(ne);
     m.close();
   });
   q('#ed-del').addEventListener('click', () => { m.close(); deleteEntries([id]); });
@@ -5119,17 +5227,17 @@ function cmdQuick(q) { // saisie rapide : durée + dossier + tâche + libellé (
   const words = q.trim().split(/\s+/); let mins = null, di = -1;
   words.forEach((w, i) => { if (mins == null && /\d/.test(w) && /[h:,.]|min|mn/i.test(w)) { const m = parseDur(w); if (m && m <= 24 * 60) { mins = m; di = i; } } });
   if (mins == null) return null;
-  let rest = words.filter((_, i) => i !== di), day = 0;
+  let rest = words.filter((_, i) => i !== di), day = 0; const pp = pplParse(rest); rest = pp.words;
   rest = rest.filter(w => { const n = norm(w); if (n === 'hier') { day = -1; return false; } if (n === 'aujourdhui' || n === "aujourd'hui") return false; return true; });
   const pick = (arr, label) => { for (let k = rest.length; k >= 1; k--) { const ws = rest.slice(0, k).map(norm); const cand = arr.filter(x => !x.deletedAt && !x.archived && ws.every(w => norm(label(x)).includes(w))); if (cand.length) { const best = cand.sort((a, b) => (norm(label(b)).startsWith(ws[0]) - norm(label(a)).startsWith(ws[0])) || label(a).length - label(b).length)[0]; rest = rest.slice(k); return best; } } return null; };
   const c = pick(S.meta.clients, x => x.name + ' ' + (x.code || '')) || pick(S.meta.persons, x => x.name), t = pick(S.meta.tasks, x => x.name);
-  return { mins, client: c ? c.id : null, task: t ? t.id : null, label: rest.join(' '), day };
+  return { mins, client: c ? c.id : null, task: t ? t.id : null, label: rest.join(' '), day, ppl: pp.ppl };
 }
 function cmdQuickSave(o) {
   const ms = o.mins * 60000; let start, end;
   if (o.day === 0) { end = Date.now(); start = end - ms; }
   else { const d = addDays(startOfDay(Date.now()), o.day), k = dayKey(d), es = Object.values(S.days[k]?.entries || {}).filter(e => !isAbs(e)); const s0 = timeOn(d, schedOf(d).start || '09:00') ?? d + 9 * 3600000; start = es.length ? Math.max(...es.map(e => e.end || e.start)) : s0; end = start + ms; }
-  const e = { id: 'e' + newId(), client: o.client, task: o.task, label: o.label, billable: defaultBillable(o.client, o.task), start, end, invoicedAt: 0, logged: false };
+  const e = { id: 'e' + newId(), client: o.client, task: o.task, label: o.label, billable: defaultBillable(o.client, o.task), start, end, invoicedAt: 0, logged: false, ...((o.ppl || []).length ? { ppl: o.ppl } : {}) };
   saveEntry(e); toast('Saisie créée : ' + fmtDur(ms) + (o.client ? ' · ' + clientName(o.client) : '') + (o.day ? ' (hier)' : ''), 'Annuler', () => deleteEntries([e.id]));
 }
 function cmdItems(q) {
@@ -5137,7 +5245,7 @@ function cmdItems(q) {
   const nq = /^\s*(?:note|post-?it)\s*[:\-]?\s+(.+)$/i.exec(q || '');
   if (nq) out.push({ ic: '🗒', t: 'Noter : « ' + nq[1].trim() + ' »', s: 'Note rapide à traiter plus tard', run: () => { const x = noteAdd(nq[1]); if (x) toast('Note ajoutée' + (x.cid ? ' · ' + clientName(x.cid) : '') + (x.due ? ' · rappel le ' + fmtDate(parseDay(x.due)).slice(0, 5) : '')); } });
   const qk = n ? cmdQuick(q) : null;
-  if (qk) out.push({ ic: '⏱', t: 'Créer la saisie : ' + fmtDur(qk.mins * 60000) + ' · ' + (qk.client ? clientName(qk.client) : 'sans dossier') + (qk.task ? ' · ' + taskName(qk.task) : '') + (qk.label ? ' · « ' + qk.label + ' »' : '') + (qk.day ? ' · hier' : ' · aujourd’hui'), s: 'Entrée pour enregistrer', run: () => cmdQuickSave(qk) });
+  if (qk) out.push({ ic: '⏱', t: 'Créer la saisie : ' + fmtDur(qk.mins * 60000) + ' · ' + (qk.client ? clientName(qk.client) : 'sans dossier') + (qk.task ? ' · ' + taskName(qk.task) : '') + (qk.label ? ' · « ' + qk.label + ' »' : '') + ((qk.ppl || []).length ? ' · avec ' + pplNames(qk.ppl) : '') + (qk.day ? ' · hier' : ' · aujourd’hui'), s: 'Entrée pour enregistrer', run: () => cmdQuickSave(qk) });
   const cl = S.meta.clients.filter(c => !c.deletedAt);
   if (runCli() && (!n || 'message mail courriel ecrire'.includes(n) || norm(runCli().name).includes(n))) out.push({ ic: '✉', t: 'Message à ' + runCli().name, s: 'Dossier du chrono en cours — à partir d’un modèle', run: () => openMsg(runCli().id) });
   if (runCli() && (!n || 'interlocuteurs contacts adresse telephone'.includes(n) || norm(runCli().name).includes(n))) out.push({ ic: '👥', t: 'Interlocuteurs de ' + runCli().name, s: 'Dossier du chrono en cours — e-mail, téléphone, notes', run: () => openContacts(runCli().id) });
@@ -5224,8 +5332,8 @@ document.addEventListener('click', ev => { if (ev.target.closest('#cmd-btn')) op
 function aggregate(entries) {
   const map = new Map();
   for (const e of entries) {
-    const k = (e.client || '') + '|' + (e.task || '') + '|' + (e.billable ? 1 : 0);
-    if (!map.has(k)) map.set(k, { client: e.client, task: e.task, billable: e.billable, ms: 0, labels: [], ids: [], logged: true });
+    const pl = pplOf(e).slice().sort(), k = (e.client || '') + '|' + (e.task || '') + '|' + (e.billable ? 1 : 0) + '|' + pl.join(',');
+    if (!map.has(k)) map.set(k, { client: e.client, task: e.task, billable: e.billable, ms: 0, labels: [], ids: [], logged: true, ppl: pl });
     const g = map.get(k); g.ms += dur(e); g.ids.push(e.id); if (!e.logged) g.logged = false;
     if (e.label && !g.labels.includes(e.label.trim())) g.labels.push(e.label.trim());
   }
@@ -5238,13 +5346,13 @@ function openRecap(k, useLiss = true) {
   if (lv) groups = lz.groups;
   const rounding = S.meta.settings.roundStep > 0, fin = g => lv ? g.lms : roundMs(g.ms);
   const tot = groups.reduce((s, g) => s + g.ms, 0), totR = groups.reduce((s, g) => s + roundMs(g.ms), 0), totF = groups.reduce((s, g) => s + fin(g), 0);
-  const tsv = ['Date\tClient\tCode\tTâche\tLibellés\tDurée (h:mm)\tDurée (h déc.)\tFacturation',
-    ...groups.map(g => [fmtDate(parseDay(k)), clientName(g.client), clientOf(g.client)?.code || '', taskName(g.task), g.labels.join(' ; '), fmtDur(fin(g), 'hm'), hoursDec(fin(g)), g.billable ? 'À facturer' : 'Non facturable'].join('\t'))].join('\n');
+  const tsv = ['Date\tClient\tCode\tTâche\tLibellés\tAvec\tDurée (h:mm)\tDurée (h déc.)\tFacturation',
+    ...groups.map(g => [fmtDate(parseDay(k)), clientName(g.client), clientOf(g.client)?.code || '', taskName(g.task), [g.labels.join(' ; '), (g.ppl || []).length ? 'avec ' + pplNames(g.ppl) : ''].filter(Boolean).join(' — '), pplNames(g.ppl), fmtDur(fin(g), 'hm'), hoursDec(fin(g)), g.billable ? 'À facturer' : 'Non facturable'].join('\t'))].join('\n');
   const m = modal(`<div class="modal-h"><h3>Récap à reporter · ${esc(fmtDayLong(k))}</h3><button class="icon" data-close>${ICON.close}</button></div>
     <div class="modal-b"><div class="muted small">Totaux regroupés par client et tâche, prêts à recopier dans le logiciel de gestion des temps du cabinet.${rounding ? ' Arrondi appliqué : ' + S.meta.settings.roundStep + ' min (' + (S.meta.settings.roundMode === 'up' ? 'au supérieur' : 'au plus proche') + ').' : ''}</div>
     ${lz ? `<label class="chk liss-sw"><input type="checkbox" id="rc-liss" ${lv ? 'checked' : ''}> Temps lissés sur la journée prévue (${fmtDur(lz.T, 'hm')} ; saisi : ${fmtDur(lz.real, 'hm')}) — ${lz.mode === 'coef' ? 'coefficient ' + (lz.T / lz.real).toLocaleString('fr-FR', { maximumFractionDigits: 3 }) + ' sur les saisies' : 'complément en temps interne'}</label>` : ''}
     <div class="tbl-wrap card"><table class="t"><thead><tr><th>Client</th><th>Tâche</th><th>Libellés</th><th class="n">Durée</th>${rounding ? '<th class="n">Arrondi</th>' : ''}${lv ? '<th class="n">Lissé</th>' : ''}<th class="n">Heures</th><th>Facturation</th><th>Reporté</th></tr></thead><tbody>
-    ${groups.map((g, i) => `<tr class="${g.fill ? 'liss-row' : ''}"><td>${cliIc(g.client)} ${cnoHTML(g.client)}${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc(g.labels.join(' ; '))}">${esc(g.labels.join(' ; '))}</td><td class="n">${g.fill ? '—' : fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${g.fill ? '—' : fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}${lv ? `<td class="n"><b>${fmtDur(g.lms, 'hm')}</b></td>` : ''}<td class="n">${hoursDec(fin(g))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td>${g.fill ? '' : `<input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}>`}</td></tr>`).join('')}
+    ${groups.map((g, i) => `<tr class="${g.fill ? 'liss-row' : ''}"><td>${cliIc(g.client)} ${cnoHTML(g.client)}${esc(clientName(g.client) || 'Sans client')}</td><td>${esc(taskName(g.task) || '—')}</td><td class="lab" title="${esc([g.labels.join(' ; '), (g.ppl || []).length ? 'avec ' + pplNames(g.ppl) : ''].filter(Boolean).join(' — '))}">${esc(g.labels.join(' ; '))} ${pplChipsHTML(g.ppl, 3)}</td><td class="n">${g.fill ? '—' : fmtDur(g.ms, 'hm')}</td>${rounding ? `<td class="n">${g.fill ? '—' : fmtDur(roundMs(g.ms), 'hm')}</td>` : ''}${lv ? `<td class="n"><b>${fmtDur(g.lms, 'hm')}</b></td>` : ''}<td class="n">${hoursDec(fin(g))}</td><td><span class="status ${g.billable ? '' : 'no'}">${g.billable ? 'À facturer' : 'Non fact.'}</span></td><td>${g.fill ? '' : `<input type="checkbox" data-g="${i}" ${g.logged ? 'checked' : ''}>`}</td></tr>`).join('')}
     <tr class="tot"><td colspan="3">Total</td><td class="n">${fmtDur(tot, 'hm')}</td>${rounding ? `<td class="n">${fmtDur(totR, 'hm')}</td>` : ''}${lv ? `<td class="n">${fmtDur(totF, 'hm')}</td>` : ''}<td class="n">${hoursDec(lv ? totF : rounding ? totR : tot)}</td><td colspan="2"></td></tr></tbody></table></div>
     <textarea class="copy" id="rc-txt" hidden readonly></textarea></div>
     <div class="modal-f"><button class="btn" id="rc-copy">${ICON.copy} Copier pour Excel</button><span class="sp"></span><button class="btn primary" id="rc-all">Tout marquer comme reporté</button></div>`, 'wide');
@@ -6431,6 +6539,7 @@ function filtered() {
     if (r.client && e.client !== r.client) return false;
     if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none' || k === 'internal') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
     if (r.task && e.task !== r.task) return false;
+    if (r.ppl && !(e.ppl || []).includes(r.ppl)) return false;
     if (r.cat && (taskCat(e.task) || 'none') !== r.cat) return false;
     if (r.grp) { const g = groupOfClient(e.client); if (r.grp === 'none' ? g : (!g || g.id !== r.grp)) return false; }
     const st = statusOf(e);
@@ -6479,6 +6588,7 @@ function renderReports() {
     <label>Portefeuille<select data-r="pf">${pfOpts(r.pf)}</select></label>
     ${hasGroups() || r.grp ? `<label>Groupe<select data-r="grp"><option value="">Tous</option>${groupsAll().map(g => `<option value="${g.id}" ${r.grp === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}<option value="none" ${r.grp === 'none' ? 'selected' : ''}>Sans groupe</option></select></label>` : ''}
     <label>Client / personne<select data-r="client">${targetOpts(r.client, 'Tous')}</select></label>
+    ${(() => { const used = [...new Set(allEntries().flatMap(e => e.ppl || []))].map(personOf).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name, 'fr')); return used.length || r.ppl ? `<label>Avec<select data-r="ppl"><option value="">Tout le monde</option>${used.map(x => `<option value="${x.id}" ${r.ppl === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''; })()}
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
     <label>Catégorie<select data-r="cat"><option value="">Toutes</option>${[...TCATS(), ['none', 'Non classées']].map(([k, l]) => `<option value="${k}" ${r.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
@@ -6531,7 +6641,7 @@ function renderReports() {
       <button class="btn sm" data-bulk="nobill" ${sel.size ? '' : 'disabled'}>Passer non facturable</button>
       <span class="sp" style="flex:1"></span><button class="btn sm danger" data-bulk="del" ${sel.size ? '' : 'disabled'}>Supprimer</button></div>
     <div class="tbl-wrap"><table class="t"><thead><tr><th><input type="checkbox" data-selall ${shown.length && shown.every(e => sel.has(e.id)) ? 'checked' : ''}></th><th>Date</th><th>Client</th><th>Tâche</th><th>Libellé</th><th>Horaires</th><th class="n">Durée</th><th>Statut</th><th>Reporté</th><th></th></tr></thead><tbody>
-    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${cnoHTML(e.client)}${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${catDot(taskCat(e.task))}${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label)}">${esc(e.label)}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
+    ${shown.map(e => `<tr data-id="${e.id}"><td><input type="checkbox" data-sel ${sel.has(e.id) ? 'checked' : ''}></td><td class="mono small">${fmtDate(e.start)}</td><td>${cliIc(e.client)} ${cnoHTML(e.client)}${esc(clientName(e.client) || '—')} ${grpDot(groupOfClient(e.client))}</td><td>${catDot(taskCat(e.task))}${esc(taskName(e.task) || '—')}</td><td class="lab" title="${esc(e.label + (pplOf(e).length ? ' — avec ' + pplNames(pplOf(e)) : ''))}">${esc(e.label)} ${pplChipsHTML(pplOf(e))}</td><td class="mono small">${hhmm(e.start)}–${hhmm(e.end)}</td><td class="n">${fmtDur(dur(e))}</td><td><span class="status ${statusOf(e)}" title="${e.invoicedAt ? 'Facturé le ' + fmtDate(e.invoicedAt) : ''}">${statusLabel(statusOf(e))}</span></td><td>${e.logged ? '✓' : ''}</td><td><button class="icon" data-act="edit" title="Modifier">${ICON.edit}</button></td></tr>`).join('') || `<tr><td colspan="10" class="empty">Aucune saisie pour ces filtres.</td></tr>`}
     </tbody></table></div>${list.length > shown.length ? `<div class="more" style="padding:12px"><button class="btn" data-act="more-detail">Afficher plus (${list.length - shown.length} restantes)</button></div>` : ''}</div>`;
   const body = $('#rapports-body');
   body.innerHTML = html;
@@ -6631,8 +6741,8 @@ function bindChart(root, b) {
 }
 function detailTSV(list, sep) {
   const q = v => sep === ';' ? '"' + String(v ?? '').replace(/"/g, '""') + '"' : String(v ?? '').replace(/[\t\n]/g, ' ');
-  const head = ['Date', 'Client / personne', 'Code client', 'Groupe', 'Portefeuille', 'Tâche', 'Libellé', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
-  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', groupOfClient(e.client)?.name || '', pfName(pfKey(e.client)), taskName(e.task), e.label, hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
+  const head = ['Date', 'Client / personne', 'Code client', 'Groupe', 'Portefeuille', 'Tâche', 'Libellé', 'Avec', 'Début', 'Fin', 'Durée (h:mm)', 'Durée (h déc.)', 'Arrondi (h déc.)', 'Facturation', 'Facturé le', 'Reporté'];
+  const rows = list.slice().sort((a, b) => a.start - b.start).map(e => [fmtDate(e.start), clientName(e.client), clientOf(e.client)?.code || '', groupOfClient(e.client)?.name || '', pfName(pfKey(e.client)), taskName(e.task), e.label, pplNames(pplOf(e)), hhmm(e.start), hhmm(e.end), fmtDur(dur(e), 'hm'), hoursDec(dur(e)), hoursDec(roundMs(dur(e))), statusLabel(statusOf(e)), e.invoicedAt ? fmtDate(e.invoicedAt) : '', e.logged ? 'oui' : 'non'].map(q).join(sep));
   return [head.map(q).join(sep), ...rows].join('\n');
 }
 function bindReports() {
@@ -6861,6 +6971,7 @@ function openPersonFiche(id, preset = {}) {
       <div class="fld-row"><label class="fld"><span>E-mail</span><input id="pf-mail" type="email" value="${esc(d.email || '')}" autocomplete="off"></label><label class="fld"><span id="pf-tel-l">${kind === 'col' ? 'Ligne directe' : 'Téléphone'}</span><input id="pf-tel" inputmode="tel" value="${esc(d.phone || '')}" autocomplete="off"></label></div>
       <div id="pf-cl-w" ${pLinked(kind) ? '' : 'hidden'}>${groupsAll().length ? `<div class="small" style="margin-bottom:4px">Groupes de dossiers <span class="muted">(rattaché à tous les dossiers du groupe, y compris ceux ajoutés plus tard)</span></div><div class="cc-list pf-gl" style="max-height:110px;margin-bottom:8px">${groupsAll().map(g => `<label class="chk"><input type="checkbox" data-pfg value="${esc(g.id)}" ${(d.groups || []).includes(g.id) ? 'checked' : ''}> ${grpTag(g)} <span class="muted small">${grpMembers(g).length} dossier${grpMembers(g).length > 1 ? 's' : ''}</span></label>`).join('')}</div>` : ''}<div class="small" style="margin-bottom:4px">Dossiers de cet interlocuteur</div><input id="pf-clq" placeholder="Filtrer les dossiers…" style="width:100%;margin-bottom:4px"><div class="cc-list" style="max-height:160px">${cl.map(c => `<label class="chk" data-n="${esc(norm(c.name + ' ' + (c.code || '')))}"><input type="checkbox" value="${c.id}" ${sel.has(c.id) ? 'checked' : ''}> ${esc(c.name)}${c.code ? ' <span class="muted small">' + esc(c.code) + '</span>' : ''}</label>`).join('')}</div></div>
       <label class="fld"><span>Note</span><textarea id="pf-note" rows="2" placeholder="ex. joignable le matin, préfère l’e-mail…">${esc(d.note || '')}</textarea></label>
+      ${x ? `<div class="fld"><span>Temps passé avec cette personne (saisies associées)</span><div>${pplTimeHTML(x.id)}</div></div>` : ''}
       <div class="muted small">🔒 Ne notez jamais d’identifiants ni de mots de passe ici.</div></div>
     <div class="modal-f">${x ? `<button class="btn ghost" id="pf-arch">${x.archived ? 'Restaurer' : 'Archiver'}</button>` : ''}<span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="pf-ok">${x ? 'Enregistrer' : 'Créer'}</button></div>`);
   const q = s2 => m.el.querySelector(s2); let k = kind;
