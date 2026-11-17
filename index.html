@@ -1214,7 +1214,7 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.64.0';
+const APP_VERSION = '1.65.0';
 const APP_DATE = '17/11/2026';
 /* =========================================================
    Utilitaires
@@ -3093,6 +3093,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.65.0', '17/11/2026', ['Progression du cycle de paie en deux jalons : 1 · bulletins confirmés (validés par le client quand la validation est demandée, sinon envoyés), 2 · DSN déposées, comptés en bulletins (en dossiers si un nombre de bulletins manque).', 'Le disque du mois de l’onglet Mon cycle et l’historique des cycles se remplissent à moitié par chaque jalon. Le dépôt des bulletins ne compte plus dans la progression ni pour « dossier terminé » (il reste une colonne et un rappel).']],
   ['1.64.0', '17/11/2026', ['Saisir du temps pour un groupe : choisissez « Groupe … » dans la barre du chrono, la saisie manuelle, la fin d’appel ou la modification d’une saisie, tapez « 1h groupe Dupont réunion DRH » dans la barre de commande, ou lancez « Chrono du groupe » depuis son carnet.', 'La saisie reste sur le groupe ; le récap à reporter la répartit en une ligne par dossier (avec son n°) au prorata des bulletins du mois, à parts égales s’ils sont inconnus, avec la mention « (groupe …) ». Rapports : filtre « Temps de groupe » (sur le groupe ou répartis sur les dossiers). Facturation et tarifs par défaut : ceux de la société mère.']],
   ['1.63.1', '17/11/2026', ['Correctif : un jour fixe de dépôt des bulletins qui tombe avant la réception habituelle des variables (ou avant le 15) s’entend du mois suivant — « le 1 » = le 1er du mois suivant. L’alerte de dépôt n’apparaît donc plus dès le début du mois ; la fenêtre des paramètres affiche la date retenue.', 'Correctif : la fenêtre des paramètres du cycle d’un dossier sans groupe ne s’ouvrait plus quand il avait ses propres paramètres (depuis la v1.60.0).']],
   ['1.63.0', '16/11/2026', ['Rapports en tableau de bord : faits marquants en phrases (variations des dossiers, concentration, temps interne, exceptionnel à facturer, jour le plus chargé, appels), répartition du temps en anneau (client, groupe, catégorie, tâche, facturation ; clic = fiche du dossier ou filtre), concentration (« 4 dossiers font la moitié de votre temps »), temps par bulletin sur 12 mois, comparaison avec la période précédente, facturation et reste à facturer par ancienneté, interruptions et échanges.', 'Calendrier de l’année (une case par jour, clic = récap du jour), profil du cycle de paie (temps moyen selon le jour du mois, repères DSN, variables, virements), fiche express d’un dossier, export du tableau de bord en image ou en PDF.', 'Les tableaux détaillés (tableau croisé, 12 derniers mois, détail des saisies) restent disponibles, repliés en bas de l’onglet.']],
@@ -3178,7 +3179,7 @@ function newsCheck() {
 }
 const HELP = {
   chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.', 'Temps commun à un groupe : choisissez « Groupe … » comme dossier ; le récap à reporter le répartit sur ses dossiers au prorata des bulletins.', 'Bouton 👤 (barre du chrono et lignes de saisie) : associer une ou plusieurs personnes à une saisie, par exemple le collègue qui vous pose une question sur un dossier ; pendant le chrono, au choix sur la saisie en cours ou sur une nouvelle saisie.']],
-  portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
+  portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Progression : deux jalons, 1 · bulletins confirmés (validés par le client, ou envoyés si la validation n’est pas demandée) et 2 · DSN déposées, en bulletins ; le disque du mois se remplit à moitié par chacun.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
   carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Équipe du dossier / du groupe : les collègues qui interviennent sur le dossier, avec leur rôle (remplaçant(e)…) ; « Rattacher… » pour ajouter des personnes déjà enregistrées.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'En haut, les faits marquants de la période ; puis les graphiques : répartition en anneau (clic sur un dossier = sa fiche express, sur une autre part = filtre), concentration, temps par bulletin, comparaison, facturation, échanges, calendrier de l’année (clic = récap du jour), profil du cycle. Survolez un graphique pour le détail ; « Exporter le tableau de bord » en image ou PDF.', 'En bas, repliés : le tableau croisé, les 12 derniers mois et le détail des saisies (cliquez sur le titre pour déplier).', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
   facturation: ['À facturer', ['Les saisies à facturer, par dossier ou par groupe, avec les montants si des tarifs sont renseignés.', '« Facturé » marque les saisies comme facturées (annulable).']],
@@ -5613,10 +5614,11 @@ function effBs(mk, cid) {
   for (let i = 0; i < 13; i++) { const v = cyRow(m, cid).bs; if (v != null && v !== '') return { n: +v, own: i === 0, from: m }; m = prevMk(m); }
   return { n: null, own: false };
 }
-function cyRowDone(mk, c, row) {
+const cyConfirmed = (c, row) => { const p = cyOf(c); return !!row.dsn || (p.valid ? !!row.val : !!row.env || (p.rec === 'robot' && !!row.dsn)); };
+function cyRowDone(mk, c, row) { // dossier terminé : bulletins confirmés et DSN déposée (le dépôt des bulletins ne compte plus depuis la v1.65.0)
   const p = cyOf(c);
   const ok = f => !!row[f] || cyState(mk, c, row, f).st === 'na';
-  return !!row.dsn && ok('vir') && ok('dep') && (!!row.env || p.rec === 'robot') && (!p.valid || !!row.val);
+  return !!row.dsn && ok('vir') && (!!row.env || p.rec === 'robot') && (!p.valid || !!row.val);
 }
 const lsGet = (k, d) => { try { const v = localStorage.getItem('chronocab:' + k); return v == null ? d : v; } catch (e) { return d; } };
 const lsSet = (k, v) => { try { localStorage.setItem('chronocab:' + k, v); } catch (e) {} };
@@ -5637,7 +5639,7 @@ function cySetClosed(mk, v, manual = false) {
 }
 // Progression du portefeuille sur un cycle
 function cyProgress(mk) {
-  const cs = cyClients(), g = { n: cs.length, env: [0, 0], vir: [0, 0], dep: [0, 0], bsDep: [0, 0], dsn: [0, 0], val: [0, 0], bsDsn: 0, fin: 0, bs: 0, touched: 0, noBs: 0 };
+  const cs = cyClients(), g = { n: cs.length, env: [0, 0], vir: [0, 0], dep: [0, 0], bsDep: [0, 0], dsn: [0, 0], val: [0, 0], bsDsn: 0, fin: 0, bs: 0, touched: 0, noBs: 0, conf: [0, 0], bsConf: [0, 0], noBsAll: 0 };
   for (const c of cs) {
     const row = cyRow(mk, c.id), p = cyOf(c), n = effBs(mk, c.id).n || 0;
     if (Object.keys(row).length) g.touched++;
@@ -5647,9 +5649,14 @@ function cyProgress(mk) {
     if (p.valid) { g.val[1]++; if (row.val) g.val[0]++; }
     if (p.dep !== 'nc') { g.dep[1]++; g.bsDep[1] += n; if (!n) g.noBs++; if (row.dep) { g.dep[0]++; g.bsDep[0] += n; } }
     g.dsn[1]++; if (row.dsn) { g.dsn[0]++; g.bsDsn += n; }
+    // Jalon 1 (v1.65.0) : bulletins confirmés = validés par le client si la validation est demandée, sinon envoyés (1er envoi) ; acquis aussi si la DSN est déposée
+    if (!n) g.noBsAll++; g.conf[1]++; g.bsConf[1] += n; if (cyConfirmed(c, row)) { g.conf[0]++; g.bsConf[0] += n; }
     if (cyRowDone(mk, c, row)) g.fin++;
   }
   g.allDsn = g.n > 0 && g.dsn[0] === g.dsn[1];
+  // Progression en bulletins (en dossiers si un nombre de bulletins manque) : moitié bulletins confirmés, moitié DSN déposées
+  g.confR = g.noBsAll ? g.conf : g.bsConf; g.dsnR = g.noBsAll ? g.dsn : [g.bsDsn, g.bs];
+  g.prog = Math.round((pct(g.confR[0], g.confR[1]) + pct(g.dsnR[0], g.dsnR[1])) / 2);
   return g;
 }
 const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
@@ -5682,8 +5689,8 @@ function cyHistory(mk) {
   return `<div class="cy-hist" aria-label="Cycles précédents">${list.map(k => {
     const g = cyProgress(k), cl = cyClosed(k), cur = k === mk;
     const st = cl ? 'closed' : !g.touched ? 'empty' : g.allDsn ? 'ready' : 'open';
-    const txt = cl ? '✓' : !g.touched ? '–' : pct(g.dsn[0], g.dsn[1]) + ' %';
-    const tip = cl ? 'Cycle clôturé' + (S.cycles[k]?.manual ? ' manuellement' : '') + ' le ' + fmtDate(dOf(cl)) : !g.touched ? 'Aucune saisie' : g.dsn[0] + ' DSN déposées sur ' + g.dsn[1];
+    const txt = cl ? '✓' : !g.touched ? '–' : g.prog + ' %';
+    const tip = cl ? 'Cycle clôturé' + (S.cycles[k]?.manual ? ' manuellement' : '') + ' le ' + fmtDate(dOf(cl)) : !g.touched ? 'Aucune saisie' : 'Progression ' + g.prog + ' % : bulletins confirmés ' + pct(g.confR[0], g.confR[1]) + ' %, DSN déposées ' + g.dsn[0] + ' sur ' + g.dsn[1];
     return `<button class="cy-h st-${st} ${cur ? 'cur' : ''}" data-cy="goto" data-mk="${k}" title="${esc(MONTHS_L[+k.slice(5) - 1] + ' ' + k.slice(0, 4) + ' — ' + tip)}"><span>${MONTHS[+k.slice(5) - 1]}</span><b>${txt}</b></button>`;
   }).join('')}</div>`;
 }
@@ -5965,9 +5972,9 @@ function renderCycle(P) {
   html += '<i data-b="progression" data-t="Progression"></i>';
   if (lsGet('cyProgMin', '') === '1') html += `<div class="card cy-prog min ${cl ? 'is-closed' : g.allDsn ? 'is-ready' : ''}"><div class="cy-prog-line">
       <b class="cy-prog-t">Progression</b>
-      ${cyMini('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.noBs ? g.dep : g.bsDep)}
-      ${g.val[1] ? cyMini('Validés', g.val[0], g.val[1]) : ''}
-      ${cyMini('DSN', g.dsn[0], g.dsn[1])}
+      ${cyMini('Bulletins confirmés', g.confR[0], g.confR[1])}
+      ${cyMini('DSN déposées', g.dsnR[0], g.dsnR[1])}
+      <b class="small">${g.prog} %</b>
       <span class="muted small">${g.fin}/${g.n} dossiers terminés</span>
       <span class="sp" style="flex:1"></span>${closeBtn}
       <button class="btn sm ghost" data-cy="progmin" title="Afficher le détail de la progression">Détails ▾</button></div></div>`;
@@ -5978,13 +5985,15 @@ function renderCycle(P) {
       ${closeBtn}<button class="btn sm ghost" data-cy="progmin" title="Réduire la progression sur une ligne">Réduire ▴</button>
     </div>
     <div class="cy-pg-grid">
-      ${cyBar('Bulletins déposés', g.bsDep[0], g.bsDep[1], g.dep[0] + ' / ' + g.dep[1] + ' dossiers' + (g.n - g.dep[1] ? ' · ' + (g.n - g.dep[1]) + ' non concerné' + (g.n - g.dep[1] > 1 ? 's' : '') : '') + (g.noBs ? ` · <span class="cy-pg-w">${g.noBs} dossier${g.noBs > 1 ? 's' : ''} sans nombre de BS : avancement compté en dossiers</span>` : ''), g.noBs ? g.dep : g.bsDep)}
-      ${cyBar('DSN déposées', g.dsn[0], g.dsn[1], g.bsDsn + ' bulletin' + (g.bsDsn > 1 ? 's' : '') + ' déclaré' + (g.bsDsn > 1 ? 's' : '') + ' · échéance le 5 ou le 15 selon le dossier')}
+      ${cyBar('1 · Bulletins confirmés', g.confR[0], g.confR[1], g.conf[0] + ' / ' + g.conf[1] + ' dossiers' + (g.val[1] ? ' · ' + g.val[0] + ' / ' + g.val[1] + ' validés par le client' : '') + (g.val[1] < g.n ? ' · sans validation demandée : 1er envoi' : '') + (g.noBsAll ? ` · <span class="cy-pg-w">${g.noBsAll} dossier${g.noBsAll > 1 ? 's' : ''} sans nombre de BS : avancement compté en dossiers</span>` : ''))}
+      ${cyBar('2 · DSN déposées', g.dsnR[0], g.dsnR[1], g.dsn[0] + ' / ' + g.dsn[1] + ' dossiers · ' + g.bsDsn + ' bulletin' + (g.bsDsn > 1 ? 's' : '') + ' déclaré' + (g.bsDsn > 1 ? 's' : '') + ' · échéance le 5 ou le 15 selon le dossier')}
     </div>
     <div class="cy-prog-sub">
       <span>1<sup>er</sup> envoi <b>${g.env[0]}/${g.env[1]}</b></span>
       ${g.val[1] ? `<span>Validés <b>${g.val[0]}/${g.val[1]}</b></span>` : ''}
       <span>Virements <b>${g.vir[0]}/${g.vir[1]}</b></span>
+      <span title="Ne compte pas dans la progression">Dépôts <b>${g.dep[0]}/${g.dep[1]}</b></span>
+      <span>Progression <b>${g.prog} %</b></span>
       <span>Dossiers terminés <b>${g.fin}/${g.n}</b></span>
       <span>Bulletins du mois <b>${g.bs || '–'}</b>${pbs ? ` <span class="muted">(préc. ${pbs})</span>` : ''}</span>
       <span class="sp" style="flex:1"></span>${cyHistory(mk)}
@@ -6368,16 +6377,16 @@ function openAlertEditor(anchor, mk, cid) {
   setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', key, true); }, 0);
   draw(); box.querySelector('#al-name').focus();
 }
-// Jauge de l'onglet « Mon cycle » : mois du cycle en cours, rempli comme une horloge selon les DSN déposées
+// Jauge de l'onglet « Mon cycle » : mois du cycle en cours, rempli comme une horloge : moitié bulletins confirmés, moitié DSN déposées (v1.65.0)
 function updateCycleBadge() {
   const el = document.getElementById('cyc-badge'); if (!el) return;
   const mk = defaultCycleMonth(), g = cyProgress(mk);
   if (!g.n) { el.hidden = true; return; }
   el.hidden = false;
-  const v = pct(g.dsn[0], g.dsn[1]);
+  const v = g.prog;
   el.style.setProperty('--p', (cyClosed(mk) || g.allDsn ? 100 : v) + '%');
   el.querySelector('.cyc-m').textContent = ['jan', 'fév', 'mar', 'avr', 'mai', 'jun', 'jul', 'aoû', 'sep', 'oct', 'nov', 'déc'][+mk.slice(5) - 1];
-  el.title = 'Cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' : clôturé' : ' : ' + g.dsn[0] + ' DSN déposée' + (g.dsn[0] > 1 ? 's' : '') + ' sur ' + g.dsn[1] + (g.val[1] ? ' · ' + g.val[0] + ' paie' + (g.val[0] > 1 ? 's' : '') + ' validée' + (g.val[0] > 1 ? 's' : '') + ' sur ' + g.val[1] : ''));
+  el.title = 'Cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' : clôturé' : ' : progression ' + v + ' % · bulletins confirmés ' + g.confR[0] + ' / ' + g.confR[1] + (g.noBsAll ? ' dossiers' : '') + ' · DSN déposées ' + g.dsn[0] + ' / ' + g.dsn[1]);
   el.classList.toggle('done', !!cyClosed(mk) || g.allDsn);
 }
 document.addEventListener('click', ev => { const el = ev.target.closest && ev.target.closest('[data-alert]'); if (!el) return; const tr = el.closest('tr[data-id]'); if (tr && UI.pfv) { tipHide(); openAlertEditor(el, UI.pfv.cmonth, tr.dataset.id); } });
