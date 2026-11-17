@@ -763,6 +763,7 @@ table.cyx tr.has-x td:first-child a{font-weight:600}
 body.discret.dsc-time .rp-svg .rp-d,body.discret.dsc-time .rp-dv{filter:blur(5px)}
 body.discret.dsc-oth .rp-svg .rp-n{filter:blur(5px)}
 #print-area.rp-print svg{max-width:100%;height:auto}#print-area .rp-pfig{break-inside:avoid;page-break-inside:avoid}
+.pf-ic.grp-e{color:var(--g);position:relative}.grp-e-b{position:absolute;right:-3px;bottom:-2px;width:7px;height:7px;border-radius:50%;background:var(--g);border:1.5px solid var(--surface)}
 .lbl-w{display:flex;align-items:center;gap:4px;min-width:0}
 .lbl-w .lbl{flex:1;min-width:0}
 .ppl-b{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:3px 4px;border-radius:7px;display:inline-flex;align-items:center;flex:none;max-width:60%;overflow:hidden}
@@ -1213,8 +1214,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.63.0';
-const APP_DATE = '16/11/2026';
+const APP_VERSION = '1.64.0';
+const APP_DATE = '17/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -1279,6 +1280,7 @@ function cliCyState(c) {
   _cliSt.m.set(c.id, st); return st;
 }
 function cliIc(id) {
+  if (isGroupId(id)) { const g = groupOf(id); return `<span class="pf-ic grp-e" style="--g:${grpColor(g)}" title="Temps du groupe ${esc(g.name)} (réparti sur ses dossiers dans le récap)">${ICON.case}<i class="grp-e-b"></i></span>`; }
   const c = id && clientOf(id), mine = !!c && isMine(c), st = cliCyState(c);
   return `<span class="pf-ic ${mine ? 'mine' : ''}" title="${mine ? 'Mon portefeuille' : 'Hors de mon portefeuille'}${st ? ' · ' + CLI_ST[st] : ''}">${ICON.case}${st ? `<i class="pf-st st-${st}"></i>` : ''}</span>`;
 }
@@ -1381,7 +1383,23 @@ const GROUP_COLOR_NAMES = ['Bleu', 'Cuivre', 'Violet', 'Olive', 'Framboise', 'Cy
 const groupsAll = () => S.meta.groups.slice().sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 const hasGroups = () => S.meta.groups.length > 0;
 const groupOf = gid => gid ? S.meta.groups.find(g => g.id === gid) || null : null;
-const groupOfClient = id => { if (!id || isPersonId(id) || isInternalId(id) || id === ABS_ID) return null; const c = clientOf(id); return c ? groupOf(c.group) : null; };
+const groupOfClient = id => { if (!id || isPersonId(id) || isInternalId(id) || id === ABS_ID) return null; if (isGroupId(id)) return groupOf(id); const c = clientOf(id); return c ? groupOf(c.group) : null; };
+/* Temps saisi pour un groupe (v1.64.0) : entry.client = id du groupe (« g… »). La saisie reste sur le groupe ; le récap à reporter
+   la répartit sur les dossiers du groupe au prorata des bulletins du mois (Mon cycle), à parts égales s'ils sont inconnus ;
+   les Rapports la montrent telle quelle ou répartie (filtre « Temps de groupe »). */
+const isGroupId = id => typeof id === 'string' && id[0] === 'g' && !!groupOf(id);
+const grpMother = gid => { const g = groupOf(gid); return g && g.mother ? clientOf(g.mother) : null; };
+function grpShares(gid, mk) {
+  const mem = S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group === gid); if (!mem.length) return [];
+  const bs = mem.map(x => (typeof effBs === 'function' ? effBs(mk, x.id).n : 0) || 0), T = bs.reduce((a, b) => a + b, 0);
+  return mem.map((x, i) => ({ cid: x.id, w: T ? bs[i] / T : 1 / mem.length, bs: bs[i] })).filter(z => z.w > 0);
+}
+function grpSplitEntry(e) { // saisies virtuelles, une par dossier (même identifiant que la saisie d'origine)
+  const sh = grpShares(e.client, monthKey(e.start)); if (!sh.length) return [e];
+  const D = dur(e); let acc = 0;
+  return sh.map((z, i) => { const ms = i === sh.length - 1 ? D - acc : Math.round(D * z.w / 60000) * 60000; acc += ms; return { ...e, client: z.cid, end: e.start + ms, _g: e.client, _w: z.w }; }).filter(v => v.end > v.start);
+}
+const grpExpand = l => l.flatMap(e => isGroupId(e.client) ? grpSplitEntry(e) : [e]);
 const grpKeyOf = c => (c && groupOf(c.group)?.id) || 'none';
 const grpColor = g => GROUP_COLORS[((g && g.color) || 0) % GROUP_COLORS.length];
 const grpTag = (g, cls = '') => g ? `<span class="grp-tag ${cls}" style="--g:${grpColor(g)}" title="Groupe ${esc(g.name)}"><i></i><span>${esc(g.name)}</span></span>` : '';
@@ -1620,12 +1638,13 @@ function absUpcoming(todayK) { // absences / formations futures, regroupées en 
   }
   return out;
 }
-const clientName = id => !id ? '' : id === ABS_ID ? ABS_NAME : isInternalId(id) ? INTERNAL_NAME : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
+const clientName = id => !id ? '' : id === ABS_ID ? ABS_NAME : isInternalId(id) ? INTERNAL_NAME : isGroupId(id) ? 'Groupe ' + groupOf(id).name : isPersonId(id) ? (personOf(id)?.name || 'Personne supprimée') : (clientOf(id)?.name || 'Client supprimé');
 function pfKey(id) {
   if (!id) return 'none';
   if (isInternalId(id)) return 'internal';
   if (id === ABS_ID) return 'abs';
   if (isPersonId(id)) return 'p:' + id;
+  if (isGroupId(id)) return S.meta.clients.some(x => x.group === id && !x.deletedAt && isMine(x)) ? 'mine' : 'others';
   const c = clientOf(id); if (!c) return 'none';
   if (isMine(c)) return 'mine';
   return c.owner && personOf(c.owner) ? 'p:' + c.owner : 'others';
@@ -1656,7 +1675,7 @@ function defaultBillable(clientId, taskId) {
   if (t && t.billing && t.billing !== 'auto') return t.billing === 'bill';
   if (isPersonId(clientId)) return false; // temps passé avec une personne : non facturable par défaut
   const cb = t ? catBill(taskCat(t)) : ''; if (cb) return cb === 'bill'; // facturation par défaut de la catégorie (v1.44.0)
-  const c = clientOf(clientId);
+  const c = clientOf(clientId) || (isGroupId(clientId) ? grpMother(clientId) : null);
   if (c && c.billing) return c.billing === 'bill';
   return !!S.meta.settings.defaultBillable;
 }
@@ -2104,7 +2123,7 @@ function autoCat(name) {
 const taskCat = t => (t = typeof t === 'string' ? taskOf(t) : t) ? (t.cat || autoCat(t.name)) : '';
 const catTag = c => c ? `<span class="cat-tag" style="--cc:${catCol('t', c)}">${CAT_L[c]}</span>` : '';
 const rateTxt = r => r && +r.amount > 0 ? (+r.amount).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + (r.mode === 'acte' ? ' € / acte' : ' € / h') : '';
-function rateOf(cid, tid) { const c = clientOf(cid), o = c && c.rates && c.rates[tid]; if (o && +o.amount > 0) return { ...o, own: true }; const t = taskOf(tid); return t && t.rate && +t.rate.amount > 0 ? t.rate : null; }
+function rateOf(cid, tid) { const c = clientOf(cid) || (isGroupId(cid) ? grpMother(cid) : null), o = c && c.rates && c.rates[tid]; if (o && +o.amount > 0) return { ...o, own: true }; const t = taskOf(tid); return t && t.rate && +t.rate.amount > 0 ? t.rate : null; }
 function amountOf(e) { if (!e.billable) return 0; const r = rateOf(e.client, e.task); if (!r) return 0; return r.mode === 'acte' ? +r.amount : dur(e) / 3600000 * +r.amount; }
 const hasRates = () => S.meta.tasks.some(t => t.rate && +t.rate.amount > 0) || S.meta.clients.some(c => c.rates && Object.keys(c.rates).length);
 const sumAmt = l => l.reduce((a, e) => a + amountOf(e), 0);
@@ -2228,16 +2247,19 @@ function clientOptions(q) {
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
   const mapC = c => ({ id: c.id, label: c.name, sub: [c.code, isMine(c) ? '' : (c.owner && personOf(c.owner) ? 'portef. ' + personOf(c.owner).name : 'hors portefeuille')].filter(Boolean).join(' · '), cli: c.id, grp: c.group });
   const mapP = x => ({ id: x.id, label: x.name, sub: [P_KIND_L[pKind(x)], pRoleTxt(x)].filter(Boolean).join(' · '), person: x.id });
+  const gs = S.meta.groups.filter(g => !q || norm('groupe ' + g.name).includes(norm(q))).sort(byName);
+  const mapG = g => { const n = S.meta.clients.filter(x => x.group === g.id && !x.deletedAt && !x.archived).length; return { id: g.id, label: 'Groupe ' + g.name, sub: n + ' dossier' + (n > 1 ? 's' : '') + ' · temps réparti au prorata des bulletins', grp: g.id }; };
   const intOpt = { id: INTERNAL_ID, label: INTERNAL_NAME, sub: 'formation, trajet, organisation… · non facturable', internal: true };
-  const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : mapC(o);
+  const map = o => o.id === INTERNAL_ID ? intOpt : isPersonId(o.id) ? mapP(o) : isGroupId(o.id) ? mapG(groupOf(o.id)) : mapC(o);
   const out = [];
   const showInt = !q || ['interne', 'cabinet', 'formation', 'trajet', 'organisation', 'logistique', 'reunion'].some(w => w.startsWith(norm(q)) || norm(q).startsWith(w.slice(0, Math.max(3, norm(q).length))));
-  const recent = q ? [] : [...cs, ...ps, ...(u.cLast[INTERNAL_ID] ? [{ id: INTERNAL_ID }] : [])].filter(o => u.cLast[o.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
+  const recent = q ? [] : [...cs, ...ps, ...S.meta.groups, ...(u.cLast[INTERNAL_ID] ? [{ id: INTERNAL_ID }] : [])].filter(o => u.cLast[o.id]).sort((a, b) => u.cLast[b.id] - u.cLast[a.id]).slice(0, 5);
   if (recent.length) out.push({ head: true, label: 'Récents' }, ...recent.map(map));
   if (showInt && !recent.some(o => o.id === INTERNAL_ID)) out.push({ head: true, label: 'Interne' }, intOpt);
   const mine = cs.filter(isMine).sort(byName), others = cs.filter(c => !isMine(c)).sort(byName);
   if (mine.length) out.push({ head: true, label: 'Mon portefeuille' }, ...mine.map(mapC));
   if (others.length) out.push({ head: true, label: 'Autres portefeuilles' }, ...others.map(mapC));
+  if (gs.length && (q || S.meta.groups.length)) out.push({ head: true, label: 'Groupes (temps commun à leurs dossiers)' }, ...gs.map(mapG));
   if (ps.length) out.push({ head: true, label: 'Personnes (temps passé avec)' }, ...ps.sort(byName).map(mapP));
   return out;
 }
@@ -2752,7 +2774,7 @@ function callEndDialog() {
   let kind = isInternalId(c.target) ? 'int' : isPersonId(c.target) ? 'coll' : 'client';
   const callTask = S.meta.tasks.find(t => !t.deletedAt && norm(t.name) === norm(CALL_TASK));
   const ok = x => !x.archived && !x.deletedAt, byName = (a, b) => a.name.localeCompare(b.name, 'fr');
-  const cliOpts = cur => `<option value="">Choisir le client…</option>` + S.meta.clients.filter(ok).sort((a, b) => (isMine(b) - isMine(a)) || byName(a, b)).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}</option>`).join('');
+  const cliOpts = cur => `<option value="">Choisir le client…</option>` + (S.meta.groups.length ? `<optgroup label="Groupes (temps commun)">${S.meta.groups.slice().sort(byName).map(g => `<option value="${g.id}" ${g.id === cur ? 'selected' : ''}>Groupe ${esc(g.name)}</option>`).join('')}</optgroup>` : '') + S.meta.clients.filter(ok).sort((a, b) => (isMine(b) - isMine(a)) || byName(a, b)).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}</option>`).join('');
   const perOpts = cur => `<option value="">Choisir le collègue…</option>` + S.meta.persons.filter(ok).sort(byName).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} (${esc(roleLabel(x.role))})</option>`).join('');
   const taskSel = (cur, extra) => `<option value="">Sans tâche</option>${extra || ''}` + S.meta.tasks.filter(ok).sort(byName).map(t => `<option value="${t.id}" ${t.id === cur ? 'selected' : ''}>${esc(t.name)}</option>`).join('');
   const m = modal(`<div class="modal-h"><h3>📞 Fin d’appel</h3><button class="icon" data-close>${ICON.close}</button></div>
@@ -3071,6 +3093,8 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.64.0', '17/11/2026', ['Saisir du temps pour un groupe : choisissez « Groupe … » dans la barre du chrono, la saisie manuelle, la fin d’appel ou la modification d’une saisie, tapez « 1h groupe Dupont réunion DRH » dans la barre de commande, ou lancez « Chrono du groupe » depuis son carnet.', 'La saisie reste sur le groupe ; le récap à reporter la répartit en une ligne par dossier (avec son n°) au prorata des bulletins du mois, à parts égales s’ils sont inconnus, avec la mention « (groupe …) ». Rapports : filtre « Temps de groupe » (sur le groupe ou répartis sur les dossiers). Facturation et tarifs par défaut : ceux de la société mère.']],
+  ['1.63.1', '17/11/2026', ['Correctif : un jour fixe de dépôt des bulletins qui tombe avant la réception habituelle des variables (ou avant le 15) s’entend du mois suivant — « le 1 » = le 1er du mois suivant. L’alerte de dépôt n’apparaît donc plus dès le début du mois ; la fenêtre des paramètres affiche la date retenue.', 'Correctif : la fenêtre des paramètres du cycle d’un dossier sans groupe ne s’ouvrait plus quand il avait ses propres paramètres (depuis la v1.60.0).']],
   ['1.63.0', '16/11/2026', ['Rapports en tableau de bord : faits marquants en phrases (variations des dossiers, concentration, temps interne, exceptionnel à facturer, jour le plus chargé, appels), répartition du temps en anneau (client, groupe, catégorie, tâche, facturation ; clic = fiche du dossier ou filtre), concentration (« 4 dossiers font la moitié de votre temps »), temps par bulletin sur 12 mois, comparaison avec la période précédente, facturation et reste à facturer par ancienneté, interruptions et échanges.', 'Calendrier de l’année (une case par jour, clic = récap du jour), profil du cycle de paie (temps moyen selon le jour du mois, repères DSN, variables, virements), fiche express d’un dossier, export du tableau de bord en image ou en PDF.', 'Les tableaux détaillés (tableau croisé, 12 derniers mois, détail des saisies) restent disponibles, repliés en bas de l’onglet.']],
   ['1.62.0', '16/11/2026', ['Carnet : bloc « Équipe du dossier » (et « Équipe du groupe ») — les collègues qui interviennent sur le dossier, avec leur rôle (comptable du dossier, responsable, remplaçant(e) pendant mes absences, expert-comptable… ou saisie libre). L’équipe d’un groupe vaut pour tous ses dossiers.', 'L’équipe est proposée en premier dans les personnes associées (👤), reprise dans « Préparer une absence » et l’export du carnet ; filtre des tuiles « avec le collègue ».', 'Rattacher une personne existante en quelques clics : bouton « Rattacher… » dans les interlocuteurs du dossier et du groupe (recherche, plusieurs à la fois) ; dans la fiche d’une personne, recherche et « Cocher mon portefeuille » / « Cocher les dossiers affichés » / « Tout décocher », y compris pour les collègues (équipe).']],
   ['1.61.0', '16/11/2026', ['Personnes associées à une saisie : un collègue vous pose une question sur un dossier ? Bouton 👤 dans la barre du chrono (avant ou pendant : « Appliquer à la saisie en cours » ou « Nouvelle saisie avec ces personnes »), sur chaque ligne de saisie, dans la fin d’appel, la modification d’une saisie et la saisie rapide (« 20min Dupont question paie avec Paul »).', 'Les noms apparaissent dans le récap à reporter (libellé « avec … » et colonne « Avec » de la copie Excel ; une saisie avec d’autres personnes reste sur sa ligne), dans les Rapports (filtre « Avec », colonne du détail et de l’export) et dans la fiche de la personne (temps passé avec elle, par dossier).']],
@@ -3153,7 +3177,7 @@ function newsCheck() {
   if ((old || seen) && NEWS.some(n => n[0] === APP_VERSION) && !document.querySelector('.overlay')) openNews(seen || '1.44.0');
 }
 const HELP = {
-  chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.', 'Bouton 👤 (barre du chrono et lignes de saisie) : associer une ou plusieurs personnes à une saisie, par exemple le collègue qui vous pose une question sur un dossier ; pendant le chrono, au choix sur la saisie en cours ou sur une nouvelle saisie.']],
+  chrono: ['Ma journée', ['▶ dans la barre du haut : choisissez un dossier (ou une personne, ou « Interne ») et une tâche, puis lancez le chrono.', 'À faire aujourd’hui : les étapes du cycle et points du jour ; « Fait » les note, ▶ lance le chrono sur le dossier.', 'Charge à venir : les échéances des deux prochaines semaines ; cliquez sur un jour pour le détail. « Préparer une absence » et « Pendant mon absence » aident à partir et revenir sereinement.', 'Ma semaine : vos temps par dossier et par jour ; un clic ouvre le récap à reporter.', 'Saisies : cliquez sur une ligne pour la modifier ; « Récap à reporter » donne les totaux à recopier dans le logiciel du cabinet.', 'Bouton 📞 : met le chrono en pause pendant un appel, puis l’affecte.', 'Temps commun à un groupe : choisissez « Groupe … » comme dossier ; le récap à reporter le répartit sur ses dossiers au prorata des bulletins.', 'Bouton 👤 (barre du chrono et lignes de saisie) : associer une ou plusieurs personnes à une saisie, par exemple le collègue qui vous pose une question sur un dossier ; pendant le chrono, au choix sur la saisie en cours ou sur une nouvelle saisie.']],
   portefeuille: ['Mon cycle', ['Cycle de paie : une case vide reçoit la date du jour en un clic ; une case remplie se modifie, se corrige ou s’efface.', 'Clic sur le nom d’un dossier : ses paramètres (dates habituelles, virements, dépôt, DSN, validation) et sa remarque permanente.', 'Charge à venir : les échéances attendues sur deux mois, d’après les paramètres de chaque dossier.', 'Temps & facturation : temps passé et à facturer par dossier sur le mois.', 'Colonnes ▾ choisit les colonnes affichées ; « Copier pour Excel » copie le tableau.']],
   carnet: ['Carnet de bord', ['Tuiles ou liste de vos dossiers ; la recherche porte aussi sur le contenu des carnets (pratiques, journal, points, notes…).', 'Dans un carnet : convention collective, cycle, alertes, interlocuteurs, tarifs, pratiques, points en cours, journal, virements, relation client.', '✉ Message (bloc Interlocuteurs) : un modèle de message adapté à l’interlocuteur, à copier dans votre messagerie.', '⧉ Copier depuis… complète le carnet avec celui d’un autre dossier ; Exporter le donne en PDF ou en texte.', 'Les blocs se déplacent (poignée ⠿) et se replient (clic sur le titre).', 'Historique du carnet (en bas) : les modifications du dossier notées automatiquement, avec l’avant et l’après ; cliquez sur une ligne pour le détail.', 'Équipe du dossier / du groupe : les collègues qui interviennent sur le dossier, avec leur rôle (remplaçant(e)…) ; « Rattacher… » pour ajouter des personnes déjà enregistrées.', 'Groupe : le carnet du groupe porte le cycle de paie (paramètres, remarque, calendriers de réception et des virements) que suivent tous ses dossiers ; ce qu’un dossier modifie lui-même est une exception, surlignée dans le tableau du groupe et reprise par ↺ ou « Aligner ».']],
   rapports: ['Rapports', ['Choisissez la période et les filtres (dossier, groupe, tâche, catégorie, facturation).', 'En haut, les faits marquants de la période ; puis les graphiques : répartition en anneau (clic sur un dossier = sa fiche express, sur une autre part = filtre), concentration, temps par bulletin, comparaison, facturation, échanges, calendrier de l’année (clic = récap du jour), profil du cycle. Survolez un graphique pour le détail ; « Exporter le tableau de bord » en image ou PDF.', 'En bas, repliés : le tableau croisé, les 12 derniers mois et le détail des saisies (cliquez sur le titre pour déplier).', 'Avec le lissage activé, les temps peuvent être affichés lissés sur la journée prévue ; les saisies réelles ne changent jamais.']],
@@ -3619,7 +3643,7 @@ function cyColTxt(p, col) {
   if (col === 'env') return +p.envDelay === 0 && p.envDelay != null ? 'pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' j ouvrés après la réception';
   if (col === 'val') return p.valid ? 'demandée, relance à ' + (p.valDelay == null ? CY_VAL_DEF : p.valDelay) + ' j' : 'non demandée';
   if (col === 'vir') return CY_LBL.vir[p.vir] || p.vir;
-  if (col === 'dep') return (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : '');
+  if (col === 'dep') return (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (' + cyDepTxt(p) + ')' : '');
   if (col === 'dsn') return 'le ' + (p.dsn || 15) + ' du mois suivant';
   if (col === 'notes') return p.notes || '—';
   return '';
@@ -3834,7 +3858,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     const others = g ? grpMembers(g).filter(x => x.id !== c.id).map(x => x.name).join(', ') : '';
     add('ident', 'Identité et convention collective', [['Raison sociale', c.name], ['N° de dossier', c.code || '—'], ['SIRET', c.siret ? fmtSiret(c.siret) : '—'], ['Groupe', g ? g.name + (isMother(c) ? ' (société mère)' : '') : '—'], ['Autres dossiers du groupe', others], ['Portefeuille', isMine(c) ? 'Mon portefeuille' : owner ? 'Portefeuille de ' + owner.name : 'Hors de mon portefeuille'], ['Bulletins (cycle de ' + mkLabel(mk) + ')', eb.n != null ? String(eb.n) + (eb.own ? '' : ' (repris du cycle de ' + mkLabel(eb.from) + ')') : '—'], ...((b.ccn || []).length ? b.ccn.map((k, i) => [i ? '' : 'Convention collective', ccnTxt(k)]) : [['Convention collective', 'non renseignée']]), ...(c.archived ? [['État', 'dossier archivé']] : [])]);
     const a = cliAvg(c.id), ed = p.envDelay === 0 ? 'pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception';
-    add('cycle', 'Cycle de paie', [['Réception des variables', (CY_LBL.rec[p.rec] || p.rec) + (p.rec !== 'var' && p.recDay ? ', envoi vers le ' + p.recDay : '') + (p.rec === 'var' ? ' · réception habituelle ' + (p.varDay ? cyVarLabel(p.varDay) : 'non renseignée (relance le ' + CY_REL_DEF + ')') : '')], ['Alerte 1er envoi', ed], ['Validation client', p.valid ? 'demandée · relance ' + (cyValDelay(c) ? cyValDelay(c) + ' jours ouvrés après l’envoi' : 'aucune') : 'non demandée'], ['Virements', (CY_LBL.vir[p.vir] || p.vir) + (Object.keys(b.vir || {}).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier' : '')], ['Dépôt des bulletins', (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : '')], ['Échéance DSN', 'le ' + (p.dsn || 15) + ' du mois suivant'], ['Remarque permanente', p.notes || '—'], ['Temps moyen', a ? fmtDur(a.avg) + ' par mois (3 derniers mois) · ce mois-ci : ' + fmtDur(a.cur) : '']]);
+    add('cycle', 'Cycle de paie', [['Réception des variables', (CY_LBL.rec[p.rec] || p.rec) + (p.rec !== 'var' && p.recDay ? ', envoi vers le ' + p.recDay : '') + (p.rec === 'var' ? ' · réception habituelle ' + (p.varDay ? cyVarLabel(p.varDay) : 'non renseignée (relance le ' + CY_REL_DEF + ')') : '')], ['Alerte 1er envoi', ed], ['Validation client', p.valid ? 'demandée · relance ' + (cyValDelay(c) ? cyValDelay(c) + ' jours ouvrés après l’envoi' : 'aucune') : 'non demandée'], ['Virements', (CY_LBL.vir[p.vir] || p.vir) + (Object.keys(b.vir || {}).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier' : '')], ['Dépôt des bulletins', (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (' + cyDepTxt(p, c) + ')' : '')], ['Échéance DSN', 'le ' + (p.dsn || 15) + ' du mois suivant'], ['Remarque permanente', p.notes || '—'], ['Temps moyen', a ? fmtDur(a.avg) + ' par mois (3 derniers mois) · ce mois-ci : ' + fmtDur(a.cur) : '']]);
     const st = f => { const v = f === 'corr' ? (row.corr || []).map(d).join(', ') : d(row[f]); if (v) return v; const x = cyState(mk, c, row, f); return x.st === 'na' ? 'non concerné' : x.st === 'auto' ? 'automatique' : x.st === 'late' ? 'en retard' : x.st === 'warn' ? 'à faire (échéance proche)' : 'à faire'; };
     add('suivi', 'Suivi du cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' (clôturé)' : ''), [['Réception des variables', st('rec') + (row.rel ? ' · relancé le ' + d(row.rel) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') : '')], ['1er envoi', st('env')], ['Corrections', (row.corr || []).length ? st('corr') : '—'], ['Validation client', p.valid ? st('val') : 'non demandée'], ['Virements', st('vir')], ['Dépôt des bulletins', st('dep')], ['DSN', st('dsn')], ['Dossier terminé', cyRowDone(mk, c, row) ? 'oui' : 'non']]);
     add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + ' — ' + (x.mode === 'validate' ? 'à valider : ' + alTrigText(x) : 'pour information') + (x.until ? ' · jusqu’au cycle de ' + mkLabel(x.until) : '')]), 'Aucune alerte active');
@@ -4045,7 +4069,7 @@ function renderCarnetGroupe(body, g) {
   const als = mem.reduce((a, x) => a + alActive(x, mk).length, 0), rels = mem.filter(x => { const l = cbPeek(x).rel?.lvl; return l && l !== 'neutre'; });
   let html = `<div class="card filters cb-head" style="--g:${grpColor(g)}"><a class="btn sm ghost" href="#carnet">‹ Tous les carnets</a>
     <h1>${grpTag(g, 'big')}</h1><span class="muted">Carnet du groupe · ${mem.length} dossier${mem.length > 1 ? 's' : ''}${mem.length && nMine < mem.length ? ' (dont ' + nMine + ' dans mon portefeuille)' : ''}</span>
-    <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span><button class="btn sm ghost" data-cbexp title="Exporter ce carnet (PDF ou texte)">${ICON.down} Exporter</button></div>`;
+    <span class="sp" style="flex:1"></span><span class="cb-saved" id="cb-saved">Enregistré</span><button class="btn sm ghost" data-cbexp title="Exporter ce carnet (PDF ou texte)">${ICON.down} Exporter</button><button class="btn sm" data-cba="start" title="Lancer le chrono sur le groupe : temps commun, réparti sur ses dossiers dans le récap">${ICON.play} Chrono du groupe</button></div>`;
   { const cands = S.meta.clients.filter(x => !x.deletedAt && !x.archived && x.group !== g.id).sort((a2, b2) => (a2.group ? 1 : 0) - (b2.group ? 1 : 0) || a2.name.localeCompare(b2.name, 'fr'));
     html += `<i data-b="gparam" data-half="1"></i><h2>Paramètres du groupe</h2><div class="card cb-sec">
       <label class="fld"><span>Nom du groupe</span><input id="cbg-name" value="${esc(g.name)}" maxlength="60" autocomplete="off"></label>
@@ -4105,7 +4129,7 @@ function renderCarnetDossier(body, c) {
   }
   // Cycle de paie (mêmes données que Mon cycle)
   html += `<i data-b="cycle" data-half="1"></i><div class="toolbar"><h2>Cycle de paie</h2><span class="sp"></span><button class="btn sm" data-cba="params">Modifier les paramètres</button></div><div class="card cb-sec">
-    <dl class="cb-kv"><dt>Réception des variables</dt><dd>${esc(recTxt)}</dd><dt>Alerte 1er envoi</dt><dd>${p.envDelay === 0 ? 'Pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception'}</dd><dt>Validation client</dt><dd>${p.valid ? 'Demandée' + (cyValDelay(c) ? ' · relance ' + cyValDelay(c) + ' jours ouvrés après l’envoi' : ' · pas de relance') : 'Non demandée'}</dd><dt>Virements</dt><dd>${esc(CY_LBL.vir[p.vir] || p.vir)}${Object.keys(b.vir).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier ci-dessous' : ''}</dd><dt>Dépôt des bulletins</dt><dd>${esc(CY_LBL.dep[p.dep] || p.dep)}${p.dep === 'fixed' && p.depDay ? ' (le ' + p.depDay + ')' : ''}</dd><dt>Échéance DSN</dt><dd>${dsnTxt}</dd></dl>
+    <dl class="cb-kv"><dt>Réception des variables</dt><dd>${esc(recTxt)}</dd><dt>Alerte 1er envoi</dt><dd>${p.envDelay === 0 ? 'Pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception'}</dd><dt>Validation client</dt><dd>${p.valid ? 'Demandée' + (cyValDelay(c) ? ' · relance ' + cyValDelay(c) + ' jours ouvrés après l’envoi' : ' · pas de relance') : 'Non demandée'}</dd><dt>Virements</dt><dd>${esc(CY_LBL.vir[p.vir] || p.vir)}${Object.keys(b.vir).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier ci-dessous' : ''}</dd><dt>Dépôt des bulletins</dt><dd>${esc(CY_LBL.dep[p.dep] || p.dep)}${p.dep === 'fixed' && p.depDay ? ' (' + cyDepTxt(p, c) + ')' : ''}</dd><dt>Échéance DSN</dt><dd>${dsnTxt}</dd></dl>
     ${(() => { const a = cliAvg(c.id), mks = months12(), r = cli12(c.id, mks, monthlyBy(e => e.client === c.id ? c.id : null)); const parts = []; if (a) parts.push(`Temps moyen : <b>${fmtDur(a.avg)}</b> par mois (3 derniers mois) · ce mois-ci : <b>${fmtDur(a.cur)}</b>`); if (r.avgBs != null) parts.push(`par bulletin : <b>${fmtDur(r.avgBs)}</b> (12 derniers mois, ${r.bs} bulletins)`); else if (r.tot) parts.push(`12 derniers mois : <b>${fmtDur(r.tot)}</b>`); return parts.length ? `<div class="cb-hint">⏱ ${parts.join(' · ')}</div>` : ''; })()}
     ${cyDosGrpHTML(c)}
     <label class="fld"><span>Remarque permanente (colonne Remarques de Mon cycle)</span><textarea data-cbf="notes" rows="3" placeholder="${g && (g.cy || {}).notes ? esc('Remarque du groupe : ' + g.cy.notes) : 'ex. Paies sur quel RIB ? · MySilae uniquement'}">${esc((c.cy || {}).notes || '')}</textarea></label>${g && (g.cy || {}).notes ? `<div class="cb-hint">Vide : la remarque du groupe s’applique (« ${esc(g.cy.notes)} »).</div>` : ''}</div>`;
@@ -5193,8 +5217,8 @@ function targetOpts(cur, empty) {
   const ok = x => (!x.archived && !x.deletedAt) || x.id === cur;
   const byName = (a, b) => a.name.localeCompare(b.name, 'fr');
   const opt = x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}${x.code ? ' · ' + esc(x.code) : ''}</option>`;
-  const mine = S.meta.clients.filter(c => ok(c) && isMine(c)).sort(byName), others = S.meta.clients.filter(c => ok(c) && !isMine(c)).sort(byName), ps = S.meta.persons.filter(ok).sort(byName);
-  return `<option value="">${empty}</option>` + (mine.length ? `<optgroup label="Mon portefeuille">${mine.map(opt).join('')}</optgroup>` : '') + (others.length ? `<optgroup label="Autres portefeuilles">${others.map(opt).join('')}</optgroup>` : '') + (ps.length ? `<optgroup label="Personnes">${ps.map(p => `<option value="${p.id}" ${p.id === cur ? 'selected' : ''}>${esc(p.name)} (${esc(roleLabel(p.role))})</option>`).join('')}</optgroup>` : '');
+  const mine = S.meta.clients.filter(c => ok(c) && isMine(c)).sort(byName), others = S.meta.clients.filter(c => ok(c) && !isMine(c)).sort(byName), ps = S.meta.persons.filter(ok).sort(byName), gs = S.meta.groups.slice().sort(byName);
+  return `<option value="">${empty}</option>` + (gs.length ? `<optgroup label="Groupes (temps commun)">${gs.map(g => `<option value="${g.id}" ${g.id === cur ? 'selected' : ''}>Groupe ${esc(g.name)}</option>`).join('')}</optgroup>` : '') + (mine.length ? `<optgroup label="Mon portefeuille">${mine.map(opt).join('')}</optgroup>` : '') + (others.length ? `<optgroup label="Autres portefeuilles">${others.map(opt).join('')}</optgroup>` : '') + (ps.length ? `<optgroup label="Personnes">${ps.map(p => `<option value="${p.id}" ${p.id === cur ? 'selected' : ''}>${esc(p.name)} (${esc(roleLabel(p.role))})</option>`).join('')}</optgroup>` : '');
 }
 function selectOpts(arr, cur, empty) {
   return `<option value="">${empty}</option>` + arr.filter(x => (!x.archived && !x.deletedAt) || x.id === cur).slice().sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
@@ -5301,7 +5325,7 @@ function cmdQuick(q) { // saisie rapide : durée + dossier + tâche + libellé (
   let rest = words.filter((_, i) => i !== di), day = 0; const pp = pplParse(rest); rest = pp.words;
   rest = rest.filter(w => { const n = norm(w); if (n === 'hier') { day = -1; return false; } if (n === 'aujourdhui' || n === "aujourd'hui") return false; return true; });
   const pick = (arr, label) => { for (let k = rest.length; k >= 1; k--) { const ws = rest.slice(0, k).map(norm); const cand = arr.filter(x => !x.deletedAt && !x.archived && ws.every(w => norm(label(x)).includes(w))); if (cand.length) { const best = cand.sort((a, b) => (norm(label(b)).startsWith(ws[0]) - norm(label(a)).startsWith(ws[0])) || label(a).length - label(b).length)[0]; rest = rest.slice(k); return best; } } return null; };
-  const c = pick(S.meta.clients, x => x.name + ' ' + (x.code || '')) || pick(S.meta.persons, x => x.name), t = pick(S.meta.tasks, x => x.name);
+  const c = (norm(rest[0] || '') === 'groupe' ? pick(S.meta.groups, x => 'groupe ' + x.name) : null) || pick(S.meta.clients, x => x.name + ' ' + (x.code || '')) || pick(S.meta.persons, x => x.name), t = pick(S.meta.tasks, x => x.name);
   return { mins, client: c ? c.id : null, task: t ? t.id : null, label: rest.join(' '), day, ppl: pp.ppl };
 }
 function cmdQuickSave(o) {
@@ -5407,12 +5431,13 @@ function aggregate(entries) {
     if (!map.has(k)) map.set(k, { client: e.client, task: e.task, billable: e.billable, ms: 0, labels: [], ids: [], logged: true, ppl: pl });
     const g = map.get(k); g.ms += dur(e); g.ids.push(e.id); if (!e.logged) g.logged = false;
     if (e.label && !g.labels.includes(e.label.trim())) g.labels.push(e.label.trim());
+    if (e._g) { const gl = '(' + clientName(e._g).replace(/^Groupe /, 'groupe ') + ')'; if (!g.labels.includes(gl)) g.labels.push(gl); }
   }
   return [...map.values()].sort((a, b) => clientName(a.client).localeCompare(clientName(b.client), 'fr') || taskName(a.task).localeCompare(taskName(b.task), 'fr'));
 }
 function openRecap(k, useLiss = true) {
   const entries = Object.values(S.days[k]?.entries || {});
-  let groups = aggregate(entries);
+  let groups = aggregate(grpExpand(entries));
   const lz = lissOn() ? lissGroups(k, groups.map(g => ({ ...g }))) : null, lv = !!(lz && useLiss);
   if (lv) groups = lz.groups;
   const rounding = S.meta.settings.roundStep > 0, fin = g => lv ? g.lms : roundMs(g.ms);
@@ -5469,7 +5494,7 @@ function cyPut(o, full) { // enregistre les valeurs voulues en ne gardant que le
   for (const k of Object.keys(full)) { const v = full[k]; if (k === 'notes' && !v) continue; if (!jEq(v, base[k])) own[k] = v; }
   if (Object.keys(own).length) o.cy = own; else delete o.cy;
 }
-const cyExc = c => { if (!c || isGroupObj(c)) return []; const base = cyBase(c), own = c.cy || {}; return Object.keys(own).filter(k => !(k === 'notes' && !own[k]) && !jEq(own[k], base[k])); };
+const cyExc = c => { if (!c || isGroupObj(c) || !groupOf(c.group)) return []; const base = cyBase(c), own = c.cy || {}; return Object.keys(own).filter(k => !(k === 'notes' && !own[k]) && !jEq(own[k], base[k])); };
 const cyClients = () => S.meta.clients.filter(c => !c.deletedAt && !c.archived && isMine(c)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
 const cyRow = (mk, cid) => (S.cycles[mk] && S.cycles[mk].rows && S.cycles[mk].rows[cid]) || {};
 const isoDay = ms => dayKey(ms);
@@ -5525,13 +5550,17 @@ const CY_VAL_DEF = 2;
 const cyValDelay = c => { const v = cyOf(c).valDelay; return v == null ? CY_VAL_DEF : +v; };
 const cyLastSend = row => { const d = [row.env, ...(row.corr || [])].filter(Boolean).sort().pop(); return d ? dOf(d) : null; };
 function cyValAlert(c, row) { const n = cyValDelay(c), ls = cyLastSend(row); return cyOf(c).valid && ls && n > 0 ? addWorkdays(ls, n) : null; }
+// Jour fixe de dépôt (v1.63.1) : un jour qui tombe au plus tard à la réception habituelle des variables
+// (ou au 15 du mois si elle n'est pas connue) s'entend du mois suivant (ex. « le 1 » = le 1er du mois suivant)
+function cyDepFixed(mk, c, p) { const ref = cyRelDates(mk, c).usual || dayIn(mk, 15); let d = dayIn(mk, +p.depDay); if (d <= ref) d = dayIn(nextMk(mk), +p.depDay); return d; }
+function cyDepTxt(p, c) { if (!(p.dep === 'fixed' && p.depDay)) return ''; const mk = defaultCycleMonth(), d = cyDepFixed(mk, c || { cy: p }, p); return 'le ' + (+p.depDay === 1 ? '1er' : p.depDay) + (monthKey(d) !== mk ? ' du mois suivant' : ' du mois'); }
 // Échéances indicatives d'un dossier pour le cycle mk
 function cyDue(mk, c, row) {
   const p = cyOf(c), last = monthEnd(mk);
   const due = {};
   if (p.rec !== 'var' && p.recDay) due.env = prevWorkday(dayIn(mk, p.recDay));
   if (p.vir !== 'client' && p.vir !== 'nc') due.vir = cbVirDate(c, mk) || prevWorkday(addDays(last, -2));          // calendrier du carnet de bord, sinon DJM-2
-  if (p.dep === 'fixed' && p.depDay) due.dep = dayIn(mk, p.depDay);
+  if (p.dep === 'fixed' && p.depDay) due.dep = cyDepFixed(mk, c, p);
   else if (p.dep === 'next') { const v = dOf(row.vir); due.dep = v ? nextWorkday(v) : null; }
   else if (p.dep === 'valid') {
     // Jour de la validation de la paie : repérée par l'envoi des virements, sinon par la dernière correction ou le 1er envoi
@@ -6080,7 +6109,7 @@ function openCyParams(cid) {
       <div class="fld-row"><label class="fld"><span>Virements</span><select id="cp-vir">${opt('file', 'Fichier de virement envoyé', p.vir)}${opt('odep', 'OD + état des paiements', p.vir)}${opt('client', 'Client autonome', p.vir)}${opt('nc', 'Non concerné', p.vir)}</select></label>
       <label class="fld"><span>Échéance DSN</span><select id="cp-dsn">${opt(15, 'Le 15 du mois suivant', p.dsn)}${opt(5, 'Le 5 du mois suivant', p.dsn)}</select></label></div>
       <div class="fld-row"><label class="fld"><span>Dépôt des bulletins</span><select id="cp-dep">${opt('next', 'Le lendemain des virements', p.dep)}${opt('valid', 'Le jour de la validation de la paie', p.dep)}${opt('fixed', 'Un jour fixe', p.dep)}${opt('nc', 'Non concerné (MySilae…)', p.dep)}</select></label>
-      <label class="fld"><span>Jour fixe de dépôt</span><input id="cp-depday" inputmode="numeric" value="${esc(p.depDay || '')}" placeholder="ex. 30"></label></div>
+      <label class="fld"><span>Jour fixe de dépôt</span><input id="cp-depday" inputmode="numeric" value="${esc(p.depDay || '')}" placeholder="ex. 30, ou 1 (du mois suivant)"><span class="muted small" id="cp-dephint"></span></label></div>
       <label class="fld"><span>Remarque permanente (colonne Remarques)</span><textarea id="cp-notes" rows="3" placeholder="ex. Paies sur quel RIB ? · Virement au DJM-2 · MySilae uniquement">${esc(p.notes || '')}</textarea></label>
     </div>
     <div class="modal-f">${isG ? `<a class="btn sm ghost" href="#carnet/groupe/${encodeURIComponent(c.id)}" data-close>📖 Carnet du groupe</a>` : `<span class="muted small">N° ${esc(c.code || '—')}</span><a class="btn sm ghost" href="#carnet/${encodeURIComponent(c.id)}" data-close>📖 Carnet de bord</a><button class="btn sm ghost" id="cp-copyto" title="Appliquer les dates et échéances de ce dossier à d’autres dossiers">Copier vers…</button>`}<span class="sp"></span><button class="btn" data-close>Annuler</button><button class="btn primary" id="cp-ok">Enregistrer</button></div>`);
@@ -6093,6 +6122,10 @@ function openCyParams(cid) {
     const u = q('#cp-usesug'); if (u) u.onclick = () => { q('#cp-varday').value = sug.code; hint(); };
   };
   q('#cp-varday').addEventListener('change', hint); hint();
+  const depHint = () => { const h = q('#cp-dephint'); if (!h) return; const dd = parseInt(q('#cp-depday').value, 10); if (q('#cp-dep').value !== 'fixed' || !(dd >= 1 && dd <= 31)) { h.textContent = ''; return; }
+    const pp = { ...cyOf(c), varDay: q('#cp-varday').value || null, dep: 'fixed', depDay: dd }, mk = defaultCycleMonth(), d = cyDepFixed(mk, { cy: pp }, pp);
+    h.textContent = 'Paie de ' + MONTHS_L[+mk.slice(5) - 1] + ' : dépôt le ' + fmtDate(d) + (monthKey(d) !== mk ? ' (mois suivant)' : ''); };
+  ['#cp-depday', '#cp-dep', '#cp-varday'].forEach(id => q(id)?.addEventListener(id === '#cp-depday' ? 'input' : 'change', depHint)); depHint();
   { const CPF = { rec: '#cp-rec', recDay: '#cp-recday', varDay: '#cp-varday', envDelay: '#cp-envdelay', valid: '#cp-valid', valDelay: '#cp-valdelay', vir: '#cp-vir', dsn: '#cp-dsn', dep: '#cp-dep', depDay: '#cp-depday', notes: '#cp-notes' }, gp = gg && cyOf(gg);
     for (const k of exc) { const sp = q(CPF[k])?.closest('label')?.querySelector('span'); if (sp) sp.insertAdjacentHTML('beforeend', ` <b class="cy-own" title="${esc('Groupe : ' + hxCyVal(k, gp[k]) || '—')}">propre au dossier</b>`); } }
   q('#cp-grp')?.addEventListener('change', ev => { q('#cp-mother-w').hidden = !ev.target.value || ev.target.value === '__newgrp'; });
@@ -6606,7 +6639,8 @@ function periodRange() {
 }
 function filtered(rng) {
   const r = UI.rep, [from, to] = rng || periodRange(), q = norm(r.q);
-  return (lissOn() && r.liss !== 'real' ? lissedEntries() : allEntries()).filter(e => {
+  const src0 = lissOn() && r.liss !== 'real' ? lissedEntries() : allEntries();
+  return (r.gsplit === 'split' ? grpExpand(src0) : src0).filter(e => {
     if (e.start < from || e.start >= to) return false;
     if (r.client && e.client !== r.client) return false;
     if (r.pf) { const k = pfKey(e.client); if (r.pf === 'others' ? (k === 'mine' || k === 'none' || k === 'internal') : r.pf === 'persons' ? !isPersonId(e.client) : k !== r.pf) return false; }
@@ -6661,6 +6695,7 @@ function renderReports() {
     ${hasGroups() || r.grp ? `<label>Groupe<select data-r="grp"><option value="">Tous</option>${groupsAll().map(g => `<option value="${g.id}" ${r.grp === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('')}<option value="none" ${r.grp === 'none' ? 'selected' : ''}>Sans groupe</option></select></label>` : ''}
     <label>Client / personne<select data-r="client">${targetOpts(r.client, 'Tous')}</select></label>
     ${(() => { const used = [...new Set(allEntries().flatMap(e => e.ppl || []))].map(personOf).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name, 'fr')); return used.length || r.ppl ? `<label>Avec<select data-r="ppl"><option value="">Tout le monde</option>${used.map(x => `<option value="${x.id}" ${r.ppl === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''; })()}
+    ${S.meta.groups.length && allEntries().some(e => isGroupId(e.client)) ? `<label>Temps de groupe<select data-r="gsplit"><option value="">Sur le groupe</option><option value="split" ${r.gsplit === 'split' ? 'selected' : ''}>Répartis sur les dossiers</option></select></label>` : ''}
     <label>Tâche<select data-r="task">${selectOpts(S.meta.tasks, r.task, 'Toutes les tâches')}</select></label>
     <label>Catégorie<select data-r="cat"><option value="">Toutes</option>${[...TCATS(), ['none', 'Non classées']].map(([k, l]) => `<option value="${k}" ${r.cat === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
     <label>Facturation<select data-r="bill">${[['all', 'Tout'], ['bill', 'Facturable (tout)'], ['todo', 'Reste à facturer'], ['inv', 'Déjà facturé'], ['no', 'Non facturable']].map(([v, l]) => `<option value="${v}" ${r.bill === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
