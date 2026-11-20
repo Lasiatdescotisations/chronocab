@@ -1214,8 +1214,8 @@ const FIREBASE_CONFIG = {
   appId: "1:29403974929:web:d0b19351eb4f058155d0b0"
 };
 const FB_VERSION = '12.16.0';
-const APP_VERSION = '1.65.0';
-const APP_DATE = '17/11/2026';
+const APP_VERSION = '1.66.0';
+const APP_DATE = '20/11/2026';
 /* =========================================================
    Utilitaires
    ========================================================= */
@@ -2978,7 +2978,7 @@ function tplVals(c, x, mk) {
   const ln = x ? titleCase(x.last || (x.first ? '' : x.name)) : '', fn = x ? titleCase(x.first || '') : '';
   const v = { 'formule': x ? (x.civ === 'Mme' ? 'Madame ' + (ln || fn) : x.civ === 'M.' ? 'Monsieur ' + (ln || fn) : [fn, ln].filter(Boolean).join(' ')) : '', 'prénom': fn, 'nom': ln, 'fonction': x ? pRoleTxt(x) : '',
     'dossier': c.name, 'n° dossier': c.code || '', 'groupe': g ? g.name : '', 'mois de paie': mkLabel(mk), 'réception habituelle': r.usual ? fmtDate(r.usual) : '',
-    'date des virements': row.vir ? fmtDate(dOf(row.vir)) : due.vir ? fmtDate(due.vir) : '', 'date de DSN': due.dsn ? fmtDate(due.dsn) : '', 'date du jour': fmtDate(Date.now()) };
+    'date des virements': cyVirEff(mk, c, row) ? fmtDate(cyVirEff(mk, c, row)) : due.vir ? fmtDate(due.vir) : '', 'date de DSN': due.dsn ? fmtDate(due.dsn) : '', 'date du jour': fmtDate(Date.now()) };
   return Object.fromEntries(Object.entries(v).map(([k, x2]) => [norm(k), x2]));
 }
 const tplFill = (t, V) => String(t || '').replace(/\{([^{}\n]{1,40})\}/g, (m0, k) => { const kk = norm(k).trim(); return kk in V ? (V[kk] || '[' + k + ']') : m0; });
@@ -3093,6 +3093,7 @@ document.addEventListener('click', ev => { const z = ev.target.closest('[data-ui
 document.addEventListener('click', ev => { if (ev.target.closest('#dsc-btn')) toggleDsc(); else if (ev.target.closest('#help-btn')) openHelp(); else if (ev.target.closest('#ver')) openNews(null); });
 /* ---------- Nouveautés de la version et aide par écran (v1.45.0) ---------- */
 const NEWS = [
+  ['1.66.0', '20/11/2026', ['Mon cycle : la colonne « Fichier vir. » note l’envoi du fichier de virement ; la date effective des virements est celle du calendrier des virements du carnet (dossier ou groupe). Le dépôt « le lendemain des virements » et les autres échéances qui en dépendent (date des virements des modèles de messages) suivent la date effective, et non plus la date d’envoi du fichier.', 'Sans date au calendrier, la date d’envoi du fichier reste utilisée ; un fichier envoyé après la date prévue décale la date effective. Les info-bulles indiquent d’où vient la date.']],
   ['1.65.0', '17/11/2026', ['Progression du cycle de paie en deux jalons : 1 · bulletins confirmés (validés par le client quand la validation est demandée, sinon envoyés), 2 · DSN déposées, comptés en bulletins (en dossiers si un nombre de bulletins manque).', 'Le disque du mois de l’onglet Mon cycle et l’historique des cycles se remplissent à moitié par chaque jalon. Le dépôt des bulletins ne compte plus dans la progression ni pour « dossier terminé » (il reste une colonne et un rappel).']],
   ['1.64.0', '17/11/2026', ['Saisir du temps pour un groupe : choisissez « Groupe … » dans la barre du chrono, la saisie manuelle, la fin d’appel ou la modification d’une saisie, tapez « 1h groupe Dupont réunion DRH » dans la barre de commande, ou lancez « Chrono du groupe » depuis son carnet.', 'La saisie reste sur le groupe ; le récap à reporter la répartit en une ligne par dossier (avec son n°) au prorata des bulletins du mois, à parts égales s’ils sont inconnus, avec la mention « (groupe …) ». Rapports : filtre « Temps de groupe » (sur le groupe ou répartis sur les dossiers). Facturation et tarifs par défaut : ceux de la société mère.']],
   ['1.63.1', '17/11/2026', ['Correctif : un jour fixe de dépôt des bulletins qui tombe avant la réception habituelle des variables (ou avant le 15) s’entend du mois suivant — « le 1 » = le 1er du mois suivant. L’alerte de dépôt n’apparaît donc plus dès le début du mois ; la fenêtre des paramètres affiche la date retenue.', 'Correctif : la fenêtre des paramètres du cycle d’un dossier sans groupe ne s’ouvrait plus quand il avait ses propres paramètres (depuis la v1.60.0).']],
@@ -3861,7 +3862,7 @@ function cbxModel(obj, isG, sel) { // contenu complet du carnet ; une rubrique c
     const a = cliAvg(c.id), ed = p.envDelay === 0 ? 'pas d’alerte' : (p.envDelay == null ? CY_ENV_DEF : p.envDelay) + ' jours ouvrés après la réception';
     add('cycle', 'Cycle de paie', [['Réception des variables', (CY_LBL.rec[p.rec] || p.rec) + (p.rec !== 'var' && p.recDay ? ', envoi vers le ' + p.recDay : '') + (p.rec === 'var' ? ' · réception habituelle ' + (p.varDay ? cyVarLabel(p.varDay) : 'non renseignée (relance le ' + CY_REL_DEF + ')') : '')], ['Alerte 1er envoi', ed], ['Validation client', p.valid ? 'demandée · relance ' + (cyValDelay(c) ? cyValDelay(c) + ' jours ouvrés après l’envoi' : 'aucune') : 'non demandée'], ['Virements', (CY_LBL.vir[p.vir] || p.vir) + (Object.keys(b.vir || {}).length && p.vir !== 'client' && p.vir !== 'nc' ? ' · dates du calendrier' : '')], ['Dépôt des bulletins', (CY_LBL.dep[p.dep] || p.dep) + (p.dep === 'fixed' && p.depDay ? ' (' + cyDepTxt(p, c) + ')' : '')], ['Échéance DSN', 'le ' + (p.dsn || 15) + ' du mois suivant'], ['Remarque permanente', p.notes || '—'], ['Temps moyen', a ? fmtDur(a.avg) + ' par mois (3 derniers mois) · ce mois-ci : ' + fmtDur(a.cur) : '']]);
     const st = f => { const v = f === 'corr' ? (row.corr || []).map(d).join(', ') : d(row[f]); if (v) return v; const x = cyState(mk, c, row, f); return x.st === 'na' ? 'non concerné' : x.st === 'auto' ? 'automatique' : x.st === 'late' ? 'en retard' : x.st === 'warn' ? 'à faire (échéance proche)' : 'à faire'; };
-    add('suivi', 'Suivi du cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' (clôturé)' : ''), [['Réception des variables', st('rec') + (row.rel ? ' · relancé le ' + d(row.rel) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') : '')], ['1er envoi', st('env')], ['Corrections', (row.corr || []).length ? st('corr') : '—'], ['Validation client', p.valid ? st('val') : 'non demandée'], ['Virements', st('vir')], ['Dépôt des bulletins', st('dep')], ['DSN', st('dsn')], ['Dossier terminé', cyRowDone(mk, c, row) ? 'oui' : 'non']]);
+    add('suivi', 'Suivi du cycle de ' + mkLabel(mk) + (cyClosed(mk) ? ' (clôturé)' : ''), [['Réception des variables', st('rec') + (row.rel ? ' · relancé le ' + d(row.rel) + (row.relN > 1 ? ' (' + row.relN + ' relances)' : '') : '')], ['1er envoi', st('env')], ['Corrections', (row.corr || []).length ? st('corr') : '—'], ['Validation client', p.valid ? st('val') : 'non demandée'], ['Fichier de virement', st('vir')], ['Virements effectifs', (v => v ? fmtDate(v) + (cbVirDate(c, mk) ? ' (calendrier)' : ' (date d’envoi du fichier)') : '—')(cyVirEff(mk, c, row))], ['Dépôt des bulletins', st('dep')], ['DSN', st('dsn')], ['Dossier terminé', cyRowDone(mk, c, row) ? 'oui' : 'non']]);
     add('alertes', 'Alertes salariés (cycle de ' + mkLabel(mk) + ')', alActive(c, mk).map(x => ['', x.name + (x.tag ? ' (' + x.tag + ')' : '') + ' — ' + (x.mode === 'validate' ? 'à valider : ' + alTrigText(x) : 'pour information') + (x.until ? ' · jusqu’au cycle de ' + mkLabel(x.until) : '')]), 'Aucune alerte active');
     add('interloc', 'Interlocuteurs', S.meta.persons.filter(x => !x.deletedAt && !x.archived && (x.clients || []).includes(c.id)).map(x => ['', pplTxt(x) + (x.note ? ' — ' + x.note : '')]), 'Aucun interlocuteur');
     add('equipe', 'Équipe du dossier', teamOf(c).map(t => ['', t.x.name + ' — ' + [teamRL(t.r), pRoleTxt(t.x), t.g ? 'équipe du groupe' : '', t.x.email, t.x.phone].filter(Boolean).join(' · ')]), 'Aucun collègue rattaché');
@@ -5312,7 +5313,7 @@ function lissGroups(k, groups) {
 }
 /* ---------- Barre de commande (v1.38.0) : Ctrl+K ou loupe de l'en-tête ----------
    Dossiers (carnet, chrono, cycle, étape du jour), navigation (onglets, réglages, outils), saisie rapide « 1h30 Dupont paie octobre ». */
-const CY_STEP_L = { rec: 'réception des variables', env: '1er envoi', val: 'validation client', vir: 'virements', dep: 'dépôt des bulletins', dsn: 'DSN' };
+const CY_STEP_L = { rec: 'réception des variables', env: '1er envoi', val: 'validation client', vir: 'envoi du fichier de virement', dep: 'dépôt des bulletins', dsn: 'DSN' };
 function cyNextStep(c) {
   if (!c || !isMine(c)) return null;
   const mk = defaultCycleMonth(), row = cyRow(mk, c.id);
@@ -5555,6 +5556,9 @@ function cyValAlert(c, row) { const n = cyValDelay(c), ls = cyLastSend(row); ret
 // (ou au 15 du mois si elle n'est pas connue) s'entend du mois suivant (ex. « le 1 » = le 1er du mois suivant)
 function cyDepFixed(mk, c, p) { const ref = cyRelDates(mk, c).usual || dayIn(mk, 15); let d = dayIn(mk, +p.depDay); if (d <= ref) d = dayIn(nextMk(mk), +p.depDay); return d; }
 function cyDepTxt(p, c) { if (!(p.dep === 'fixed' && p.depDay)) return ''; const mk = defaultCycleMonth(), d = cyDepFixed(mk, c || { cy: p }, p); return 'le ' + (+p.depDay === 1 ? '1er' : p.depDay) + (monthKey(d) !== mk ? ' du mois suivant' : ' du mois'); }
+// Date effective des virements (v1.66.0) : celle du calendrier des virements (dossier ou groupe) ; à défaut, la date d'envoi
+// du fichier notée dans Mon cycle. Un fichier envoyé après la date prévue décale la date effective.
+function cyVirEff(mk, c, row) { const cal = cbVirDate(c, mk), sent = dOf(row.vir); return cal && sent ? Math.max(cal, sent) : cal || sent || null; }
 // Échéances indicatives d'un dossier pour le cycle mk
 function cyDue(mk, c, row) {
   const p = cyOf(c), last = monthEnd(mk);
@@ -5562,7 +5566,7 @@ function cyDue(mk, c, row) {
   if (p.rec !== 'var' && p.recDay) due.env = prevWorkday(dayIn(mk, p.recDay));
   if (p.vir !== 'client' && p.vir !== 'nc') due.vir = cbVirDate(c, mk) || prevWorkday(addDays(last, -2));          // calendrier du carnet de bord, sinon DJM-2
   if (p.dep === 'fixed' && p.depDay) due.dep = cyDepFixed(mk, c, p);
-  else if (p.dep === 'next') { const v = dOf(row.vir); due.dep = v ? nextWorkday(v) : null; }
+  else if (p.dep === 'next') { const v = cyVirEff(mk, c, row); due.dep = v ? nextWorkday(v) : null; }
   else if (p.dep === 'valid') {
     // Jour de la validation de la paie : repérée par l'envoi des virements, sinon par la dernière correction ou le 1er envoi
     const corr = (row.corr || []).slice(-1)[0], v = p.valid ? dOf(row.val) : dOf(row.vir) || ((p.vir === 'client' || p.vir === 'nc') ? dOf(corr || row.env) : null);
@@ -5603,10 +5607,14 @@ function cyState(mk, c, row, f) {
     if (today >= prevWorkday(addDays(al, -1))) return { st: 'warn', tip: '1er envoi attendu avant le ' + fmtDate(al) };
     return { st: 'todo', tip: 'Alerte le ' + fmtDate(al) + ' si le 1er envoi n’est pas fait' };
   }
-  if (!d) return { st: 'todo' };
-  if (today > d) return { st: 'late', tip: 'Échéance : ' + fmtDate(d) };
-  if (today >= addDays(d, f === 'dsn' ? -3 : -1)) return { st: 'warn', tip: 'Échéance : ' + fmtDate(d) };
-  return { st: 'todo', tip: 'Échéance : ' + fmtDate(d) };
+  const ve = (f === 'vir' || f === 'dep') ? cyVirEff(mk, c, row) : null, cal = cbVirDate(c, mk);
+  const why = f === 'vir' ? (cal ? ' · virements effectifs le ' + fmtDate(cal) + ' (calendrier des virements)' : ' · date par défaut : l’avant-veille de la fin du mois (renseignez le calendrier des virements du carnet)')
+    : f === 'dep' && p.dep === 'next' && ve ? ' · lendemain des virements effectifs du ' + fmtDate(ve) + (cal ? ' (calendrier des virements)' : ' (date d’envoi du fichier : pas de date au calendrier)') : '';
+  if (!d) return { st: 'todo', tip: f === 'dep' && p.dep === 'next' ? 'Échéance connue une fois le fichier de virement envoyé, ou d’après le calendrier des virements du carnet' : undefined };
+  const lbl = f === 'vir' ? 'Fichier de virement à envoyer au plus tard le ' : 'Échéance : ';
+  if (today > d) return { st: 'late', tip: lbl + fmtDate(d) + why };
+  if (today >= addDays(d, f === 'dsn' ? -3 : -1)) return { st: 'warn', tip: lbl + fmtDate(d) + why };
+  return { st: 'todo', tip: lbl + fmtDate(d) + why };
 }
 // Nombre de BS effectif : saisi, sinon repris du dernier mois renseigné (jusqu'à 12 mois en arrière)
 function effBs(mk, cid) {
@@ -5715,7 +5723,7 @@ function cyTodo() {
         if (today >= rd.rel && (!row.rel || today >= addWorkdays(dOf(row.rel), 2))) items.push({ mk, cid: c.id, f: 'rel', txt: (row.rel ? 'Relancer à nouveau' : 'Relancer') + ' pour les variables — ' + c.name + (row.rel ? ' (dernière relance le ' + fmtDate(dOf(row.rel)).slice(0, 5) + ')' : p.varDay ? ' (habituellement ' + cyVarLabel(p.varDay) + ')' : '') + when, late: today > rd.late });
       }
       if (p.valid && !row.val) { const al = cyValAlert(c, row); if (al && today >= al) items.push({ mk, cid: c.id, f: 'val', txt: 'Validation des bulletins à relancer — ' + c.name + ' (envoyés le ' + fmtDate(cyLastSend(row)).slice(0, 5) + ')' + when, late: true, d: al }); }
-      if (!row.vir && due.vir && row.env && today >= addDays(due.vir, -1)) add('vir', 'Virements à envoyer — ' + c.name, due.vir);
+      if (!row.vir && due.vir && row.env && today >= addDays(due.vir, -1)) add('vir', 'Fichier de virement à envoyer — ' + c.name, due.vir);
       if (!row.dep && due.dep && today >= due.dep) add('dep', 'Déposer les bulletins — ' + c.name, due.dep);
       if (!row.dsn && today >= addDays(due.dsn, -3) && (row.env || p.rec === 'robot' || today > due.dsn)) add('dsn', 'DSN à déposer — ' + c.name + ' (échéance le ' + fmtDate(due.dsn).slice(0, 5) + ')', due.dsn);
     }
@@ -5775,7 +5783,7 @@ function cyUpcoming(days = 7) {
 /* ---------- Charge à venir (v1.45.0) : échéances attendues d'après les paramètres et dates habituelles du cycle ----------
    Étapes non faites : réception des variables (date habituelle, sinon relance par défaut), 1er envoi (réception + délai),
    validation client, virements, dépôt des bulletins, DSN ; points en cours datés des carnets (dossiers et groupes). */
-const FC_STEPS = [['rec', 'Réception des variables'], ['env', '1er envoi'], ['val', 'Validation client'], ['vir', 'Virements'], ['dep', 'Dépôt des bulletins'], ['dsn', 'DSN'], ['ann', 'Calendrier annuel'], ['pt', 'Points en cours']];
+const FC_STEPS = [['rec', 'Réception des variables'], ['env', '1er envoi'], ['val', 'Validation client'], ['vir', 'Fichier de virement'], ['dep', 'Dépôt des bulletins'], ['dsn', 'DSN'], ['ann', 'Calendrier annuel'], ['pt', 'Points en cours']];
 const FC_L = Object.fromEntries(FC_STEPS);
 const FC_COL = { rec: 0, env: 5, val: 2, vir: 6, dep: 3, dsn: 7, pt: 1, ann: 4 };
 const fcCol = k => GROUP_COLORS[FC_COL[k] % GROUP_COLORS.length];
@@ -5929,7 +5937,7 @@ function cyCellHTML(mk, c, row, f) {
 }
 const CY_TRI = { '': '', ok: 'OK', nc: 'NC', exo: 'Exo' };
 // Colonnes de Mon cycle affichées, propres à chaque appareil (v1.39.0) ; Réception, 1er envoi et DSN toujours affichées
-const CY_COLS_OPT = [['prep', 'Prépa'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['al', 'Alerte salarié'], ['note', 'Remarques']];
+const CY_COLS_OPT = [['prep', 'Prépa'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Fichier de virement'], ['dep', 'Dépôts'], ['al', 'Alerte salarié'], ['note', 'Remarques']];
 const cyColsHidden = () => { try { const h = JSON.parse(lsGet('cyColsHid', '["prep"]')); return Array.isArray(h) ? h : ['prep']; } catch (e) { return ['prep']; } };
 function openCyCols(anchor) {
   closeCyPop();
@@ -5958,7 +5966,7 @@ function renderCycle(P) {
   const closed = nAll && done.length === nAll ? Math.max(...rows.concat([]).map(r => Math.max(dOf(r.row.dsn) || 0, dOf(r.row.dep) || 0, dOf(r.row.vir) || 0))) : 0;
   const todo = mk === cur || mk === prevMk(cur) ? cyTodo() : [];
   const hid = cyColsHidden();
-  const cols = [['rec', 'Réception'], ['prep', 'Prépa'], ['env', '1er envoi'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Virements'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['al', 'Alerte salarié'], ['note', 'Remarques']].filter(([k]) => !hid.includes(k));
+  const cols = [['rec', 'Réception'], ['prep', 'Prépa'], ['env', '1er envoi'], ['corr', 'Corrigé'], ['val', 'Validation'], ['bs', 'Nb BS'], ['vir', 'Fichier vir.'], ['dep', 'Dépôts'], ['dsn', 'DSN'], ...(isApril ? [['doeth', 'DOETH'], ['tal', 'TA libé.']] : []), ['al', 'Alerte salarié'], ['note', 'Remarques']].filter(([k]) => !hid.includes(k));
   let html = `<div class="card filters pf-head">${pfSwitch(P)}
     <div class="month-nav"><button class="icon" data-cy="prev" title="Cycle précédent">‹</button><b>Cycle de ${esc(monthLabel)}</b><button class="icon" data-cy="next" title="Cycle suivant">›</button>${mk === cur ? '' : '<button class="btn sm ghost" data-cy="today">Cycle du mois</button>'}</div>
     <span class="sp" style="flex:1"></span>
@@ -5991,7 +5999,7 @@ function renderCycle(P) {
     <div class="cy-prog-sub">
       <span>1<sup>er</sup> envoi <b>${g.env[0]}/${g.env[1]}</b></span>
       ${g.val[1] ? `<span>Validés <b>${g.val[0]}/${g.val[1]}</b></span>` : ''}
-      <span>Virements <b>${g.vir[0]}/${g.vir[1]}</b></span>
+      <span>Fichiers de virement <b>${g.vir[0]}/${g.vir[1]}</b></span>
       <span title="Ne compte pas dans la progression">Dépôts <b>${g.dep[0]}/${g.dep[1]}</b></span>
       <span>Progression <b>${g.prog} %</b></span>
       <span>Dossiers terminés <b>${g.fin}/${g.n}</b></span>
@@ -6040,7 +6048,7 @@ function openCyCell(mk, cid, f, anchor) {
   const center = curIso ? dOf(curIso) : today;
   const days = []; for (let i = -4; i <= 4; i++) days.push(addDays(center, i));
   const lbl = d => (d === today ? 'Aujourd’hui · ' : d === addDays(today, -1) ? 'Hier · ' : d === addDays(today, 1) ? 'Demain · ' : '') + WD_S[new Date(d).getDay()] + ' ' + new Date(d).getDate() + ' ' + MONTHS[new Date(d).getMonth()];
-  const titles = { rec: row.rel && !row.rec ? 'Variables reçues le…' : 'Réception', prep: 'Préparation', env: '1er envoi', corr: 'Corrigé', val: 'Validation client', vir: 'Virements', dep: 'Dépôts', dsn: 'DSN' };
+  const titles = { rec: row.rel && !row.rec ? 'Variables reçues le…' : 'Réception', prep: 'Préparation', env: '1er envoi', corr: 'Corrigé', val: 'Validation client', vir: 'Fichier de virement envoyé le…', dep: 'Dépôts', dsn: 'DSN' };
   const pop = document.createElement('div'); pop.id = 'cy-pop'; pop.className = 'cy-pop';
   if (f === 'rec' && !row.rec && row.rel) days.forEach((d, i) => days[i] = d); // la liste propose « reçues le … »
   pop.innerHTML = `<div class="cy-pop-h">${titles[f]} · ${esc(c.name)}</div>
